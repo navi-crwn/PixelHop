@@ -542,7 +542,7 @@ $isAdmin = $isLoggedIn && isAdmin();
     <footer class="relative z-10 mt-auto">
         <div class="glass-footer">
             <div class="max-w-7xl mx-auto px-6 py-12">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
 
                     <!-- Brand Column -->
                     <div class="lg:col-span-2">
@@ -601,6 +601,16 @@ $isAdmin = $isLoggedIn && isAdmin();
                         </ul>
                     </div>
 
+                    <!-- HEL.ink Family Column -->
+                    <div>
+                        <h4 class="text-sm font-semibold mb-4 uppercase tracking-wider" style="color: var(--color-text-primary);">HEL.ink Family</h4>
+                        <ul class="space-y-3">
+                            <li><a href="https://hel.ink" target="_blank" class="footer-link">HEL.ink - URL Shortener</a></li>
+                            <li><a href="https://hel.ink/products" target="_blank" class="footer-link">Link in Bio</a></li>
+                            <li><a href="/features.php" class="footer-link">PixelHop Features</a></li>
+                        </ul>
+                    </div>
+
                     <!-- Legal Column -->
                     <div>
                         <h4 class="text-sm font-semibold mb-4 uppercase tracking-wider" style="color: var(--color-text-primary);">Legal</h4>
@@ -617,7 +627,7 @@ $isAdmin = $isLoggedIn && isAdmin();
                 <!-- Footer Bottom -->
                 <div class="border-t mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4" style="border-color: var(--glass-border);">
                     <p class="text-sm" style="color: var(--color-text-muted);">
-                        © 2025 PixelHop. Your Pixel is A Hop Away.
+                        © 2025 PixelHop. Part of the <a href="https://hel.ink" target="_blank" class="text-neon-cyan hover:underline">HEL.ink</a> family.
                     </p>
                     <div class="flex items-center gap-4">
                         <span class="text-xs px-2 py-1 rounded bg-yellow-500/20 text-yellow-400">API Coming Soon</span>
