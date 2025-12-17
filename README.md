@@ -4,9 +4,9 @@
 
 <img src="https://p.hel.ink/assets/img/logo.svg" alt="PixelHop" width="120">
 
-**Free image hosting + powerful editing tools. No BS, just works.**
+**Free image hosting with built-in editing tools.**
 
-Built with PHP 8 • Self-hostable • Forever free
+PHP 8 • Self-hostable • Open Source
 
 [Live Demo](https://p.hel.ink) • [API Docs](https://p.hel.ink/docs) • [Report Bug](https://github.com/navi-crwn/pixelhop/issues)
 
@@ -23,35 +23,35 @@ Built with PHP 8 • Self-hostable • Forever free
 
 ---
 
-## Apa sih PixelHop?
+## Overview
 
-PixelHop itu image hosting + image tools dalam satu platform. Upload gambar, dapet link permanen. Mau compress? resize? crop? convert format? Bisa semua. Ada juga fitur AI buat extract text (OCR) sama hapus background otomatis.
+PixelHop is an image hosting platform with integrated image processing tools. Upload images, get permanent shareable links. Compress, resize, crop, convert formats — all in one place. Also includes AI-powered OCR and background removal.
 
-Gak ribet, gak perlu install software macem-macem. Tinggal buka browser, drag drop, selesai. ✨
+No desktop software needed. Works entirely in the browser.
 
-## Highlights
+## Features
 
-- **Image Hosting** — Upload, dapet link, share. Simpel.
-- **Compress** — Kecilin file size tanpa rusak kualitas
-- **Resize & Crop** — Ubah ukuran, potong sesuai ratio (1:1, 4:3, 16:9, custom)
-- **Convert** — Pindah format: JPEG ↔ PNG ↔ WebP ↔ GIF ↔ BMP
-- **OCR** — Extract text dari gambar pake Tesseract
-- **Remove Background** — AI-powered, hasil bersih dalam hitungan detik
-- **User Accounts** — Login pake Google, ada dashboard pribadi
-- **Admin Panel** — Full control, monitoring, abuse prevention
-- **Self-hostable** — Deploy di server sendiri, data lu tetep di lu
+- **Image Hosting** — Upload and get shareable links instantly
+- **Compress** — Reduce file size while maintaining quality
+- **Resize & Crop** — Adjust dimensions with preset ratios (1:1, 4:3, 16:9) or custom
+- **Convert** — Switch formats: JPEG ↔ PNG ↔ WebP ↔ GIF ↔ BMP
+- **OCR** — Extract text from images using Tesseract
+- **Remove Background** — AI-powered background removal
+- **User Accounts** — Google OAuth login with personal dashboard
+- **Admin Panel** — Full control, monitoring, and abuse prevention
+- **Self-hostable** — Deploy on your own server, own your data
 
 ## User System
 
-Sekarang ada sistem user buat tracking upload & akses fitur AI:
+User accounts for tracking uploads and managing AI tool access:
 
 | Tier | Storage | OCR/day | RemBG/day |
 |------|---------|---------|-----------|
 | Guest | - | - | - |
 | Free | 500MB | 5x | 3x |
-| Premium | 🚧 Coming Soon | 🚧 | 🚧 |
+| Premium | Coming Soon | - | - |
 
-> **Note:** Premium tier masih dalam pengembangan. Untuk sekarang, semua user bisa pake fitur Free tier.
+> **Note:** Premium tier is currently in development.
 
 ## Tech Stack
 
@@ -59,98 +59,98 @@ Sekarang ada sistem user buat tracking upload & akses fitur AI:
 Backend     : PHP 8.1+, MySQL/MariaDB
 Frontend    : TailwindCSS, Vanilla JS, Lucide Icons
 AI/Python   : Tesseract OCR, rembg (background removal)
-Storage     : S3-compatible (Contabo, AWS, MinIO, dll)
+Storage     : S3-compatible (AWS, MinIO, Contabo, etc.)
 Auth        : Google OAuth 2.0, Cloudflare Turnstile
 ```
 
-## Quick Start
+## Installation
 
 ```bash
-# Clone repo
+# Clone the repository
 git clone https://github.com/navi-crwn/pixelhop.git
 cd pixelhop
 
-# Copy config files
+# Copy configuration files
 cp config/database.example.php config/database.php
 cp config/oauth.example.php config/oauth.php
 cp config/s3.example.php config/s3.php
 
-# Import database
+# Import database schema
 mysql -u your_user -p your_database < database/schema.sql
 
-# Setup Python (untuk OCR & RemBG)
+# Set up Python environment (for OCR & RemBG)
 cd python && python3 -m venv venv
 source venv/bin/activate
 pip install -r ../requirements.txt
 
-# Set permissions
+# Set directory permissions
 chmod 755 temp/ data/
 ```
 
-Abis itu tinggal point web server ke folder project, edit config sesuai credentials lu, done! 🎉
+Configure your web server to point to the project root, update the config files with your credentials, and you're ready to go.
 
 ## API
 
-Semua tools bisa diakses via API. Cocok buat integrasi ShareX, custom scripts, atau automasi lainnya.
+All tools are accessible via API, suitable for ShareX integration, custom scripts, or automation.
 
-| Endpoint | Method | Fungsi |
-|----------|--------|--------|
-| `/api/upload.php` | POST | Upload gambar |
-| `/api/compress.php` | POST | Compress |
-| `/api/resize.php` | POST | Resize |
-| `/api/crop.php` | POST | Crop |
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/upload.php` | POST | Upload image |
+| `/api/compress.php` | POST | Compress image |
+| `/api/resize.php` | POST | Resize image |
+| `/api/crop.php` | POST | Crop image |
 | `/api/convert.php` | POST | Convert format |
 | `/api/ocr.php` | POST | Extract text |
-| `/api/rembg.php` | POST | Hapus background |
+| `/api/rembg.php` | POST | Remove background |
 
 ## Project Structure
 
 ```
 pixelhop/
-├── admin/          # Admin panel
+├── admin/          # Admin panel pages
 ├── api/            # API endpoints
 ├── assets/         # CSS, JS, images
-├── auth/           # Login, OAuth, middleware
-├── config/         # Konfigurasi (database, S3, OAuth)
+├── auth/           # Authentication handlers
+├── config/         # Configuration files
 ├── core/           # Core classes (Gatekeeper, AbuseGuard)
 ├── cron/           # Scheduled tasks
-├── includes/       # Libraries (Database, ImageHandler, dll)
-├── member/         # Member area
+├── includes/       # PHP libraries
+├── member/         # Member area pages
 ├── python/         # Python scripts (OCR, RemBG)
 └── temp/           # Temporary files
 ```
 
 ## Cron Jobs
 
-Tambah ke crontab buat auto maintenance:
+Add to crontab for automatic maintenance:
 
 ```bash
-# Tiap jam: cleanup temp files, abuse watchdog
+# Hourly: cleanup temp files, abuse watchdog
 0 * * * * php /path/to/pixelhop/cron/maintenance.php >> /var/log/pixelhop.log 2>&1
 ```
 
 ## Requirements
 
-- PHP 8.1+ dengan extensions: pdo_mysql, gd/imagick, curl, json, mbstring
-- MySQL 5.7+ atau MariaDB 10.3+
-- Python 3.10+ (buat OCR & RemBG)
+- PHP 8.1+ with extensions: pdo_mysql, gd/imagick, curl, json, mbstring
+- MySQL 5.7+ or MariaDB 10.3+
+- Python 3.10+ (for OCR & RemBG)
 - S3-compatible storage
-- Nginx/Apache
+- Nginx or Apache
 
 ## License
 
-MIT License - bebas dipake, dimodif, didistribusi. Lihat [LICENSE.md](LICENSE.md) buat detail lengkap.
+MIT License. See [LICENSE.md](LICENSE.md) for details.
 
-## Credits & Thanks
+## Credits
 
-Lihat [LICENSE.md](LICENSE.md) buat list lengkap library, tools, dan inspirasi yang dipake.
+See [LICENSE.md](LICENSE.md) for full list of libraries and tools used.
 
 ---
 
 <div align="center">
 
-Made with ☕ by [navi-crwn](https://github.com/navi-crwn)
+Built by [navi-crwn](https://github.com/navi-crwn)
 
-Part of the [HEL.ink](https://hel.ink) family
+Part of the [HEL.ink](https://hel.ink) project
 
 </div>

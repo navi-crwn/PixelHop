@@ -39,7 +39,6 @@ SOFTWARE.
 | TailwindCSS | 3.x | MIT | [tailwindcss.com](https://tailwindcss.com) |
 | Lucide Icons | - | ISC | [lucide.dev](https://lucide.dev) |
 | GSAP | 3.x | Standard | [greensock.com](https://greensock.com) |
-| Vanilla JS | ES6+ | - | - |
 
 ### Python / AI
 | Technology | Version | License | Link |
@@ -57,68 +56,55 @@ SOFTWARE.
 | Cloudflare Turnstile | Bot protection | [cloudflare.com/turnstile](https://www.cloudflare.com/products/turnstile/) |
 | S3-compatible Storage | Image hosting | Various providers |
 
-## PHP Libraries & Components
+## PHP Extensions
 
-- **PDO MySQL** - Database connectivity
-- **GD Library** - Image processing
-- **ImageMagick** - Advanced image manipulation (optional)
-- **cURL** - HTTP requests
-- **JSON** - Data interchange
+- **PDO MySQL** — Database connectivity
+- **GD Library** — Image processing
+- **ImageMagick** — Advanced image manipulation (optional)
+- **cURL** — HTTP requests
+- **JSON** — Data interchange
 
 ## Fonts
 
-- **Inter** - UI font, SIL Open Font License
+- **Inter** — UI font, SIL Open Font License
 
-## Special Thanks
-
-### Open Source Community
-Terima kasih banyak buat semua kontributor open source yang udah bikin tools-tools keren ini. Tanpa kalian, project kayak gini gak bakal exist.
+## Acknowledgments
 
 ### Inspirations
-- **Imgur** - For pioneering simple image hosting
-- **remove.bg** - For making AI background removal mainstream
-- **TinyPNG** - For smart compression that just works
+- [Imgur](https://imgur.com) — Simple image hosting done right
+- [remove.bg](https://remove.bg) — AI background removal
+- [TinyPNG](https://tinypng.com) — Smart image compression
 
-### Tools & Development
+### Development Tools
 | Tool | Purpose |
 |------|---------|
 | VS Code | Primary IDE |
-| GitHub | Version control & hosting |
-| GitHub Copilot | AI pair programming |
-| Figma | UI/UX design |
+| GitHub | Version control |
+| GitHub Copilot | AI assistance |
 | TablePlus | Database management |
 
 ### Infrastructure
-- **Contabo** - VPS hosting
-- **Cloudflare** - CDN & security
-- **Let's Encrypt** - SSL certificates
-
-## Personal Thanks
-
-Shoutout ke:
-- ☕ Coffee - buat menemani coding malem-malem
-- 🎵 Lo-fi beats - buat bikin fokus
-- 🐰 Rabbit mascot - buat jadi logo yang lucu
-- 👥 Early testers - yang sabar waktu masih banyak bug
+- [Contabo](https://contabo.com) — VPS hosting
+- [Cloudflare](https://cloudflare.com) — CDN & security
+- [Let's Encrypt](https://letsencrypt.org) — SSL certificates
 
 ---
 
 ## Contributing
 
-Kalau mau kontribusi ke project ini, PRs welcome! Check [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon) untuk guidelines.
+Pull requests are welcome. Please open an issue first to discuss proposed changes.
 
 ## Support
 
-- 🐛 Found a bug? [Open an issue](https://github.com/navi-crwn/pixelhop/issues)
-- 💡 Feature request? [Start a discussion](https://github.com/navi-crwn/pixelhop/discussions)
-- ⭐ Like it? Star the repo!
+- Found a bug? [Open an issue](https://github.com/navi-crwn/pixelhop/issues)
+- Feature request? [Start a discussion](https://github.com/navi-crwn/pixelhop/discussions)
 
 ---
 
 <div align="center">
 
-Made with ☕ & 💜 in Indonesia
+Built by [navi-crwn](https://github.com/navi-crwn)
 
-Part of the [HEL.ink](https://hel.ink) family
+Part of the [HEL.ink](https://hel.ink) project
 
 </div>
