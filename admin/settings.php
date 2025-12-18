@@ -123,14 +123,20 @@ $currentPage = 'settings';
                         
                         <div class="form-group">
                             <label class="form-label">Max Concurrent Processes</label>
-                            <input type="number" class="form-input" id="max_concurrent_processes" 
-                                   value="<?= $settings['max_concurrent_processes'] ?>" min="1" max="10">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('max_concurrent_processes', -1, 1, 10)">−</button>
+                                <input type="number" id="max_concurrent_processes" value="<?= $settings['max_concurrent_processes'] ?>" min="1" max="10" readonly>
+                                <button type="button" onclick="adjustValue('max_concurrent_processes', 1, 1, 10)">+</button>
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">CPU Load Threshold</label>
-                            <input type="number" class="form-input" id="cpu_load_threshold" 
-                                   value="<?= $settings['cpu_load_threshold'] ?>" min="1" max="10" step="0.1">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('cpu_load_threshold', -0.5, 1, 10)">−</button>
+                                <input type="number" id="cpu_load_threshold" value="<?= $settings['cpu_load_threshold'] ?>" min="1" max="10" step="0.5" readonly>
+                                <button type="button" onclick="adjustValue('cpu_load_threshold', 0.5, 1, 10)">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -145,14 +151,20 @@ $currentPage = 'settings';
                         
                         <div class="form-group">
                             <label class="form-label">Free Users (per day)</label>
-                            <input type="number" class="form-input" id="daily_ocr_limit_free" 
-                                   value="<?= $settings['daily_ocr_limit_free'] ?>" min="0">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('daily_ocr_limit_free', -1, 0, 100)">−</button>
+                                <input type="number" id="daily_ocr_limit_free" value="<?= $settings['daily_ocr_limit_free'] ?>" min="0" readonly>
+                                <button type="button" onclick="adjustValue('daily_ocr_limit_free', 1, 0, 100)">+</button>
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">Premium Users (per day)</label>
-                            <input type="number" class="form-input" id="daily_ocr_limit_premium" 
-                                   value="<?= $settings['daily_ocr_limit_premium'] ?>" min="0">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('daily_ocr_limit_premium', -5, 0, 500)">−</button>
+                                <input type="number" id="daily_ocr_limit_premium" value="<?= $settings['daily_ocr_limit_premium'] ?>" min="0" readonly>
+                                <button type="button" onclick="adjustValue('daily_ocr_limit_premium', 5, 0, 500)">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -167,14 +179,20 @@ $currentPage = 'settings';
                         
                         <div class="form-group">
                             <label class="form-label">Free Users (per day)</label>
-                            <input type="number" class="form-input" id="daily_removebg_limit_free" 
-                                   value="<?= $settings['daily_removebg_limit_free'] ?>" min="0">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('daily_removebg_limit_free', -1, 0, 100)">−</button>
+                                <input type="number" id="daily_removebg_limit_free" value="<?= $settings['daily_removebg_limit_free'] ?>" min="0" readonly>
+                                <button type="button" onclick="adjustValue('daily_removebg_limit_free', 1, 0, 100)">+</button>
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label class="form-label">Premium Users (per day)</label>
-                            <input type="number" class="form-input" id="daily_removebg_limit_premium" 
-                                   value="<?= $settings['daily_removebg_limit_premium'] ?>" min="0">
+                            <div class="number-input-inline">
+                                <button type="button" onclick="adjustValue('daily_removebg_limit_premium', -5, 0, 500)">−</button>
+                                <input type="number" id="daily_removebg_limit_premium" value="<?= $settings['daily_removebg_limit_premium'] ?>" min="0" readonly>
+                                <button type="button" onclick="adjustValue('daily_removebg_limit_premium', 5, 0, 500)">+</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,6 +237,20 @@ $currentPage = 'settings';
             lucide.createIcons();
             
             const csrf = '<?= $csrfToken ?>';
+            
+            // Adjust value function for number inputs
+            window.adjustValue = function(id, delta, min, max) {
+                const input = document.getElementById(id);
+                let value = parseFloat(input.value) || 0;
+                value += delta;
+                if (value < min) value = min;
+                if (value > max) value = max;
+                // Round to 1 decimal for float values
+                if (delta % 1 !== 0) {
+                    value = Math.round(value * 10) / 10;
+                }
+                input.value = value;
+            };
             
             document.getElementById('btn-save').onclick = async () => {
                 const settings = {

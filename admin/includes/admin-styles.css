@@ -472,6 +472,81 @@ body {
     box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
 }
 
+/* Number Input Inline - Minus/Value/Plus style */
+.number-input-inline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: fit-content;
+}
+
+.number-input-inline button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.number-input-inline button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-cyan);
+}
+
+.number-input-inline button:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.number-input-inline input {
+    width: 60px;
+    min-width: 50px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 0;
+    -moz-appearance: textfield;
+}
+
+.number-input-inline input::-webkit-outer-spin-button,
+.number-input-inline input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.number-input-inline input:focus {
+    outline: none;
+}
+
+[data-theme="light"] .number-input-inline {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .number-input-inline button {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .number-input-inline button:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--accent-cyan);
+}
+
 /* Toggle Switch */
 .toggle-switch {
     position: relative;

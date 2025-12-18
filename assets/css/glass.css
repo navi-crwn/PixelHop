@@ -1468,34 +1468,41 @@ a:focus-visible {
     background-clip: text;
 }
 
-/* Glassmorphism Select/Dropdown */
+/* Glassmorphism Select/Dropdown - Matching glass-dropdown style */
 .glass-select,
 .form-select,
 select {
-    background: var(--glass-bg);
+    background: linear-gradient(135deg,
+        rgba(34, 211, 238, 0.1) 0%,
+        rgba(168, 85, 247, 0.1) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(34, 211, 238, 0.3);
     border-radius: var(--radius-lg);
     color: var(--color-text-primary);
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: 0.625rem 1rem;
+    padding-right: 2.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-normal);
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
-    padding-right: 40px;
+    min-width: 140px;
 }
 
 .glass-select:hover,
 .form-select:hover,
 select:hover {
-    background-color: var(--glass-bg-hover);
-    border-color: var(--glass-border-hover);
+    background: linear-gradient(135deg,
+        rgba(34, 211, 238, 0.15) 0%,
+        rgba(168, 85, 247, 0.15) 100%);
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
 }
 
 .glass-select:focus,
@@ -1503,31 +1510,43 @@ select:hover {
 select:focus {
     outline: none;
     border-color: var(--color-neon-cyan);
-    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2),
+                0 0 30px rgba(34, 211, 238, 0.3);
 }
 
 /* Dropdown Options styling */
 .glass-select option,
 .form-select option,
 select option {
-    background: var(--color-bg-secondary);
+    background: #0f1428;
     color: var(--color-text-primary);
-    padding: 12px;
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+}
+
+.glass-select option:hover,
+.form-select option:hover,
+select option:hover {
+    background: linear-gradient(135deg,
+        rgba(34, 211, 238, 0.15) 0%,
+        rgba(168, 85, 247, 0.15) 100%);
 }
 
 /* Light theme dropdown adjustments */
 [data-theme="light"] .glass-select,
 [data-theme="light"] .form-select,
 [data-theme="light"] select {
-    background-color: rgba(255, 255, 255, 0.8);
-    border-color: rgba(0, 0, 0, 0.1);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background: linear-gradient(135deg,
+        rgba(34, 211, 238, 0.12) 0%,
+        rgba(168, 85, 247, 0.12) 100%);
+    border-color: rgba(34, 211, 238, 0.35);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 [data-theme="light"] .glass-select option,
 [data-theme="light"] .form-select option,
 [data-theme="light"] select option {
-    background: #f0f4f8;
+    background: #ffffff;
     color: #1e293b;
 }
 
@@ -2859,36 +2878,77 @@ input[type="number"] {
 .number-input-inline {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .number-input-inline button {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
-    border: 1px solid rgba(34, 211, 238, 0.3);
-    border-radius: 8px;
-    color: var(--color-neon-cyan);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 400;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .number-input-inline button:hover {
-    background: linear-gradient(135deg, rgba(34, 211, 238, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
-    border-color: var(--color-neon-cyan);
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-neon-cyan);
 }
 
 .number-input-inline button:active {
     transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .number-input-inline input {
-    width: 80px;
+    width: 60px;
+    min-width: 50px;
     text-align: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 0;
+    -moz-appearance: textfield;
+}
+
+.number-input-inline input::-webkit-outer-spin-button,
+.number-input-inline input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.number-input-inline input:focus {
+    outline: none;
+}
+
+.number-input-inline input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Light theme */
+[data-theme="light"] .number-input-inline {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .number-input-inline button {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .number-input-inline button:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--color-neon-cyan);
 }
