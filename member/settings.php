@@ -83,23 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
                 echo json_encode(['success' => false, 'error' => 'Invalid email format']);
                 exit;
             }
-
-
             $check = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
             $check->execute([$newEmail, $user['id']]);
             if ($check->fetch()) {
                 echo json_encode(['success' => false, 'error' => 'Email is already in use']);
                 exit;
             }
-
-
             $stmt = $db->prepare("UPDATE users SET email = ?, email_verified = 0, email_verified_at = NULL, verification_token = ? WHERE id = ?");
             $verificationToken = bin2hex(random_bytes(32));
             $stmt->execute([$newEmail, $verificationToken, $user['id']]);
 
             $_SESSION['user_email'] = $newEmail;
-
-
 
             echo json_encode(['success' => true, 'message' => 'Email updated. A verification email has been sent to your new address.']);
             break;
@@ -123,8 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
 
             $stmt = $db->prepare("UPDATE users SET delete_requested_at = ?, delete_token = ? WHERE id = ?");
             $stmt->execute([$deleteTime, $deleteToken, $user['id']]);
-
-
 
             echo json_encode(['success' => true, 'message' => 'Account deletion scheduled. Your account will be deleted in 48 hours. You can cancel this in your settings.', 'delete_at' => $deleteTime]);
             break;
@@ -157,130 +149,229 @@ $hasPendingDeletion = !empty($user['delete_requested_at']);
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/glass.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; }
-        .card { background: rgba(20, 20, 35, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-        .title-section { display: flex; align-items: center; gap: 14px; }
-        .title-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #22d3ee, #a855f7); display: flex; align-items: center; justify-content: center; }
-        .nav-link { padding: 10px 18px; border-radius: 10px; color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%); 
+            min-height: 100vh; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(20, 20, 35, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .user-section { display: flex; align-items: center; gap: 14px; }
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #22d3ee, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-info h1 { font-size: 18px; font-weight: 700; color: #fff; margin: 0; }
+        .user-info p { font-size: 13px; color: rgba(255,255,255,0.5); margin: 2px 0 0; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link {
+            padding: 10px 18px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         .nav-link:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-
+        .nav-link.active { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+        
+        /* Info Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+        .stat-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-value { font-size: 14px; font-weight: 600; color: #fff; }
+        
+        /* Two Column Forms */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+        }
         .section-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-        .form-group { margin-bottom: 16px; }
+        
+        .form-group { margin-bottom: 14px; }
         .form-label { display: block; font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-bottom: 6px; }
-        .form-input { width: 100%; padding: 12px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; font-size: 13px; }
+        .form-input { 
+            width: 100%; 
+            padding: 12px 14px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: 14px; 
+        }
         .form-input:focus { border-color: #22d3ee; outline: none; }
 
-        .btn { padding: 12px 24px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: none; }
+        .btn { 
+            padding: 12px 20px; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            border: none; 
+        }
         .btn-primary { background: linear-gradient(135deg, #22d3ee, #a855f7); color: #fff; }
         .btn-danger { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); }
 
-        .danger-zone { border-color: rgba(239, 68, 68, 0.3); }
-        .warning-box { background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .danger-card { border-color: rgba(239, 68, 68, 0.2); }
+        .warning-box { background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
 
         .toast { position: fixed; top: 20px; right: 20px; padding: 14px 20px; border-radius: 10px; font-size: 13px; z-index: 1000; display: none; }
         .toast-success { background: rgba(34, 197, 94, 0.9); color: #fff; }
         .toast-error { background: rgba(239, 68, 68, 0.9); color: #fff; }
-
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
-        .info-label { font-size: 13px; color: rgba(255, 255, 255, 0.5); }
-        .info-value { font-size: 13px; color: #fff; }
+        
+        @media (max-width: 600px) {
+            .two-col { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .nav-links { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
         <div class="header">
-            <div class="title-section">
-                <div class="title-icon"><i data-lucide="settings" class="w-6 h-6 text-white"></i></div>
-                <div>
-                    <h1 class="text-xl font-bold text-white">Account Settings</h1>
-                    <p class="text-xs text-white/50">Manage your account</p>
+            <div class="user-section">
+                <div class="user-avatar"><i data-lucide="settings" class="w-6 h-6 text-white"></i></div>
+                <div class="user-info">
+                    <h1>Account Settings</h1>
+                    <p><?= htmlspecialchars($user['email']) ?></p>
                 </div>
             </div>
-            <a href="/dashboard.php" class="nav-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</a>
+            <div class="nav-links">
+                <a href="/dashboard.php" class="nav-link"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+                <a href="/member/settings.php" class="nav-link active"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
+                <a href="/auth/logout.php" class="nav-link" style="color: #ef4444;"><i data-lucide="log-out" class="w-4 h-4"></i></a>
+            </div>
         </div>
-
+        
         <!-- Account Info -->
-        <div class="card">
-            <div class="section-title"><i data-lucide="user" class="w-4 h-4 text-cyan-400"></i> Account Information</div>
-            <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value"><?= htmlspecialchars($user['email']) ?></span>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Account</div>
+                <div class="stat-value"><?= ucfirst($user['account_type'] ?? 'free') ?></div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Account Type</span>
-                <span class="info-value"><?= ucfirst($user['account_type'] ?? 'free') ?></span>
+            <div class="stat-card">
+                <div class="stat-label">Member Since</div>
+                <div class="stat-value"><?= date('M j, Y', strtotime($user['created_at'])) ?></div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Member Since</span>
-                <span class="info-value"><?= date('M j, Y', strtotime($user['created_at'])) ?></span>
+            <div class="stat-card">
+                <div class="stat-label">Email</div>
+                <div class="stat-value" style="color: <?= $user['email_verified_at'] ? '#22c55e' : '#ef4444' ?>">
+                    <?= $user['email_verified_at'] ? '✓ Verified' : '✗ Unverified' ?>
+                </div>
             </div>
-            <div class="info-row" style="border: none;">
-                <span class="info-label">Email Verified</span>
-                <span class="info-value"><?= $user['email_verified_at'] ? '✓ Verified' : '✗ Not verified' ?></span>
+            <div class="stat-card">
+                <div class="stat-label">Role</div>
+                <div class="stat-value"><?= $isAdmin ? 'Admin' : 'User' ?></div>
             </div>
         </div>
 
-        <!-- Change Password -->
-        <div class="card">
-            <div class="section-title"><i data-lucide="key" class="w-4 h-4 text-purple-400"></i> Change Password</div>
-            <form id="passwordForm">
-                <div class="form-group">
-                    <label class="form-label">Current Password</label>
-                    <input type="password" name="current_password" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">New Password</label>
-                    <input type="password" name="new_password" class="form-input" required minlength="8">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Confirm New Password</label>
-                    <input type="password" name="confirm_password" class="form-input" required>
-                </div>
-                <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> Update Password</button>
-            </form>
-        </div>
+        <!-- Two Column: Password & Email -->
+        <div class="two-col">
+            <div class="card">
+                <div class="section-title"><i data-lucide="key" class="w-4 h-4" style="color: #a855f7;"></i> Change Password</div>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password" class="form-input" required minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> Update</button>
+                </form>
+            </div>
 
-        <!-- Change Email -->
-        <div class="card">
-            <div class="section-title"><i data-lucide="mail" class="w-4 h-4 text-pink-400"></i> Change Email</div>
-            <form id="emailForm">
-                <div class="form-group">
-                    <label class="form-label">New Email</label>
-                    <input type="email" name="new_email" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <input type="password" name="password" class="form-input" required>
-                </div>
-                <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> Update Email</button>
-            </form>
+            <div class="card">
+                <div class="section-title"><i data-lucide="mail" class="w-4 h-4" style="color: #ec4899;"></i> Change Email</div>
+                <form id="emailForm">
+                    <div class="form-group">
+                        <label class="form-label">New Email</label>
+                        <input type="email" name="new_email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> Update</button>
+                </form>
+            </div>
         </div>
 
         <?php if (!$isAdmin): ?>
-        <!-- Danger Zone -->
-        <div class="card danger-zone">
+        <div class="card danger-card">
             <div class="section-title" style="color: #ef4444;"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Danger Zone</div>
-
             <?php if ($hasPendingDeletion): ?>
             <div class="warning-box">
-                <div class="text-sm text-yellow-400 font-medium mb-2">⚠️ Account deletion scheduled</div>
-                <div class="text-xs text-white/60">Your account will be permanently deleted on <?= date('M j, Y \a\t H:i', strtotime($user['delete_requested_at'])) ?>.</div>
+                <div style="font-weight: 600; color: #eab308; margin-bottom: 4px;">⚠️ Account deletion scheduled</div>
+                <div style="font-size: 13px; color: rgba(255,255,255,0.6);">Your account will be deleted on <?= date('M j, Y \a\t H:i', strtotime($user['delete_requested_at'])) ?></div>
             </div>
-            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">
-                <i data-lucide="x" class="w-4 h-4"></i> Cancel Deletion
-            </button>
+            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn"><i data-lucide="x" class="w-4 h-4"></i> Cancel Deletion</button>
             <?php else: ?>
-            <p class="text-sm text-white/50 mb-4">Once you delete your account, there is no going back. You have 48 hours to cancel after requesting deletion.</p>
-            <form id="deleteForm">
-                <div class="form-group">
-                    <label class="form-label">Confirm Password to Delete Account</label>
+            <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">Once you delete your account, there is no going back. You have 48 hours to cancel.</p>
+            <form id="deleteForm" style="display: flex; gap: 12px; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label class="form-label">Confirm Password</label>
                     <input type="password" name="password" class="form-input" required>
                 </div>
-                <button type="submit" class="btn btn-danger"><i data-lucide="trash-2" class="w-4 h-4"></i> Request Account Deletion</button>
+                <button type="submit" class="btn btn-danger"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete Account</button>
             </form>
             <?php endif; ?>
         </div>

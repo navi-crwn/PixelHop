@@ -29,6 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method not allowed', 405);
 }
 
+// Security Firewall Check
+require_once __DIR__ . '/../includes/SecurityFirewall.php';
+$firewall = new SecurityFirewall();
+$firewallCheck = $firewall->check();
+if (!$firewallCheck['allowed']) {
+    jsonError($firewallCheck['reason'], $firewallCheck['code'] ?? 403);
+}
+
 require_once __DIR__ . '/../includes/ImageHandler.php';
 require_once __DIR__ . '/../includes/RateLimiter.php';
 require_once __DIR__ . '/../auth/middleware.php';

@@ -25,6 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(false, 'Method not allowed', 405);
 }
 
+// Security Firewall Check
+require_once __DIR__ . '/../includes/SecurityFirewall.php';
+require_once __DIR__ . '/../includes/R2StorageManager.php';
+$firewall = new SecurityFirewall();
+$firewallCheck = $firewall->checkUpload();
+if (!$firewallCheck['allowed']) {
+    http_response_code($firewallCheck['code'] ?? 403);
+    echo json_encode(['success' => false, 'error' => $firewallCheck['reason']]);
+    exit;
+}
+
 // Load config
 $config = require __DIR__ . '/../config/s3.php';
 
@@ -196,22 +207,30 @@ try {
 
     imagedestroy($sourceImage);
 
+    // Initialize hybrid storage manager (R2 + Contabo)
+    $storageManager = new R2StorageManager($config);
+    
     $s3Keys = [];
+    $storageProviders = []; // Track which provider stores each size
+    
     foreach ($uploadedFiles as $sizeName => $fileInfo) {
         $s3Key = date('Y/m/d', $timestamp) . '/' . $fileInfo['filename'];
-        $uploadResult = uploadToS3(
+        
+        // Use hybrid storage: thumb/medium → R2, original/large → Contabo
+        $uploadResult = $storageManager->upload(
             $fileInfo['filepath'],
             $s3Key,
             $mimeType,
-            $config['s3']
+            $sizeName // 'original', 'large', 'medium', 'thumb'
         );
 
-        if (!$uploadResult) {
-            throw new Exception("Failed to upload {$sizeName} to S3");
+        if (!$uploadResult['success']) {
+            throw new Exception("Failed to upload {$sizeName}: " . ($uploadResult['error'] ?? 'Unknown error'));
         }
 
-        $uploadedUrls[$sizeName] = $config['site']['url'] . '/i/' . $s3Key;
+        $uploadedUrls[$sizeName] = $uploadResult['url'];
         $s3Keys[$sizeName] = $s3Key;
+        $storageProviders[$sizeName] = $uploadResult['provider']; // 'r2' or 'contabo'
     }
 
     $deleteAfter = $_POST['delete_after'] ?? 'never';
@@ -244,6 +263,7 @@ try {
         'hash' => $fileHash,
         'urls' => $uploadedUrls,
         's3_keys' => $s3Keys,
+        'storage_providers' => $storageProviders, // Track R2 vs Contabo per size
         'created_at' => $timestamp,
         'delete_at' => $deleteAt,
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',

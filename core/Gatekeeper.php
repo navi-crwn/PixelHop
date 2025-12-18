@@ -16,8 +16,6 @@ class Gatekeeper
 {
     private PDO $db;
     private array $settings = [];
-
-
     public const OK = 'ok';
     public const ERROR_STORAGE_FULL = 'storage_full';
     public const ERROR_USER_QUOTA = 'user_quota_exceeded';
@@ -44,8 +42,6 @@ class Gatekeeper
 
             foreach ($rows as $row) {
                 $value = $row['setting_value'];
-
-
                 switch ($row['setting_type']) {
                     case 'int':
                         $value = (int) $value;
@@ -122,13 +118,9 @@ class Gatekeeper
         if ($this->settings['maintenance_mode']) {
             return $this->deny(self::ERROR_MAINTENANCE, 'System is under maintenance. Please try again later.');
         }
-
-
         if ($this->settings['kill_switch_active']) {
             return $this->deny(self::ERROR_KILL_SWITCH, 'Uploads are temporarily disabled due to storage limits.');
         }
-
-
         $emergencyThreshold = 263070212096;
         $globalUsed = $this->settings['global_storage_used'];
 
@@ -137,16 +129,12 @@ class Gatekeeper
             $this->updateSetting('kill_switch_active', 1);
             return $this->deny(self::ERROR_STORAGE_FULL, 'Server storage is full. Uploads are temporarily disabled.');
         }
-
-
         if ($userId !== null) {
             $user = $this->getUser($userId);
 
             if ($user) {
                 $storageUsed = (int) $user['storage_used'];
                 $storageLimit = (int) $user['storage_limit'];
-
-
                 if ($user['account_type'] === 'free') {
                     $storageLimit = min($storageLimit, $this->settings['storage_limit_free']);
                 } elseif ($user['account_type'] === 'premium') {
@@ -182,8 +170,6 @@ class Gatekeeper
         if ($this->settings['maintenance_mode']) {
             return $this->deny(self::ERROR_MAINTENANCE, 'System is under maintenance. Please try again later.');
         }
-
-
         $loadAvg = sys_getloadavg();
         $currentLoad = $loadAvg[0];
         $threshold = (float) $this->settings['cpu_load_threshold'];
@@ -195,8 +181,6 @@ class Gatekeeper
                 ['cpu_load' => $currentLoad, 'threshold' => $threshold]
             );
         }
-
-
         $maxProcesses = (int) $this->settings['max_concurrent_processes'];
         $runningProcesses = $this->countPythonProcesses();
 
@@ -207,16 +191,12 @@ class Gatekeeper
                 ['running' => $runningProcesses, 'max' => $maxProcesses]
             );
         }
-
-
         if ($userId !== null) {
             $user = $this->getUser($userId);
 
             if ($user) {
 
                 $this->resetDailyCountersIfNeeded($userId, $user);
-
-
                 $user = $this->getUser($userId);
 
                 $accountType = $user['account_type'] ?? 'free';
@@ -237,8 +217,6 @@ class Gatekeeper
                 return $this->allow(['used' => $dailyCount, 'limit' => $dailyLimit, 'tool' => $toolName]);
             }
         }
-
-
         return $this->allow(['used' => 0, 'limit' => 1, 'tool' => $toolName, 'guest' => true]);
     }
 
@@ -253,8 +231,6 @@ class Gatekeeper
 
             $stmt = $this->db->prepare("UPDATE users SET {$countColumn} = {$countColumn} + 1 WHERE id = ?");
             $stmt->execute([$userId]);
-
-
             $stmt = $this->db->prepare("
                 INSERT INTO usage_logs (user_id, tool_name, file_size, processing_time_ms, status, ip_address)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -330,8 +306,6 @@ class Gatekeeper
         try {
             $lifetime = (int) $this->settings['temp_file_lifetime_hours'];
             $expiresAt = date('Y-m-d H:i:s', strtotime("+{$lifetime} hours"));
-
-
             $fileId = bin2hex(random_bytes(16));
 
             $stmt = $this->db->prepare("
@@ -360,20 +334,14 @@ class Gatekeeper
             if (!is_dir($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
-
-
             $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
             $ext = $extMap[$mimeType] ?? 'bin';
 
             $filePath = $tempDir . '/' . pathinfo($fileName, PATHINFO_FILENAME) . '.' . $ext;
-
-
             $bytes = file_put_contents($filePath, $imageData);
             if ($bytes === false) {
                 return false;
             }
-
-
             $fileId = $this->registerTempFile($filePath, basename($filePath), $bytes, $userId, $toolName, $mimeType, $fileName);
 
             if (!$fileId) {
@@ -437,11 +405,7 @@ class Gatekeeper
                 $deleted++;
                 $freedBytes += (int) $file['file_size'];
             }
-
-
             $this->db->exec("DELETE FROM temp_files WHERE expires_at <= NOW()");
-
-
             $tempDir = __DIR__ . '/../temp';
             $lifetimeHours = $this->getSetting('temp_file_lifetime_hours', 6);
             $cutoffTime = time() - ($lifetimeHours * 3600);
@@ -452,8 +416,6 @@ class Gatekeeper
                     $dirName = basename($dir);
 
                     if (strpos($dirName, '.') === 0) continue;
-
-
                     $mtime = filemtime($dir);
                     if ($mtime < $cutoffTime) {
 
@@ -472,8 +434,6 @@ class Gatekeeper
                     }
                 }
             }
-
-
             if ($freedBytes > 0) {
                 $this->updateGlobalStorage(-$freedBytes);
             }
@@ -495,15 +455,13 @@ class Gatekeeper
     public function getServerHealth(): array
     {
         $loadAvg = sys_getloadavg();
-
-
         $memInfo = $this->getMemoryInfo();
-
-
         $diskFree = disk_free_space('/');
         $diskTotal = disk_total_space('/');
         $diskUsed = $diskTotal - $diskFree;
-
+        
+        // Calculate temp folder usage (allocated 10GB for website temp)
+        $tempUsage = $this->getTempFolderUsage();
 
         $pythonProcesses = $this->countPythonProcesses();
 
@@ -525,12 +483,14 @@ class Gatekeeper
                 'used_human' => $this->formatBytes($diskUsed),
                 'total_human' => $this->formatBytes($diskTotal),
             ],
+            'temp' => $tempUsage,
             'storage' => [
                 'global_used' => $this->settings['global_storage_used'],
                 'global_used_human' => $this->formatBytes($this->settings['global_storage_used']),
                 'cap' => 268435456000,
                 'cap_human' => '250 GB',
                 'percent' => round(($this->settings['global_storage_used'] / 268435456000) * 100, 2),
+                'providers' => $this->getStorageProviderStats(),
             ],
             'processes' => [
                 'python_running' => $pythonProcesses,
@@ -541,6 +501,75 @@ class Gatekeeper
                 'kill_switch' => $this->settings['kill_switch_active'],
             ],
         ];
+    }
+    
+    /**
+     * Get temp folder usage (allocated 10GB)
+     */
+    private function getTempFolderUsage(): array
+    {
+        $tempDir = __DIR__ . '/../temp';
+        $allocatedBytes = 10 * 1024 * 1024 * 1024; // 10 GB
+        $usedBytes = 0;
+        $fileCount = 0;
+        
+        if (is_dir($tempDir)) {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($tempDir, \RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    $usedBytes += $file->getSize();
+                    $fileCount++;
+                }
+            }
+        }
+        
+        $percent = $allocatedBytes > 0 ? round(($usedBytes / $allocatedBytes) * 100, 2) : 0;
+        
+        return [
+            'used' => $usedBytes,
+            'used_human' => $this->formatBytes($usedBytes),
+            'allocated' => $allocatedBytes,
+            'allocated_human' => '10 GB',
+            'available' => $allocatedBytes - $usedBytes,
+            'available_human' => $this->formatBytes($allocatedBytes - $usedBytes),
+            'percent' => $percent,
+            'file_count' => $fileCount,
+        ];
+    }
+
+    /**
+     * Get storage stats per provider (R2, Contabo)
+     */
+    private function getStorageProviderStats(): array
+    {
+        $stats = [
+            'r2' => ['used' => 0, 'used_human' => '0 B', 'limit' => 9.5 * 1024 * 1024 * 1024, 'limit_human' => '9.5 GB', 'percent' => 0, 'file_count' => 0],
+            'contabo' => ['used' => 0, 'used_human' => '0 B', 'limit' => 250 * 1024 * 1024 * 1024, 'limit_human' => '250 GB', 'percent' => 0, 'file_count' => 0],
+        ];
+        
+        try {
+            $stmt = $this->db->prepare("SELECT provider, total_bytes, file_count FROM storage_stats WHERE provider IN ('r2', 'contabo')");
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            foreach ($results as $row) {
+                $provider = $row['provider'];
+                if (isset($stats[$provider])) {
+                    $used = (int) $row['total_bytes'];
+                    $limit = $stats[$provider]['limit'];
+                    $stats[$provider]['used'] = $used;
+                    $stats[$provider]['used_human'] = $this->formatBytes($used);
+                    $stats[$provider]['file_count'] = (int) $row['file_count'];
+                    $stats[$provider]['percent'] = $limit > 0 ? round(($used / $limit) * 100, 2) : 0;
+                }
+            }
+        } catch (PDOException $e) {
+            error_log('Gatekeeper: Failed to get storage provider stats - ' . $e->getMessage());
+        }
+        
+        return $stats;
     }
 
     /**
@@ -553,14 +582,10 @@ class Gatekeeper
         if (!$user) {
             return [];
         }
-
-
         $this->resetDailyCountersIfNeeded($userId, $user);
         $user = $this->getUser($userId);
 
         $accountType = $user['account_type'] ?? 'free';
-
-
         $storageLimit = $accountType === 'premium'
             ? $this->settings['storage_limit_premium']
             : $this->settings['storage_limit_free'];
@@ -595,8 +620,6 @@ class Gatekeeper
             'resets_at' => 'Midnight (server time)',
         ];
     }
-
-
 
     private function getUser(int $userId): ?array
     {
@@ -646,8 +669,6 @@ class Gatekeeper
             'free' => 0,
             'percent' => 0,
         ];
-
-
         if (is_readable('/proc/meminfo')) {
             $data = file_get_contents('/proc/meminfo');
             preg_match('/MemTotal:\s+(\d+)\s+kB/', $data, $total);

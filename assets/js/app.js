@@ -798,8 +798,6 @@ function showBatchResults() {
             }))));
         }
         
-        console.log('Redirecting to result page. Success:', successCount, 'Errors:', errorCount);
-        
         setTimeout(() => {
             const url = successCount > 0 
                 ? '/result?id=' + imageIds + (errorCount > 0 ? '&errors=' + errorCount : '')
