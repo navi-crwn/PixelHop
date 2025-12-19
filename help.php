@@ -264,7 +264,7 @@ $siteName = $config['site']['name'];
                         <i data-lucide="chevron-down" class="w-5 h-5 faq-icon"></i>
                     </div>
                     <div class="faq-answer">
-                        Yes! We provide a free REST API for uploading images and using all our image tools. Visit our <a href="/docs" style="color: var(--color-neon-cyan);">API Documentation</a> for details on endpoints and usage.
+                        <strong>Coming Soon!</strong> We're currently developing a REST API for uploading images and using our image tools programmatically. Stay tuned for updates on our <a href="/docs" style="color: var(--color-neon-cyan);">API Documentation</a> page.
                     </div>
                 </div>
             </div>
