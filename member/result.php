@@ -497,13 +497,13 @@ $csrfToken = generateCsrfToken();
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="/dashboard.php" class="action-btn action-btn-secondary">
+            <a href="/dashboard" class="action-btn action-btn-secondary">
                 <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
             </a>
-            <a href="/gallery.php" class="action-btn action-btn-secondary">
+            <a href="/gallery" class="action-btn action-btn-secondary">
                 <i data-lucide="images" class="w-4 h-4"></i> Gallery
             </a>
-            <a href="/member/tools.php" class="action-btn action-btn-secondary">
+            <a href="/member/tools" class="action-btn action-btn-secondary">
                 <i data-lucide="wrench" class="w-4 h-4"></i> Tools
             </a>
             <?php if ($isToolResult): ?>
@@ -511,7 +511,7 @@ $csrfToken = generateCsrfToken();
                 <i data-lucide="download" class="w-4 h-4"></i> Download All (ZIP)
             </button>
             <?php endif; ?>
-            <a href="/member/upload.php" class="action-btn action-btn-primary">
+            <a href="/member/upload" class="action-btn action-btn-primary">
                 <i data-lucide="plus" class="w-4 h-4"></i> Upload More
             </a>
         </div>
@@ -572,7 +572,7 @@ $csrfToken = generateCsrfToken();
                 <div class="empty-state">
                     <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
                     <p>${message}</p>
-                    <a href="/member/upload.php" class="action-btn action-btn-primary" style="display: inline-flex; margin-top: 16px;">
+                    <a href="/member/upload" class="action-btn action-btn-primary" style="display: inline-flex; margin-top: 16px;">
                         <i data-lucide="upload" class="w-4 h-4"></i> Upload Images
                     </a>
                 </div>

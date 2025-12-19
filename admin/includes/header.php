@@ -56,7 +56,7 @@ $subMenus = [
         </nav>
 
         <div class="header-actions">
-            <a href="/member/upload.php" class="nav-link site-link" title="Upload Image">
+            <a href="/member/upload" class="nav-link site-link" title="Upload Image">
                 <i data-lucide="upload" class="w-4 h-4"></i>
                 <span>Upload</span>
             </a>
@@ -97,11 +97,11 @@ $subMenus = [
         <?= $menu['label'] ?>
     </a>
     <?php endforeach; ?>
-    <a href="/member/upload.php" class="mobile-nav-link">
+    <a href="/member/upload" class="mobile-nav-link">
         <i data-lucide="upload" class="w-5 h-5"></i>
         Upload Image
     </a>
-    <a href="/dashboard.php" class="mobile-nav-link">
+    <a href="/dashboard" class="mobile-nav-link">
         <i data-lucide="home" class="w-5 h-5"></i>
         My Account
     </a>

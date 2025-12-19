@@ -200,7 +200,7 @@ $siteName = $config['site']['name'] ?? 'PixelHop';
             <div class="timer" id="timer" style="display: none;"></div>
         </div>
         
-        <a href="/login.php" class="back-link">
+        <a href="/login" class="back-link">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             Back to login
         </a>

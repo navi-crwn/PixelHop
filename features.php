@@ -357,7 +357,7 @@ $isAdmin = $isLoggedIn && isAdmin();
                         <ul class="space-y-3">
                             <li><a href="https://hel.ink" target="_blank" class="footer-link">HEL.ink - URL Shortener</a></li>
                             <li><a href="https://hel.ink/products" target="_blank" class="footer-link">Link in Bio</a></li>
-                            <li><a href="/features.php" class="footer-link">PixelHop Features</a></li>
+                            <li><a href="/features" class="footer-link">PixelHop Features</a></li>
                         </ul>
                     </div>
 
@@ -365,10 +365,10 @@ $isAdmin = $isLoggedIn && isAdmin();
                     <div>
                         <h4 class="text-sm font-semibold mb-4 uppercase tracking-wider" style="color: var(--color-text-primary);">Legal</h4>
                         <ul class="space-y-3">
-                            <li><a href="/terms.php" class="footer-link">Terms of Service</a></li>
-                            <li><a href="/privacy.php" class="footer-link">Privacy Policy</a></li>
-                            <li><a href="/dmca.php" class="footer-link">DMCA</a></li>
-                            <li><a href="/contact.php" class="footer-link">Contact</a></li>
+                            <li><a href="/terms" class="footer-link">Terms of Service</a></li>
+                            <li><a href="/privacy" class="footer-link">Privacy Policy</a></li>
+                            <li><a href="/dmca" class="footer-link">DMCA</a></li>
+                            <li><a href="/contact" class="footer-link">Contact</a></li>
                         </ul>
                     </div>
 

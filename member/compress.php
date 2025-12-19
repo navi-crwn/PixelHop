@@ -460,11 +460,11 @@ $csrfToken = generateCsrfToken();
                 </div>
             </div>
             <div class="nav-links">
-                <a href="/member/tools.php" class="nav-link">
+                <a href="/member/tools" class="nav-link">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     Back to Tools
                 </a>
-                <a href="/dashboard.php" class="nav-link">
+                <a href="/dashboard" class="nav-link">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     Dashboard
                 </a>

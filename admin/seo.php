@@ -269,8 +269,8 @@ $currentPage = 'settings';
             <footer class="admin-footer">
                 <span>© 2025 PixelHop • Admin Panel v2.0</span>
                 <div class="footer-links">
-                    <a href="/dashboard.php">My Account</a>
-                    <a href="/auth/logout.php" class="text-red">Logout</a>
+                    <a href="/dashboard">My Account</a>
+                    <a href="/auth/logout" class="text-red">Logout</a>
                 </div>
             </footer>
         </div>

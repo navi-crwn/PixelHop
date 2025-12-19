@@ -544,29 +544,29 @@ $csrfToken = generateCsrfToken();
                 </div>
             </div>
             <div class="nav-links">
-                <a href="/dashboard.php" class="nav-link active">
+                <a href="/dashboard" class="nav-link active">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     Dashboard
                 </a>
-                <a href="/gallery.php" class="nav-link">
+                <a href="/gallery" class="nav-link">
                     <i data-lucide="images" class="w-4 h-4"></i>
                     Gallery
                 </a>
-                <a href="/member/tools.php" class="nav-link">
+                <a href="/member/tools" class="nav-link">
                     <i data-lucide="wrench" class="w-4 h-4"></i>
                     Tools
                 </a>
                 <?php if ($isAdmin): ?>
-                <a href="/admin/dashboard.php" class="nav-link">
+                <a href="/admin/dashboard" class="nav-link">
                     <i data-lucide="shield" class="w-4 h-4"></i>
                     Admin
                 </a>
                 <?php endif; ?>
-                <a href="/member/settings.php" class="nav-link">
+                <a href="/member/settings" class="nav-link">
                     <i data-lucide="settings" class="w-4 h-4"></i>
                     Settings
                 </a>
-                <a href="/member/upload.php" class="nav-link">
+                <a href="/member/upload" class="nav-link">
                     <i data-lucide="upload" class="w-4 h-4"></i>
                     Upload
                 </a>
@@ -686,30 +686,30 @@ $csrfToken = generateCsrfToken();
                         <i data-lucide="zap" class="w-4 h-4 text-yellow"></i>
                         Quick Tools
                     </div>
-                    <a href="/member/tools.php" class="card-link">View All →</a>
+                    <a href="/member/tools" class="card-link">View All →</a>
                 </div>
                 <div class="tool-grid">
-                    <a href="/member/upload.php" class="tool-btn">
+                    <a href="/member/upload" class="tool-btn">
                         <i data-lucide="upload" class="text-cyan"></i>
                         <span>Upload</span>
                     </a>
-                    <a href="/member/compress.php" class="tool-btn">
+                    <a href="/member/compress" class="tool-btn">
                         <i data-lucide="file-minus" class="text-green"></i>
                         <span>Compress</span>
                     </a>
-                    <a href="/member/resize.php" class="tool-btn">
+                    <a href="/member/resize" class="tool-btn">
                         <i data-lucide="scaling" class="text-purple"></i>
                         <span>Resize</span>
                     </a>
-                    <a href="/member/ocr.php" class="tool-btn">
+                    <a href="/member/ocr" class="tool-btn">
                         <i data-lucide="scan-text" class="text-yellow"></i>
                         <span>OCR</span>
                     </a>
-                    <a href="/member/rembg.php" class="tool-btn">
+                    <a href="/member/rembg" class="tool-btn">
                         <i data-lucide="eraser" class="text-pink"></i>
                         <span>Remove BG</span>
                     </a>
-                    <a href="/member/convert.php" class="tool-btn">
+                    <a href="/member/convert" class="tool-btn">
                         <i data-lucide="repeat" class="text-cyan"></i>
                         <span>Convert</span>
                     </a>
@@ -723,7 +723,7 @@ $csrfToken = generateCsrfToken();
                         <i data-lucide="images" class="w-4 h-4 text-purple"></i>
                         Recent Uploads
                     </div>
-                    <a href="/gallery.php" class="card-link">View Gallery →</a>
+                    <a href="/gallery" class="card-link">View Gallery →</a>
                 </div>
                 <div class="gallery-grid">
                     <?php if (empty($userImages)): ?>
@@ -752,9 +752,9 @@ $csrfToken = generateCsrfToken();
                 Member since <?= date('M Y', strtotime($currentUser['created_at'])) ?>
             </div>
             <div class="flex gap-4">
-                <a href="/member/tools.php" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Tools</a>
+                <a href="/member/tools" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Tools</a>
                 <a href="/help" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Help</a>
-                <a href="/auth/logout.php" class="text-xs hover:text-red-400 transition" style="color: rgba(255,255,255,0.5);">Logout</a>
+                <a href="/auth/logout" class="text-xs hover:text-red-400 transition" style="color: rgba(255,255,255,0.5);">Logout</a>
             </div>
         </div>
     </div>

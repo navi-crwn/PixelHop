@@ -240,17 +240,17 @@ $currentPage = 'security';
                                 <i data-lucide="search" class="w-4 h-4"></i>
                                 Run Watchdog
                             </button>
-                            <a href="/admin/firewall.php" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
+                            <a href="/admin/firewall" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
                                 <i data-lucide="flame" class="w-4 h-4"></i>
                                 Firewall Logs
                             </a>
                         </div>
                         <div class="flex gap-2" style="flex-wrap: wrap;">
-                            <a href="/admin/storage.php" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
+                            <a href="/admin/storage" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
                                 <i data-lucide="database" class="w-4 h-4"></i>
                                 Storage Stats
                             </a>
-                            <a href="/admin/tools.php" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
+                            <a href="/admin/tools" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
                                 <i data-lucide="wrench" class="w-4 h-4"></i>
                                 Tools Stats
                             </a>
@@ -371,9 +371,9 @@ $currentPage = 'security';
             <footer class="admin-footer">
                 <span>© 2025 PixelHop • Admin Panel v2.0</span>
                 <div class="footer-links">
-                    <a href="/dashboard.php">My Account</a>
-                    <a href="/member/tools.php">Tools</a>
-                    <a href="/auth/logout.php" class="text-red">Logout</a>
+                    <a href="/dashboard">My Account</a>
+                    <a href="/member/tools">Tools</a>
+                    <a href="/auth/logout" class="text-red">Logout</a>
                 </div>
             </footer>
         </div>

@@ -304,7 +304,7 @@ TEXT;
             </ul>
             
             <div style="text-align: center; margin: 32px 0;">
-                <a href="https://p.hel.ink/dashboard.php" style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #22d3ee, #a855f7); color: #fff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 12px;">
+                <a href="https://p.hel.ink/dashboard" style="display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #22d3ee, #a855f7); color: #fff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 12px;">
                     Go to Dashboard
                 </a>
             </div>

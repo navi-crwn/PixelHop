@@ -558,19 +558,19 @@ $tools = [
                 </div>
             </div>
             <div class="nav-links">
-                <a href="/dashboard.php" class="nav-link">
+                <a href="/dashboard" class="nav-link">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     Dashboard
                 </a>
-                <a href="/gallery.php" class="nav-link">
+                <a href="/gallery" class="nav-link">
                     <i data-lucide="images" class="w-4 h-4"></i>
                     Gallery
                 </a>
-                <a href="/member/tools.php" class="nav-link active">
+                <a href="/member/tools" class="nav-link active">
                     <i data-lucide="wrench" class="w-4 h-4"></i>
                     Tools
                 </a>
-                <a href="/member/upload.php" class="nav-link">
+                <a href="/member/upload" class="nav-link">
                     <i data-lucide="upload" class="w-4 h-4"></i>
                     Upload
                 </a>
@@ -630,7 +630,7 @@ $tools = [
                     <strong style="color: #22d3ee;">Temporary Storage:</strong> 
                     Tool results are stored for <strong>6 hours</strong> then auto-deleted. 
                     Download your processed images before they expire. 
-                    To save permanently, use the <a href="/member/upload.php" class="underline" style="color: #22d3ee;">Upload</a> feature.
+                    To save permanently, use the <a href="/member/upload" class="underline" style="color: #22d3ee;">Upload</a> feature.
                 </div>
             </div>
         </div>
@@ -644,7 +644,7 @@ $tools = [
                     $isDisabled = true;
                 }
             ?>
-            <a href="/member/<?= $tool['id'] ?>.php" class="tool-card <?= $isDisabled ? 'disabled' : '' ?>">
+            <a href="/member/<?= $tool['id'] ?>" class="tool-card <?= $isDisabled ? 'disabled' : '' ?>">
                 <div class="tool-icon" style="background: <?= $tool['color'] ?>20;">
                     <i data-lucide="<?= $tool['icon'] ?>" class="w-6 h-6" style="color: <?= $tool['color'] ?>;"></i>
                 </div>
@@ -687,9 +687,9 @@ $tools = [
                 Image Tools
             </div>
             <div class="footer-links">
-                <a href="/dashboard.php">Dashboard</a>
+                <a href="/dashboard">Dashboard</a>
                 <a href="/help">Help</a>
-                <a href="/auth/logout.php">Logout</a>
+                <a href="/auth/logout">Logout</a>
             </div>
         </div>
     </div>

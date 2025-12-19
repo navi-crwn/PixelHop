@@ -303,9 +303,9 @@ $hasPendingDeletion = !empty($user['delete_requested_at']);
                 </div>
             </div>
             <div class="nav-links">
-                <a href="/dashboard.php" class="nav-link"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
-                <a href="/member/settings.php" class="nav-link active"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
-                <a href="/auth/logout.php" class="nav-link" style="color: #ef4444;"><i data-lucide="log-out" class="w-4 h-4"></i></a>
+                <a href="/dashboard" class="nav-link"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+                <a href="/member/settings" class="nav-link active"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
+                <a href="/auth/logout" class="nav-link" style="color: #ef4444;"><i data-lucide="log-out" class="w-4 h-4"></i></a>
             </div>
         </div>
         

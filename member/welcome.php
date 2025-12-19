@@ -93,13 +93,13 @@ $siteName = $config['site']['name'];
             </div>
         </div>
 
-        <a href="/dashboard.php" class="btn-primary">
+        <a href="/dashboard" class="btn-primary">
             <i data-lucide="rocket" class="w-5 h-5"></i>
             Go to Dashboard
         </a>
 
         <p class="text-xs text-white/30 mt-6">
-            Need help? Check out our <a href="/docs.php" class="text-cyan-400 hover:underline">documentation</a>
+            Need help? Check out our <a href="/docs" class="text-cyan-400 hover:underline">documentation</a>
         </p>
     </div>
 

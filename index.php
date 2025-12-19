@@ -189,21 +189,21 @@ $isAdmin = $isLoggedIn && isAdmin();
                         </button>
                         <div id="user-menu-dropdown" class="absolute right-0 top-full mt-2 w-48 glass-card py-2 hidden">
                             <?php if ($isAdmin): ?>
-                            <a href="/admin/dashboard.php" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="shield" class="w-4 h-4 text-neon-purple"></i>
                                 Admin Dashboard
                             </a>
                             <?php endif; ?>
-                            <a href="/dashboard.php" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/dashboard" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="layout-dashboard" class="w-4 h-4 text-neon-cyan"></i>
                                 My Dashboard
                             </a>
-                            <a href="/my-images.php" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/my-images" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="images" class="w-4 h-4 text-neon-pink"></i>
                                 My Images
                             </a>
                             <div class="border-t my-2" style="border-color: var(--glass-border);"></div>
-                            <a href="/auth/logout.php" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/auth/logout" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="log-out" class="w-4 h-4"></i>
                                 Logout
                             </a>
@@ -211,11 +211,11 @@ $isAdmin = $isLoggedIn && isAdmin();
                     </div>
                     <?php else: ?>
                     <!-- Guest Menu -->
-                    <a href="/login.php" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-all">
+                    <a href="/login" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-all">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
                         <span class="text-sm font-medium">Login</span>
                     </a>
-                    <a href="/register.php" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:opacity-90 transition-all">
+                    <a href="/register" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:opacity-90 transition-all">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
                         <span class="text-sm font-medium">Register</span>
                     </a>
@@ -258,25 +258,25 @@ $isAdmin = $isLoggedIn && isAdmin();
                     <div class="border-t my-2" style="border-color: var(--glass-border);"></div>
                     <?php if ($isLoggedIn): ?>
                     <?php if ($isAdmin): ?>
-                    <a href="/admin/dashboard.php" class="tool-pill-mobile">
+                    <a href="/admin/dashboard" class="tool-pill-mobile">
                         <i data-lucide="shield" class="w-4 h-4 text-neon-purple"></i>
                         <span>Admin Dashboard</span>
                     </a>
                     <?php endif; ?>
-                    <a href="/dashboard.php" class="tool-pill-mobile">
+                    <a href="/dashboard" class="tool-pill-mobile">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 text-neon-cyan"></i>
                         <span>My Dashboard</span>
                     </a>
-                    <a href="/auth/logout.php" class="tool-pill-mobile text-red-400">
+                    <a href="/auth/logout" class="tool-pill-mobile text-red-400">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
                         <span>Logout</span>
                     </a>
                     <?php else: ?>
-                    <a href="/login.php" class="tool-pill-mobile">
+                    <a href="/login" class="tool-pill-mobile">
                         <i data-lucide="log-in" class="w-4 h-4" style="color: var(--color-text-tertiary);"></i>
                         <span>Login</span>
                     </a>
-                    <a href="/register.php" class="tool-pill-mobile">
+                    <a href="/register" class="tool-pill-mobile">
                         <i data-lucide="user-plus" class="w-4 h-4 text-neon-cyan"></i>
                         <span>Register</span>
                     </a>
@@ -586,19 +586,19 @@ $isAdmin = $isLoggedIn && isAdmin();
                         <h4 class="text-sm font-semibold mb-4 uppercase tracking-wider" style="color: var(--color-text-primary);">Account</h4>
                         <ul class="space-y-3">
                             <?php if ($isLoggedIn): ?>
-                            <li><a href="/dashboard.php" class="footer-link">Dashboard</a></li>
-                            <li><a href="/my-images.php" class="footer-link">My Images</a></li>
+                            <li><a href="/dashboard" class="footer-link">Dashboard</a></li>
+                            <li><a href="/my-images" class="footer-link">My Images</a></li>
                             <?php if ($isAdmin): ?>
-                            <li><a href="/admin/dashboard.php" class="footer-link">Admin Panel</a></li>
+                            <li><a href="/admin/dashboard" class="footer-link">Admin Panel</a></li>
                             <?php endif; ?>
-                            <li><a href="/auth/logout.php" class="footer-link">Logout</a></li>
+                            <li><a href="/auth/logout" class="footer-link">Logout</a></li>
                             <?php else: ?>
-                            <li><a href="/login.php" class="footer-link">Login</a></li>
-                            <li><a href="/register.php" class="footer-link">Register</a></li>
+                            <li><a href="/login" class="footer-link">Login</a></li>
+                            <li><a href="/register" class="footer-link">Register</a></li>
                             <?php endif; ?>
                             <li><a href="/docs" class="footer-link">API Docs</a></li>
                             <li><a href="/help" class="footer-link">Help Center</a></li>
-                            <li><a href="/changelog.php" class="footer-link">What's New</a></li>
+                            <li><a href="/changelog" class="footer-link">What's New</a></li>
                         </ul>
                     </div>
 
@@ -608,7 +608,7 @@ $isAdmin = $isLoggedIn && isAdmin();
                         <ul class="space-y-3">
                             <li><a href="https://hel.ink" target="_blank" class="footer-link">HEL.ink - URL Shortener</a></li>
                             <li><a href="https://hel.ink/products" target="_blank" class="footer-link">Link in Bio</a></li>
-                            <li><a href="/features.php" class="footer-link">PixelHop Features</a></li>
+                            <li><a href="/features" class="footer-link">PixelHop Features</a></li>
                         </ul>
                     </div>
 
@@ -616,10 +616,10 @@ $isAdmin = $isLoggedIn && isAdmin();
                     <div>
                         <h4 class="text-sm font-semibold mb-4 uppercase tracking-wider" style="color: var(--color-text-primary);">Legal</h4>
                         <ul class="space-y-3">
-                            <li><a href="/terms.php" class="footer-link">Terms of Service</a></li>
-                            <li><a href="/privacy.php" class="footer-link">Privacy Policy</a></li>
-                            <li><a href="/dmca.php" class="footer-link">DMCA</a></li>
-                            <li><a href="/contact.php" class="footer-link">Contact</a></li>
+                            <li><a href="/terms" class="footer-link">Terms of Service</a></li>
+                            <li><a href="/privacy" class="footer-link">Privacy Policy</a></li>
+                            <li><a href="/dmca" class="footer-link">DMCA</a></li>
+                            <li><a href="/contact" class="footer-link">Contact</a></li>
                         </ul>
                     </div>
 

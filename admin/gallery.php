@@ -647,7 +647,7 @@ $currentPage = 'gallery';
                                 <i data-lucide="search" class="w-4 h-4"></i> Filter
                             </button>
                             <?php if ($search || $filterUser || $filterDate): ?>
-                            <a href="/admin/gallery.php" class="btn btn-secondary">Clear</a>
+                            <a href="/admin/gallery" class="btn btn-secondary">Clear</a>
                             <?php endif; ?>
                         </div>
                     </form>
@@ -758,9 +758,9 @@ $currentPage = 'gallery';
             <footer class="admin-footer">
                 <span>© 2025 PixelHop • Admin Panel v2.0</span>
                 <div class="footer-links">
-                    <a href="/dashboard.php">My Account</a>
-                    <a href="/member/tools.php">Tools</a>
-                    <a href="/auth/logout.php" class="text-red">Logout</a>
+                    <a href="/dashboard">My Account</a>
+                    <a href="/member/tools">Tools</a>
+                    <a href="/auth/logout" class="text-red">Logout</a>
                 </div>
             </footer>
         </div>

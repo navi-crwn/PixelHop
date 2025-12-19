@@ -392,10 +392,10 @@ function getProxyUrl($s3Key) {
                 </div>
             </div>
             <div class="nav-links">
-                <a href="/dashboard.php" class="nav-link"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
-                <a href="/gallery.php" class="nav-link active"><i data-lucide="images" class="w-4 h-4"></i> Gallery</a>
-                <a href="/member/tools.php" class="nav-link"><i data-lucide="wrench" class="w-4 h-4"></i> Tools</a>
-                <a href="/member/upload.php" class="nav-link"><i data-lucide="upload" class="w-4 h-4"></i> Upload</a>
+                <a href="/dashboard" class="nav-link"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+                <a href="/gallery" class="nav-link active"><i data-lucide="images" class="w-4 h-4"></i> Gallery</a>
+                <a href="/member/tools" class="nav-link"><i data-lucide="wrench" class="w-4 h-4"></i> Tools</a>
+                <a href="/member/upload" class="nav-link"><i data-lucide="upload" class="w-4 h-4"></i> Upload</a>
             </div>
         </div>
 
@@ -404,7 +404,7 @@ function getProxyUrl($s3Key) {
             <i data-lucide="image-off" class="empty-icon"></i>
             <h2 class="text-lg font-semibold text-white mb-2">No images yet</h2>
             <p class="text-sm">Start uploading images to build your gallery</p>
-            <a href="/member/upload.php" class="upload-btn"><i data-lucide="upload" class="w-4 h-4"></i> Upload Image</a>
+            <a href="/member/upload" class="upload-btn"><i data-lucide="upload" class="w-4 h-4"></i> Upload Image</a>
         </div>
         <?php else: ?>
         <div class="stats-row">
@@ -438,7 +438,7 @@ function getProxyUrl($s3Key) {
                     <option value="views" <?= $sort === 'views' ? 'selected' : '' ?>>Most Views</option>
                     <option value="name" <?= $sort === 'name' ? 'selected' : '' ?>>By Name</option>
                 </select>
-                <a href="/member/upload.php" class="btn btn-primary"><i data-lucide="upload" class="w-4 h-4"></i> Upload</a>
+                <a href="/member/upload" class="btn btn-primary"><i data-lucide="upload" class="w-4 h-4"></i> Upload</a>
             </div>
         </div>
 
@@ -484,9 +484,9 @@ function getProxyUrl($s3Key) {
                 <?= $totalImages ?> images uploaded
             </div>
             <div class="footer-links">
-                <a href="/member/tools.php">Tools</a>
+                <a href="/member/tools">Tools</a>
                 <a href="/help">Help</a>
-                <a href="/auth/logout.php">Logout</a>
+                <a href="/auth/logout">Logout</a>
             </div>
         </div>
     </div>

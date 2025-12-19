@@ -122,7 +122,7 @@ $csrfToken = generateCsrfToken();
                 <?= $rembgRemaining ?> <?= is_numeric($rembgRemaining) ? 'uses left today' : '' ?>
             </div>
             <div class="nav-links">
-                <a href="/member/tools.php" class="nav-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</a>
+                <a href="/member/tools" class="nav-link"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</a>
             </div>
         </div>
 

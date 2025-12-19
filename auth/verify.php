@@ -180,7 +180,7 @@ $siteName = $config['site']['name'] ?? 'PixelHop';
             </div>
             <h1>Email Verified!</h1>
             <p>Your email has been verified successfully. You can now enjoy all features of PixelHop.</p>
-            <a href="/dashboard.php" class="btn-primary">
+            <a href="/dashboard" class="btn-primary">
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 Go to Dashboard
             </a>
@@ -190,11 +190,11 @@ $siteName = $config['site']['name'] ?? 'PixelHop';
             </div>
             <h1>Verification Failed</h1>
             <p><?= htmlspecialchars($error) ?></p>
-            <a href="/login.php" class="btn-primary">
+            <a href="/login" class="btn-primary">
                 <i data-lucide="log-in" class="w-5 h-5"></i>
                 Go to Login
             </a>
-            <a href="/auth/resend-verification.php" class="btn-secondary">
+            <a href="/auth/resend-verification" class="btn-secondary">
                 Resend Verification Email
             </a>
         <?php endif; ?>

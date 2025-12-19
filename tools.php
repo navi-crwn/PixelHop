@@ -513,12 +513,12 @@ $toolStatus = [
                         </button>
                         <div id="user-menu-dropdown" class="absolute right-0 top-full mt-2 w-48 glass-card py-2 hidden">
                             <?php if ($isAdmin): ?>
-                            <a href="/admin/dashboard.php" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="shield" class="w-4 h-4 text-neon-purple"></i>
                                 Admin Dashboard
                             </a>
                             <?php endif; ?>
-                            <a href="/dashboard.php" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/dashboard" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="layout-dashboard" class="w-4 h-4 text-neon-cyan"></i>
                                 My Dashboard
                             </a>
@@ -527,7 +527,7 @@ $toolStatus = [
                                 Upload
                             </a>
                             <div class="border-t my-2" style="border-color: var(--glass-border);"></div>
-                            <a href="/auth/logout.php" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-[var(--glass-bg-hover)] transition-colors">
+                            <a href="/auth/logout" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-[var(--glass-bg-hover)] transition-colors">
                                 <i data-lucide="log-out" class="w-4 h-4"></i>
                                 Logout
                             </a>
@@ -535,11 +535,11 @@ $toolStatus = [
                     </div>
                     <?php else: ?>
                     <!-- Guest Menu -->
-                    <a href="/login.php" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-all">
+                    <a href="/login" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--glass-bg-hover)] transition-all">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
                         <span class="text-sm font-medium">Login</span>
                     </a>
-                    <a href="/register.php" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:opacity-90 transition-all">
+                    <a href="/register" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:opacity-90 transition-all">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
                         <span class="text-sm font-medium">Register</span>
                     </a>
@@ -577,7 +577,7 @@ $toolStatus = [
                         Processed images are stored temporarily for <strong>6 hours</strong> and then automatically deleted. 
                         Download your results before they expire. Files are NOT uploaded to permanent storage.
                         <?php if (!$isLoggedIn): ?>
-                        <a href="/register.php" class="ml-1 underline" style="color: #22d3ee;">Register</a> to save images permanently.
+                        <a href="/register" class="ml-1 underline" style="color: #22d3ee;">Register</a> to save images permanently.
                         <?php endif; ?>
                     </div>
                 </div>

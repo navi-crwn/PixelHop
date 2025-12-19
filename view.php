@@ -551,7 +551,7 @@ $lastViewed = isset($image['last_viewed_at']) ? formatDate($image['last_viewed_a
                                target="_blank" class="share-btn twitter" title="Share on Twitter">
                                 <i data-lucide="twitter" class="w-4 h-4"></i>
                             </a>
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($siteUrl . '/' . $imageId) ?>"
+                            <a href="https://www.facebook.com/sharer/sharer?u=<?= urlencode($siteUrl . '/' . $imageId) ?>"
                                target="_blank" class="share-btn facebook" title="Share on Facebook">
                                 <i data-lucide="facebook" class="w-4 h-4"></i>
                             </a>
