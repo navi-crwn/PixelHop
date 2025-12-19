@@ -114,7 +114,7 @@ class SecurityFirewall
             'block_suspicious_patterns' => true,
             'rate_limit_enabled' => true,
             'rate_limit_requests' => 100,      // requests per minute
-            'rate_limit_uploads' => 20,        // uploads per hour
+            'rate_limit_uploads' => 300,       // uploads per hour (raised to reduce false 429s)
             'auto_block_threshold' => 10,      // suspicious events before auto-block
             'auto_block_duration' => 24,       // hours
             'blocked_countries' => [],         // empty = don't block by country

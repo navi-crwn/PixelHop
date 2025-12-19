@@ -45,10 +45,19 @@ if (!$gatekeeper->getSetting('tool_compress_enabled', 1)) {
     jsonError('This tool is currently disabled for maintenance.', 503);
 }
 
+// Check tool usage limits
+$toolCheck = $gatekeeper->canRunLightTool('compress', getCurrentUserId());
+if (!$toolCheck['allowed']) {
+    jsonError($toolCheck['reason'], 429);
+}
+
 // Rate limiting
 $rateLimiter = new RateLimiter();
 $rateLimiter->enforce(getCurrentUserId());
 $rateLimiter->addHeaders(getCurrentUserId());
+
+// Track start time for usage logging
+$toolStartTime = microtime(true);
 
 try {
     $handler = new ImageHandler();
@@ -190,6 +199,10 @@ try {
             $viewUrl = $tempResult['view_url'];
         }
     }
+    
+    // Log tool usage
+    $processingTime = (int)((microtime(true) - $toolStartTime) * 1000);
+    $gatekeeper->recordLightToolUsage('compress', getCurrentUserId(), $outputSize, $processingTime, 'success');
 
     if ($returnType === 'json') {
         echo json_encode([

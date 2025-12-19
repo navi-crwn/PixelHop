@@ -50,6 +50,12 @@ if (!$gatekeeper->getSetting('tool_crop_enabled', 1)) {
     jsonError('This tool is currently disabled for maintenance.', 503);
 }
 
+// Check tool usage limits
+$toolCheck = $gatekeeper->canRunLightTool('crop', getCurrentUserId());
+if (!$toolCheck['allowed']) {
+    jsonError($toolCheck['reason'], 429);
+}
+
 // Rate limiting
 $rateLimiter = new RateLimiter();
 $rateLimiter->enforce(getCurrentUserId());

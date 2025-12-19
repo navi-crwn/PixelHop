@@ -156,11 +156,27 @@ class AbuseGuard
                     'code' => 'guest_size_limit'
                 ];
             }
+            
+            // Check daily bandwidth limit for guests (100MB default)
+            $dailyBandwidthMB = (int) $this->getSetting('abuse_guest_daily_bandwidth_mb', 100);
+            $usedBandwidth = $this->getUploadBandwidth($ip, '-24 hours');
+            $usedBandwidthMB = $usedBandwidth / (1024 * 1024);
+            
+            if (($usedBandwidth + $fileSize) > ($dailyBandwidthMB * 1024 * 1024)) {
+                $this->logAbuse($ip, self::ABUSE_BANDWIDTH_ABUSE, 'medium', null,
+                    "Guest exceeded daily bandwidth: " . round($usedBandwidthMB, 2) . "MB/{$dailyBandwidthMB}MB");
+                return [
+                    'allowed' => false,
+                    'reason' => "Daily upload limit reached ({$dailyBandwidthMB}MB). Please register for more storage.",
+                    'code' => 'guest_bandwidth_limit',
+                    'retry_after' => 86400
+                ];
+            }
         }
 
 
         $hourlyCount = $this->getUploadCount($ip, '-1 hour');
-        $hourlyLimit = (int) $this->getSetting('abuse_threshold_uploads_per_hour', 50);
+        $hourlyLimit = (int) $this->getSetting('abuse_threshold_uploads_per_hour', 100);
 
         if ($hourlyCount >= $hourlyLimit) {
 
@@ -170,7 +186,7 @@ class AbuseGuard
 
             if ($this->getSetting('abuse_auto_block_enabled', 1)) {
                 $dailyCount = $this->getUploadCount($ip, '-24 hours');
-                $dailyLimit = (int) $this->getSetting('abuse_threshold_uploads_per_day', 200);
+                $dailyLimit = (int) $this->getSetting('abuse_threshold_uploads_per_day', 2000);
 
                 if ($dailyCount >= $dailyLimit) {
                     $this->blockIP($ip, 'Automatic block: Exceeded daily upload limit', null, 'auto');
@@ -184,6 +200,21 @@ class AbuseGuard
                 'reason' => 'Upload limit reached. Please wait before uploading more images.',
                 'code' => 'rate_limit',
                 'retry_after' => 3600
+            ];
+        }
+        
+        // Check daily count limit
+        $dailyCount = $this->getUploadCount($ip, '-24 hours');
+        $dailyLimit = (int) $this->getSetting('abuse_threshold_uploads_per_day', 2000);
+        
+        if ($dailyCount >= $dailyLimit) {
+            $this->logAbuse($ip, self::ABUSE_UPLOAD_SPAM, 'high', $userId,
+                "Exceeded daily upload limit: {$dailyCount}/{$dailyLimit}");
+            return [
+                'allowed' => false,
+                'reason' => 'Daily upload limit reached. Please try again tomorrow.',
+                'code' => 'daily_limit',
+                'retry_after' => 86400
             ];
         }
 
@@ -220,6 +251,29 @@ class AbuseGuard
         }
 
         return $count;
+    }
+    
+    /**
+     * Get upload bandwidth (total bytes) for IP in time period
+     */
+    private function getUploadBandwidth(string $ip, string $since): int
+    {
+        $imagesFile = __DIR__ . '/../data/images.json';
+        if (!file_exists($imagesFile)) {
+            return 0;
+        }
+
+        $images = json_decode(file_get_contents($imagesFile), true) ?: [];
+        $sinceTimestamp = strtotime($since);
+        $totalBytes = 0;
+
+        foreach ($images as $img) {
+            if (($img['ip'] ?? '') === $ip && ($img['created_at'] ?? 0) >= $sinceTimestamp) {
+                $totalBytes += $img['size'] ?? 0;
+            }
+        }
+
+        return $totalBytes;
     }
 
     /**

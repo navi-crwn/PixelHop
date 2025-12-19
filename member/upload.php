@@ -34,6 +34,14 @@ $csrfToken = generateCsrfToken();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload - PixelHop</title>
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('pixelhop-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -52,13 +60,22 @@ $csrfToken = generateCsrfToken();
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             background: rgba(20, 20, 35, 0.85);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             padding: 32px;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
+        }
+
+        [data-theme="light"] .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.1);
         }
 
         .header {
@@ -179,11 +196,13 @@ $csrfToken = generateCsrfToken();
 
         .url-input-group {
             display: flex;
+            flex-direction: column;
             gap: 12px;
         }
 
-        .url-input {
-            flex: 1;
+        .url-textarea {
+            width: 100%;
+            min-height: 120px;
             padding: 16px 20px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -192,15 +211,34 @@ $csrfToken = generateCsrfToken();
             font-size: 14px;
             outline: none;
             transition: all 0.2s;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
         }
 
-        .url-input:focus {
+        .url-textarea:focus {
             border-color: #22d3ee;
             background: rgba(34, 211, 238, 0.05);
         }
 
-        .url-input::placeholder {
+        .url-textarea::placeholder {
             color: rgba(255, 255, 255, 0.3);
+        }
+
+        .url-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: -4px;
+        }
+
+        [data-theme="light"] .url-textarea {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1a202c;
+        }
+
+        [data-theme="light"] .url-textarea::placeholder {
+            color: rgba(0, 0, 0, 0.4);
         }
 
         .upload-btn {
@@ -378,10 +416,14 @@ $csrfToken = generateCsrfToken();
         <!-- URL Upload Panel -->
         <div class="upload-panel" id="panel-url">
             <div class="url-input-group">
-                <input type="text" class="url-input" id="urlInput" placeholder="Paste image URL here...">
-                <button class="upload-btn" id="urlUploadBtn">
+                <textarea class="url-textarea" id="urlInput" placeholder="Paste image URLs here...
+One URL per line, e.g.:
+https://example.com/image1.jpg
+https://example.com/image2.png"></textarea>
+                <p class="url-hint">Enter one URL per line for batch upload</p>
+                <button class="upload-btn" id="urlUploadBtn" style="align-self: flex-end;">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    Fetch
+                    Fetch All
                 </button>
             </div>
             <div class="progress-bar" id="urlProgressBar">
@@ -506,7 +548,7 @@ $csrfToken = generateCsrfToken();
                 showStatus('success', `All ${successCount} images uploaded successfully!`);
 
                 if (results.length === 1) {
-                    window.location.href = '/' + results[0].id;
+                    window.location.href = '/' + results[0].data.id;
                 } else {
 
                     sessionStorage.setItem('uploadResults', JSON.stringify(results));
@@ -530,41 +572,69 @@ $csrfToken = generateCsrfToken();
         const urlProgressBar = document.getElementById('urlProgressBar');
         const urlProgressFill = document.getElementById('urlProgressFill');
         const urlStatusMessage = document.getElementById('urlStatusMessage');
+        const urlPreviewGrid = document.getElementById('urlPreviewGrid');
 
         urlUploadBtn.addEventListener('click', async () => {
-            const url = urlInput.value.trim();
-            if (!url) return;
+            const text = urlInput.value.trim();
+            if (!text) return;
+
+            // Parse multiple URLs (one per line)
+            const urls = text.split('\n')
+                .map(u => u.trim())
+                .filter(u => u && (u.startsWith('http://') || u.startsWith('https://')));
+
+            if (urls.length === 0) {
+                urlStatusMessage.className = 'status-message error';
+                urlStatusMessage.textContent = 'Please enter valid URLs (starting with http:// or https://)';
+                return;
+            }
 
             urlUploadBtn.disabled = true;
             urlProgressBar.classList.add('active');
-            urlProgressFill.style.width = '50%';
+            urlPreviewGrid.innerHTML = '';
+            
+            const results = [];
+            let processed = 0;
 
-            const formData = new FormData();
-            formData.append('url', url);
-            formData.append('csrf_token', '<?= $csrfToken ?>');
+            for (const url of urls) {
+                const formData = new FormData();
+                formData.append('url', url);
+                formData.append('csrf_token', '<?= $csrfToken ?>');
 
-            try {
-                const response = await fetch('/api/upload.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-
-                urlProgressFill.style.width = '100%';
-
-                if (result.success) {
-                    urlStatusMessage.className = 'status-message success';
-                    urlStatusMessage.textContent = 'Image uploaded successfully!';
-                    setTimeout(() => {
-                        window.location.href = '/' + result.id;
-                    }, 500);
-                } else {
-                    urlStatusMessage.className = 'status-message error';
-                    urlStatusMessage.textContent = result.error || 'Upload failed';
+                try {
+                    const response = await fetch('/api/upload.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    results.push({ ...result, url });
+                } catch (err) {
+                    results.push({ success: false, error: err.message, url });
                 }
-            } catch (err) {
+
+                processed++;
+                urlProgressFill.style.width = (processed / urls.length * 100) + '%';
+            }
+
+            const successCount = results.filter(r => r.success).length;
+
+            if (successCount > 0) {
+                urlStatusMessage.className = 'status-message success';
+                urlStatusMessage.textContent = `${successCount}/${urls.length} images uploaded successfully!`;
+                
+                if (successCount === 1 && urls.length === 1) {
+                    setTimeout(() => {
+                        window.location.href = '/' + results[0].data.id;
+                    }, 500);
+                } else if (successCount > 0) {
+                    sessionStorage.setItem('uploadResults', JSON.stringify(results));
+                    setTimeout(() => {
+                        window.location.href = '/member/result.php?type=upload&count=' + successCount;
+                    }, 1000);
+                }
+            } else {
                 urlStatusMessage.className = 'status-message error';
-                urlStatusMessage.textContent = 'Upload failed: ' + err.message;
+                urlStatusMessage.textContent = 'All uploads failed. Check the URLs and try again.';
             }
 
             urlUploadBtn.disabled = false;

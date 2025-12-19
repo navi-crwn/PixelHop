@@ -70,7 +70,6 @@ class Turnstile
 
         $response = curl_exec($ch);
         $error = curl_error($ch);
-        curl_close($ch);
 
         if ($error) {
             error_log('Turnstile verification error: ' . $error);

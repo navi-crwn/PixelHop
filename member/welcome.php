@@ -42,6 +42,13 @@ $siteName = $config['site']['name'];
         .feature-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 16px 32px; background: linear-gradient(135deg, #22d3ee, #a855f7); color: #fff; font-weight: 600; border-radius: 12px; text-decoration: none; transition: transform 0.2s; }
         .btn-primary:hover { transform: translateY(-2px); }
+
+        /* Light theme */
+        [data-theme="light"] body { background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%); }
+        [data-theme="light"] .welcome-card { background: rgba(255, 255, 255, 0.9); border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .text-white, [data-theme="light"] h1, [data-theme="light"] .feature-title { color: #1a202c !important; }
+        [data-theme="light"] .text-white\/50, [data-theme="light"] .feature-desc { color: rgba(0, 0, 0, 0.5) !important; }
+        [data-theme="light"] .feature-item { background: rgba(0, 0, 0, 0.03); border-color: rgba(0, 0, 0, 0.08); }
     </style>
 </head>
 <body>

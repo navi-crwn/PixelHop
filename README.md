@@ -39,6 +39,11 @@ No desktop software needed. Works entirely in the browser.
 - **Remove Background** — AI-powered background removal
 - **User Accounts** — Google OAuth login with personal dashboard
 - **Admin Panel** — Full control, monitoring, and abuse prevention
+- **Hybrid Storage** — R2 + Contabo S3 with automatic failover
+- **View Analytics** — Track view counts and last viewed dates
+- **Report System** — Users can report inappropriate images
+- **Account Moderation** — Lock/Suspend accounts with warnings
+- **Auto-Expiration** — Images auto-delete after 90 days of inactivity
 - **Self-hostable** — Deploy on your own server, own your data
 
 ## User System
@@ -102,6 +107,7 @@ All tools are accessible via API, suitable for ShareX integration, custom script
 | `/api/convert.php` | POST | Convert format |
 | `/api/ocr.php` | POST | Extract text |
 | `/api/rembg.php` | POST | Remove background |
+| `/api/report.php` | POST | Report an image |
 
 ## Project Structure
 
@@ -127,6 +133,9 @@ Add to crontab for automatic maintenance:
 ```bash
 # Hourly: cleanup temp files, abuse watchdog
 0 * * * * php /path/to/pixelhop/cron/maintenance.php >> /var/log/pixelhop.log 2>&1
+
+# Daily at 2 AM: expire inactive images (90 days)
+0 2 * * * php /path/to/pixelhop/cron/image_expiration.php >> /var/log/pixelhop.log 2>&1
 ```
 
 ## Requirements

@@ -1,7 +1,7 @@
 <?php
 /**
- * PixelHop - S3 Image Proxy
- * Proxies image requests to S3 with caching headers
+ * PixelHop - Hybrid Storage Image Proxy
+ * Proxies image requests to R2 (thumb/medium) or Contabo S3 (original/large)
  */
 
 // Load config
@@ -14,20 +14,30 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $imagePath = preg_replace('#^/i/#', '', $requestUri);
 
 // Security: validate path format (only allow safe characters)
-if (!preg_match('#^[\d]{4}/[\d]{2}/[\d]{2}/[a-zA-Z0-9_]+\.(jpg|jpeg|png|gif|webp)$#', $imagePath)) {
+// Format: YYYY/MM/DD/imageId_size.ext where size can be original, large, medium, thumb
+if (!preg_match('#^[\d]{4}/[\d]{2}/[\d]{2}/([a-zA-Z0-9]+)_(original|large|medium|thumb)\.(jpg|jpeg|png|gif|webp)$#', $imagePath, $matches)) {
     http_response_code(404);
     header('Content-Type: text/plain');
     echo 'Image not found';
     exit;
 }
 
-// Build S3 URL using the public_url (includes tenant ID)
-$s3Url = $config['s3']['public_url'] . '/' . $imagePath;
+$sizeType = $matches[2]; // original, large, medium, or thumb
+
+// Determine which storage to use based on size type
+// Hybrid strategy: thumb/medium → R2, original/large → Contabo
+if (in_array($sizeType, ['thumb', 'medium']) && !empty($config['r2']['enabled'])) {
+    // Use Cloudflare R2 for thumbnails and medium
+    $storageUrl = $config['r2']['public_url'] . '/' . $imagePath;
+} else {
+    // Use Contabo S3 for original and large
+    $storageUrl = $config['s3']['public_url'] . '/' . $imagePath;
+}
 
 // Initialize cURL
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL => $s3Url,
+    CURLOPT_URL => $storageUrl,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_HEADER => true,
@@ -39,7 +49,6 @@ $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 $error = curl_error($ch);
-curl_close($ch);
 
 // Handle errors
 if ($error || $httpCode !== 200) {

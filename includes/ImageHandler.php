@@ -156,7 +156,6 @@ class ImageHandler
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
 
         if ($error) {
             throw new RuntimeException('Failed to fetch URL: ' . $error);
@@ -215,7 +214,6 @@ class ImageHandler
 
         $success = curl_exec($ch);
         $error = curl_error($ch);
-        curl_close($ch);
         fclose($fp);
 
 

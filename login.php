@@ -242,13 +242,7 @@ unset($_SESSION['auth_error']);
 
             try {
                 const formData = new FormData(form);
-
-
                 const data = Object.fromEntries(formData);
-
-
-                console.log('Login data:', data);
-                console.log('Turnstile response:', data['cf-turnstile-response']);
 
                 const response = await fetch('/auth/login.php', {
                     method: 'POST',
@@ -270,6 +264,15 @@ unset($_SESSION['auth_error']);
                         window.location.href = result.redirect || '/';
                     }, 500);
                 } else {
+                    // Check if email verification is required
+                    if (result.require_verification && result.redirect) {
+                        showNotification(result.message || 'Please verify your email', 'warning');
+                        setTimeout(() => {
+                            window.location.href = result.redirect;
+                        }, 1500);
+                        return;
+                    }
+                    
                     showNotification(result.message || 'Login failed', 'error');
                     submitBtn.disabled = false;
                     btnText.classList.remove('hidden');

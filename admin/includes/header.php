@@ -56,14 +56,14 @@ $subMenus = [
         </nav>
 
         <div class="header-actions">
+            <a href="/member/upload.php" class="nav-link site-link" title="Upload Image">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                <span>Upload</span>
+            </a>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
                 <i data-lucide="sun" class="theme-icon-light w-5 h-5"></i>
                 <i data-lucide="moon" class="theme-icon-dark w-5 h-5"></i>
             </button>
-            <a href="/" class="nav-link site-link">
-                <i data-lucide="home" class="w-4 h-4"></i>
-                <span>Site</span>
-            </a>
         </div>
     </div>
     
@@ -97,8 +97,12 @@ $subMenus = [
         <?= $menu['label'] ?>
     </a>
     <?php endforeach; ?>
-    <a href="/" class="mobile-nav-link">
+    <a href="/member/upload.php" class="mobile-nav-link">
+        <i data-lucide="upload" class="w-5 h-5"></i>
+        Upload Image
+    </a>
+    <a href="/dashboard.php" class="mobile-nav-link">
         <i data-lucide="home" class="w-5 h-5"></i>
-        Back to Site
+        My Account
     </a>
 </div>

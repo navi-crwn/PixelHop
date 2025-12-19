@@ -114,6 +114,14 @@ $tools = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Tools - PixelHop</title>
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('pixelhop-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -371,6 +379,155 @@ $tools = [
             gap: 12px;
             color: #ef4444;
         }
+
+        /* Light theme */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
+        }
+
+        [data-theme="light"] .dashboard-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .text-white,
+        [data-theme="light"] h1,
+        [data-theme="light"] .tool-name {
+            color: #1a202c !important;
+        }
+
+        [data-theme="light"] .text-white\/50,
+        [data-theme="light"] .text-white\/60,
+        [data-theme="light"] .tool-desc {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="light"] .header {
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .nav-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        [data-theme="light"] .nav-link:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #1a202c;
+        }
+
+        [data-theme="light"] .nav-link.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: #0891b2;
+        }
+
+        [data-theme="light"] .quota-card,
+        [data-theme="light"] .tool-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .tool-card:hover {
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .quota-bar {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .quota-text {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] .tool-quota {
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .premium-note {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(249, 115, 22, 0.15));
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #22d3ee;
+        }
+
+        [data-theme="light"] .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        [data-theme="light"] .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #0891b2;
+        }
+
+        #theme-icon-light { display: none; }
+        #theme-icon-dark { display: block; }
+
+        [data-theme="light"] #theme-icon-light { display: block; }
+        [data-theme="light"] #theme-icon-dark { display: none; }
+
+        .footer-bar {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        [data-theme="light"] .footer-bar {
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        [data-theme="light"] .footer-text {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-links a {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+        }
+
+        [data-theme="light"] .footer-links a {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .footer-links a:hover {
+            color: #22d3ee;
+        }
     </style>
 </head>
 <body>
@@ -464,6 +621,19 @@ $tools = [
                 </div>
             </div>
         </div>
+        
+        <!-- Info Notice -->
+        <div class="mb-6 p-4 rounded-lg" style="background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3);">
+            <div class="flex items-start gap-3">
+                <i data-lucide="info" class="w-5 h-5 mt-0.5 flex-shrink-0" style="color: #22d3ee;"></i>
+                <div class="text-sm" style="color: rgba(255,255,255,0.8);">
+                    <strong style="color: #22d3ee;">Temporary Storage:</strong> 
+                    Tool results are stored for <strong>6 hours</strong> then auto-deleted. 
+                    Download your processed images before they expire. 
+                    To save permanently, use the <a href="/member/upload.php" class="underline" style="color: #22d3ee;">Upload</a> feature.
+                </div>
+            </div>
+        </div>
 
         <!-- Tools Grid -->
         <div class="tools-grid">
@@ -506,6 +676,22 @@ $tools = [
             <button onclick="showComingSoon()" class="upgrade-btn">Upgrade</button>
         </div>
         <?php endif; ?>
+
+        <!-- Footer with Theme Toggle -->
+        <div class="footer-bar">
+            <div class="footer-text">
+                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle theme">
+                    <i data-lucide="sun" class="w-4 h-4" id="theme-icon-light"></i>
+                    <i data-lucide="moon" class="w-4 h-4" id="theme-icon-dark"></i>
+                </button>
+                Image Tools
+            </div>
+            <div class="footer-links">
+                <a href="/dashboard.php">Dashboard</a>
+                <a href="/help">Help</a>
+                <a href="/auth/logout.php">Logout</a>
+            </div>
+        </div>
     </div>
 
     <!-- Coming Soon Modal -->
@@ -520,6 +706,14 @@ $tools = [
 
     <script>
         lucide.createIcons();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('pixelhop-theme', next);
+        }
 
         function showComingSoon() {
             const modal = document.getElementById('comingSoonModal');

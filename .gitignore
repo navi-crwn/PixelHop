@@ -3,6 +3,7 @@ credentials.md
 config/database.php
 config/oauth.php
 config/s3.php
+config/mail.php
 .env
 
 # Backup files
@@ -30,6 +31,8 @@ python/__pycache__/
 
 # Data files
 data/images.json
+data/abuse_reports.json
+data/expiration_log.json
 data/ratelimit/
 
 # Logs
@@ -43,3 +46,4 @@ Thumbs.db
 # Node
 node_modules/
 admin/backup_old/
+vendor/

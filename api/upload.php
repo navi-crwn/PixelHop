@@ -14,6 +14,17 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Lightweight debug logger for upload issues
+function uploadDebug(string $message, array $context = []): void {
+    $logFile = __DIR__ . '/../temp/upload_debug.log';
+    $line = date('c') . ' ' . $message;
+    if (!empty($context)) {
+        $line .= ' ' . json_encode($context);
+    }
+    $line .= PHP_EOL;
+    @file_put_contents($logFile, $line, FILE_APPEND);
+}
+
 // Handle preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -31,6 +42,12 @@ require_once __DIR__ . '/../includes/R2StorageManager.php';
 $firewall = new SecurityFirewall();
 $firewallCheck = $firewall->checkUpload();
 if (!$firewallCheck['allowed']) {
+    uploadDebug('firewall_block', [
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        'reason' => $firewallCheck['reason'] ?? null,
+        'code' => $firewallCheck['code'] ?? null,
+        'path' => $_SERVER['REQUEST_URI'] ?? '',
+    ]);
     http_response_code($firewallCheck['code'] ?? 403);
     echo json_encode(['success' => false, 'error' => $firewallCheck['reason']]);
     exit;
@@ -54,12 +71,103 @@ $fileSize = $_FILES['image']['size'] ?? 0;
 
 $abuseCheck = $abuseGuard->checkUpload($clientIP, $sessionUserId, $fileSize);
 if (!$abuseCheck['allowed']) {
+    uploadDebug('abuse_block', [
+        'ip' => $clientIP,
+        'reason' => $abuseCheck['reason'] ?? null,
+        'code' => $abuseCheck['code'] ?? null,
+        'user_id' => $sessionUserId,
+    ]);
     $httpCode = ($abuseCheck['code'] ?? '') === 'rate_limit' ? 429 : 403;
     jsonResponse(false, $abuseCheck['reason'], $httpCode);
 }
 
-// Check if image was uploaded
-if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+// Handle URL upload (remote fetch)
+$remoteUrl = $_POST['url'] ?? '';
+$file = null;
+$tempFilePath = null;
+
+uploadDebug('upload_request', [
+    'has_remote_url' => !empty($remoteUrl),
+    'has_file' => isset($_FILES['image']),
+    'ip' => $clientIP,
+    'user_id' => $sessionUserId,
+]);
+
+if (!empty($remoteUrl)) {
+    uploadDebug('remote_url_upload', ['url' => $remoteUrl, 'url_length' => strlen($remoteUrl)]);
+    
+    // Validate URL format
+    if (!filter_var($remoteUrl, FILTER_VALIDATE_URL)) {
+        jsonResponse(false, 'Invalid URL format');
+    }
+    
+    // Only allow http/https
+    $scheme = parse_url($remoteUrl, PHP_URL_SCHEME);
+    if (!in_array($scheme, ['http', 'https'])) {
+        jsonResponse(false, 'Only HTTP/HTTPS URLs are allowed');
+    }
+    
+    // Fetch the remote image
+    $ch = curl_init($remoteUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_USERAGENT => 'PixelHop/1.0 Image Fetcher',
+        CURLOPT_HTTPHEADER => ['Accept: image/*'],
+    ]);
+    
+    $imageData = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    $curlError = curl_error($ch);
+    
+    if ($curlError) {
+        uploadDebug('remote_fetch_error', ['error' => $curlError, 'url' => $remoteUrl]);
+        jsonResponse(false, 'Failed to fetch image: ' . $curlError);
+    }
+    
+    if ($httpCode !== 200) {
+        uploadDebug('remote_http_error', ['http_code' => $httpCode, 'url' => $remoteUrl]);
+        jsonResponse(false, 'Failed to fetch image: HTTP ' . $httpCode);
+    }
+    
+    if (empty($imageData)) {
+        jsonResponse(false, 'Empty response from remote server');
+    }
+    
+    // Check file size
+    $dataSize = strlen($imageData);
+    if ($dataSize > $config['upload']['max_size']) {
+        jsonResponse(false, 'Remote image too large. Maximum size: 10 MB');
+    }
+    
+    // Create temp file
+    $tempFilePath = tempnam(sys_get_temp_dir(), 'pixelhop_remote_');
+    file_put_contents($tempFilePath, $imageData);
+    
+    // Extract filename from URL
+    $urlPath = parse_url($remoteUrl, PHP_URL_PATH);
+    $originalName = basename($urlPath) ?: 'image.jpg';
+    
+    // Create pseudo $_FILES array
+    $file = [
+        'name' => $originalName,
+        'type' => $contentType,
+        'tmp_name' => $tempFilePath,
+        'error' => UPLOAD_ERR_OK,
+        'size' => $dataSize,
+    ];
+    
+    uploadDebug('remote_fetch_success', ['size' => $dataSize, 'type' => $contentType]);
+    
+} elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    $file = $_FILES['image'];
+} else {
+    // Check if image was uploaded
     $errorMessages = [
         UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize',
         UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE',
@@ -72,8 +180,6 @@ if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
     $error = $_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE;
     jsonResponse(false, $errorMessages[$error] ?? 'Upload failed');
 }
-
-$file = $_FILES['image'];
 
 // Validate file type
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -120,10 +226,20 @@ $fileHash = hash_file('sha256', $file['tmp_name']);
 $duplicateImage = findDuplicateImage($fileHash, $file['size']);
 
 if ($duplicateImage) {
+    // Build proxy URLs for duplicate response
+    $dupProxyUrls = [];
+    $dupS3Keys = $duplicateImage['s3_keys'] ?? [];
+    foreach ($dupS3Keys as $sizeName => $key) {
+        $dupProxyUrls[$sizeName] = $config['site']['url'] . '/i/' . $key;
+    }
+    // Fallback to stored urls if s3_keys not available
+    if (empty($dupProxyUrls)) {
+        $dupProxyUrls = $duplicateImage['urls'] ?? [];
+    }
 
     jsonResponse(true, null, 200, [
         'id' => $duplicateImage['id'],
-        'urls' => $duplicateImage['urls'],
+        'urls' => $dupProxyUrls,
         'view_url' => $config['site']['url'] . '/' . $duplicateImage['id'],
         'width' => $duplicateImage['width'],
         'height' => $duplicateImage['height'],
@@ -284,17 +400,36 @@ try {
         }
     }
 
+    // Clean up remote temp file if any
+    if ($tempFilePath && file_exists($tempFilePath)) {
+        @unlink($tempFilePath);
+    }
+
     cleanupTempDir($tempDir);
+
+    // Build proxy URLs for response (use site domain instead of raw S3)
+    $proxyUrls = [];
+    foreach ($s3Keys as $sizeName => $key) {
+        $proxyUrls[$sizeName] = $config['site']['url'] . '/i/' . $key;
+    }
 
     jsonResponse(true, null, 200, [
         'id' => $imageId,
-        'urls' => $uploadedUrls,
+        'filename' => $file['name'],
+        'extension' => $extension,
+        'size' => $file['size'],
+        'urls' => $proxyUrls,
         'view_url' => $config['site']['url'] . '/' . $imageId,
         'width' => $originalWidth,
         'height' => $originalHeight,
     ]);
 
 } catch (Exception $e) {
+
+    // Clean up remote temp file if any
+    if (isset($tempFilePath) && $tempFilePath && file_exists($tempFilePath)) {
+        @unlink($tempFilePath);
+    }
 
     cleanupTempDir($tempDir);
     jsonResponse(false, $e->getMessage());
@@ -575,7 +710,6 @@ function _doS3Upload($endpoint, $bucket, $key, $accessKey, $secretKey, $region, 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
-    curl_close($ch);
 
     if ($error) {
         return [

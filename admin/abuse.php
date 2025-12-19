@@ -57,6 +57,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => true, 'report' => $report]);
             break;
 
+        case 'dismiss_report':
+            $reportId = $_POST['report_id'] ?? '';
+            $reportsFile = __DIR__ . '/../data/abuse_reports.json';
+            $reports = file_exists($reportsFile) ? json_decode(file_get_contents($reportsFile), true) ?: [] : [];
+            
+            foreach ($reports as &$r) {
+                if ($r['id'] === $reportId) {
+                    $r['status'] = 'dismissed';
+                    $r['reviewed_at'] = time();
+                    $r['reviewed_by'] = $currentUser['email'] ?? 'admin';
+                    break;
+                }
+            }
+            unset($r);
+            
+            file_put_contents($reportsFile, json_encode($reports, JSON_PRETTY_PRINT), LOCK_EX);
+            echo json_encode(['success' => true]);
+            break;
+
+        case 'delete_reported_image':
+            $reportId = $_POST['report_id'] ?? '';
+            $reportsFile = __DIR__ . '/../data/abuse_reports.json';
+            $reports = file_exists($reportsFile) ? json_decode(file_get_contents($reportsFile), true) ?: [] : [];
+            
+            $imageId = null;
+            foreach ($reports as &$r) {
+                if ($r['id'] === $reportId) {
+                    $imageId = $r['image_id'];
+                    $r['status'] = 'resolved';
+                    $r['action_taken'] = 'deleted';
+                    $r['reviewed_at'] = time();
+                    $r['reviewed_by'] = $currentUser['email'] ?? 'admin';
+                    break;
+                }
+            }
+            unset($r);
+            
+            if ($imageId) {
+                // Delete the image
+                require_once __DIR__ . '/../includes/R2StorageManager.php';
+                $s3Config = require __DIR__ . '/../config/s3.php';
+                $storageManager = new R2StorageManager($s3Config);
+                
+                $imagesFile = __DIR__ . '/../data/images.json';
+                $images = file_exists($imagesFile) ? json_decode(file_get_contents($imagesFile), true) ?: [] : [];
+                
+                if (isset($images[$imageId])) {
+                    $imgData = $images[$imageId];
+                    if (!empty($imgData['s3_keys'])) {
+                        $storageManager->deleteImage($imgData['s3_keys'], $imgData['size'] ?? 0);
+                    }
+                    unset($images[$imageId]);
+                    file_put_contents($imagesFile, json_encode($images, JSON_PRETTY_PRINT), LOCK_EX);
+                }
+                
+                file_put_contents($reportsFile, json_encode($reports, JSON_PRETTY_PRINT), LOCK_EX);
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['error' => 'Report not found']);
+            }
+            break;
+
         default:
             echo json_encode(['error' => 'Unknown action']);
     }
@@ -67,6 +129,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stats = $abuseGuard->getStats();
 $blockedIPs = $abuseGuard->getBlockedIPs(20);
 $abuseLogs = $abuseGuard->getAbuseLogs(20);
+
+// Load user reports
+$reportsFile = __DIR__ . '/../data/abuse_reports.json';
+$userReports = [];
+if (file_exists($reportsFile)) {
+    $userReports = json_decode(file_get_contents($reportsFile), true) ?: [];
+    // Sort by created_at descending
+    usort($userReports, fn($a, $b) => ($b['created_at'] ?? 0) - ($a['created_at'] ?? 0));
+}
+$pendingReports = count(array_filter($userReports, fn($r) => ($r['status'] ?? '') === 'pending'));
 
 $csrfToken = generateCsrfToken();
 $currentPage = 'security';
@@ -225,13 +297,82 @@ $currentPage = 'security';
                         </table>
                     </div>
                 </div>
+
+                <!-- User Reports Table -->
+                <div class="card mt-6">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i data-lucide="flag" class="w-5 h-5"></i>
+                            User Reports
+                            <?php if ($pendingReports > 0): ?>
+                            <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;"><?= $pendingReports ?> pending</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Reason</th>
+                                    <th>Details</th>
+                                    <th>Reporter IP</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-list">
+                                <?php foreach (array_slice($userReports, 0, 20) as $report): ?>
+                                <tr data-report-id="<?= htmlspecialchars($report['id']) ?>">
+                                    <td>
+                                        <a href="/<?= htmlspecialchars($report['image_id']) ?>" target="_blank" class="text-cyan">
+                                            <?= htmlspecialchars($report['image_id']) ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-<?= $report['reason'] === 'illegal' || $report['reason'] === 'nsfw' ? 'red' : 'yellow' ?>">
+                                            <?= ucfirst(htmlspecialchars($report['reason'])) ?>
+                                        </span>
+                                    </td>
+                                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?= htmlspecialchars($report['details'] ?? '') ?>">
+                                        <?= htmlspecialchars(substr($report['details'] ?? '-', 0, 50)) ?>
+                                    </td>
+                                    <td><code><?= htmlspecialchars(substr($report['ip'], 0, 15)) ?></code></td>
+                                    <td>
+                                        <?php 
+                                        $statusColors = ['pending' => 'yellow', 'reviewed' => 'cyan', 'resolved' => 'green', 'dismissed' => 'gray'];
+                                        $statusColor = $statusColors[$report['status']] ?? 'gray';
+                                        ?>
+                                        <span class="badge badge-<?= $statusColor ?>"><?= ucfirst($report['status']) ?></span>
+                                    </td>
+                                    <td><?= date('M j, H:i', $report['created_at']) ?></td>
+                                    <td>
+                                        <div class="flex gap-1">
+                                            <button class="btn btn-secondary btn-report-action" data-action="dismiss" style="padding: 4px 8px; font-size: 11px;">
+                                                Dismiss
+                                            </button>
+                                            <button class="btn btn-danger btn-report-action" data-action="delete" style="padding: 4px 8px; font-size: 11px;">
+                                                Delete Image
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                                <?php if (empty($userReports)): ?>
+                                <tr><td colspan="7" class="text-muted" style="text-align: center;">No user reports</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <footer class="admin-footer">
                 <span>© 2025 PixelHop • Admin Panel v2.0</span>
                 <div class="footer-links">
                     <a href="/dashboard.php">My Account</a>
-                    <a href="/tools">Tools</a>
+                    <a href="/member/tools.php">Tools</a>
                     <a href="/auth/logout.php" class="text-red">Logout</a>
                 </div>
             </footer>
@@ -245,6 +386,18 @@ $currentPage = 'security';
             border-radius: 4px;
             font-size: 12px;
         }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-yellow { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .badge-green { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .badge-cyan { background: rgba(34, 211, 238, 0.2); color: #22d3ee; }
+        .badge-gray { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
     </style>
 
     <script>
@@ -298,6 +451,36 @@ $currentPage = 'security';
                     const r = await api('unblock_ip', { ip });
                     if (r.success) {
                         row.remove();
+                    }
+                };
+            });
+
+            // Report action handlers
+            document.querySelectorAll('.btn-report-action').forEach(btn => {
+                btn.onclick = async function() {
+                    const row = this.closest('tr');
+                    const reportId = row.dataset.reportId;
+                    const action = this.dataset.action;
+                    
+                    if (action === 'delete' && !confirm('Are you sure you want to delete this image? This cannot be undone.')) {
+                        return;
+                    }
+                    
+                    const apiAction = action === 'delete' ? 'delete_reported_image' : 'dismiss_report';
+                    const r = await api(apiAction, { report_id: reportId });
+                    
+                    if (r.success) {
+                        row.style.opacity = '0.3';
+                        row.style.pointerEvents = 'none';
+                        const statusCell = row.querySelector('td:nth-child(5) .badge');
+                        if (statusCell) {
+                            statusCell.textContent = action === 'delete' ? 'Resolved' : 'Dismissed';
+                            statusCell.className = 'badge badge-' + (action === 'delete' ? 'green' : 'gray');
+                        }
+                        // Disable all buttons in this row
+                        row.querySelectorAll('button').forEach(b => b.disabled = true);
+                    } else {
+                        alert(r.error || 'Action failed');
                     }
                 };
             });

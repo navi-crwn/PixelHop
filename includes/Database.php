@@ -89,6 +89,14 @@ class Database
     }
 
     /**
+     * Get last insert ID (helper for legacy callers)
+     */
+    public static function lastInsertId(): int
+    {
+        return (int) self::getInstance()->lastInsertId();
+    }
+
+    /**
      * Execute update/delete and return affected rows
      */
     public static function execute(string $sql, array $params = []): int

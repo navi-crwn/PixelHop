@@ -1,7 +1,9 @@
 <?php
 /**
- * PixelHop - Result Page
- * Shows results for uploads and tool processing (batch support)
+ * PixelHop - Member Result Page
+ * Shows results for uploads and tool processing
+ * Upload results: accordion style like landing page
+ * Tool results: grid style with Download All ZIP
  */
 
 session_start();
@@ -14,11 +16,10 @@ if (!isAuthenticated()) {
 }
 
 $currentUser = getCurrentUser();
-$isAdmin = isAdmin();
-
 $type = $_GET['type'] ?? 'upload';
 $count = (int)($_GET['count'] ?? 0);
 $tool = $_GET['tool'] ?? '';
+$isToolResult = ($type === 'tool' || !empty($tool));
 
 $csrfToken = generateCsrfToken();
 ?>
@@ -27,126 +28,355 @@ $csrfToken = generateCsrfToken();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results - PixelHop</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title><?= $isToolResult ? ucfirst($tool) . ' Results' : 'Upload Complete' ?> - PixelHop</title>
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('pixelhop-theme');
+            if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/glass.css">
+    <?php if ($isToolResult): ?>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <?php endif; ?>
     <style>
-        * { box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            background: var(--color-bg-primary);
             min-height: 100vh;
+        }
+        .result-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .result-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .result-header p {
+            color: var(--color-text-secondary);
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .action-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+        }
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            color: white;
+        }
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 211, 238, 0.3);
+        }
+        .action-btn-secondary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-primary);
+        }
+        .action-btn-secondary:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--neon-cyan);
         }
 
-        .container {
+        /* Upload Result - Accordion Style */
+        .thumbnail-strip {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(24px);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+        .thumbnail-item {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .thumbnail-item:hover {
+            border-color: var(--neon-cyan);
+            transform: scale(1.05);
+        }
+        .thumbnail-item.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+        .thumbnail-item img {
             width: 100%;
-            max-width: 1000px;
-            background: rgba(20, 20, 35, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            height: 100%;
+            object-fit: cover;
         }
-
-        .header {
+        .thumbnail-item .thumb-index {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .image-details-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(24px);
+            overflow: hidden;
+        }
+        .image-item {
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .image-item:last-child {
+            border-bottom: none;
+        }
+        .image-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .image-header:hover {
+            background: var(--glass-bg-hover);
+        }
+        .image-header .preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .image-header .preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-header .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .image-header .info h3 {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .image-header .info p {
+            font-size: 0.875rem;
+            color: var(--color-text-tertiary);
+        }
+        .image-header .chevron {
+            color: var(--color-text-tertiary);
+            transition: transform 0.3s ease;
+        }
+        .image-item.expanded .chevron {
+            transform: rotate(180deg);
+        }
+        .image-details {
+            display: none;
+            padding: 0 1rem 1rem 1rem;
+            animation: slideDown 0.3s ease;
+        }
+        .image-item.expanded .image-details {
+            display: block;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .link-group {
+            background: var(--color-bg-tertiary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .link-group:last-child {
+            margin-bottom: 0;
+        }
+        .link-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .link-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .link-input {
+            flex: 1;
+            background: var(--color-bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.625rem 0.875rem;
+            color: var(--color-text-primary);
+            font-size: 0.875rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        .copy-btn {
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .copy-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+        }
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .summary-card {
+            margin-top: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(24px);
+            padding: 1.5rem;
+        }
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--color-bg-tertiary);
+            border-radius: 12px;
+        }
+        .summary-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-bottom: 0.25rem;
+        }
+        .summary-item .label {
+            font-size: 0.75rem;
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .copy-all-section {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-
-        .title-section {
+        .copy-all-section span {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+        .copy-all-buttons {
             display: flex;
-            align-items: center;
-            gap: 14px;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-
-        .title-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #22c55e, #10b981);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 13px;
+        .copy-all-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
-            text-decoration: none;
+            gap: 0.375rem;
+        }
+        .copy-all-btn:hover {
+            border-color: var(--neon-cyan);
+            background: var(--glass-bg-hover);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #22d3ee, #a855f7);
-            color: #fff;
-            border: none;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(34, 211, 238, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.12);
-            color: #fff;
-        }
-
+        /* Tool Results - Grid Style */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
         }
-
         .result-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
             overflow: hidden;
         }
-
         .result-image {
             aspect-ratio: 4/3;
             background: rgba(0, 0, 0, 0.2);
             position: relative;
         }
-
         .result-image img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
-
         .result-badge {
             position: absolute;
             top: 10px;
@@ -158,34 +388,29 @@ $csrfToken = generateCsrfToken();
             background: rgba(34, 197, 94, 0.9);
             color: #fff;
         }
-
         .result-info {
             padding: 16px;
         }
-
         .result-filename {
             font-size: 14px;
             font-weight: 500;
-            color: #fff;
+            color: var(--color-text-primary);
             margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .result-meta {
             display: flex;
             gap: 12px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--color-text-tertiary);
             margin-bottom: 12px;
         }
-
         .result-actions {
             display: flex;
             gap: 8px;
         }
-
         .result-btn {
             flex: 1;
             padding: 8px;
@@ -200,125 +425,99 @@ $csrfToken = generateCsrfToken();
             align-items: center;
             justify-content: center;
             gap: 4px;
+            border: none;
         }
-
         .result-btn-view {
             background: rgba(34, 211, 238, 0.15);
             color: #22d3ee;
-            border: none;
         }
-
         .result-btn-download {
             background: rgba(34, 197, 94, 0.15);
             color: #22c55e;
-            border: none;
         }
-
-        .result-btn-copy {
-            background: rgba(168, 85, 247, 0.15);
-            color: #a855f7;
-            border: none;
-        }
-
         .result-btn:hover {
             transform: translateY(-1px);
         }
-
+        .text-green { color: #22c55e; }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--color-text-tertiary);
         }
-
-        .stats-summary {
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
             display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .stat-box {
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            background: rgba(34, 197, 94, 0.9);
             color: #fff;
         }
-
-        .stat-label {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .text-green { color: #22c55e; }
-        .text-cyan { color: #22d3ee; }
-
-        @media (max-width: 600px) {
-            .action-btns { display: none; }
-            .stats-summary { flex-direction: column; }
-        }
+        .toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="result-container">
         <!-- Header -->
-        <div class="header">
-            <div class="title-section">
-                <div class="title-icon">
-                    <i data-lucide="check-circle" class="w-6 h-6 text-white"></i>
+        <div class="result-header">
+            <h1>
+                <?php if ($isToolResult): ?>
+                    <i data-lucide="check-circle" class="inline w-8 h-8 text-green-400 mr-2"></i>
+                    <?= ucfirst($tool) ?> Complete
+                <?php else: ?>
+                    <i data-lucide="check-circle" class="inline w-8 h-8 text-green-400 mr-2"></i>
+                    Upload Complete
+                <?php endif; ?>
+            </h1>
+            <p><span id="resultCount"><?= $count ?></span> <?= $count === 1 ? 'image' : 'images' ?> processed</p>
+        </div>
+        
+        <?php if ($isToolResult): ?>
+        <!-- Temp Storage Notice -->
+        <div class="mb-6 p-4 rounded-lg" style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3);">
+            <div class="flex items-start gap-3">
+                <i data-lucide="clock" class="w-5 h-5 mt-0.5 flex-shrink-0" style="color: #fbbf24;"></i>
+                <div class="text-sm" style="color: rgba(255,255,255,0.8);">
+                    <strong style="color: #fbbf24;">⏰ Expires in 6 hours:</strong> 
+                    These results are temporary and will be <strong>automatically deleted</strong>. 
+                    Download your images now to keep them.
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold text-white">
-                        <?php if ($type === 'upload'): ?>
-                            Upload Complete
-                        <?php else: ?>
-                            <?= ucfirst($tool) ?> Results
-                        <?php endif; ?>
-                    </h1>
-                    <p class="text-xs text-white/50">
-                        <span id="resultCount"><?= $count ?></span> <?= $count === 1 ? 'image' : 'images' ?> processed
-                    </p>
-                </div>
-            </div>
-            <div class="action-btns">
-                <a href="/" class="action-btn btn-secondary">
-                    <i data-lucide="home" class="w-4 h-4"></i>
-                    Home
-                </a>
-                <a href="/member/tools.php" class="action-btn btn-secondary">
-                    <i data-lucide="wrench" class="w-4 h-4"></i>
-                    Tools
-                </a>
-                <button class="action-btn btn-secondary" id="downloadAllBtn">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    Download All (ZIP)
-                </button>
-                <a href="/member/upload.php" class="action-btn btn-primary">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Upload More
-                </a>
             </div>
         </div>
+        <?php endif; ?>
 
-        <!-- Stats Summary -->
-        <div class="stats-summary" id="statsSummary">
-            <div class="stat-box">
-                <div class="stat-value text-green" id="totalFiles">0</div>
-                <div class="stat-label">Files Processed</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value text-cyan" id="totalSize">0 KB</div>
-                <div class="stat-label">Total Size</div>
-            </div>
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/dashboard.php" class="action-btn action-btn-secondary">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+            </a>
+            <a href="/gallery.php" class="action-btn action-btn-secondary">
+                <i data-lucide="images" class="w-4 h-4"></i> Gallery
+            </a>
+            <a href="/member/tools.php" class="action-btn action-btn-secondary">
+                <i data-lucide="wrench" class="w-4 h-4"></i> Tools
+            </a>
+            <?php if ($isToolResult): ?>
+            <button class="action-btn action-btn-secondary" id="downloadAllBtn">
+                <i data-lucide="download" class="w-4 h-4"></i> Download All (ZIP)
+            </button>
+            <?php endif; ?>
+            <a href="/member/upload.php" class="action-btn action-btn-primary">
+                <i data-lucide="plus" class="w-4 h-4"></i> Upload More
+            </a>
         </div>
 
-        <!-- Results Grid -->
-        <div class="results-grid" id="resultsGrid">
+        <!-- Results Container -->
+        <div id="resultsContainer">
             <div class="empty-state" id="emptyState">
                 <i data-lucide="loader" class="w-12 h-12 mx-auto mb-4 opacity-50 animate-spin"></i>
                 <p>Loading results...</p>
@@ -326,22 +525,27 @@ $csrfToken = generateCsrfToken();
         </div>
     </div>
 
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
     <script>
         lucide.createIcons();
 
-        const resultsGrid = document.getElementById('resultsGrid');
-        const emptyState = document.getElementById('emptyState');
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-
+        const isToolResult = <?= $isToolResult ? 'true' : 'false' ?>;
+        const container = document.getElementById('resultsContainer');
         let results = [];
 
-
+        // Load results from sessionStorage
         const storedResults = sessionStorage.getItem('uploadResults') || sessionStorage.getItem('toolResults');
 
         if (storedResults) {
             try {
                 results = JSON.parse(storedResults);
-                displayResults(results);
+                if (isToolResult) {
+                    displayToolResults(results);
+                } else {
+                    displayUploadResults(results);
+                }
             } catch (e) {
                 showEmpty('Failed to load results');
             }
@@ -349,78 +553,11 @@ $csrfToken = generateCsrfToken();
             showEmpty('No results found');
         }
 
-        function displayResults(items) {
-            if (!items || items.length === 0) {
-                showEmpty('No results found');
-                return;
-            }
-
-            resultsGrid.innerHTML = '';
-            document.getElementById('totalFiles').textContent = items.length;
-            document.getElementById('resultCount').textContent = items.length;
-
-            let totalSize = 0;
-
-            items.forEach((item, index) => {
-                if (!item.success) return;
-
-                totalSize += item.size || 0;
-
-                const card = document.createElement('div');
-                card.className = 'result-card';
-
-
-                const isToolResult = !!item.data && item.data.startsWith('data:');
-                const thumbUrl = item.urls?.thumb || item.urls?.medium || item.data || '';
-                const downloadUrl = item.urls?.original || item.data || '';
-
-
-                const viewUrl = item.view_url || (item.id ? '/' + item.id : (isToolResult ? item.data : downloadUrl));
-
-                card.innerHTML = `
-                    <div class="result-image">
-                        <img src="${thumbUrl}" alt="">
-                        <span class="result-badge">Success</span>
-                    </div>
-                    <div class="result-info">
-                        <div class="result-filename">${item.filename || item.id || 'image_' + (index + 1)}</div>
-                        <div class="result-meta">
-                            <span>${item.width || '?'}×${item.height || '?'}</span>
-                            <span>${formatSize(item.size || 0)}</span>
-                            ${item.savings_percent ? `<span class="text-green">-${item.savings_percent}%</span>` : ''}
-                        </div>
-                        <div class="result-actions">
-                            <a href="${viewUrl}" class="result-btn result-btn-view" target="_blank">
-                                <i data-lucide="eye" class="w-3 h-3"></i>
-                                View
-                            </a>
-                            <a href="${downloadUrl}" class="result-btn result-btn-download" download="${item.filename || 'image_' + (index + 1)}">
-                                <i data-lucide="download" class="w-3 h-3"></i>
-                                Download
-                            </a>
-                        </div>
-                    </div>
-                `;
-
-                resultsGrid.appendChild(card);
-            });
-
-            document.getElementById('totalSize').textContent = formatSize(totalSize);
-            lucide.createIcons();
-        }
-
-        function showEmpty(message) {
-            resultsGrid.innerHTML = `
-                <div class="empty-state" style="grid-column: 1/-1;">
-                    <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                    <p>${message}</p>
-                    <a href="/member/upload.php" class="action-btn btn-primary" style="display: inline-flex; margin-top: 16px;">
-                        <i data-lucide="upload" class="w-4 h-4"></i>
-                        Upload Images
-                    </a>
-                </div>
-            `;
-            lucide.createIcons();
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
         function formatSize(bytes) {
@@ -430,40 +567,380 @@ $csrfToken = generateCsrfToken();
             return bytes + ' B';
         }
 
-        function copyLink(url) {
-            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
-            navigator.clipboard.writeText(fullUrl).then(() => {
+        function showEmpty(message) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                    <p>${message}</p>
+                    <a href="/member/upload.php" class="action-btn action-btn-primary" style="display: inline-flex; margin-top: 16px;">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Images
+                    </a>
+                </div>
+            `;
+            lucide.createIcons();
+        }
 
-                alert('Link copied!');
+        // UPLOAD RESULTS - Accordion Style
+        function displayUploadResults(items) {
+            if (!items || items.length === 0) {
+                showEmpty('No results found');
+                return;
+            }
+
+            const successItems = items.filter(i => i.success);
+            if (successItems.length === 0) {
+                showEmpty('No successful uploads');
+                return;
+            }
+
+            document.getElementById('resultCount').textContent = successItems.length;
+
+            let totalSize = 0;
+            successItems.forEach(item => {
+                const data = item.data || item;
+                totalSize += data.size || 0;
+            });
+
+            let html = '';
+
+            // Thumbnail strip
+            html += '<div class="thumbnail-strip">';
+            successItems.forEach((item, index) => {
+                const data = item.data || item;
+                const thumbUrl = data.urls?.thumb || data.urls?.medium || data.urls?.original || '';
+                html += `
+                    <div class="thumbnail-item" data-index="${index}">
+                        <img src="${thumbUrl}" alt="" onerror="this.src='/assets/img/placeholder.png'">
+                        <span class="thumb-index">${index + 1}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            // Copy All section
+            html += `
+                <div class="copy-all-section">
+                    <span><i data-lucide="link" class="w-4 h-4 inline mr-1"></i> Copy all links at once</span>
+                    <div class="copy-all-buttons">
+                        <button class="copy-all-btn" onclick="copyAllLinks('direct')">
+                            <i data-lucide="link" class="w-4 h-4"></i> Direct Links
+                        </button>
+                        <button class="copy-all-btn" onclick="copyAllLinks('html')">
+                            <i data-lucide="code" class="w-4 h-4"></i> HTML
+                        </button>
+                        <button class="copy-all-btn" onclick="copyAllLinks('bbcode')">
+                            <i data-lucide="hash" class="w-4 h-4"></i> BBCode
+                        </button>
+                        <button class="copy-all-btn" onclick="copyAllLinks('markdown')">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Markdown
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Image details accordion
+            html += '<div class="image-details-container">';
+            successItems.forEach((item, index) => {
+                const data = item.data || item;
+                const thumbUrl = data.urls?.thumb || data.urls?.medium || '';
+                const originalUrl = data.urls?.original || '';
+                const viewUrl = data.view_url || '/' + data.id;
+                const filename = data.filename || data.id;
+                const siteUrl = window.location.origin;
+
+                const directLink = originalUrl.startsWith('http') ? originalUrl : siteUrl + originalUrl;
+
+                html += `
+                    <div class="image-item" data-index="${index}" 
+                         data-direct="${encodeURIComponent(directLink)}"
+                         data-view="${encodeURIComponent(siteUrl + viewUrl)}"
+                         data-filename="${encodeURIComponent(filename)}">
+                        <div class="image-header" onclick="toggleExpand(this)">
+                            <div class="preview">
+                                <img src="${thumbUrl}" alt="" onerror="this.src='/assets/img/placeholder.png'">
+                            </div>
+                            <div class="info">
+                                <h3>${escapeHtml(filename)}</h3>
+                                <p>${data.width || '?'}×${data.height || '?'} • ${formatSize(data.size || 0)}</p>
+                            </div>
+                            <i data-lucide="chevron-down" class="chevron w-5 h-5"></i>
+                        </div>
+                        <div class="image-details">
+                            <div class="link-group">
+                                <label>Direct Link</label>
+                                <div class="link-input-group">
+                                    <input type="text" class="link-input direct-link-input" readonly>
+                                    <button class="copy-btn" data-copy="direct">
+                                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="link-group">
+                                <label>HTML Embed</label>
+                                <div class="link-input-group">
+                                    <input type="text" class="link-input html-embed-input" readonly>
+                                    <button class="copy-btn" data-copy="html">
+                                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="link-group">
+                                <label>BBCode</label>
+                                <div class="link-input-group">
+                                    <input type="text" class="link-input bbcode-input" readonly>
+                                    <button class="copy-btn" data-copy="bbcode">
+                                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="link-group">
+                                <label>Markdown</label>
+                                <div class="link-input-group">
+                                    <input type="text" class="link-input markdown-input" readonly>
+                                    <button class="copy-btn" data-copy="markdown">
+                                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            // Summary
+            html += `
+                <div class="summary-card">
+                    <div class="summary-title">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        Upload Summary
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="value">${successItems.length}</div>
+                            <div class="label">Images</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="value">${formatSize(totalSize)}</div>
+                            <div class="label">Total Size</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            lucide.createIcons();
+
+            // Populate input values safely (after DOM is created)
+            container.querySelectorAll('.image-item').forEach(item => {
+                const directLink = decodeURIComponent(item.dataset.direct);
+                const viewUrl = decodeURIComponent(item.dataset.view);
+                const filename = decodeURIComponent(item.dataset.filename);
+                
+                const htmlEmbed = `<a href="${viewUrl}"><img src="${directLink}" alt="${filename}"></a>`;
+                const bbcode = `[url=${viewUrl}][img]${directLink}[/img][/url]`;
+                const markdown = `[![${filename}](${directLink})](${viewUrl})`;
+                
+                // Set values using .value (safely escapes HTML)
+                item.querySelector('.direct-link-input').value = directLink;
+                item.querySelector('.html-embed-input').value = htmlEmbed;
+                item.querySelector('.bbcode-input').value = bbcode;
+                item.querySelector('.markdown-input').value = markdown;
+                
+                // Add copy button handlers
+                item.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const type = btn.dataset.copy;
+                        let text = '';
+                        switch(type) {
+                            case 'direct': text = directLink; break;
+                            case 'html': text = htmlEmbed; break;
+                            case 'bbcode': text = bbcode; break;
+                            case 'markdown': text = markdown; break;
+                        }
+                        copyToClipboard(text, btn);
+                    });
+                });
+            });
+
+            // Auto expand first item
+            const firstItem = container.querySelector('.image-item');
+            if (firstItem) firstItem.classList.add('expanded');
+
+            // Thumbnail click handler
+            container.querySelectorAll('.thumbnail-item').forEach(thumb => {
+                thumb.addEventListener('click', () => {
+                    const index = thumb.dataset.index;
+                    const targetItem = container.querySelector(`.image-item[data-index="${index}"]`);
+                    
+                    // Collapse all
+                    container.querySelectorAll('.image-item').forEach(item => item.classList.remove('expanded'));
+                    container.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+                    
+                    // Expand target
+                    targetItem.classList.add('expanded');
+                    thumb.classList.add('active');
+                    targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             });
         }
 
+        function toggleExpand(header) {
+            const item = header.closest('.image-item');
+            item.classList.toggle('expanded');
+        }
 
-        downloadAllBtn.addEventListener('click', async () => {
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copied!';
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Copy';
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+
+        function copyAllLinks(type) {
+            const successItems = results.filter(i => i.success);
+            const siteUrl = window.location.origin;
+            let links = [];
+
+            successItems.forEach(item => {
+                const data = item.data || item;
+                const originalUrl = data.urls?.original || '';
+                const viewUrl = data.view_url || '/' + data.id;
+                const filename = data.filename || data.id;
+                const directLink = originalUrl.startsWith('http') ? originalUrl : siteUrl + originalUrl;
+
+                switch (type) {
+                    case 'direct':
+                        links.push(directLink);
+                        break;
+                    case 'html':
+                        links.push(`<a href="${siteUrl}${viewUrl}"><img src="${directLink}" alt="${filename}"></a>`);
+                        break;
+                    case 'bbcode':
+                        links.push(`[url=${siteUrl}${viewUrl}][img]${directLink}[/img][/url]`);
+                        break;
+                    case 'markdown':
+                        links.push(`[![${filename}](${directLink})](${siteUrl}${viewUrl})`);
+                        break;
+                }
+            });
+
+            navigator.clipboard.writeText(links.join('\n')).then(() => {
+                showToast(`Copied ${links.length} ${type} links!`);
+            });
+        }
+
+        // TOOL RESULTS - Grid Style with Download All
+        function displayToolResults(items) {
+            if (!items || items.length === 0) {
+                showEmpty('No results found');
+                return;
+            }
+
+            const successItems = items.filter(i => i.success);
+            document.getElementById('resultCount').textContent = successItems.length;
+
+            let totalSize = 0;
+            let html = '<div class="results-grid">';
+
+            successItems.forEach((item, index) => {
+                const data = item.data || item;
+                totalSize += data.size || 0;
+
+                const isDataUrl = typeof data === 'string' && data.startsWith('data:');
+                const thumbUrl = isDataUrl ? data : (data.urls?.thumb || data.urls?.medium || data.urls?.original || '');
+                const downloadUrl = isDataUrl ? data : (data.urls?.original || '');
+                const viewUrl = data.view_url || (data.id ? '/' + data.id : downloadUrl);
+                const filename = data.filename || data.id || 'image_' + (index + 1);
+
+                html += `
+                    <div class="result-card">
+                        <div class="result-image">
+                            <img src="${thumbUrl}" alt="" onerror="this.src='/assets/img/placeholder.png'">
+                            <span class="result-badge">Success</span>
+                        </div>
+                        <div class="result-info">
+                            <div class="result-filename">${filename}</div>
+                            <div class="result-meta">
+                                <span>${data.width || '?'}×${data.height || '?'}</span>
+                                <span>${formatSize(data.size || 0)}</span>
+                                ${data.savings_percent ? `<span class="text-green">-${data.savings_percent}%</span>` : ''}
+                            </div>
+                            <div class="result-actions">
+                                <a href="${viewUrl}" class="result-btn result-btn-view" target="_blank">
+                                    <i data-lucide="eye" class="w-3 h-3"></i> View
+                                </a>
+                                <a href="${downloadUrl}" class="result-btn result-btn-download" download="${filename}">
+                                    <i data-lucide="download" class="w-3 h-3"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            // Summary
+            html += `
+                <div class="summary-card">
+                    <div class="summary-title">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        Processing Summary
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="value">${successItems.length}</div>
+                            <div class="label">Processed</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="value">${formatSize(totalSize)}</div>
+                            <div class="label">Total Size</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // Download All ZIP for Tool Results
+        <?php if ($isToolResult): ?>
+        document.getElementById('downloadAllBtn').addEventListener('click', async () => {
             if (results.length === 0) return;
 
-            downloadAllBtn.disabled = true;
-            downloadAllBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Creating ZIP...';
+            const btn = document.getElementById('downloadAllBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Creating ZIP...';
 
             try {
                 const zip = new JSZip();
 
                 for (const item of results) {
                     if (!item.success) continue;
-
-                    const url = item.urls?.original || item.url || item.data;
+                    const data = item.data || item;
+                    const url = data.urls?.original || (typeof data === 'string' ? data : '');
                     if (!url) continue;
 
                     try {
                         if (url.startsWith('data:')) {
-
                             const base64 = url.split(',')[1];
-                            zip.file(item.filename || item.id + '.png', base64, { base64: true });
+                            zip.file(data.filename || data.id + '.png', base64, { base64: true });
                         } else {
-
                             const response = await fetch(url);
                             const blob = await response.blob();
-                            zip.file(item.filename || item.id + '.' + (item.extension || 'jpg'), blob);
+                            zip.file(data.filename || data.id + '.' + (data.extension || 'jpg'), blob);
                         }
                     } catch (e) {
                         console.error('Failed to add file:', e);
@@ -473,17 +950,17 @@ $csrfToken = generateCsrfToken();
                 const content = await zip.generateAsync({ type: 'blob' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(content);
-                a.download = 'pixelhop_' + Date.now() + '.zip';
+                a.download = 'pixelhop_<?= $tool ?>_' + Date.now() + '.zip';
                 a.click();
-
             } catch (e) {
                 alert('Failed to create ZIP: ' + e.message);
             }
 
-            downloadAllBtn.disabled = false;
-            downloadAllBtn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Download All (ZIP)';
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Download All (ZIP)';
             lucide.createIcons();
         });
+        <?php endif; ?>
     </script>
 </body>
 </html>

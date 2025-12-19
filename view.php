@@ -40,8 +40,101 @@ if (empty($imageId) || !isset($images[$imageId])) {
 }
 
 $image = $images[$imageId];
+
+// Check if image owner's account is suspended
+$imageOwnerSuspended = false;
+if (!empty($image['user_id'])) {
+    require_once __DIR__ . '/includes/Database.php';
+    $owner = Database::fetchOne(
+        'SELECT account_status, status_reason FROM users WHERE id = ?',
+        [$image['user_id']]
+    );
+    if ($owner && $owner['account_status'] === 'suspended') {
+        $imageOwnerSuspended = true;
+    }
+}
+
+// Show suspended page if owner is suspended
+if ($imageOwnerSuspended) {
+    http_response_code(451);
+    ?>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Unavailable - PixelHop</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/glass.css">
+</head>
+<body style="background: var(--color-bg-primary); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div style="text-align: center; padding: 40px; max-width: 500px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>
+            </svg>
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: #ef4444; margin-bottom: 16px;">Image Unavailable</h1>
+        <p style="color: var(--color-text-secondary); font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+            This image is not accessible because the account owner has been suspended for violating our Terms of Service.
+        </p>
+        <p style="color: var(--color-text-tertiary); font-size: 14px; margin-bottom: 32px;">
+            The image and account will be permanently deleted in 30 days unless an appeal is submitted.
+        </p>
+        <a href="/" style="display: inline-block; padding: 12px 24px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--color-text-primary); text-decoration: none;">
+            ← Return to Home
+        </a>
+    </div>
+</body>
+</html>
+    <?php
+    exit;
+}
+
+// Track view count and last_viewed_at for all images
+$now = time();
+$lastViewed = $image['last_viewed_at'] ?? 0;
+
+// Only update once per hour per image to reduce disk writes
+if ($now - $lastViewed > 3600) {
+    // Increment view count
+    $images[$imageId]['view_count'] = ($image['view_count'] ?? 0) + 1;
+    $images[$imageId]['last_viewed_at'] = $now;
+    
+    // For guest uploads: clear any pending deletion marker since image was viewed
+    if (empty($image['user_id']) || $image['user_id'] === null) {
+        if (isset($images[$imageId]['marked_for_deletion'])) {
+            unset($images[$imageId]['marked_for_deletion']);
+        }
+    }
+    
+    file_put_contents($dataFile, json_encode($images, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+    // Reload image data after save
+    $image = $images[$imageId];
+}
+
 $siteUrl = $config['site']['url'];
 $siteName = $config['site']['name'];
+
+// Build proxy URLs using site domain instead of raw S3 URLs
+// This uses /i/{s3_key} for proxied access
+function getProxyUrl($s3Key, $siteUrl) {
+    // Extract path from S3 key (format: YYYY/MM/DD/filename.ext)
+    return $siteUrl . '/i/' . $s3Key;
+}
+
+// Get the S3 keys and build proxy URLs
+$proxyUrls = [];
+$s3Keys = $image['s3_keys'] ?? [];
+foreach ($s3Keys as $sizeName => $key) {
+    $proxyUrls[$sizeName] = getProxyUrl($key, $siteUrl);
+}
+
+// Fallback to stored URLs if s3_keys not available (old images)
+if (empty($proxyUrls)) {
+    $proxyUrls = $image['urls'] ?? [];
+}
 
 // Format file size
 function formatBytes($bytes, $precision = 2) {
@@ -60,6 +153,8 @@ function formatDate($timestamp) {
 $fileSize = formatBytes($image['size']);
 $uploadDate = formatDate($image['created_at']);
 $dimensions = "{$image['width']} × {$image['height']}";
+$viewCount = $image['view_count'] ?? 0;
+$lastViewed = isset($image['last_viewed_at']) ? formatDate($image['last_viewed_at']) : 'Never';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -71,14 +166,14 @@ $dimensions = "{$image['width']} × {$image['height']}";
     <!-- Open Graph -->
     <meta property="og:title" content="Image on <?= htmlspecialchars($siteName) ?>">
     <meta property="og:description" content="<?= $dimensions ?> • <?= $fileSize ?>">
-    <meta property="og:image" content="<?= htmlspecialchars($image['urls']['large'] ?? $image['urls']['original']) ?>">
+    <meta property="og:image" content="<?= htmlspecialchars($proxyUrls['large'] ?? $proxyUrls['original'] ?? '') ?>">
     <meta property="og:url" content="<?= $siteUrl ?>/<?= $imageId ?>">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Image on <?= htmlspecialchars($siteName) ?>">
-    <meta name="twitter:image" content="<?= htmlspecialchars($image['urls']['large'] ?? $image['urls']['original']) ?>">
+    <meta name="twitter:image" content="<?= htmlspecialchars($proxyUrls['large'] ?? $proxyUrls['original'] ?? '') ?>">
 
     <title>Image - <?= htmlspecialchars($siteName) ?></title>
 
@@ -321,7 +416,7 @@ $dimensions = "{$image['width']} × {$image['height']}";
             <div class="image-frame mb-6">
                 <div class="image-container">
                     <img
-                        src="<?= htmlspecialchars($image['urls']['large'] ?? $image['urls']['original']) ?>"
+                        src="<?= htmlspecialchars($proxyUrls['large'] ?? $proxyUrls['original'] ?? '') ?>"
                         alt="Uploaded image"
                         id="main-image"
                         loading="eager"
@@ -340,7 +435,7 @@ $dimensions = "{$image['width']} × {$image['height']}";
                         <div>
                             <div class="link-label">Direct Link</div>
                             <div class="link-row">
-                                <input type="text" class="link-input" value="<?= htmlspecialchars($image['urls']['original']) ?>" readonly id="link-direct">
+                                <input type="text" class="link-input" value="<?= htmlspecialchars($proxyUrls['original'] ?? '') ?>" readonly id="link-direct">
                                 <button class="copy-btn" onclick="copyLink('link-direct', this)" title="Copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                 </button>
@@ -360,7 +455,7 @@ $dimensions = "{$image['width']} × {$image['height']}";
                         <div>
                             <div class="link-label">HTML Embed</div>
                             <div class="link-row">
-                                <input type="text" class="link-input" value='<img src="<?= htmlspecialchars($image['urls']['original']) ?>" alt="Image">' readonly id="link-html">
+                                <input type="text" class="link-input" readonly id="link-html">
                                 <button class="copy-btn" onclick="copyLink('link-html', this)" title="Copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                 </button>
@@ -370,7 +465,7 @@ $dimensions = "{$image['width']} × {$image['height']}";
                         <div>
                             <div class="link-label">BBCode</div>
                             <div class="link-row">
-                                <input type="text" class="link-input" value="[img]<?= htmlspecialchars($image['urls']['original']) ?>[/img]" readonly id="link-bbcode">
+                                <input type="text" class="link-input" readonly id="link-bbcode">
                                 <button class="copy-btn" onclick="copyLink('link-bbcode', this)" title="Copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                 </button>
@@ -380,13 +475,19 @@ $dimensions = "{$image['width']} × {$image['height']}";
                         <div>
                             <div class="link-label">Markdown</div>
                             <div class="link-row">
-                                <input type="text" class="link-input" value="![Image](<?= htmlspecialchars($image['urls']['original']) ?>)" readonly id="link-md">
+                                <input type="text" class="link-input" readonly id="link-md">
                                 <button class="copy-btn" onclick="copyLink('link-md', this)" title="Copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
+                    <script>
+                        // Set embed values safely via JavaScript
+                        document.getElementById('link-html').value = '<img src="<?= htmlspecialchars($proxyUrls['original'] ?? '', ENT_QUOTES) ?>" alt="Image">';
+                        document.getElementById('link-bbcode').value = '[img]<?= htmlspecialchars($proxyUrls['original'] ?? '', ENT_QUOTES) ?>[/img]';
+                        document.getElementById('link-md').value = '![Image](<?= htmlspecialchars($proxyUrls['original'] ?? '', ENT_QUOTES) ?>)';
+                    </script>
                 </div>
 
                 <!-- Info Panel -->
@@ -409,6 +510,14 @@ $dimensions = "{$image['width']} × {$image['height']}";
                         <div class="meta-item">
                             <i data-lucide="calendar"></i>
                             <span><?= $uploadDate ?></span>
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="eye"></i>
+                            <span><?= number_format($viewCount) ?> views</span>
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="clock"></i>
+                            <span>Last viewed: <?= $lastViewed ?></span>
                         </div>
                         <?php if (!empty($image['delete_at'])): ?>
                         <div class="meta-item text-yellow-400">
@@ -458,6 +567,14 @@ $dimensions = "{$image['width']} × {$image['height']}";
                                 <i data-lucide="link" class="w-4 h-4"></i>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Report Button -->
+                    <div class="border-t border-white/10 pt-4 mt-4">
+                        <button onclick="openReportModal()" class="w-full py-2 px-4 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all flex items-center justify-center gap-2 text-sm">
+                            <i data-lucide="flag" class="w-4 h-4"></i>
+                            Report Image
+                        </button>
                     </div>
                 </div>
 
@@ -537,6 +654,140 @@ $dimensions = "{$image['width']} × {$image['height']}";
                 window.open('<?= htmlspecialchars($image['urls']['original']) ?>', '_blank');
             });
         }
+
+        // Report Modal Functions
+        function openReportModal() {
+            document.getElementById('reportModal').classList.add('show');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('show');
+        }
+
+        async function submitReport() {
+            const reason = document.getElementById('reportReason').value;
+            const details = document.getElementById('reportDetails').value.trim();
+            const submitBtn = document.getElementById('submitReportBtn');
+
+            if (!reason) {
+                alert('Please select a reason for reporting.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Submitting...';
+            lucide.createIcons();
+
+            try {
+                const response = await fetch('/api/report.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_id: '<?= $imageId ?>',
+                        reason: reason,
+                        details: details
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('reportModal').innerHTML = `
+                        <div class="report-modal-content">
+                            <div class="text-center py-8">
+                                <i data-lucide="check-circle" class="w-16 h-16 mx-auto text-green-400 mb-4"></i>
+                                <h3 class="text-xl font-semibold text-white mb-2">Report Submitted</h3>
+                                <p class="text-gray-400 mb-4">Thank you for helping keep PixelHop safe. Our team will review this report.</p>
+                                <button onclick="closeReportModal()" class="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                } else {
+                    alert(result.error || 'Failed to submit report. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Submit Report';
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Submit Report';
+                lucide.createIcons();
+            }
+        }
     </script>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="report-modal">
+        <div class="report-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Report Image</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">Please let us know why you're reporting this image. Our team will review it within 24 hours.</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm text-gray-300 mb-2">Reason *</label>
+                <select id="reportReason" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-cyan-400 focus:outline-none">
+                    <option value="">Select a reason...</option>
+                    <option value="illegal">Illegal Content</option>
+                    <option value="nsfw">Adult/NSFW Content</option>
+                    <option value="violence">Violence/Gore</option>
+                    <option value="harassment">Harassment/Bullying</option>
+                    <option value="copyright">Copyright Infringement</option>
+                    <option value="spam">Spam/Misleading</option>
+                    <option value="malware">Malware/Phishing</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm text-gray-300 mb-2">Additional Details (optional)</label>
+                <textarea id="reportDetails" rows="3" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-cyan-400 focus:outline-none resize-none" placeholder="Provide more context about this report..."></textarea>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeReportModal()" class="flex-1 py-2 px-4 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 transition-all">Cancel</button>
+                <button id="submitReportBtn" onclick="submitReport()" class="flex-1 py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i> Submit Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .report-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .report-modal.show {
+            display: flex;
+        }
+        .report-modal-content {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </body>
 </html>

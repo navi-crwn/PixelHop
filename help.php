@@ -133,7 +133,9 @@ $siteName = $config['site']['name'];
                         <i data-lucide="chevron-down" class="w-5 h-5 faq-icon"></i>
                     </div>
                     <div class="faq-answer">
-                        Images are stored indefinitely as long as they don't violate our Terms of Service. We provide permanent hosting for all uploaded images. You can request deletion by contacting us with your image URL.
+                        <strong>Uploaded Images:</strong> Images uploaded through the main upload feature are stored permanently on our cloud storage as long as they don't violate our Terms of Service.<br><br>
+                        <strong>Inactive Images:</strong> Public (guest) uploads that haven't been viewed for 90 days may be automatically removed to save storage space. Registered users' images are not affected by this policy.<br><br>
+                        <strong>Tool Results (Temporary):</strong> Files processed through our image tools (compress, resize, convert, crop) are stored in <em>temporary storage only</em> and are <strong>automatically deleted after 6 hours</strong>. These are NOT uploaded to permanent storage. If you need to keep a processed image, download it immediately after processing or use the "Upload Result" option.
                     </div>
                 </div>
 
@@ -143,9 +145,13 @@ $siteName = $config['site']['name'];
                         <i data-lucide="chevron-down" class="w-5 h-5 faq-icon"></i>
                     </div>
                     <div class="faq-answer">
+                        <strong>Guest (No Account):</strong> 100MB/day bandwidth, 100 uploads/hour, 2,000 uploads/day<br>
                         <strong>Free Users:</strong> 500MB total storage, 5 OCR/day, 3 RemBG/day<br>
                         <strong>Premium Users:</strong> 5GB storage, 50 OCR/day, 30 RemBG/day<br><br>
-                        Rate limiting is also applied (50 uploads/hour, 200/day per IP) to prevent abuse. Create an account to unlock higher limits!
+                        <strong>Tool Limits (Compress, Resize, Convert, Crop):</strong><br>
+                        • Guests: 20/hour, 100/day per IP<br>
+                        • Registered Users: 1,000/day<br><br>
+                        Create an account to unlock higher limits!
                     </div>
                 </div>
 

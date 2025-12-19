@@ -41,6 +41,23 @@ if (empty($images) && $errorCount === 0) {
     exit;
 }
 
+// Helper function to build proxy URL
+function resultGetProxyUrl($s3Key, $siteUrl) {
+    return $siteUrl . '/i/' . $s3Key;
+}
+
+// Build proxy URLs for all images
+foreach ($images as $id => &$img) {
+    $s3Keys = $img['s3_keys'] ?? [];
+    $proxyUrls = [];
+    foreach ($s3Keys as $sizeName => $key) {
+        $proxyUrls[$sizeName] = resultGetProxyUrl($key, $config['site']['url']);
+    }
+    // Store proxy URLs, fallback to original urls if s3_keys not available
+    $img['proxy_urls'] = !empty($proxyUrls) ? $proxyUrls : ($img['urls'] ?? []);
+}
+unset($img); // Break reference
+
 // Calculate totals
 $totalSize = 0;
 $totalImages = count($images);
@@ -646,6 +663,18 @@ function resultFormatRelative($timestamp) {
                 <?php endif; ?>
             </div>
 
+            <!-- Guest Expiration Notice -->
+            <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1)); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+                <i data-lucide="clock" style="width: 1.25rem; height: 1.25rem; color: #fbbf24; flex-shrink: 0; margin-top: 0.125rem;"></i>
+                <div>
+                    <p style="color: var(--color-text-primary); font-weight: 500; margin-bottom: 0.25rem;">Guest Upload Notice</p>
+                    <p style="color: var(--color-text-secondary); font-size: 0.875rem; margin: 0;">
+                        Images uploaded as guest may be automatically removed after <strong>90 days of inactivity</strong>. 
+                        <a href="/register" style="color: #22d3ee; text-decoration: underline;">Create a free account</a> to keep your images permanently!
+                    </p>
+                </div>
+            </div>
+
             <?php if ($totalImages > 0): ?>
             <!-- Thumbnail Strip -->
             <div class="thumbnail-strip" id="thumbnail-strip">
@@ -653,7 +682,7 @@ function resultFormatRelative($timestamp) {
                 <div class="thumbnail-item <?php echo $i === 1 ? 'active' : ''; ?>"
                      data-id="<?php echo $id; ?>"
                      onclick="scrollToImage('<?php echo $id; ?>')">
-                    <img src="<?php echo htmlspecialchars($img['urls']['thumb']); ?>" alt="">
+                    <img src="<?php echo htmlspecialchars($img['proxy_urls']['thumb'] ?? ''); ?>" alt="">
                     <span class="thumb-index"><?php echo $i; ?></span>
                 </div>
                 <?php endforeach; ?>
@@ -686,9 +715,9 @@ function resultFormatRelative($timestamp) {
             <div class="image-details-container">
                 <?php foreach ($images as $id => $img):
                     $viewUrl = $config['site']['url'] . '/' . $id;
-                    $directUrl = $img['urls']['original'];
-                    $thumbUrl = $img['urls']['thumb'];
-                    $mediumUrl = $img['urls']['medium'];
+                    $directUrl = $img['proxy_urls']['original'] ?? '';
+                    $thumbUrl = $img['proxy_urls']['thumb'] ?? '';
+                    $mediumUrl = $img['proxy_urls']['medium'] ?? '';
                 ?>
                 <div class="image-item" id="image-<?php echo $id; ?>" data-id="<?php echo $id; ?>">
                     <div class="image-header" onclick="toggleDetails('<?php echo $id; ?>')">
@@ -742,8 +771,8 @@ function resultFormatRelative($timestamp) {
                         <div class="link-group">
                             <label>BBCode</label>
                             <div class="link-input-group">
-                                <input type="text" class="link-input" value="[img]<?php echo htmlspecialchars($directUrl); ?>[/img]" readonly>
-                                <button class="copy-btn" onclick="copyToClipboard('[img]<?php echo htmlspecialchars($directUrl); ?>[/img]', this)">
+                                <input type="text" class="link-input bbcode-input" readonly>
+                                <button class="copy-btn bbcode-copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                     Copy
                                 </button>
@@ -754,8 +783,8 @@ function resultFormatRelative($timestamp) {
                         <div class="link-group">
                             <label>Markdown</label>
                             <div class="link-input-group">
-                                <input type="text" class="link-input" value="![image](<?php echo htmlspecialchars($directUrl); ?>)" readonly>
-                                <button class="copy-btn" onclick="copyToClipboard('![image](<?php echo htmlspecialchars($directUrl); ?>)', this)">
+                                <input type="text" class="link-input markdown-input" readonly>
+                                <button class="copy-btn markdown-copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                     Copy
                                 </button>
@@ -766,13 +795,30 @@ function resultFormatRelative($timestamp) {
                         <div class="link-group">
                             <label>HTML</label>
                             <div class="link-input-group">
-                                <input type="text" class="link-input" value='<img src="<?php echo htmlspecialchars($directUrl); ?>" alt="">' readonly>
-                                <button class="copy-btn" onclick="copyToClipboard('<img src=&quot;<?php echo htmlspecialchars($directUrl); ?>&quot; alt=&quot;&quot;>', this)">
+                                <input type="text" class="link-input html-input" readonly>
+                                <button class="copy-btn html-copy">
                                     <i data-lucide="copy" class="w-4 h-4"></i>
                                     Copy
                                 </button>
                             </div>
                         </div>
+                        <script>
+                            (function() {
+                                const container = document.getElementById('image-<?php echo $id; ?>');
+                                const directUrl = '<?php echo htmlspecialchars($directUrl, ENT_QUOTES); ?>';
+                                const bbcode = '[img]' + directUrl + '[/img]';
+                                const markdown = '![image](' + directUrl + ')';
+                                const html = '<img src="' + directUrl + '" alt="">';
+                                
+                                container.querySelector('.bbcode-input').value = bbcode;
+                                container.querySelector('.markdown-input').value = markdown;
+                                container.querySelector('.html-input').value = html;
+                                
+                                container.querySelector('.bbcode-copy').onclick = function() { copyToClipboard(bbcode, this); };
+                                container.querySelector('.markdown-copy').onclick = function() { copyToClipboard(markdown, this); };
+                                container.querySelector('.html-copy').onclick = function() { copyToClipboard(html, this); };
+                            })();
+                        </script>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -858,8 +904,8 @@ function resultFormatRelative($timestamp) {
             return [
                 'id' => $id,
                 'view' => $config['site']['url'] . '/' . $id,
-                'direct' => $img['urls']['original'],
-                'thumb' => $img['urls']['thumb']
+                'direct' => $img['proxy_urls']['original'] ?? '',
+                'thumb' => $img['proxy_urls']['thumb'] ?? ''
             ];
         }, array_keys($images), array_values($images))); ?>;
 

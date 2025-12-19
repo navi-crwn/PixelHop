@@ -211,7 +211,7 @@ $currentPage = 'settings';
                 <span>© 2025 PixelHop • Admin Panel v2.0</span>
                 <div class="footer-links">
                     <a href="/dashboard.php">My Account</a>
-                    <a href="/tools">Tools</a>
+                    <a href="/member/tools.php">Tools</a>
                     <a href="/auth/logout.php" class="text-red">Logout</a>
                 </div>
             </footer>

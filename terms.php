@@ -97,16 +97,22 @@ $siteName = $config['site']['name'];
                 <h2>5. Content Removal</h2>
                 <p>We reserve the right to remove any content that violates these terms without notice. Repeated violations may result in permanent bans.</p>
 
-                <h2>6. No Warranty</h2>
+                <h2>6. Data Retention & Temporary Files</h2>
+                <p><strong>Permanent Storage:</strong> Images uploaded through the main upload feature are stored on our cloud infrastructure indefinitely, subject to our content policies.</p>
+                <p><strong>Inactive Image Policy:</strong> Public (guest) uploads that have not been viewed for 90 consecutive days may be automatically removed to optimize storage. Registered users' images are exempt from this policy.</p>
+                <p><strong>Temporary Processing Files:</strong> Files processed through our image tools (compress, resize, convert, crop, OCR, RemBG) are stored in <strong>temporary storage only</strong> and are <strong>automatically deleted after 6 hours</strong>. These processed files are NOT uploaded to permanent storage. Users must download processed files immediately or use the "Upload Result" feature to save them permanently.</p>
+                <p><strong>No Backup Guarantee:</strong> While we strive to maintain reliable storage, we do not guarantee data preservation. Users are encouraged to keep personal backups of important images.</p>
+
+                <h2>7. No Warranty</h2>
                 <p>The Service is provided "as is" without warranties of any kind. We do not guarantee uninterrupted access, data preservation, or fitness for any particular purpose.</p>
 
-                <h2>7. Limitation of Liability</h2>
+                <h2>8. Limitation of Liability</h2>
                 <p>PixelHop shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service.</p>
 
-                <h2>8. Changes to Terms</h2>
+                <h2>9. Changes to Terms</h2>
                 <p>We may update these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
 
-                <h2>9. Contact</h2>
+                <h2>10. Contact</h2>
                 <p>For questions about these terms, please visit our <a href="/contact">Contact page</a>.</p>
             </div>
         </div>

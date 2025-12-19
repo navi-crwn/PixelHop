@@ -92,6 +92,19 @@ $csrfToken = generateCsrfToken();
 
         .download-bar { display: none; gap: 12px; margin-top: 16px; justify-content: center; }
         .download-bar.visible { display: flex; }
+
+        /* Light theme */
+        [data-theme="light"] body { background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%); }
+        [data-theme="light"] .container { background: rgba(255, 255, 255, 0.9); border-color: rgba(0, 0, 0, 0.1); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .text-white, [data-theme="light"] h1 { color: #1a202c !important; }
+        [data-theme="light"] .header { border-color: rgba(0, 0, 0, 0.08); }
+        [data-theme="light"] .nav-link { color: rgba(0, 0, 0, 0.6); }
+        [data-theme="light"] .nav-link:hover { background: rgba(0, 0, 0, 0.05); color: #1a202c; }
+        [data-theme="light"] .upload-area { border-color: rgba(0, 0, 0, 0.15); background: rgba(0, 0, 0, 0.02); }
+        [data-theme="light"] .upload-area:hover { border-color: #0891b2; background: rgba(8, 145, 178, 0.05); }
+        [data-theme="light"] .text-white\/50 { color: rgba(0, 0, 0, 0.5) !important; }
+        [data-theme="light"] .preview-area { background: rgba(0, 0, 0, 0.03); border-color: rgba(0, 0, 0, 0.08); }
+        [data-theme="light"] .btn-secondary { background: rgba(0, 0, 0, 0.05); color: rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body>

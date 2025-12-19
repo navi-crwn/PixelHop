@@ -89,13 +89,35 @@ if ($password !== $confirmPassword) {
 }
 
 try {
+    // Include Mailer for email verification
+    require_once __DIR__ . '/../includes/Mailer.php';
 
     $existingUser = Database::fetchOne(
-        'SELECT id FROM users WHERE email = ?',
+        'SELECT id, email_verified FROM users WHERE email = ?',
         [$email]
     );
 
     if ($existingUser) {
+        // If user exists but not verified, allow re-sending verification
+        if (!$existingUser['email_verified']) {
+            // Generate new verification token
+            $verificationToken = bin2hex(random_bytes(32));
+            $verificationExpires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+            
+            Database::execute(
+                'UPDATE users SET email_verification_token = ?, email_verification_expires = ? WHERE id = ?',
+                [$verificationToken, $verificationExpires, $existingUser['id']]
+            );
+            
+            // Send verification email
+            $mailer = new Mailer();
+            $mailer->sendVerificationEmail($email, $verificationToken);
+            
+            jsonResponse(true, 'Verification email resent. Please check your inbox.', 200, [
+                'require_verification' => true,
+                'redirect' => '/auth/verify-pending.php'
+            ]);
+        }
         jsonResponse(false, 'An account with this email already exists', 409);
     }
 
@@ -110,37 +132,32 @@ try {
         throw new Exception('Password hashing failed');
     }
 
+    // Generate verification token
+    $verificationToken = bin2hex(random_bytes(32));
+    $verificationExpires = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
     $userId = Database::insert(
-        'INSERT INTO users (email, password_hash, role, created_at) VALUES (?, ?, ?, NOW())',
-        [$email, $passwordHash, 'user']
+        'INSERT INTO users (email, password_hash, role, email_verified, email_verification_token, email_verification_expires, created_at) 
+         VALUES (?, ?, ?, 0, ?, ?, NOW())',
+        [$email, $passwordHash, 'user', $verificationToken, $verificationExpires]
     );
 
     if (!$userId) {
         throw new Exception('Failed to create user');
     }
 
+    // Send verification email
+    $mailer = new Mailer();
+    $emailSent = $mailer->sendVerificationEmail($email, $verificationToken);
+    
+    if (!$emailSent) {
+        error_log("Failed to send verification email to: $email");
+    }
 
-    $user = Database::fetchOne(
-        'SELECT id, email, role FROM users WHERE id = ?',
-        [$userId]
-    );
-
-    setUserSession($user);
-
-
-    Database::execute(
-        'UPDATE users SET last_login = NOW() WHERE id = ?',
-        [$userId]
-    );
-
-    jsonResponse(true, 'Registration successful', 201, [
-        'user' => [
-            'id' => $userId,
-            'email' => $email,
-            'role' => 'user'
-        ],
-        'redirect' => $_SESSION['redirect_after_login'] ?? '/'
+    // Don't auto-login - require verification first
+    jsonResponse(true, 'Account created! Please check your email to verify your account.', 201, [
+        'require_verification' => true,
+        'redirect' => '/auth/verify-pending.php'
     ]);
 
 } catch (PDOException $e) {

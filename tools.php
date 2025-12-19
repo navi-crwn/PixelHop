@@ -559,13 +559,28 @@ $toolStatus = [
         <div class="max-w-5xl mx-auto">
 
             <!-- Page Header -->
-            <div class="text-center mb-12">
+            <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold mb-3" style="color: var(--color-text-primary);">
                     Image Tools
                 </h1>
                 <p style="color: var(--color-text-tertiary);">
                     Free, fast, and privacy-focused image processing
                 </p>
+            </div>
+            
+            <!-- Info Notice -->
+            <div class="mb-8 p-4 rounded-lg" style="background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3);">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 mt-0.5 flex-shrink-0" style="color: #22d3ee;"></i>
+                    <div class="text-sm" style="color: var(--color-text-secondary);">
+                        <strong style="color: #22d3ee;">Temporary Storage:</strong> 
+                        Processed images are stored temporarily for <strong>6 hours</strong> and then automatically deleted. 
+                        Download your results before they expire. Files are NOT uploaded to permanent storage.
+                        <?php if (!$isLoggedIn): ?>
+                        <a href="/register.php" class="ml-1 underline" style="color: #22d3ee;">Register</a> to save images permanently.
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
 
             <!-- Tools Grid -->

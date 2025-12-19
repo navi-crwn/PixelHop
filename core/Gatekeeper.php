@@ -279,6 +279,136 @@ class Gatekeeper
     }
 
     /**
+     * Check if a light tool (compress, resize, convert, crop) can run
+     * Returns allowed for guests with usage tracking by IP
+     *
+     * @param string $toolName Tool identifier
+     * @param int|null $userId User ID (null for guests)
+     * @param string|null $ip IP address for guest tracking
+     * @return array ['allowed' => bool, 'reason' => string, 'code' => string]
+     */
+    public function canRunLightTool(string $toolName, ?int $userId = null, ?string $ip = null): array
+    {
+        // Maintenance mode check
+        if ($this->settings['maintenance_mode']) {
+            return $this->deny(self::ERROR_MAINTENANCE, 'System is under maintenance. Please try again later.');
+        }
+        
+        $ip = $ip ?? ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        if (strpos($ip, ',') !== false) {
+            $ip = trim(explode(',', $ip)[0]);
+        }
+        
+        // Guest limits - more restrictive
+        if ($userId === null) {
+            $guestHourlyLimit = (int) ($this->settings['tool_guest_hourly_limit'] ?? 20);
+            $guestDailyLimit = (int) ($this->settings['tool_guest_daily_limit'] ?? 100);
+            
+            $hourlyUsage = $this->getToolUsageByIp($ip, $toolName, '-1 hour');
+            $dailyUsage = $this->getToolUsageByIp($ip, $toolName, '-24 hours');
+            
+            if ($hourlyUsage >= $guestHourlyLimit) {
+                return $this->deny(
+                    'guest_hourly_limit',
+                    "Hourly tool limit reached ({$hourlyUsage}/{$guestHourlyLimit}). Please register for unlimited access.",
+                    ['used' => $hourlyUsage, 'limit' => $guestHourlyLimit]
+                );
+            }
+            
+            if ($dailyUsage >= $guestDailyLimit) {
+                return $this->deny(
+                    'guest_daily_limit',
+                    "Daily tool limit reached ({$dailyUsage}/{$guestDailyLimit}). Please register for more.",
+                    ['used' => $dailyUsage, 'limit' => $guestDailyLimit]
+                );
+            }
+            
+            return $this->allow(['used' => $dailyUsage, 'limit' => $guestDailyLimit, 'tool' => $toolName, 'guest' => true]);
+        }
+        
+        // Logged-in users - very high limits (essentially unlimited for regular tools)
+        $userDailyLimit = (int) ($this->settings['tool_user_daily_limit'] ?? 1000);
+        $dailyUsage = $this->getToolUsageByUser($userId, $toolName, '-24 hours');
+        
+        if ($dailyUsage >= $userDailyLimit) {
+            return $this->deny(
+                self::ERROR_DAILY_LIMIT,
+                "Daily tool limit reached ({$dailyUsage}/{$userDailyLimit}). Please try again tomorrow.",
+                ['used' => $dailyUsage, 'limit' => $userDailyLimit]
+            );
+        }
+        
+        return $this->allow(['used' => $dailyUsage, 'limit' => $userDailyLimit, 'tool' => $toolName]);
+    }
+    
+    /**
+     * Get tool usage count by IP
+     */
+    private function getToolUsageByIp(string $ip, string $toolName, string $since): int
+    {
+        try {
+            $sinceTime = date('Y-m-d H:i:s', strtotime($since));
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) FROM usage_logs 
+                WHERE ip_address = ? AND tool_name = ? AND created_at >= ?
+            ");
+            $stmt->execute([$ip, $toolName, $sinceTime]);
+            return (int) $stmt->fetchColumn();
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * Get tool usage count by user
+     */
+    private function getToolUsageByUser(int $userId, string $toolName, string $since): int
+    {
+        try {
+            $sinceTime = date('Y-m-d H:i:s', strtotime($since));
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) FROM usage_logs 
+                WHERE user_id = ? AND tool_name = ? AND created_at >= ?
+            ");
+            $stmt->execute([$userId, $toolName, $sinceTime]);
+            return (int) $stmt->fetchColumn();
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * Record light tool usage (for guests too)
+     */
+    public function recordLightToolUsage(string $toolName, ?int $userId = null, int $fileSize = 0, int $processingTimeMs = 0, string $status = 'success'): bool
+    {
+        try {
+            $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            if (strpos($ip, ',') !== false) {
+                $ip = trim(explode(',', $ip)[0]);
+            }
+            
+            $stmt = $this->db->prepare("
+                INSERT INTO usage_logs (user_id, tool_name, file_size, processing_time_ms, status, ip_address)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $userId,
+                $toolName,
+                $fileSize,
+                $processingTimeMs,
+                $status,
+                $ip
+            ]);
+            
+            return true;
+        } catch (Exception $e) {
+            error_log('Gatekeeper: Failed to record light tool usage - ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Update user storage counter
      */
     public function updateUserStorage(int $userId, int $delta): bool

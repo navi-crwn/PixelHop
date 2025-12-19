@@ -19,6 +19,16 @@ $gatekeeper = new Gatekeeper();
 $currentUser = getCurrentUser();
 $isAdmin = isAdmin();
 
+// Check for admin warning
+$adminWarning = $_SESSION['admin_warning'] ?? null;
+if ($adminWarning) {
+    // Mark warning as shown after displaying
+    Database::execute(
+        'UPDATE users SET warning_shown = 1 WHERE id = ?',
+        [$currentUser['id']]
+    );
+}
+
 // Get user's quota and usage - Admin has unlimited access
 $storageUsed = $currentUser['storage_used'] ?? 0;
 if ($isAdmin) {
@@ -70,6 +80,14 @@ $csrfToken = generateCsrfToken();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - PixelHop</title>
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('pixelhop-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -84,6 +102,11 @@ $csrfToken = generateCsrfToken();
             align-items: center;
             justify-content: center;
             padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
         }
 
         .dashboard-container {
@@ -95,6 +118,70 @@ $csrfToken = generateCsrfToken();
             border-radius: 24px;
             padding: 32px;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .dashboard-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .stat-card,
+        [data-theme="light"] .content-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .text-white,
+        [data-theme="light"] h1,
+        [data-theme="light"] .text-lg,
+        [data-theme="light"] .text-xl,
+        [data-theme="light"] .card-title,
+        [data-theme="light"] .tool-btn span,
+        [data-theme="light"] .progress-value {
+            color: #1a202c !important;
+        }
+
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .stat-detail,
+        [data-theme="light"] .progress-unit {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="light"] .nav-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        [data-theme="light"] .nav-link:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #1a202c;
+        }
+
+        [data-theme="light"] .nav-link.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: #0891b2;
+        }
+
+        [data-theme="light"] .tool-btn {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .tool-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .gallery-empty {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] .progress-bg {
+            stroke: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .header {
+            border-color: rgba(0, 0, 0, 0.08);
         }
 
         .header {
@@ -388,6 +475,51 @@ $csrfToken = generateCsrfToken();
         .stroke-cyan { stroke: #22d3ee; }
         .stroke-purple { stroke: #a855f7; }
         .stroke-yellow { stroke: #eab308; }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #22d3ee;
+        }
+
+        [data-theme="light"] .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        [data-theme="light"] .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #0891b2;
+        }
+
+        #theme-icon-light { display: none; }
+        #theme-icon-dark { display: block; }
+
+        [data-theme="light"] #theme-icon-light { display: block; }
+        [data-theme="light"] #theme-icon-dark { display: none; }
+
+        [data-theme="light"] .footer-text {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="light"] .footer-bar a {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
     </style>
 </head>
 <body>
@@ -434,9 +566,9 @@ $csrfToken = generateCsrfToken();
                     <i data-lucide="settings" class="w-4 h-4"></i>
                     Settings
                 </a>
-                <a href="/" class="nav-link">
-                    <i data-lucide="home" class="w-4 h-4"></i>
-                    Home
+                <a href="/member/upload.php" class="nav-link">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    Upload
                 </a>
             </div>
         </div>
@@ -611,16 +743,16 @@ $csrfToken = generateCsrfToken();
         </div>
 
         <!-- Footer -->
-        <div class="mt-6 pt-5 border-t flex justify-between items-center" style="border-color: rgba(255,255,255,0.08);">
-            <div class="text-xs flex items-center gap-3" style="color: rgba(255,255,255,0.4);">
-                <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg flex items-center justify-center transition hover:bg-white/10" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);" title="Toggle theme">
-                    <i data-lucide="sun" class="w-4 h-4 theme-icon-light"></i>
-                    <i data-lucide="moon" class="w-4 h-4 theme-icon-dark"></i>
+        <div class="mt-6 pt-5 border-t flex justify-between items-center footer-bar" style="border-color: rgba(255,255,255,0.08);">
+            <div class="text-xs flex items-center gap-3 footer-text" style="color: rgba(255,255,255,0.4);">
+                <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle theme">
+                    <i data-lucide="sun" class="w-4 h-4" id="theme-icon-light"></i>
+                    <i data-lucide="moon" class="w-4 h-4" id="theme-icon-dark"></i>
                 </button>
                 Member since <?= date('M Y', strtotime($currentUser['created_at'])) ?>
             </div>
             <div class="flex gap-4">
-                <a href="/tools" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Tools</a>
+                <a href="/member/tools.php" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Tools</a>
                 <a href="/help" class="text-xs hover:text-cyan-400 transition" style="color: rgba(255,255,255,0.5);">Help</a>
                 <a href="/auth/logout.php" class="text-xs hover:text-red-400 transition" style="color: rgba(255,255,255,0.5);">Logout</a>
             </div>
@@ -630,22 +762,47 @@ $csrfToken = generateCsrfToken();
     <script>
         lucide.createIcons();
 
-
         function toggleTheme() {
             const html = document.documentElement;
             const current = html.getAttribute('data-theme') || 'dark';
             const next = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('pixelhop-theme', next);
-            updateThemeIcon();
         }
 
-        function updateThemeIcon() {
-            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-            document.querySelectorAll('.theme-icon-light').forEach(el => el.style.display = isDark ? 'none' : 'block');
-            document.querySelectorAll('.theme-icon-dark').forEach(el => el.style.display = isDark ? 'block' : 'none');
+        // Show admin warning modal if exists
+        <?php if ($adminWarning): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('warningModal').style.display = 'flex';
+        });
+        
+        function dismissWarning() {
+            document.getElementById('warningModal').style.display = 'none';
+            <?php unset($_SESSION['admin_warning']); ?>
         }
-        updateThemeIcon();
+        <?php endif; ?>
     </script>
+
+    <?php if ($adminWarning): ?>
+    <!-- Admin Warning Modal -->
+    <div id="warningModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(234, 88, 12, 0.1)); border: 2px solid rgba(251, 146, 60, 0.5); border-radius: 16px; padding: 32px; max-width: 480px; width: 90%; text-align: center;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(251, 146, 60, 0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i data-lucide="alert-triangle" style="width: 32px; height: 32px; color: #fb923c;"></i>
+            </div>
+            <h2 style="font-size: 24px; font-weight: 700; color: #fb923c; margin-bottom: 12px;">⚠️ Warning from Admin</h2>
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                <p style="color: var(--color-text-primary); font-size: 15px; line-height: 1.6; white-space: pre-wrap;"><?= htmlspecialchars($adminWarning) ?></p>
+            </div>
+            <p style="color: var(--color-text-secondary); font-size: 13px; margin-bottom: 24px;">
+                Please take this warning seriously. Repeated violations may result in account suspension.
+            </p>
+            <button onclick="dismissWarning()" style="padding: 12px 32px; background: #fb923c; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s;">
+                I Understand
+            </button>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+    <?php endif; ?>
 </body>
 </html>

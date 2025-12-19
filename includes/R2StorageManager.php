@@ -335,7 +335,6 @@ class R2StorageManager
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
         
         if ($error) {
             return ['success' => false, 'error' => "CURL error: {$error}", 'http_code' => 0];
@@ -461,6 +460,188 @@ class R2StorageManager
             $i++;
         }
         return round($bytes, 2) . ' ' . $units[$i];
+    }
+    
+    /**
+     * Delete an object from storage
+     * Automatically detects provider from key suffix
+     */
+    public function deleteObject(string $key, int $fileSize = 0): array
+    {
+        // Determine provider based on key suffix
+        // thumb/medium = R2, original/large = Contabo
+        $isR2 = preg_match('/_(thumb|medium)\.[a-z]+$/i', $key);
+        
+        if ($isR2 && $this->r2Enabled) {
+            $result = $this->deleteFromR2($key);
+            if ($result['success'] && $fileSize > 0) {
+                $this->reduceUsage('r2', $fileSize);
+            }
+            return $result;
+        } else {
+            $result = $this->deleteFromContabo($key);
+            if ($result['success'] && $fileSize > 0) {
+                $this->reduceUsage('contabo', $fileSize);
+            }
+            return $result;
+        }
+    }
+    
+    /**
+     * Delete multiple objects (all variants of an image)
+     */
+    public function deleteImage(array $s3Keys, int $totalSize = 0): array
+    {
+        $results = [];
+        $successCount = 0;
+        
+        foreach ($s3Keys as $variant => $key) {
+            if (empty($key)) continue;
+            
+            $result = $this->deleteObject($key, 0);
+            $results[$variant] = $result;
+            if ($result['success']) {
+                $successCount++;
+            }
+        }
+        
+        // Update usage tracking
+        if ($totalSize > 0 && $successCount > 0) {
+            // Estimate: thumb+medium on R2, original+large on Contabo
+            // Rough split: 10% R2, 90% Contabo
+            if ($this->r2Enabled) {
+                $this->reduceUsage('r2', (int)($totalSize * 0.05));
+            }
+            $this->reduceUsage('contabo', (int)($totalSize * 0.95));
+        }
+        
+        return [
+            'success' => $successCount > 0,
+            'deleted' => $successCount,
+            'total' => count($s3Keys),
+            'details' => $results,
+        ];
+    }
+    
+    /**
+     * Delete from R2 (public for cleanup scripts)
+     */
+    public function deleteFromR2(string $key): array
+    {
+        return $this->deleteFromS3(
+            $key,
+            $this->r2Config['endpoint'],
+            $this->r2Config['bucket'],
+            $this->r2Config['access_key'],
+            $this->r2Config['secret_key'],
+            $this->r2Config['region'] ?? 'auto'
+        );
+    }
+    
+    /**
+     * Delete from Contabo (public for cleanup scripts)
+     */
+    public function deleteFromContabo(string $key): array
+    {
+        return $this->deleteFromS3(
+            $key,
+            $this->contaboConfig['endpoint'],
+            $this->contaboConfig['bucket'],
+            $this->contaboConfig['access_key'],
+            $this->contaboConfig['secret_key'],
+            $this->contaboConfig['region'] ?? 'default'
+        );
+    }
+    
+    /**
+     * Generic S3-compatible delete
+     */
+    private function deleteFromS3(
+        string $key,
+        string $endpoint,
+        string $bucket,
+        string $accessKey,
+        string $secretKey,
+        string $region
+    ): array {
+        $host = parse_url($endpoint, PHP_URL_HOST);
+        $url = "{$endpoint}/{$bucket}/{$key}";
+        
+        $now = new DateTime('UTC');
+        $longDate = $now->format('Ymd\THis\Z');
+        $shortDate = $now->format('Ymd');
+        
+        // Empty payload for DELETE
+        $payloadHash = hash('sha256', '');
+        
+        // Build canonical request
+        $canonicalUri = '/' . $bucket . '/' . $key;
+        $canonicalQueryString = '';
+        
+        $headers = [
+            'host' => $host,
+            'x-amz-content-sha256' => $payloadHash,
+            'x-amz-date' => $longDate,
+        ];
+        ksort($headers);
+        
+        $canonicalHeaders = '';
+        $signedHeaders = [];
+        foreach ($headers as $k => $v) {
+            $canonicalHeaders .= strtolower($k) . ':' . trim($v) . "\n";
+            $signedHeaders[] = strtolower($k);
+        }
+        $signedHeadersStr = implode(';', $signedHeaders);
+        
+        $canonicalRequest = "DELETE\n" .
+            $canonicalUri . "\n" .
+            $canonicalQueryString . "\n" .
+            $canonicalHeaders . "\n" .
+            $signedHeadersStr . "\n" .
+            $payloadHash;
+        
+        $algorithm = 'AWS4-HMAC-SHA256';
+        $credentialScope = "{$shortDate}/{$region}/s3/aws4_request";
+        $stringToSign = "{$algorithm}\n{$longDate}\n{$credentialScope}\n" . hash('sha256', $canonicalRequest);
+        
+        $kDate = hash_hmac('sha256', $shortDate, 'AWS4' . $secretKey, true);
+        $kRegion = hash_hmac('sha256', $region, $kDate, true);
+        $kService = hash_hmac('sha256', 's3', $kRegion, true);
+        $kSigning = hash_hmac('sha256', 'aws4_request', $kService, true);
+        $signature = hash_hmac('sha256', $stringToSign, $kSigning);
+        
+        $authorization = "{$algorithm} Credential={$accessKey}/{$credentialScope}, SignedHeaders={$signedHeadersStr}, Signature={$signature}";
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_CUSTOMREQUEST => 'DELETE',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                "Authorization: {$authorization}",
+                "Host: {$host}",
+                "x-amz-content-sha256: {$payloadHash}",
+                "x-amz-date: {$longDate}",
+            ],
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        
+        if ($error) {
+            return ['success' => false, 'error' => "CURL error: {$error}", 'http_code' => 0];
+        }
+        
+        // 204 No Content or 200 OK means success for DELETE
+        if ($httpCode === 204 || $httpCode === 200) {
+            return ['success' => true, 'http_code' => $httpCode];
+        }
+        
+        return ['success' => false, 'error' => "HTTP {$httpCode}: {$response}", 'http_code' => $httpCode];
     }
     
     /**

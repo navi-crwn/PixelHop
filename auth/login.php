@@ -64,7 +64,7 @@ if (empty($password)) {
 try {
 
     $user = Database::fetchOne(
-        'SELECT id, email, password_hash, role, is_blocked, block_reason, locked_until, login_attempts
+        'SELECT id, email, password_hash, role, is_blocked, block_reason, locked_until, login_attempts, email_verified, account_status, status_reason, warning_message, warning_shown
          FROM users WHERE email = ?',
         [$email]
     );
@@ -83,6 +83,23 @@ try {
     if ($user['is_blocked']) {
         $reason = $user['block_reason'] ?: 'Your account has been suspended';
         jsonResponse(false, $reason, 403);
+    }
+
+    // Check account status (locked/suspended)
+    $accountStatus = $user['account_status'] ?? 'active';
+    
+    if ($accountStatus === 'locked') {
+        $reason = $user['status_reason'] ?: 'Your account has been locked.';
+        jsonResponse(false, $reason . ' Please contact support@hel.ink to unlock your account.', 403, [
+            'account_locked' => true
+        ]);
+    }
+    
+    if ($accountStatus === 'suspended') {
+        $reason = $user['status_reason'] ?: 'Your account has been suspended.';
+        jsonResponse(false, $reason . ' Your account and all images will be deleted in 30 days. To appeal, please contact support@hel.ink within 30 days.', 403, [
+            'account_suspended' => true
+        ]);
     }
 
 
@@ -113,6 +130,16 @@ try {
         }
 
         jsonResponse(false, 'Invalid email or password', 401);
+    }
+
+    // Check email verification
+    if (!$user['email_verified']) {
+        // Store email in session for resend functionality
+        $_SESSION['pending_verification_email'] = $user['email'];
+        jsonResponse(false, 'Please verify your email before logging in.', 403, [
+            'require_verification' => true,
+            'redirect' => '/auth/verify-pending.php'
+        ]);
     }
 
 
@@ -159,13 +186,20 @@ try {
     $redirectUrl = $_SESSION['redirect_after_login'] ?? $defaultRedirect;
     unset($_SESSION['redirect_after_login']);
 
+    // Check if user has pending warning
+    $hasWarning = !empty($user['warning_message']) && !$user['warning_shown'];
+    if ($hasWarning) {
+        $_SESSION['admin_warning'] = $user['warning_message'];
+    }
+
     jsonResponse(true, 'Login successful', 200, [
         'user' => [
             'id' => $user['id'],
             'email' => $user['email'],
             'role' => $user['role']
         ],
-        'redirect' => $redirectUrl
+        'redirect' => $redirectUrl,
+        'has_warning' => $hasWarning
     ]);
 
 } catch (PDOException $e) {

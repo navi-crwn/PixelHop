@@ -308,16 +308,31 @@ $csrfToken = generateCsrfToken();
 
         function updateRequirement(id, met) {
             const el = document.getElementById(id);
+            if (!el) return;
+            
             const icon = el.querySelector('i');
+            if (!icon) return;
 
             if (met) {
                 el.classList.add('met');
+                el.style.color = '#4ade80';
                 icon.setAttribute('data-lucide', 'check-circle');
+                icon.style.color = '#4ade80';
             } else {
                 el.classList.remove('met');
+                el.style.color = '';
                 icon.setAttribute('data-lucide', 'circle');
+                icon.style.color = '';
             }
-            lucide.createIcons();
+            
+            // Re-render just this icon
+            lucide.createIcons({
+                icons: {
+                    'check-circle': true,
+                    'circle': true
+                },
+                attrs: {}
+            });
         }
 
 
@@ -369,10 +384,18 @@ $csrfToken = generateCsrfToken();
                 const result = await response.json();
 
                 if (result.success) {
-                    showNotification('Account created successfully! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = result.redirect || '/';
-                    }, 500);
+                    // Check if verification is required
+                    if (result.require_verification) {
+                        showNotification('Account created! Please check your email to verify.', 'success');
+                        setTimeout(() => {
+                            window.location.href = result.redirect || '/auth/verify-pending.php';
+                        }, 1500);
+                    } else {
+                        showNotification('Account created successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = result.redirect || '/';
+                        }, 500);
+                    }
                 } else {
                     showNotification(result.message || 'Registration failed', 'error');
                     submitBtn.disabled = false;
