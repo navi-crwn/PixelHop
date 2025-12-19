@@ -390,9 +390,6 @@ $isAdmin = $isLoggedIn && isAdmin();
     </footer>
 
     <!-- Scripts -->
-    <script>
-        lucide.createIcons();
-    </script>
-    <script src="/assets/js/app.js?v=1.0.5"></script>
+    <script src="/assets/js/app.js?v=1.0.6"></script>
 </body>
 </html>
