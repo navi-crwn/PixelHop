@@ -2,6 +2,20 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [2.3.0] - 2026-01-03
+
+### Added
+- **Descriptive Image Links**: Uploaded image links now include a slug from the original filename (e.g. `rumah-baru_a3x9K2`), making it easier to identify images from the link alone.
+- **Smart Slug Truncation**: For long filenames, only the first ~15 characters are used for the slug, cut at word boundaries for readability.
+- **Bulk Upload Friendly**: Copying multiple links now shows which image is which, even for guests.
+
+### Changed
+- **Backward Compatibility**: All old image links (e.g. `akqxW3`) remain valid and accessible. Only new uploads use the new descriptive format.
+- **View, Result, and Gallery Pages**: All pages now support both old and new link formats seamlessly.
+
+### Fixed
+- Improved filename sanitization for URL slugs.
+
 ## [2.2.0] - 2025-12-18
 
 ### Added

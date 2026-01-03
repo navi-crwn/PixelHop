@@ -122,6 +122,32 @@ $siteName = $config['site']['name'];
     <main class="relative z-10 pt-28 pb-16 px-4">
         <div class="changelog-content">
 
+            <!-- January 2026 - v2.3 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <span class="version-badge">v2.3</span>
+                    <span class="version-date">January 3, 2026</span>
+                </div>
+                <h2 class="version-title">Descriptive Image Links & Backward Compatibility</h2>
+                <ul class="change-list">
+                    <li class="change-item">
+                        <i data-lucide="plus-circle" class="change-icon change-new"></i>
+                        <span><span class="tag tag-new">NEW</span>Image links now include part of the original filename for easier identification (e.g. <code>rumah-baru_a3x9K2</code>).</span>
+                    </li>
+                    <li class="change-item">
+                        <i data-lucide="plus-circle" class="change-icon change-new"></i>
+                        <span><span class="tag tag-new">NEW</span>Bulk upload: Copying links now shows which image is which, even for guests.</span>
+                    </li>
+                    <li class="change-item">
+                        <i data-lucide="zap" class="change-icon change-improved"></i>
+                        <span><span class="tag tag-improved">IMPROVED</span>Long filenames are truncated smartly for clean URLs.</span>
+                    </li>
+                    <li class="change-item">
+                        <i data-lucide="zap" class="change-icon change-improved"></i>
+                        <span><span class="tag tag-improved">IMPROVED</span>All old image links remain valid and accessible. Only new uploads use the new format.</span>
+                    </li>
+                </ul>
+            </div>
             <div class="text-center mb-12">
                 <h1 class="text-3xl md:text-4xl font-bold mb-3" style="color: var(--color-text-primary);">What's New</h1>
                 <p style="color: var(--color-text-tertiary);">Latest updates and improvements to PixelHop</p>
