@@ -38,6 +38,20 @@ type Config struct {
 	GoogleRedirect string
 
 	AdminEmail string // shown on legal pages / DMCA contact
+
+	// HEL.ink accounts: when both are set, people sign in with their HEL.ink
+	// account and PixelHop's own sign-up, password reset and Google login
+	// are handed over to HEL.ink.
+	HelinkURL    string
+	HelinkSecret string
+
+	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
+	TurnstileSiteKey string
+	TurnstileSecret  string
+
+	// Optional background-removal service (see tools/rembg-server.py).
+	RembgURL    string
+	RembgPerDay int
 }
 
 type S3Config struct {
@@ -114,6 +128,15 @@ func Load() (*Config, error) {
 	}
 
 	c.GoogleRedirect = env("GOOGLE_REDIRECT_URI", c.BaseURL+"/auth/google/callback")
+	c.HelinkURL = strings.TrimRight(env("HELINK_URL", ""), "/")
+	c.HelinkSecret = env("HELINK_SSO_SECRET", "")
+	c.TurnstileSiteKey = env("TURNSTILE_SITE_KEY", "")
+	c.TurnstileSecret = env("TURNSTILE_SECRET_KEY", "")
+	c.RembgURL = strings.TrimRight(env("PIXELHOP_REMBG_URL", ""), "/")
+	c.RembgPerDay = envInt("PIXELHOP_REMBG_PER_DAY", 30)
+	if c.HelinkURL != "" && len(c.HelinkSecret) < 32 {
+		return nil, fmt.Errorf("HELINK_SSO_SECRET must be at least 32 characters (the same value as PIXELHOP_SSO_SECRET on HEL.ink)")
+	}
 
 	if c.Storage == "s3" && (c.S3.Endpoint == "" || c.S3.Bucket == "" || c.S3.AccessKey == "") {
 		return nil, fmt.Errorf("PIXELHOP_STORAGE=s3 needs S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY and S3_SECRET_KEY")
@@ -126,6 +149,12 @@ func Load() (*Config, error) {
 
 // SecureCookies is true when the site is served over HTTPS.
 func (c *Config) SecureCookies() bool { return strings.HasPrefix(c.BaseURL, "https://") }
+
+// SSOEnabled reports whether accounts come from HEL.ink.
+func (c *Config) SSOEnabled() bool { return c.HelinkURL != "" && c.HelinkSecret != "" }
+
+// TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.
+func (c *Config) TurnstileEnabled() bool { return c.TurnstileSiteKey != "" && c.TurnstileSecret != "" }
 
 // GoogleEnabled reports whether "Sign in with Google" is configured.
 func (c *Config) GoogleEnabled() bool { return c.GoogleID != "" && c.GoogleKey != "" }

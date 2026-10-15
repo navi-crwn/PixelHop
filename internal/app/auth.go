@@ -167,10 +167,13 @@ func safeNext(next string) string {
 type authForm struct {
 	Email, Name, Next, Error string
 	Google, Registration     bool
+	SSO                      bool   // accounts come from HEL.ink
+	Helink                   string // HEL.ink base URL
 }
 
 func (a *App) authForm(r *http.Request) authForm {
-	return authForm{Next: r.FormValue("next"), Google: a.cfg.GoogleEnabled(), Registration: a.registrationOpen(r.Context())}
+	return authForm{Next: r.FormValue("next"), Google: a.cfg.GoogleEnabled(), Registration: a.registrationOpen(r.Context()),
+		SSO: a.cfg.SSOEnabled(), Helink: a.cfg.HelinkURL}
 }
 
 func (a *App) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -187,6 +190,12 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if !a.limits.allow("login:"+clientIP(r), 10, 15*time.Minute) {
 		f.Error = "Too many attempts. Please wait a few minutes and try again."
 		w.WriteHeader(http.StatusTooManyRequests)
+		a.render(w, r, "login", "Sign in", f)
+		return
+	}
+	if !a.turnstileOK(r) {
+		f.Error = "The security check didn't pass. Please try again."
+		w.WriteHeader(http.StatusBadRequest)
 		a.render(w, r, "login", "Sign in", f)
 		return
 	}
@@ -233,10 +242,18 @@ func (a *App) registrationOpen(ctx context.Context) bool {
 }
 
 func (a *App) registerPage(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() { // accounts are made on HEL.ink
+		http.Redirect(w, r, a.cfg.HelinkURL+"/register", http.StatusSeeOther)
+		return
+	}
 	a.render(w, r, "register", "Create account", a.authForm(r))
 }
 
 func (a *App) register(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() {
+		http.Redirect(w, r, a.cfg.HelinkURL+"/register", http.StatusSeeOther)
+		return
+	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	f.Name = trim(strings.TrimSpace(r.FormValue("name")), 60)
@@ -247,6 +264,8 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 		f.Error = "Sign-ups are closed on this server."
 	case !a.limits.allow("register:"+clientIP(r), 5, time.Hour):
 		f.Error = "Too many sign-ups from your network. Try again later."
+	case !a.turnstileOK(r):
+		f.Error = "The security check didn't pass. Please try again."
 	case !validEmail(f.Email):
 		f.Error = "Please enter a valid email address."
 	case len(pw) < 8:

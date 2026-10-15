@@ -130,6 +130,9 @@ CREATE TABLE settings (
 `,
 	// 2: admin warnings shown to a user until they acknowledge them
 	`ALTER TABLE users ADD COLUMN warning TEXT NOT NULL DEFAULT '';`,
+	// 3: link to the person's HEL.ink account (one account for all HEL.ink apps)
+	`ALTER TABLE users ADD COLUMN helink_id TEXT;
+CREATE UNIQUE INDEX users_helink ON users(helink_id) WHERE helink_id IS NOT NULL;`,
 }
 
 func (d *DB) migrate() error {

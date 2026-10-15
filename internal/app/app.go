@@ -84,6 +84,8 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /register", a.registerPage)
 	mux.HandleFunc("POST /register", a.register)
 	mux.HandleFunc("POST /logout", a.logout)
+	mux.HandleFunc("GET /auth/helink", a.helinkStart)
+	mux.HandleFunc("GET /auth/helink/callback", a.helinkCallback)
 	mux.HandleFunc("GET /auth/google", a.googleStart)
 	mux.HandleFunc("GET /auth/google/callback", a.googleCallback)
 	mux.HandleFunc("GET /auth/google-callback", a.googleCallback) // redirect URI used by PixelHop 2
@@ -122,6 +124,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("DELETE /api/v1/images/{id}", a.apiDeleteImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
+	mux.HandleFunc("POST /api/v1/tools/remove-background", a.apiRemoveBackground)
 
 	mux.HandleFunc("/", a.notFound)
 
