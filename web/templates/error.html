@@ -1,0 +1,9 @@
+{{define "content"}}
+<div class="wrap narrow center" style="padding-top:40px">
+  <img src="/static/img/logo.svg" alt="" width="96" height="96" style="margin:0 auto 18px;image-rendering:pixelated;opacity:.9">
+  <p class="mono grad" style="font-size:3rem;font-weight:800;margin:0">{{.Data.Code}}</p>
+  <h1 style="font-size:1.8rem">{{.Title}}</h1>
+  <p class="muted">{{.Data.Message}}</p>
+  <div class="btn-row" style="justify-content:center;margin-top:20px"><a class="btn primary" href="/">Upload an image</a><a class="btn" href="/tools">Open the studio</a></div>
+</div>
+{{end}}

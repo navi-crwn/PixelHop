@@ -2,6 +2,36 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.0.0] - 2026-10-15
+
+PixelHop rebuilt from scratch in Go. See [AUDIT.md](AUDIT.md) for why.
+
+### Added
+- **One binary**: web server, SQLite database and cleanup janitor in a ~16 MB executable. Docker image, systemd unit and nginx example included.
+- **Lossless metadata stripping**: GPS/EXIF, XMP and IPTC removed from JPEG, PNG and WebP without re-encoding; EXIF rotation applied first.
+- **In-browser studio**: compress, resize, crop, convert (incl. AVIF), adjust/rotate, blur & pixelate, color palette, OCR and background removal, all client-side.
+- **Albums** for multi-file uploads, **QR codes**, **Markdown/HTML/BBCode** embeds, and readable links (`beach-sunset-x7Kp2Q`).
+- **Self-destruct** timers (10 minutes to 90 days) and private **delete links** for guests, plus a per-device upload history.
+- **API keys** (hashed, shown once) with a one-click **ShareX** config; JSON API for upload, list, rename, delete.
+- **Storage backends**: local disk or any S3-compatible bucket, with a built-in SigV4 signer and optional CDN redirects.
+- **Admin**: overview with a 30-day chart, images, users (lock/suspend/role/quota/password/warnings), reports, IP bans, site settings, SEO title/description, announcement bar.
+- **`pixelhop import`**: moves PixelHop 2 users (with their passwords) and images; `--copy` re-hosts the files.
+- GitHub Pages website with EN/ID and light/dark, and README images rendered from it.
+
+### Security
+- SSRF-proof "upload from link" (checks every resolved address, including redirects).
+- Forwarding headers are trusted only from configured proxies (`PIXELHOP_TRUSTED_PROXIES=cloudflare`).
+- CSRF protection via Fetch Metadata, a strict CSP without inline scripts, and sandboxed image responses.
+- Argon2id passwords, rate-limited sign-in, hashed session tokens, and a decompression-bomb guard.
+
+### Changed
+- Server-side Python AI (rembg, PaddleOCR, upscale, erase, face blur) replaced by in-browser tools; upscale and erase are not offered.
+- MySQL + `images.json` replaced by SQLite.
+- The PHP code moved to `legacy/` (tag `v2.3.0-php`).
+
+### Kept working
+- Image pages `/{id}`, PixelHop 2 image links `/i/YYYY/MM/DD/{id}_{size}.{ext}`, `POST /api/upload.php` (ShareX), and `/auth/google-callback`.
+
 ## [2.3.0] - 2026-01-03
 
 ### Added

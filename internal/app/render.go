@@ -1,0 +1,250 @@
+package app
+
+import (
+	"bytes"
+	"fmt"
+	"html/template"
+	"io/fs"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/web"
+)
+
+type pages struct{ t map[string]*template.Template }
+
+// page is what every template receives as ".".
+type page struct {
+	Title, Desc     string
+	OGImage, OGType string
+	NoIndex         bool
+	Data            any
+
+	User         *db.User
+	Site         string
+	Base         string
+	Path         string
+	Announcement string
+	Version      string
+	Asset        string // cache-busting query for /static files
+	Google       bool
+	GuestUploads bool
+	MaxMB        int64
+	MaxBatch     int
+}
+
+var startedAt = fmt.Sprint(time.Now().Unix())
+
+func loadPages(a *App) (*pages, error) {
+	funcs := template.FuncMap{
+		"bytes": humanBytes,
+		"dims":  humanDims,
+		"ago":   ago,
+		"date":  func(t int64) string { return time.Unix(t, 0).UTC().Format("2 Jan 2006") },
+		"iso":   func(t int64) string { return time.Unix(t, 0).UTC().Format(time.RFC3339) },
+		// Pages load images by path, so they work under any host name;
+		// the absolute links people copy come from linksFor.
+		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.BaseURL) },
+		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.BaseURL) },
+		"add":    func(x, y int) int { return x + y },
+		"pct": func(n, of int) int {
+			if of == 0 {
+				return 0
+			}
+			return n * 100 / of
+		},
+		"seq": func(n int) []int {
+			s := make([]int, n)
+			for i := range s {
+				s[i] = i + 1
+			}
+			return s
+		},
+		"until": func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
+		"usage": func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
+		"mb":    func(b int64) int64 { return b >> 20 },
+	}
+	p := &pages{t: map[string]*template.Template{}}
+	files, err := fs.Glob(web.Templates, "templates/*.html")
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range files {
+		name := strings.TrimSuffix(strings.TrimPrefix(f, "templates/"), ".html")
+		if name == "base" {
+			continue
+		}
+		t, err := template.New("").Funcs(funcs).ParseFS(web.Templates, "templates/base.html", "templates/partials/*.html", f)
+		if err != nil {
+			return nil, fmt.Errorf("template %s: %w", name, err)
+		}
+		p.t[name] = t
+	}
+	return p, nil
+}
+
+func (a *App) base(r *http.Request, p page) page {
+	ctx := r.Context()
+	p.User = currentUser(r)
+	p.Site = a.cfg.SiteName
+	p.Base = a.cfg.BaseURL
+	p.Path = r.URL.Path
+	p.Version = Version
+	p.Asset = Version + "-" + startedAt
+	p.Google = a.cfg.GoogleEnabled()
+	p.Announcement = a.db.Setting(ctx, "announcement", "")
+	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
+	p.MaxMB = a.cfg.MaxUploadBytes >> 20
+	p.MaxBatch = a.cfg.MaxBatch
+	return p
+}
+
+func (a *App) render(w http.ResponseWriter, r *http.Request, name, title string, data any) {
+	a.renderPage(w, r, name, page{Title: title, Data: data})
+}
+
+func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p page) {
+	t := a.pages.t[name]
+	if t == nil {
+		a.serverError(w, r, fmt.Errorf("no template %q", name))
+		return
+	}
+	p = a.base(r, p)
+	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
+		p.NoIndex = true
+	}
+	var buf bytes.Buffer
+	if err := t.ExecuteTemplate(&buf, "base", p); err != nil {
+		a.log.Error("render", "page", name, "err", err)
+		http.Error(w, "Something went wrong on our side.", http.StatusInternalServerError)
+		return
+	}
+	h := w.Header()
+	h.Set("Content-Type", "text/html; charset=utf-8")
+	// The studio's background remover (onnxruntime-web) compiles code at run
+	// time, so only that page may use eval. It shows no other people's content.
+	eval := ""
+	if name == "tools" {
+		eval = " 'unsafe-eval'"
+	}
+	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; "+
+		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://cdn.jsdelivr.net blob:; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
+		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
+		"font-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com")
+	if p.User != nil {
+		h.Set("Cache-Control", "private, no-store")
+	}
+	buf.WriteTo(w)
+}
+
+// ---- simple pages ----
+
+func (a *App) home(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	n, views := a.db.PublicStats(ctx)
+	a.renderPage(w, r, "home", page{
+		Title: a.db.Setting(ctx, "seo_title", "Free image hosting with a built-in photo studio"),
+		Desc: a.db.Setting(ctx, "seo_description", "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. "+
+			"Edit, compress, convert, OCR and remove backgrounds right in your browser."),
+		OGImage: a.cfg.BaseURL + "/static/img/social.jpg",
+		Data:    map[string]any{"Images": n, "Views": views},
+	})
+}
+
+func (a *App) tools(w http.ResponseWriter, r *http.Request) {
+	a.renderPage(w, r, "tools", page{Title: "Photo studio",
+		Desc: "Compress, resize, crop, convert, read text (OCR), remove backgrounds, blur faces and pick colors, privately in your browser."})
+}
+
+func (a *App) docs(w http.ResponseWriter, r *http.Request) {
+	a.renderPage(w, r, "docs", page{Title: "API & ShareX", Desc: "Upload from scripts, apps and ShareX with the " + a.cfg.SiteName + " API."})
+}
+
+func (a *App) legal(w http.ResponseWriter, r *http.Request) {
+	a.renderPage(w, r, "legal", page{Title: "Terms, privacy & takedowns", Data: a.cfg.AdminEmail})
+}
+
+func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/api/") {
+		apiError(w, http.StatusNotFound, "not found")
+		return
+	}
+	w.WriteHeader(http.StatusNotFound)
+	a.renderPage(w, r, "error", page{Title: "Not found", NoIndex: true, Data: map[string]any{
+		"Code": 404, "Message": "This link doesn't lead anywhere. The image may have expired or been deleted."}})
+}
+
+func (a *App) fail(w http.ResponseWriter, r *http.Request, code int, msg string) {
+	if strings.HasPrefix(r.URL.Path, "/api/") || strings.Contains(r.Header.Get("Accept"), "application/json") {
+		apiError(w, code, msg)
+		return
+	}
+	w.WriteHeader(code)
+	a.renderPage(w, r, "error", page{Title: http.StatusText(code), NoIndex: true, Data: map[string]any{"Code": code, "Message": msg}})
+}
+
+func (a *App) serverError(w http.ResponseWriter, r *http.Request, err error) {
+	a.log.Error("server error", "path", r.URL.Path, "err", err)
+	a.fail(w, r, http.StatusInternalServerError, "Something went wrong on our side. Please try again in a moment.")
+}
+
+func (a *App) favicon(w http.ResponseWriter, r *http.Request) {
+	r.URL.Path = "/static/img/logo.svg"
+	w.Header().Set("Content-Type", "image/svg+xml")
+	a.static.ServeHTTP(w, r)
+}
+
+func (a *App) robots(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprintf(w, "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /settings\nDisallow: /delete/\nDisallow: /api/\n")
+}
+
+// ---- formatting ----
+
+func humanBytes(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	v := float64(b) / float64(div)
+	if v >= 100 {
+		return fmt.Sprintf("%.0f %cB", v, "KMGTPE"[exp])
+	}
+	return fmt.Sprintf("%.1f %cB", v, "KMGTPE"[exp])
+}
+
+func humanDims(w, h int) string { return fmt.Sprintf("%d × %d", w, h) }
+
+func ago(t int64) string {
+	if t == 0 {
+		return "never"
+	}
+	d := time.Since(time.Unix(t, 0))
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		return plural(int(d.Minutes()), "minute") + " ago"
+	case d < 48*time.Hour:
+		return plural(int(d.Hours()), "hour") + " ago"
+	case d < 60*24*time.Hour:
+		return plural(int(d.Hours()/24), "day") + " ago"
+	case d < 730*24*time.Hour:
+		return plural(int(d.Hours()/24/30), "month") + " ago"
+	}
+	return plural(int(d.Hours()/24/365), "year") + " ago"
+}
+
+func plural(n int, w string) string {
+	if n == 1 {
+		return "1 " + w
+	}
+	return fmt.Sprintf("%d %ss", n, w)
+}

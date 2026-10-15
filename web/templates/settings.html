@@ -1,0 +1,66 @@
+{{define "content"}}{{$d := .Data}}{{$u := .User}}
+<div class="wrap narrow">
+  <div class="page-head"><h1>Settings</h1></div>
+  {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
+  {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
+
+  <div class="card" id="api">
+    <h2>API keys &amp; ShareX</h2>
+    <p class="muted small">Keys let ShareX, scripts and apps upload to your account. Treat them like passwords. See the <a href="/docs">API docs</a>.</p>
+    {{with $d.NewKey}}
+    <div class="key-once">
+      <b>Your new key. Copy it now: it won't be shown again.</b>
+      <div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="new-key" aria-label="New API key"><button class="btn sm" type="button" data-copy="#new-key"><svg><use href="#i-copy"/></svg>Copy</button></div>
+      <button class="btn sm primary" style="margin-top:10px" type="button" data-sharex="{{.}}" data-sharex-url="{{$.Base}}/api/v1/upload" data-sharex-name="{{$.Site}}"><svg><use href="#i-down"/></svg>Download ShareX config with this key</button>
+    </div>
+    {{end}}
+    <form method="post" action="/settings/keys" class="copy" style="margin-bottom:14px">
+      <input type="text" name="name" placeholder="Key name, e.g. ShareX on laptop" maxlength="40" aria-label="Key name">
+      <button class="btn" type="submit"><svg><use href="#i-key"/></svg>Create key</button>
+    </form>
+    {{if $d.Keys}}
+    <div class="table-wrap"><table>
+      <tr><th>Name</th><th>Key</th><th>Last used</th><th></th></tr>
+      {{range $d.Keys}}
+      <tr><td>{{.Name}}</td><td class="mono small">{{.Prefix}}…</td><td class="small muted">{{ago .LastUsed}}</td>
+        <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="Delete the key “{{.Name}}”? Apps using it will stop working."><button class="btn sm ghost danger" type="submit">Delete</button></form></td></tr>
+      {{end}}
+    </table></div>
+    {{else}}<p class="small faint">No keys yet.</p>{{end}}
+    <p class="small muted" style="margin:12px 0 0">Lost a key's ShareX file? <a href="/settings/sharex/ph">Download a blank config</a> and paste your key into it, or create a new key.</p>
+  </div>
+
+  <div class="card">
+    <h2>Profile</h2>
+    <form method="post" action="/settings/profile">
+      <div class="field"><label>Email</label><input type="email" value="{{$u.Email}}" disabled></div>
+      <div class="field"><label for="name">Name</label><input type="text" id="name" name="name" value="{{$u.Name}}" maxlength="60"></div>
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>{{if $d.HasPass}}Change password{{else}}Set a password{{end}}</h2>
+    {{if not $d.HasPass}}<p class="muted small">You sign in with Google. Add a password to also sign in with your email.</p>{{end}}
+    <form method="post" action="/settings/password">
+      {{if $d.HasPass}}<div class="field"><label for="current">Current password</label><input type="password" id="current" name="current" autocomplete="current-password" required></div>{{end}}
+      <div class="field"><label for="password">New password</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn" type="submit">{{if $d.HasPass}}Change password{{else}}Set password{{end}}</button>
+      <p class="small faint" style="margin:10px 0 0">Changing your password signs you out on your other devices.</p>
+    </form>
+  </div>
+
+  <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
+    <h2>Delete account</h2>
+    <p class="muted small">Deletes your account and every image you uploaded. Links stop working right away.</p>
+    <form method="post" action="/settings/delete-account" data-confirm="Delete your account and all your images? This can't be undone.">
+      {{if $d.HasPass}}
+      <div class="field"><label for="del-pw">Your password</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
+      {{else}}
+      <div class="field"><label for="del-confirm">Type your email to confirm</label><input type="text" id="del-confirm" name="confirm" required></div>
+      {{end}}
+      <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>Delete my account</button>
+    </form>
+  </div>
+</div>
+{{end}}

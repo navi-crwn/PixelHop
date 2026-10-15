@@ -1,0 +1,83 @@
+{{define "base"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .Title}}{{.Title}} · {{end}}{{.Site}}</title>
+{{with .Desc}}<meta name="description" content="{{.}}">{{end}}
+{{if .NoIndex}}<meta name="robots" content="noindex">{{end}}
+<meta name="theme-color" content="#08090c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+<meta property="og:site_name" content="{{.Site}}">
+<meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}{{.Site}}{{end}}">
+{{with .Desc}}<meta property="og:description" content="{{.}}">{{end}}
+<meta property="og:url" content="{{.Base}}{{.Path}}">
+{{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
+<link rel="icon" href="/static/img/logo.svg?v={{.Asset}}" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
+<script src="/static/js/theme.js?v={{.Asset}}"></script>
+{{block "head" .}}{{end}}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+{{template "icons"}}
+{{with .Announcement}}<div class="announce">{{.}}</div>{{end}}
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>Upload</a>
+      <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>Studio</a>
+      {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>My images</a>{{end}}
+      <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>API</a>
+      {{if and .User .User.IsAdmin}}<a href="/admin" {{if eq .Path "/admin"}}aria-current="page"{{end}}>Admin</a>{{end}}
+    </nav>
+    <div class="nav-r">
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch light or dark"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
+      {{if .User}}
+      <div class="menu" id="menu">
+        <button type="button" aria-haspopup="true" aria-label="Account menu"><span class="avatar">{{if .User.AvatarURL}}<img src="{{.User.AvatarURL}}" alt="" referrerpolicy="no-referrer">{{else}}{{slice .User.Email 0 1}}{{end}}</span></button>
+        <div class="menu-list">
+          <div class="who">{{.User.Email}}</div>
+          <a href="/dashboard"><svg width="16" height="16"><use href="#i-grid"/></svg>My images</a>
+          <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>Settings &amp; API keys</a>
+          {{if .User.IsAdmin}}<a href="/admin"><svg width="16" height="16"><use href="#i-shield"/></svg>Admin</a>{{end}}
+          <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>Sign out</button></form>
+        </div>
+      </div>
+      {{else}}
+      <a class="btn sm ghost" href="/login">Sign in</a>
+      {{end}}
+      <button class="icon-btn burger" id="burger" type="button" aria-label="Menu"><svg><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+{{if and .User .User.Warning}}
+<dialog id="warning" class="warning" data-open>
+  <h2>A message from the moderators</h2>
+  <p>{{.User.Warning}}</p>
+  <form method="post" action="/settings/ack-warning"><input type="hidden" name="back" value="{{.Path}}"><button class="btn primary" type="submit">I understand</button></form>
+</dialog>
+{{end}}
+{{template "content" .}}
+</main>
+<footer>
+  <div class="wrap">
+    <span><b>{{.Site}}</b> · open source image hosting</span>
+    <nav aria-label="Footer">
+      <a href="/tools">Studio</a>
+      <a href="/docs">API &amp; ShareX</a>
+      <a href="/legal">Terms &amp; privacy</a>
+      <a href="/legal#takedown">Report abuse</a>
+      <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="/static/js/app.js?v={{.Asset}}" defer></script>
+{{block "scripts" .}}{{end}}
+</body>
+</html>{{end}}

@@ -1,0 +1,13 @@
+{{define "content"}}{{$im := .Data}}
+<div class="wrap narrow">
+  <div class="card center" style="max-width:480px;margin:20px auto">
+    <img src="{{thumb $im}}" alt="" style="max-height:220px;margin:0 auto 16px;border-radius:12px">
+    <h1 style="font-size:1.5rem">Delete this image?</h1>
+    <p class="muted">The link <code>{{$im.ID}}</code> will stop working right away. This can't be undone.</p>
+    <form method="post" class="btn-row" style="justify-content:center">
+      <a class="btn" href="/{{$im.ID}}">Keep it</a>
+      <button class="btn danger solid" type="submit"><svg><use href="#i-trash"/></svg>Delete forever</button>
+    </form>
+  </div>
+</div>
+{{end}}

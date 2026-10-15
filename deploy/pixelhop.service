@@ -1,0 +1,25 @@
+# systemd unit. Install:
+#   sudo cp pixelhop /usr/local/bin/ && sudo useradd -r -m -d /var/lib/pixelhop pixelhop
+#   sudo cp deploy/pixelhop.service /etc/systemd/system/ && sudo cp .env.example /etc/pixelhop.env
+#   sudo systemctl enable --now pixelhop
+[Unit]
+Description=PixelHop image hosting
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pixelhop
+EnvironmentFile=/etc/pixelhop.env
+Environment=PIXELHOP_DATA=/var/lib/pixelhop
+ExecStart=/usr/local/bin/pixelhop serve
+Restart=on-failure
+# Hardening: PixelHop only needs its data folder and the network.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/pixelhop
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target

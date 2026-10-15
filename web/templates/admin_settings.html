@@ -1,0 +1,30 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head"><h1>Site settings</h1></div>
+  {{template "admin_nav" .}}
+  {{if $d.Saved}}<div class="alert ok">Saved.</div>{{end}}
+  <div class="grid-2">
+    <form class="card" method="post" action="/admin/settings">
+      <h2>Who can do what</h2>
+      <label class="check" style="margin:14px 0"><input type="checkbox" name="guest_uploads" {{if $d.GuestUploads}}checked{{end}}><span>Guests can upload<br><span class="small muted">Without an account; each upload gets a private delete link.</span></span></label>
+      <label class="check" style="margin:14px 0"><input type="checkbox" name="registration" {{if $d.Registration}}checked{{end}}><span>Anyone can create an account</span></label>
+      <div class="field"><label for="announcement">Announcement bar <span class="hint">shown on every page; leave empty to hide</span></label><input type="text" id="announcement" name="announcement" value="{{$d.Announcement}}" maxlength="300"></div>
+      <h2 style="margin-top:22px">Search &amp; sharing</h2>
+      <div class="field"><label for="seo_title">Home page title</label><input type="text" id="seo_title" name="seo_title" value="{{$d.SEOTitle}}" maxlength="120" placeholder="Free image hosting with a built-in photo studio"></div>
+      <div class="field"><label for="seo_description">Home page description <span class="hint">shown by Google and in link previews</span></label><textarea id="seo_description" name="seo_description" maxlength="300">{{$d.SEODescription}}</textarea></div>
+      <button class="btn primary" type="submit">Save</button>
+    </form>
+    <div class="card">
+      <h2>Server</h2>
+      <p class="muted small">These come from environment variables (see <code>.env.example</code>); restart PixelHop after changing them.</p>
+      <dl class="facts">
+        <dt>Storage</dt><dd>{{$d.Storage}}</dd>
+        <dt>Max upload</dt><dd>{{$d.MaxUploadMB}} MB × {{$d.MaxBatch}} files</dd>
+        <dt>Delete unviewed after</dt><dd>{{if $d.InactiveDays}}{{$d.InactiveDays}} days{{else}}never{{end}}</dd>
+        <dt>Google sign-in</dt><dd>{{if $d.Google}}on{{else}}off{{end}}</dd>
+        <dt>Trusted proxies</dt><dd>{{if $d.TrustedProxies}}{{$d.TrustedProxies}} ranges{{else}}none (direct){{end}}</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+{{end}}

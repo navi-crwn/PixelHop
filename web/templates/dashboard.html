@@ -1,0 +1,56 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  {{if $d.Welcome}}<div class="alert ok">Welcome to {{.Site}}! Uploads you make while signed in land here. Grab an API key in <a href="/settings#api">Settings</a> to upload from ShareX or scripts.</div>{{end}}
+  <div class="page-head">
+    <div>
+      <h1>My images</h1>
+      <p class="muted" style="margin:4px 0 0">{{$d.Total}} images · {{bytes $d.Used}} of {{bytes $d.Quota}} used</p>
+      <div class="meter" style="margin-top:8px" title="{{$d.Percent}}%"><i style="width:{{$d.Percent}}%"></i></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>Select</button>
+      <button class="btn danger hide" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
+      <a class="btn primary" href="/"><svg><use href="#i-upload"/></svg>Upload</a>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <form method="get" role="search">
+      <input type="search" name="q" value="{{$d.Query}}" placeholder="Search by name or link" aria-label="Search">
+      <select name="sort" aria-label="Sort" data-autosubmit>
+        <option value="">Newest</option>
+        <option value="old" {{if eq $d.Sort "old"}}selected{{end}}>Oldest</option>
+        <option value="views" {{if eq $d.Sort "views"}}selected{{end}}>Most viewed</option>
+        <option value="size" {{if eq $d.Sort "size"}}selected{{end}}>Largest</option>
+      </select>
+      <button class="btn" type="submit">Search</button>
+    </form>
+  </div>
+
+  {{if $d.Images}}
+  <div class="gallery" id="my-gallery">
+    {{range $d.Images}}
+    <div class="tile" style="background:{{.Color}}">
+      <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
+      {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
+      {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
+      <input class="tick" type="checkbox" value="{{.ID}}" aria-label="Select {{.Title}}">
+      <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>
+    </div>
+    {{end}}
+  </div>
+  {{if gt $d.Pages 1}}
+  <nav class="pager" aria-label="Pages">
+    {{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}&q={{$d.Query}}&sort={{$d.Sort}}">Previous</a>{{end}}
+    <span class="btn sm ghost">Page {{$d.Page}} of {{$d.Pages}}</span>
+    {{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}&q={{$d.Query}}&sort={{$d.Sort}}">Next</a>{{end}}
+  </nav>
+  {{end}}
+  {{else}}
+  <div class="empty">
+    <svg width="40" height="40" style="margin:0 auto 10px;opacity:.6"><use href="#i-image"/></svg>
+    {{if $d.Query}}<p>Nothing matches “{{$d.Query}}”.</p>{{else}}<p>No images yet. Your uploads show up here.</p><a class="btn primary" href="/">Upload your first image</a>{{end}}
+  </div>
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,23 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head"><h1>IP bans</h1></div>
+  {{template "admin_nav" .}}
+  {{with $d.Error}}<div class="alert err">{{.}}</div>{{end}}
+  <div class="card">
+    <h2>Ban an address</h2>
+    <p class="muted small">Banned addresses can still view images but can't upload, report, sign up or sign in.</p>
+    <form method="post" action="/admin/bans" class="copy">
+      <input type="text" name="ip" placeholder="203.0.113.7 or 2001:db8::1" required aria-label="IP address">
+      <input type="text" name="reason" placeholder="Reason (optional)" aria-label="Reason">
+      <button class="btn danger" type="submit">Ban</button>
+    </form>
+  </div>
+  <div class="table-wrap" style="margin-top:16px"><table>
+    <tr><th>Address</th><th>Reason</th><th>Since</th><th></th></tr>
+    {{range $d.Bans}}
+    <tr><td class="mono">{{.IP}}</td><td class="small">{{.Reason}}</td><td class="small muted">{{ago .CreatedAt}}</td>
+      <td style="text-align:right"><form method="post" action="/admin/bans/delete"><input type="hidden" name="ip" value="{{.IP}}"><button class="btn sm">Unban</button></form></td></tr>
+    {{else}}<tr><td colspan="4" class="muted center">Nobody is banned.</td></tr>{{end}}
+  </table></div>
+</div>
+{{end}}

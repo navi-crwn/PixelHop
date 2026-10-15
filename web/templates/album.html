@@ -1,0 +1,18 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head">
+    <div>
+      <span class="pill acc"><svg width="12" height="12"><use href="#i-album"/></svg>Album</span>
+      <h1 style="margin-top:8px">{{if $d.Album.Title}}{{$d.Album.Title}}{{else}}{{len $d.Images}} images{{end}}</h1>
+      <p class="muted" style="margin:0">Shared <time datetime="{{iso $d.Album.CreatedAt}}">{{ago $d.Album.CreatedAt}}</time></p>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" type="button" data-copy-text="{{$d.Link}}"><svg><use href="#i-link"/></svg>Copy album link</button>
+      <a class="btn" href="/qr/{{$d.Album.ID}}.png?a=1" target="_blank" rel="noopener"><svg><use href="#i-qr"/></svg>QR</a>
+    </div>
+  </div>
+  <div class="masonry">
+    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}"></a>{{end}}
+  </div>
+</div>
+{{end}}

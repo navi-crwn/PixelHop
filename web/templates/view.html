@@ -1,0 +1,83 @@
+{{define "content"}}{{$d := .Data}}{{$im := $d.Image}}
+<div class="wrap">
+  <div class="viewer">
+    <div>
+      <div class="stage" id="stage" style="background-color:{{$im.Color}}22">
+        <img src="{{direct $im}}" alt="{{$im.Title}}" width="{{$im.Width}}" height="{{$im.Height}}" id="photo" style="background:{{$im.Color}}">
+      </div>
+      {{with $d.Siblings}}{{if gt (len .) 1}}
+      <div class="strip" aria-label="Other images in this album">
+        {{range .}}<a href="/{{.ID}}" {{if eq .ID $im.ID}}aria-current="true"{{end}}><img src="{{thumb .}}" alt="" loading="lazy"></a>{{end}}
+      </div>
+      {{end}}{{end}}
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <h1 id="title">{{if $im.Title}}{{$im.Title}}{{else}}{{$im.ID}}{{end}}</h1>
+        <div class="muted small">Uploaded <time datetime="{{iso $im.CreatedAt}}">{{ago $im.CreatedAt}}</time>{{if $im.ExpiresAt}} · <span class="pill warn"><svg width="12" height="12"><use href="#i-clock"/></svg>deletes in {{until $im.ExpiresAt}}</span>{{end}}{{if $im.Hidden}} · <span class="pill bad">hidden by moderators</span>{{end}}</div>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn primary sm" type="button" data-copy-text="{{$d.Links.Page}}"><svg><use href="#i-link"/></svg>Copy link</button>
+          <a class="btn sm" href="{{$d.Links.Download}}"><svg><use href="#i-down"/></svg>Download</a>
+          <a class="btn sm" href="/tools?src={{$im.ID}}"><svg><use href="#i-adjust"/></svg>Edit</a>
+        </div>
+        {{with $d.Album}}<p class="small" style="margin:12px 0 0"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-album"/></svg> Part of <a href="/a/{{.ID}}">an album</a></p>{{end}}
+      </div>
+
+      <div class="card">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="direct">Direct</button>
+          <button role="tab" aria-selected="false" data-tab="md">Markdown</button>
+          <button role="tab" aria-selected="false" data-tab="html">HTML</button>
+          <button role="tab" aria-selected="false" data-tab="bb">BBCode</button>
+        </div>
+        <div class="copy" data-panel="direct"><input type="text" readonly value="{{$d.Links.Direct}}" aria-label="Direct link"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
+        <div class="copy hide" data-panel="md"><input type="text" readonly value="{{$d.Links.Markdown}}" aria-label="Markdown"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
+        <div class="copy hide" data-panel="html"><input type="text" readonly value="{{$d.Links.HTML}}" aria-label="HTML"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
+        <div class="copy hide" data-panel="bb"><input type="text" readonly value="{{$d.Links.BBCode}}" aria-label="BBCode"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
+
+        <dl class="facts">
+          <dt>Size</dt><dd>{{dims $im.Width $im.Height}} px</dd>
+          <dt>File</dt><dd>{{bytes $im.Size}} · {{$im.Ext}}</dd>
+          <dt>Color</dt><dd><span class="swatch" style="background:{{$im.Color}}"></span><span class="mono">{{$im.Color}}</span></dd>
+          <dt>Views</dt><dd>{{$im.Views}}</dd>
+          {{if ne $im.Backend "remote"}}<dt>Metadata</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>location removed</span></dd>{{end}}
+        </dl>
+      </div>
+
+      <div class="card center">
+        <img class="qr" src="/qr/{{$im.ID}}.png" alt="QR code for this page" loading="lazy" width="136" height="136">
+        <p class="small muted" style="margin:10px 0 0">Scan to open on a phone</p>
+      </div>
+
+      <div class="btn-row">
+        {{if $d.Owner}}
+        <button class="btn sm ghost" type="button" id="rename" data-id="{{$im.ID}}"><svg><use href="#i-edit"/></svg>Rename</button>
+        <button class="btn sm ghost danger" type="button" id="delete" data-id="{{$im.ID}}"><svg><use href="#i-trash"/></svg>Delete</button>
+        {{end}}
+        <button class="btn sm ghost" type="button" id="report-open" style="margin-left:auto"><svg><use href="#i-flag"/></svg>Report</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<dialog id="report">
+  <form method="dialog" id="report-form" data-id="{{$im.ID}}">
+    <h2>Report this image</h2>
+    <p class="muted small">Tell the moderators what's wrong. Reports are anonymous.</p>
+    <div class="radios">
+      <label><input type="radio" name="reason" value="illegal" required> Illegal content or child abuse</label>
+      <label><input type="radio" name="reason" value="nsfw"> Sexual or graphic, posted without consent</label>
+      <label><input type="radio" name="reason" value="privacy"> Shares my private information</label>
+      <label><input type="radio" name="reason" value="copyright"> My copyright</label>
+      <label><input type="radio" name="reason" value="spam"> Spam or scam</label>
+      <label><input type="radio" name="reason" value="other"> Something else</label>
+    </div>
+    <textarea name="note" placeholder="Anything else we should know? (optional)" maxlength="1000"></textarea>
+    <div class="btn-row" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="send">Send report</button>
+    </div>
+  </form>
+</dialog>
+{{end}}

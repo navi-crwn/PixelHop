@@ -1,0 +1,8 @@
+{
+  "name": "pixelhop-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Only for rendering the README images; PixelHop itself needs no Node.",
+  "scripts": { "readme-images": "node scripts/readme-images.mjs" },
+  "devDependencies": { "playwright": "1.48.2" }
+}

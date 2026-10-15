@@ -1,0 +1,111 @@
+{{define "content"}}
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow"><b>v3</b> Rebuilt in Go: one tiny binary, open source</span>
+    <h1>Drop an image. <span class="grad">Get a link.</span></h1>
+    <p class="lead">Free image hosting that removes your GPS location before anyone sees it. Albums, ShareX, an API, and a photo studio that runs right in your browser.</p>
+
+    {{if or .GuestUploads .User}}
+    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-batch="{{.MaxBatch}}">
+      <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose images to upload">
+        <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
+        <h2>Drop images here</h2>
+        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> · JPG, PNG, GIF, WebP, BMP · up to {{.MaxMB}} MB each, {{.MaxBatch}} at once</p>
+        <div class="btn-row">
+          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose images</button>
+          <button class="btn lg" type="button" id="show-url"><svg><use href="#i-link"/></svg>From a link</button>
+        </div>
+        <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp" multiple hidden>
+        <form class="url-row hide" id="url-form">
+          <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
+          <button class="btn" type="submit">Fetch</button>
+        </form>
+        <div class="opts" id="opts">
+          <label>Delete after
+            <select id="expire">
+              <option value="">Never</option>
+              <option value="10m">10 minutes</option>
+              <option value="1h">1 hour</option>
+              <option value="1d">1 day</option>
+              <option value="7d">7 days</option>
+              <option value="30d">30 days</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="slug" checked> File name in link</label>
+          <label><input type="checkbox" id="album" checked> Group several into an album</label>
+        </div>
+      </div>
+    </div>
+    <div class="album-banner hide" id="album-banner" style="text-align:left">
+      <svg width="20" height="20"><use href="#i-album"/></svg><b>Album</b>
+      <input type="text" readonly id="album-link" aria-label="Album link">
+      <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
+      <a class="btn sm" id="album-open" href="#">Open</a>
+    </div>
+    <div class="uploads" id="uploads" aria-live="polite"></div>
+    {{if not .User}}<p class="small faint" style="margin-top:14px">Uploading as a guest: you get a private delete link for each image. <a href="/register">Create a free account</a> to keep a gallery.</p>{{end}}
+    {{else}}
+    <div class="card" style="max-width:520px;margin:0 auto">
+      <h2>Sign in to upload</h2>
+      <p class="muted">Guest uploads are turned off on this server.</p>
+      <div class="btn-row" style="justify-content:center"><a class="btn primary" href="/login">Sign in</a><a class="btn" href="/register">Create account</a></div>
+    </div>
+    {{end}}
+
+    {{with .Data}}{{if gt .Images 0}}
+    <div class="stats"><div><b data-count="{{.Images}}">{{.Images}}</b>images hosted</div><div><b data-count="{{.Views}}">{{.Views}}</b>views served</div></div>
+    {{end}}{{end}}
+  </section>
+
+  <section class="section" id="device-history-wrap" hidden>
+    <div class="page-head"><div><h2 style="margin:0">Uploaded from this device</h2><p class="muted small" style="margin:4px 0 0">Kept only in this browser, with each image's delete link.</p></div>
+      <button class="btn sm ghost" type="button" id="clear-history">Forget this list</button></div>
+    <div class="gallery" id="device-history"></div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-head">
+      <h2>Everything an image host should do. <span class="grad">Nothing it shouldn't.</span></h2>
+      <p>No ads, no tracking scripts, no premium tier hiding the good parts.</p>
+    </div>
+    <div class="features">
+      <div class="feature" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3>Location removed</h3><p>Photos from phones carry GPS coordinates and camera details. {{.Site}} strips them on upload, without re-compressing your image.</p></div>
+      <div class="feature" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>Fast links</h3><p>A short readable link, a direct link, Markdown, HTML, BBCode and a QR code for every image, ready to copy.</p></div>
+      <div class="feature" style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>Albums</h3><p>Drop a handful of photos and share them as one album link, with a clean gallery page.</p></div>
+      <div class="feature" style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3>Self-destruct</h3><p>Let an image delete itself after 10 minutes, a day or a month. Guests get a private delete link, too.</p></div>
+      <div class="feature" style="--c:var(--amber)"><div class="ico"><svg><use href="#i-terminal"/></svg></div><h3>ShareX &amp; API</h3><p>Screenshot, and the link is on your clipboard. A one-click ShareX config and a simple REST API with keys.</p></div>
+      <div class="feature" style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3>Host it yourself</h3><p>One small Go binary with SQLite inside. Store images on disk or any S3 bucket: R2, MinIO, B2, Contabo.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="studio-teaser">
+      <div>
+        <h2>A photo studio that never uploads your photo.</h2>
+        <p class="muted">Compress, resize, crop, convert, read text, remove backgrounds, blur faces and plates, and pull a color palette. It all runs on your own device; the image only leaves it if you choose to upload the result.</p>
+        <a class="btn primary" href="/tools"><svg><use href="#i-adjust"/></svg>Open the studio</a>
+      </div>
+      <div class="tool-chips">
+        <a href="/tools#compress"><svg><use href="#i-compress"/></svg>Compress</a>
+        <a href="/tools#resize"><svg><use href="#i-resize"/></svg>Resize</a>
+        <a href="/tools#crop"><svg><use href="#i-crop"/></svg>Crop</a>
+        <a href="/tools#convert"><svg><use href="#i-convert"/></svg>Convert</a>
+        <a href="/tools#adjust"><svg><use href="#i-adjust"/></svg>Adjust</a>
+        <a href="/tools#redact"><svg><use href="#i-blur"/></svg>Blur &amp; pixelate</a>
+        <a href="/tools#ocr"><svg><use href="#i-text"/></svg>Image to text</a>
+        <a href="/tools#rembg"><svg><use href="#i-eraser"/></svg>Remove background</a>
+        <a href="/tools#palette"><svg><use href="#i-palette"/></svg>Color palette</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Three steps, no account needed</h2></div>
+    <div class="steps">
+      <div class="step"><h3>Drop or paste</h3><p>Drag files in, paste a screenshot, or give a link to an image on the web.</p></div>
+      <div class="step"><h3>We clean it up</h3><p>Hidden location and camera data are removed and a thumbnail is made in a blink.</p></div>
+      <div class="step"><h3>Share anywhere</h3><p>Copy the link, embed code or QR. Previews look right on Discord, X, WhatsApp and forums.</p></div>
+    </div>
+  </section>
+</div>
+{{end}}

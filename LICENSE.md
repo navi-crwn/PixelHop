@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2025 Ivan Novskies (navi-crwn)
+Copyright (c) 2025-2026 Ivan Novskies (navi-crwn)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,87 +24,37 @@ SOFTWARE.
 
 # Credits & Acknowledgments
 
-## Core Technologies
+## PixelHop 3
 
-### Backend
-| Technology | Version | License | Link |
-|------------|---------|---------|------|
-| PHP | 8.1+ | PHP License | [php.net](https://www.php.net) |
-| MySQL | 5.7+ | GPL | [mysql.com](https://www.mysql.com) |
-| Nginx | - | BSD-2 | [nginx.org](https://nginx.org) |
+| Component | License | Link |
+|---|---|---|
+| Go standard library | BSD-3-Clause | [go.dev](https://go.dev) |
+| modernc.org/sqlite (pure-Go SQLite) | BSD-3-Clause | [gitlab.com/cznic/sqlite](https://gitlab.com/cznic/sqlite) |
+| golang.org/x/image, x/crypto | BSD-3-Clause | [pkg.go.dev/golang.org/x](https://pkg.go.dev/golang.org/x/image) |
+| rsc.io/qr | BSD-3-Clause | [pkg.go.dev/rsc.io/qr](https://pkg.go.dev/rsc.io/qr) |
+| go-sql-driver/mysql (only for importing PixelHop 2) | MPL-2.0 | [github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) |
 
-### Frontend
-| Technology | Version | License | Link |
-|------------|---------|---------|------|
-| TailwindCSS | 3.x | MIT | [tailwindcss.com](https://tailwindcss.com) |
-| Lucide Icons | - | ISC | [lucide.dev](https://lucide.dev) |
-| GSAP | 3.x | Standard | [greensock.com](https://greensock.com) |
+### Loaded in the browser on demand (not bundled)
 
-### Python / AI
-| Technology | Version | License | Link |
-|------------|---------|---------|------|
-| Python | 3.10+ | PSF | [python.org](https://www.python.org) |
-| Tesseract OCR | 4.x | Apache 2.0 | [github.com/tesseract-ocr](https://github.com/tesseract-ocr/tesseract) |
-| pytesseract | - | Apache 2.0 | [pypi.org/project/pytesseract](https://pypi.org/project/pytesseract/) |
-| rembg | - | MIT | [github.com/danielgatis/rembg](https://github.com/danielgatis/rembg) |
-| Pillow (PIL) | - | HPND | [pillow.readthedocs.io](https://pillow.readthedocs.io) |
+| Library | License | Used for |
+|---|---|---|
+| [tesseract.js](https://github.com/naptha/tesseract.js) | Apache-2.0 | Image to text (OCR) |
+| [@imgly/background-removal](https://github.com/imgly/background-removal-js) | AGPL-3.0 | Background removal; loaded unmodified from jsDelivr |
 
-### Services & APIs
-| Service | Purpose | Link |
-|---------|---------|------|
-| Google OAuth 2.0 | User authentication | [developers.google.com](https://developers.google.com/identity) |
-| Cloudflare Turnstile | Bot protection | [cloudflare.com/turnstile](https://www.cloudflare.com/products/turnstile/) |
-| S3-compatible Storage | Image hosting | Various providers |
+Icons and the pixel-bunny logo were drawn for PixelHop. The GitHub mark is from Octicons (MIT).
 
-## PHP Extensions
-
-- **PDO MySQL** — Database connectivity
-- **GD Library** — Image processing
-- **ImageMagick** — Advanced image manipulation (optional)
-- **cURL** — HTTP requests
-- **JSON** — Data interchange
-
-## Fonts
-
-- **Inter** — UI font, SIL Open Font License
-
-## Acknowledgments
-
-### Inspirations
-- [Imgur](https://imgur.com) — Simple image hosting done right
-- [remove.bg](https://remove.bg) — AI background removal
-- [TinyPNG](https://tinypng.com) — Smart image compression
-
-### Development Tools
-| Tool | Purpose |
-|------|---------|
-| VS Code | Primary IDE |
-| GitHub | Version control |
-| GitHub Copilot | AI assistance |
-| TablePlus | Database management |
-
-### Infrastructure
-- [Contabo](https://contabo.com) — VPS hosting
-- [Cloudflare](https://cloudflare.com) — CDN & security
-- [Let's Encrypt](https://letsencrypt.org) — SSL certificates
-
----
+PixelHop 2 (PHP, in `legacy/`) also used PHP, MySQL, TailwindCSS, Lucide, Tesseract, rembg, Pillow and Cloudflare Turnstile.
 
 ## Contributing
 
-Pull requests are welcome. Please open an issue first to discuss proposed changes.
-
-## Support
+Pull requests are welcome. Please open an issue first to discuss bigger changes, and run `make test` before sending.
 
 - Found a bug? [Open an issue](https://github.com/navi-crwn/pixelhop/issues)
-- Feature request? [Start a discussion](https://github.com/navi-crwn/pixelhop/discussions)
 
 ---
 
 <div align="center">
 
 Built by [navi-crwn](https://github.com/navi-crwn)
-
-Part of the [HEL.ink](https://hel.ink) project
 
 </div>
