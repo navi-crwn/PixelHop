@@ -63,6 +63,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /legal", a.legal)
 	mux.HandleFunc("GET /a/{id}", a.album)
 	mux.HandleFunc("GET /{id}", a.view)
+	mux.HandleFunc("GET /result", a.legacyResult) // PixelHop 2 upload results: /result?id=a,b
 	mux.HandleFunc("GET /delete/{id}/{token}", a.deleteConfirm)
 	mux.HandleFunc("POST /delete/{id}/{token}", a.deleteWithToken)
 	mux.HandleFunc("POST /report/{id}", a.report)
