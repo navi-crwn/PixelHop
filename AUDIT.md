@@ -93,6 +93,7 @@ Upscaling and object erasing were dropped: they need a GPU-class model to be wor
 
 ## Not carried over (yet)
 
-- **Email** verification and password-reset mails. Admins can reset a password in the panel or with `pixelhop user passwd`.
 - **Google Safe Browsing scans** (SafeGuard), the automatic abuse scoring (AbuseGuard), and the daily summary mail.
-- **Server-side upscale, erase and face blur.** The studio has manual blur/pixelate instead.
+- **Orphan-file cleanup** for storage buckets.
+
+Email verification and password resets are handled by HEL.ink when its accounts are used; upscale, magic eraser and face blur came back as server AI tools.

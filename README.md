@@ -65,10 +65,12 @@
 - **🙋 No account needed.**
   - Guests get a private delete link for every image, also remembered in their browser.
   - Accounts add a gallery with search, sorting, renaming, bulk delete and a storage quota.
-- **🎨 Photo studio, in the browser.**
-  - Compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, and pick a color palette.
-  - **OCR** in six languages (tesseract.js) and **background removal** (@imgly/background-removal).
-  - Nothing is uploaded unless you press *Upload result*.
+- **🎨 Photo studio.**
+  - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in six languages (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
+  - On the server, for signed-in users (optional [`tools/ai-server.py`](tools/ai-server.py)): **background removal** in about a second (rembg), **automatic face blur** (OpenCV), **magic eraser** (LaMa) and **HD upscale 2×** (Real-ESRGAN). One image at a time, daily limits, nothing stored.
+- **📦 Batch.** Resize, convert, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
+- **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
+- **👤 One account with HEL.ink** (optional). Set `HELINK_URL` and `HELINK_SSO_SECRET` and people sign in with their [HEL.ink](https://hel.ink) account; sign-up, passwords, Google and 2FA live there.
 - **🔌 API & ShareX.**
   - A REST API with `Bearer` keys.
   - The settings page makes a ready-to-use `.sxcu` file for ShareX.
@@ -126,6 +128,9 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | — | For S3-compatible storage |
 | `S3_PUBLIC_URL` | — | CDN address of the bucket; image links redirect there |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
+| `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
+| `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
 | `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
 
 </details>
@@ -134,7 +139,7 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 <summary><b>Behind nginx / Cloudflare, and as a service</b></summary>
 
 - [`deploy/nginx.conf`](deploy/nginx.conf) is a reverse-proxy example. Set `PIXELHOP_TRUSTED_PROXIES=127.0.0.1` so PixelHop believes nginx's `X-Forwarded-For`; add `cloudflare` if Cloudflare is in front.
-- [`deploy/pixelhop.service`](deploy/pixelhop.service) is a hardened systemd unit.
+- [`deploy/pixelhop.service`](deploy/pixelhop.service) is a hardened systemd unit; [`deploy/pixelhop-ai.service`](deploy/pixelhop-ai.service) runs the optional AI tools (`pip install "rembg[cpu]" opencv-python-headless onnxruntime`, plus the LaMa and Real-ESRGAN x2plus ONNX files).
 - Back up by copying the data folder (or `sqlite3 data/pixelhop.db ".backup copy.db"` while it runs).
 
 </details>
@@ -160,6 +165,8 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://p.hel.
 | `GET` · `PATCH` · `DELETE /api/v1/images/{id}` | Read, rename (`{"title": …}`) or delete one |
 | `GET /api/v1/me` | Your account and storage use |
 | `GET /api/v1/stats` | Public totals |
+| `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |
+| `GET /tools/qr.png` · `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
 
 Every answer looks like `{"success": true, "data": …}` or `{"success": false, "error": "…"}`. The full reference is at [`/docs`](https://p.hel.ink/docs) on any PixelHop server.
 
