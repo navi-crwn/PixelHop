@@ -1,0 +1,27 @@
+# Optional AI tools for PixelHop (background removal, face blur, magic eraser,
+# HD upscale). Point PIXELHOP_REMBG_URL at http://127.0.0.1:7001.
+#   python3 -m venv /opt/pixelhop-ai && /opt/pixelhop-ai/bin/pip install "rembg[cpu]" opencv-python-headless onnxruntime pillow numpy
+#   Put lama.onnx and RealESRGAN_x2plus.onnx somewhere and set LAMA_MODEL / ESRGAN_MODEL.
+[Unit]
+Description=PixelHop AI tools
+After=network-online.target
+
+[Service]
+User=pixelhop
+Environment=AI_HOST=127.0.0.1
+Environment=AI_PORT=7001
+Environment=AI_IDLE_MINUTES=15
+Environment=LAMA_MODEL=/var/lib/pixelhop/models/lama.onnx
+Environment=ESRGAN_MODEL=/var/lib/pixelhop/models/RealESRGAN_x2plus.onnx
+ExecStart=/opt/pixelhop-ai/bin/python3 /usr/local/share/pixelhop/ai-server.py
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/pixelhop
+MemoryMax=3G
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

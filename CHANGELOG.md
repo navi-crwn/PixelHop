@@ -6,6 +6,14 @@ All notable changes to PixelHop will be documented in this file.
 
 PixelHop rebuilt from scratch in Go. See [AUDIT.md](AUDIT.md) for why.
 
+### Added after the first preview
+- **One account with HEL.ink**: optional sign-in with a HEL.ink account (signed, single-use tickets); sign-up, password resets, Google and 2FA handled by HEL.ink; `pixelhop user merge` folds old accounts in.
+- **Server AI tools** (optional `tools/ai-server.py`): background removal, automatic face blur, magic eraser (LaMa) and HD upscale 2x (Real-ESRGAN), sign-in only with daily limits.
+- **Batch page**: the same steps for many images, then one ZIP or one album.
+- **Copy all links** after bulk uploads, on albums and on old `/result` links; share buttons; thumbnail links; gallery select all, copy links and ZIP download.
+- **QR code generator** for any text, PNG or SVG.
+- Cloudflare **Turnstile**, a **Help** page, admin tool usage and disk space, local-only `/metrics`, and redirects for every PixelHop 2 page and tool address.
+
 ### Added
 - **One binary**: web server, SQLite database and cleanup janitor in a ~16 MB executable. Docker image, systemd unit and nginx example included.
 - **Lossless metadata stripping**: GPS/EXIF, XMP and IPTC removed from JPEG, PNG and WebP without re-encoding; EXIF rotation applied first.

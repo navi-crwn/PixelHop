@@ -94,6 +94,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /auth/google", a.googleStart)
 	mux.HandleFunc("GET /auth/google/callback", a.googleCallback)
 	mux.HandleFunc("GET /auth/google-callback", a.googleCallback) // redirect URI used by PixelHop 2
+	mux.HandleFunc("GET /auth/google-callback.php", a.googleCallback)
 
 	// member area
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
