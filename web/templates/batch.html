@@ -1,0 +1,44 @@
+{{define "content"}}
+<div class="wrap" style="max-width:1100px">
+  <div class="page-head">
+    <div><h1>Batch</h1><p class="muted" style="margin:4px 0 0">Do the same thing to many images at once, then download a ZIP or upload them as one album.</p></div>
+    <a class="btn ghost" href="/tools"><svg><use href="#i-adjust"/></svg>Back to studio</a>
+  </div>
+
+  <div class="batch" id="batch" data-signed-in="{{if .User}}1{{end}}" data-server="{{if .RembgServer}}1{{end}}" data-max-batch="{{.MaxBatch}}">
+    <div>
+      <div class="drop-in batch-drop" id="b-drop" role="button" tabindex="0">
+        <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
+        <h2 style="font-size:1.15rem">Drop images here</h2>
+        <p class="muted small">or <button class="btn sm" type="button" id="b-pick">choose files</button> · they stay on this device until you upload</p>
+        <input type="file" id="b-file" accept="image/*" multiple hidden>
+      </div>
+      <div class="batch-list" id="b-list"></div>
+    </div>
+
+    <aside class="panel">
+      <h2>Steps</h2>
+      <p class="desc">Applied to every image, top to bottom.</p>
+      <div class="field"><label for="b-size">Resize (longest side)</label>
+        <select id="b-size"><option value="0">Keep size</option><option value="3840">3840 px (4K)</option><option value="2048">2048 px</option><option value="1920">1920 px</option><option value="1600">1600 px</option><option value="1080">1080 px</option><option value="800">800 px</option><option value="512">512 px</option></select></div>
+      <div class="field"><label for="b-format">Format</label>
+        <select id="b-format"><option value="">Same as original</option><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option><option value="image/avif">AVIF</option></select></div>
+      <div class="field"><label>Quality</label><div class="range-row"><input type="range" id="b-quality" min="10" max="100" value="82"><output id="b-qout">82</output></div></div>
+      <div class="batch-ai">
+        <label class="check"><input type="checkbox" id="b-rembg"> <span>Remove background <span class="pill acc">AI</span></span></label>
+        <label class="check"><input type="checkbox" id="b-faces"> <span>Blur faces <span class="pill acc">AI</span></span></label>
+        <label class="check"><input type="checkbox" id="b-upscale"> <span>HD upscale 2× <span class="pill acc">AI</span><br><span class="small muted">images over 1 MP are shrunk to 1 MP first</span></span></label>
+        <p class="small muted" id="b-ai-note"></p>
+      </div>
+      <hr style="margin:16px 0">
+      <div class="btn-row">
+        <button class="btn primary" type="button" id="b-zip" disabled><svg><use href="#i-down"/></svg>Download ZIP</button>
+        <button class="btn" type="button" id="b-upload" disabled><svg><use href="#i-upload"/></svg>Upload as album</button>
+      </div>
+      <div class="out-info" id="b-status" style="display:none"></div>
+      <div id="b-result" class="hide" style="margin-top:10px"><div class="copy"><input type="text" readonly id="b-link" aria-label="Album link"><button class="btn sm" type="button" data-copy="#b-link"><svg><use href="#i-copy"/></svg></button></div></div>
+    </aside>
+  </div>
+</div>
+{{end}}
+{{define "scripts"}}<script src="/static/js/batch.js?v={{.Asset}}" defer></script>{{end}}

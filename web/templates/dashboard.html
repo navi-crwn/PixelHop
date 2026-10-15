@@ -9,7 +9,13 @@
     </div>
     <div class="btn-row">
       <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>Select</button>
-      <button class="btn danger hide" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
+      <span class="sel-actions hide" id="sel-actions">
+        <button class="btn ghost" type="button" id="select-all">Select all</button>
+        <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>Copy links</button>
+        <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
+        <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
+      </span>
+      <form method="post" action="/dashboard/download" id="zip-form" hidden></form>
       <a class="btn primary" href="/"><svg><use href="#i-upload"/></svg>Upload</a>
     </div>
   </div>
@@ -30,7 +36,7 @@
   {{if $d.Images}}
   <div class="gallery" id="my-gallery">
     {{range $d.Images}}
-    <div class="tile" style="background:{{.Color}}">
+    <div class="tile" style="background:{{.Color}}" data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}">
       <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
       {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
       {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}

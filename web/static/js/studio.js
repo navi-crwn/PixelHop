@@ -162,7 +162,7 @@
     toolBox.innerHTML = '';
     var h = document.createElement('h2'); h.textContent = tool.title; toolBox.appendChild(h);
     var p = document.createElement('p'); p.className = 'desc'; p.textContent = tool.desc; toolBox.appendChild(p);
-    if (!cur) { var e = document.createElement('p'); e.className = 'small muted'; e.textContent = 'Open an image to start.'; toolBox.appendChild(e); return; }
+    if (!cur && !tool.noImage) { var e = document.createElement('p'); e.className = 'small muted'; e.textContent = 'Open an image to start.'; toolBox.appendChild(e); return; }
     tool.ui(toolBox);
   }
   $$('.tool-list [data-tool]').forEach(function (b) { b.addEventListener('click', function () { pick(b.dataset.tool); }); });
@@ -412,6 +412,23 @@
     return o;
   }
 
+  // obscure hides a rectangle of src, drawn into dst: pixelate, blur or a black box.
+  function obscure(dst, src, x, y, w, h, mode, strength) {
+    var cx = dst.getContext('2d');
+    if (mode === 'box') { cx.fillStyle = '#000'; cx.fillRect(x, y, w, h); return; }
+    var k = mode === 'pixelate' ? Math.max(2, Math.round(Math.max(w, h) / (60 - strength))) : Math.max(2, strength / 2);
+    var small = document.createElement('canvas'); small.width = Math.max(1, Math.round(w / k)); small.height = Math.max(1, Math.round(h / k));
+    var sx = small.getContext('2d'); sx.imageSmoothingEnabled = mode === 'blur';
+    sx.drawImage(src, x, y, w, h, 0, 0, small.width, small.height);
+    if (mode === 'blur') { // a second pass smooths the blocky edges
+      var tiny = document.createElement('canvas'); tiny.width = Math.max(1, small.width >> 1); tiny.height = Math.max(1, small.height >> 1);
+      tiny.getContext('2d').drawImage(small, 0, 0, tiny.width, tiny.height); small = tiny;
+    }
+    cx.imageSmoothingEnabled = mode === 'blur'; cx.imageSmoothingQuality = 'high';
+    cx.drawImage(small, 0, 0, small.width, small.height, x, y, w, h);
+  }
+  window.phObscure = obscure;
+
   // ---------- redact ----------
   tools.redact = {
     title: 'Blur & pixelate', desc: 'Hide faces, plates, names or chat bubbles. Drag a box over each part you want to hide.',
@@ -442,20 +459,8 @@
         var x = Math.round(Math.min(s.x, q.x) * cur.width), y = Math.round(Math.min(s.y, q.y) * cur.height);
         var w = Math.round(Math.abs(q.x - s.x) * cur.width), h = Math.round(Math.abs(q.y - s.y) * cur.height);
         if (w < 3 || h < 3) return;
-        var o = clone(cur), cx = o.getContext('2d');
-        if (mode === 'box') { cx.fillStyle = '#000'; cx.fillRect(x, y, w, h); }
-        else {
-          var k = mode === 'pixelate' ? Math.max(2, Math.round(Math.max(w, h) / (60 - strength))) : Math.max(2, strength / 2);
-          var small = document.createElement('canvas'); small.width = Math.max(1, Math.round(w / k)); small.height = Math.max(1, Math.round(h / k));
-          var sx = small.getContext('2d'); sx.imageSmoothingEnabled = mode === 'blur';
-          sx.drawImage(cur, x, y, w, h, 0, 0, small.width, small.height);
-          if (mode === 'blur') { // a second pass smooths the blocky edges
-            var tiny = document.createElement('canvas'); tiny.width = Math.max(1, small.width >> 1); tiny.height = Math.max(1, small.height >> 1);
-            tiny.getContext('2d').drawImage(small, 0, 0, tiny.width, tiny.height); small = tiny;
-          }
-          cx.imageSmoothingEnabled = mode === 'blur'; cx.imageSmoothingQuality = 'high';
-          cx.drawImage(small, 0, 0, small.width, small.height, x, y, w, h);
-        }
+        var o = clone(cur);
+        obscure(o, cur, x, y, w, h, mode, strength);
         commit(o);
       }
       view.style.cursor = 'crosshair';
@@ -613,5 +618,163 @@
     }
   };
 
-  pick(location.hash.slice(1) || 'compress');
+  // ---------- server AI tools (sign-in required) ----------
+  function needServer(p) {
+    if (!serverRembg) { p.appendChild(el('p', { class: 'small muted', text: 'This tool runs on the server, which is not set up here.' })); return false; }
+    if (!signedIn) {
+      p.appendChild(el('p', { class: 'small muted', text: 'This tool runs on our server. Sign in (free) to use it.' }));
+      p.appendChild(el('a', { class: 'btn primary', href: '/login?next=' + encodeURIComponent('/tools' + location.hash), text: 'Sign in' }));
+      return false;
+    }
+    return true;
+  }
+  function canvasBlob(c, type) { return new Promise(function (res) { c.toBlob(res, type || 'image/png', 0.95); }); }
+  // serverTool posts the current image (and optional extra files) and returns the Response.
+  function serverTool(name, extra) {
+    return canvasBlob(cur, cur.width * cur.height > 4e6 ? 'image/jpeg' : 'image/png').then(function (blob) {
+      var fd = new FormData(); fd.append('file', blob, srcName + (blob.type === 'image/jpeg' ? '.jpg' : '.png'));
+      for (var k in (extra || {})) fd.append(k, extra[k], k + '.png');
+      return fetch('/api/v1/tools/' + name, { method: 'POST', body: fd, headers: { Accept: 'image/png, application/json' } });
+    }).then(function (r) {
+      if (r.ok) return r;
+      return r.json().then(function (j) { throw new Error(j.error || 'The server could not do that'); }, function () { throw new Error('The server could not do that (' + r.status + ')'); });
+    });
+  }
+  function applyResult(r, tool) {
+    return r.blob().then(function (b) { return createImageBitmap(b); })
+      .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick(tool); });
+  }
+
+  // ---------- face blur ----------
+  tools.faces = {
+    title: 'Blur faces', desc: 'Finds faces and hides them in one go. Missed one? Use “Blur & pixelate” to cover it by hand.',
+    ui: function (p) {
+      if (!needServer(p)) return;
+      var mode = 'blur', strength = 22;
+      p.appendChild(field('Style', seg([['blur', 'Blur'], ['pixelate', 'Pixelate'], ['box', 'Black box']], mode, function (m) { mode = m; })));
+      p.appendChild(field('Strength', range(6, 40, strength, 1, function (x) { strength = x; })));
+      var found = el('p', { class: 'small muted' });
+      p.appendChild(btn('Find & blur faces', function () {
+        busy('Looking for faces…');
+        serverTool('faces').then(function (r) { return r.json(); }).then(function (j) {
+          busy(false);
+          var list = j.faces || [];
+          if (!list.length) { found.textContent = 'No faces found. Use “Blur & pixelate” to cover them by hand.'; return; }
+          var o = clone(cur), kx = cur.width / j.width, ky = cur.height / j.height;
+          list.forEach(function (f) {
+            // grow each box a little so hair and chin are covered too
+            var w = f[2] * kx * 1.3, h = f[3] * ky * 1.45, x = f[0] * kx - (w - f[2] * kx) / 2, y = f[1] * ky - (h - f[3] * ky) / 2.6;
+            x = Math.max(0, x); y = Math.max(0, y); w = Math.min(cur.width - x, w); h = Math.min(cur.height - y, h);
+            obscure(o, cur, Math.round(x), Math.round(y), Math.round(w), Math.round(h), mode, strength);
+          });
+          commit(o);
+          found.textContent = list.length === 1 ? '1 face hidden.' : list.length + ' faces hidden.';
+        }).catch(function (e) { busy(false); toast(e.message, true); });
+      }, 'primary'));
+      p.appendChild(el('div', { style: 'margin-top:12px' }, [found]));
+    }
+  };
+
+  // ---------- magic eraser ----------
+  tools.erase = {
+    title: 'Magic eraser', desc: 'Paint over people, objects or text you want gone; AI fills the space with what should be behind them.',
+    ui: function (p) {
+      if (!needServer(p)) return;
+      var size = 40;
+      var mask = document.createElement('canvas'); mask.width = cur.width; mask.height = cur.height;
+      var mx = mask.getContext('2d'); mx.lineCap = mx.lineJoin = 'round'; mx.strokeStyle = '#fff';
+      var paint = document.createElement('canvas'); paint.className = 'paint';
+      box.appendChild(paint);
+      function fit() {
+        var vr = view.getBoundingClientRect(), br = box.getBoundingClientRect();
+        paint.style.left = (vr.left - br.left) + 'px'; paint.style.top = (vr.top - br.top) + 'px';
+        paint.style.width = vr.width + 'px'; paint.style.height = vr.height + 'px';
+        paint.width = mask.width; paint.height = mask.height; redraw();
+      }
+      function redraw() {
+        var c = paint.getContext('2d'); c.clearRect(0, 0, paint.width, paint.height);
+        c.globalAlpha = .5; c.drawImage(mask, 0, 0); c.globalCompositeOperation = 'source-in';
+        c.fillStyle = '#f43f5e'; c.fillRect(0, 0, paint.width, paint.height); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+      }
+      var last = null, any = false;
+      function pos(e) { var r = paint.getBoundingClientRect(); return { x: (e.clientX - r.left) * mask.width / r.width, y: (e.clientY - r.top) * mask.height / r.height }; }
+      function stroke(a, b) {
+        mx.lineWidth = size * mask.width / paint.getBoundingClientRect().width;
+        mx.beginPath(); mx.moveTo(a.x, a.y); mx.lineTo(b.x, b.y); mx.stroke(); any = true; redraw();
+      }
+      function down(e) { e.preventDefault(); paint.setPointerCapture(e.pointerId); last = pos(e); stroke(last, last); }
+      function move(e) { if (!last) return; var q = pos(e); stroke(last, q); last = q; }
+      function up() { last = null; }
+      paint.addEventListener('pointerdown', down); paint.addEventListener('pointermove', move); paint.addEventListener('pointerup', up);
+      window.addEventListener('resize', fit);
+      overlay = { refresh: fit, off: function () { paint.remove(); window.removeEventListener('resize', fit); } };
+      requestAnimationFrame(fit);
+
+      p.appendChild(field('Brush size', range(10, 120, size, 1, function (x) { size = x; }, function (x) { return x + ' px'; })));
+      p.appendChild(el('div', { class: 'btn-row' }, [
+        btn('Erase', function () {
+          if (!any) { toast('Paint over what to erase first', true); return; }
+          busy('Erasing… this takes about 10 seconds');
+          canvasBlob(mask).then(function (m) { return serverTool('erase', { mask: m }); })
+            .then(function (r) { return applyResult(r, 'erase'); })
+            .catch(function (e) { busy(false); toast(e.message, true); });
+        }, 'primary'),
+        btn('Clear', function () { mx.clearRect(0, 0, mask.width, mask.height); any = false; redraw(); })
+      ]));
+      p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Works best on small things against a simple background. Do several small erases rather than one big one.' }));
+    }
+  };
+
+  // ---------- HD upscaler ----------
+  tools.upscale = {
+    title: 'HD upscale', desc: 'Doubles the width and height with an AI model (Real-ESRGAN) that sharpens detail instead of blurring it.',
+    ui: function (p) {
+      if (!needServer(p)) return;
+      var mp = cur.width * cur.height / 1e6;
+      p.appendChild(el('p', { class: 'small', text: 'Now ' + cur.width + ' × ' + cur.height + ' → ' + cur.width * 2 + ' × ' + cur.height * 2 }));
+      if (mp > 1) p.appendChild(el('p', { class: 'small muted', text: 'Larger than 1 megapixel: it will be shrunk to 1 MP first, then doubled.' }));
+      p.appendChild(btn('Upscale 2×', function () {
+        if (mp > 1) {
+          var k = Math.sqrt(1 / mp);
+          commit(scaled(cur, Math.floor(cur.width * k), Math.floor(cur.height * k)));
+        }
+        busy('Upscaling… up to a minute for big images');
+        serverTool('upscale').then(function (r) { return applyResult(r, 'upscale'); })
+          .catch(function (e) { busy(false); toast(e.message, true); });
+      }, 'primary'));
+      p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Best for small photos, screenshots and artwork. Limit: 10 per day.' }));
+    }
+  };
+
+  // ---------- QR code ----------
+  tools.qr = {
+    title: 'QR code', desc: 'Make a QR code for any link or text. Download it, or open it here to edit further.',
+    noImage: true,
+    ui: function (p) {
+      var text = el('textarea', { placeholder: 'https://hel.ink/b/you', rows: 3, maxlength: 1500 });
+      var fg = el('input', { type: 'color', value: '#000000' }), bg = el('input', { type: 'color', value: '#ffffff' });
+      var trans = el('label', { class: 'check' }, [el('input', { type: 'checkbox' }), ' Transparent background']);
+      var level = 'M', img = el('img', { alt: 'QR code preview', class: 'qr', style: 'width:200px;height:200px;margin:14px auto;display:none' });
+      function url(fmt) {
+        var q = new URLSearchParams({ text: text.value.trim(), size: 1024, level: level, fg: fg.value.slice(1), bg: trans.firstChild.checked ? 'transparent' : bg.value.slice(1) });
+        return '/tools/qr.' + fmt + '?' + q;
+      }
+      function update() { var ok = text.value.trim() !== ''; img.style.display = ok ? 'block' : 'none'; if (ok) img.src = url('png'); }
+      var t; text.addEventListener('input', function () { clearTimeout(t); t = setTimeout(update, 300); });
+      [fg, bg, trans.firstChild].forEach(function (x) { x.addEventListener('change', update); });
+      p.appendChild(field('Link or text', text));
+      p.appendChild(el('div', { class: 'grid-2', style: 'gap:10px' }, [field('Color', fg), field('Background', bg)]));
+      p.appendChild(trans);
+      p.appendChild(field('Error correction', seg([['L', 'Low'], ['M', 'Medium'], ['Q', 'High'], ['H', 'Max']], level, function (l) { level = l; update(); }), 'higher survives logos & damage'));
+      p.appendChild(img);
+      p.appendChild(el('div', { class: 'btn-row' }, [
+        btn('PNG', function () { if (text.value.trim()) fetch(url('png')).then(function (r) { return r.blob(); }).then(function (b) { window.phSave(b, 'qr-code.png'); }); }, 'primary'),
+        btn('SVG', function () { if (text.value.trim()) fetch(url('svg')).then(function (r) { return r.blob(); }).then(function (b) { window.phSave(b, 'qr-code.svg'); }); }),
+        btn('Open in studio', function () { if (text.value.trim()) fetch(url('png')).then(function (r) { return r.blob(); }).then(function (b) { load(b, 'qr-code'); }); })
+      ]));
+    }
+  };
+
+  var legacyOpen = { faceblur: 'faces' }[new URLSearchParams(location.search).get('open')] || new URLSearchParams(location.search).get('open');
+  pick(location.hash.slice(1) || (tools[legacyOpen] ? legacyOpen : 'compress'));
 })();

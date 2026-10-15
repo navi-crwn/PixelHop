@@ -102,9 +102,16 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	}
 	useSlug := r.FormValue("slug") != "0" && r.FormValue("slug") != "false"
 
-	// Several files become an album with its own share link.
+	// Several files become an album with its own share link. Signed-in people
+	// can keep adding to one of their albums (batch uploads come in chunks).
 	albumID := ""
-	if len(inputs) > 1 && r.FormValue("album") != "0" {
+	keepAlbum := false
+	if aid := r.FormValue("album_id"); aid != "" && u != nil && validID(aid) {
+		if al, err := a.db.Album(ctx, aid); err == nil && al.UserID.Valid && al.UserID.Int64 == u.ID {
+			albumID, keepAlbum = aid, true
+		}
+	}
+	if albumID == "" && (len(inputs) > 1 || r.FormValue("album") == "force") && r.FormValue("album") != "0" {
 		al := &db.Album{ID: newID(""), Title: trim(r.FormValue("title"), 120)}
 		if u != nil {
 			al.UserID = sql.NullInt64{Int64: u.ID, Valid: true}
@@ -150,7 +157,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 		results = append(results, res)
 	}
-	if albumID != "" {
+	if albumID != "" && !keepAlbum && r.FormValue("album") != "force" {
 		ok := 0
 		for _, res := range results {
 			if res.Err == nil && !res.Duplicate {

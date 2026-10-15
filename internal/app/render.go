@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"net"
 	"net/http"
+	"net/netip"
 	"strings"
 	"time"
 
@@ -140,7 +142,7 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	// The studio's background remover (onnxruntime-web) compiles code at run
 	// time, so only that page may use eval. It shows no other people's content.
 	eval := ""
-	if name == "tools" {
+	if name == "tools" || name == "batch" {
 		eval = " 'unsafe-eval'"
 	}
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; "+
@@ -170,6 +172,16 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 func (a *App) tools(w http.ResponseWriter, r *http.Request) {
 	a.renderPage(w, r, "tools", page{Title: "Photo studio",
 		Desc: "Compress, resize, crop, convert, read text (OCR), remove backgrounds, blur faces and pick colors, privately in your browser."})
+}
+
+func (a *App) batch(w http.ResponseWriter, r *http.Request) {
+	a.renderPage(w, r, "batch", page{Title: "Batch editing",
+		Desc: "Resize, convert, remove backgrounds, blur faces and upscale many images at once; download a ZIP or upload an album."})
+}
+
+func (a *App) help(w http.ResponseWriter, r *http.Request) {
+	a.renderPage(w, r, "help", page{Title: "Help", Data: a.cfg.AdminEmail,
+		Desc: "Answers about uploading, links, albums, the studio, accounts and privacy on " + a.cfg.SiteName + "."})
 }
 
 func (a *App) docs(w http.ResponseWriter, r *http.Request) {
@@ -213,6 +225,22 @@ func (a *App) favicon(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = "/static/img/logo.svg"
 	w.Header().Set("Content-Type", "image/svg+xml")
 	a.static.ServeHTTP(w, r)
+}
+
+// metrics serves Prometheus-style counters to the server itself only.
+func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
+	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+	if ip, err := netip.ParseAddr(host); err != nil || !ip.IsLoopback() || r.Header.Get("X-Forwarded-For") != "" {
+		a.notFound(w, r)
+		return
+	}
+	s := a.db.Stats(r.Context())
+	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+	fmt.Fprintf(w, "pixelhop_images %d\npixelhop_bytes %d\npixelhop_views %d\npixelhop_users %d\npixelhop_albums %d\npixelhop_open_reports %d\n",
+		s.Images, s.Bytes, s.Views, s.Users, s.Albums, s.OpenReports)
+	for tool, n := range a.db.Usage(r.Context(), 1) {
+		fmt.Fprintf(w, "pixelhop_tool_runs_today{tool=%q} %d\n", tool, n)
+	}
 }
 
 func (a *App) robots(w http.ResponseWriter, r *http.Request) {

@@ -59,7 +59,11 @@ func (a *App) Handler() http.Handler {
 	// pages
 	mux.HandleFunc("GET /{$}", a.home)
 	mux.HandleFunc("GET /tools", a.tools)
+	mux.HandleFunc("GET /tools/batch", a.batch)
+	mux.HandleFunc("GET /tools/qr.png", a.qrTool)
+	mux.HandleFunc("GET /tools/qr.svg", a.qrTool)
 	mux.HandleFunc("GET /docs", a.docs)
+	mux.HandleFunc("GET /help", a.help)
 	mux.HandleFunc("GET /legal", a.legal)
 	mux.HandleFunc("GET /a/{id}", a.album)
 	mux.HandleFunc("GET /{id}", a.view)
@@ -76,6 +80,7 @@ func (a *App) Handler() http.Handler {
 	mux.Handle("GET /static/", a.static)
 	mux.HandleFunc("GET /favicon.ico", a.favicon)
 	mux.HandleFunc("GET /robots.txt", a.robots)
+	mux.HandleFunc("GET /metrics", a.metrics)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 
 	// accounts
@@ -92,6 +97,7 @@ func (a *App) Handler() http.Handler {
 
 	// member area
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
+	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
 	mux.HandleFunc("GET /settings", a.member(a.settingsPage))
 	mux.HandleFunc("POST /settings/profile", a.member(a.saveProfile))
 	mux.HandleFunc("POST /settings/password", a.member(a.savePassword))
@@ -124,7 +130,12 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("DELETE /api/v1/images/{id}", a.apiDeleteImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
-	mux.HandleFunc("POST /api/v1/tools/remove-background", a.apiRemoveBackground)
+	mux.HandleFunc("POST /api/v1/tools/{tool}", a.apiAITool)
+
+	// Pages and tool URLs from PixelHop 2.
+	for from, to := range legacyPages {
+		mux.Handle("GET "+from, http.RedirectHandler(to, http.StatusMovedPermanently))
+	}
 
 	mux.HandleFunc("/", a.notFound)
 

@@ -1,0 +1,31 @@
+{{define "content"}}
+<div class="wrap">
+  <div class="prose" style="margin:0 auto">
+    <h1>Help</h1>
+    <p class="muted">Quick answers. Can't find yours? {{with .Data}}Email <a href="mailto:{{.}}">{{.}}</a>.{{else}}Use the Report button on any image.{{end}}</p>
+
+    <h2>Uploading</h2>
+    <details open><summary><b>What can I upload?</b></summary><p>JPG, PNG, GIF, WebP and BMP, up to {{.MaxMB}} MB each and {{.MaxBatch}} at a time. Drop files, paste with <span class="kbd">Ctrl</span>+<span class="kbd">V</span>, or give a link to an image on the web.</p></details>
+    <details><summary><b>How do I share many images at once?</b></summary><p>Upload them together: they become one album with its own link. Under the list, <b>Copy all links</b> copies every direct link, page link, Markdown, BBCode or HTML in one go. Album pages have the same buttons.</p></details>
+    <details><summary><b>How long do images stay online?</b></summary><p>Forever, unless you pick <b>Delete after</b> when uploading, or delete them yourself.</p></details>
+    <details><summary><b>How do I delete an image I uploaded as a guest?</b></summary><p>Each guest upload gets a private delete link, also saved in your browser under “Uploaded from this device” on the home page. Signed-in users delete from <a href="/dashboard">My images</a>.</p></details>
+
+    <h2>Links</h2>
+    <details><summary><b>Which link should I use?</b></summary><p><b>View</b> opens the image page (good for chats). <b>Direct</b> is the image file itself (for forums, Markdown and websites). <b>Thumb</b> is a small preview. All of them are on the image page.</p></details>
+    <details><summary><b>Do old p.hel.ink links still work?</b></summary><p>Yes. Page links, direct <code>/i/…</code> links in every size, and upload result links all keep working.</p></details>
+
+    <h2>Studio</h2>
+    <details><summary><b>Is my image uploaded when I edit it?</b></summary><p>No for compress, resize, crop, convert, adjust, blur, palette, text reading and “Remove background → On this device”. Server tools (background removal on the server, face blur, magic eraser, HD upscale) send the image to this server, process it in memory and discard it.</p></details>
+    <details><summary><b>Why do some tools need an account?</b></summary><p>The AI tools that run on our server cost real computing power, so they're for signed-in users with a daily limit. Everything else works without an account.</p></details>
+    <details><summary><b>Can I edit many images at once?</b></summary><p>Yes: <a href="/tools/batch">Batch</a> resizes, converts, removes backgrounds, blurs faces or upscales a whole set, then gives you a ZIP or one album.</p></details>
+
+    <h2>Account</h2>
+    <details><summary><b>Which account do I use?</b></summary><p>{{if .SSO}}Your HEL.ink account: one account for short links, bio pages and images. Sign-up, passwords, Google sign-in and two-factor codes are managed on <a href="{{.Helink}}">HEL.ink</a>.{{else}}Create one on the <a href="/register">sign-up page</a>.{{end}}</p></details>
+    <details><summary><b>How do I upload from ShareX or a script?</b></summary><p>Create a key in <a href="/settings#api">Settings → API keys</a> and download the ShareX config. Details in the <a href="/docs">API docs</a>.</p></details>
+
+    <h2>Privacy &amp; safety</h2>
+    <details><summary><b>Is my location removed?</b></summary><p>Yes. GPS position, camera details and similar hidden data are stripped from every upload, without lowering the quality.</p></details>
+    <details><summary><b>How do I report an image?</b></summary><p>Press <b>Report</b> on the image page. Copyright notices: see <a href="/legal#takedown">Terms &amp; takedowns</a>.</p></details>
+  </div>
+</div>
+{{end}}
