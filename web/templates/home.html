@@ -42,7 +42,17 @@
       <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
       <a class="btn sm" id="album-open" href="#">Open</a>
     </div>
-    <div class="uploads" id="uploads" aria-live="polite"></div>
+    <div data-copy-all-root class="uploads-wrap">
+      <div class="hide" id="copy-all-bar"><div class="copy-all" data-copy-all-scope>
+  <span class="small muted"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-copy"/></svg> Copy all links:</span>
+  <button class="btn sm" type="button" data-copy-all="direct">Direct</button>
+  <button class="btn sm" type="button" data-copy-all="page">View</button>
+  <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>
+  <button class="btn sm" type="button" data-copy-all="bbcode">BBCode</button>
+  <button class="btn sm" type="button" data-copy-all="html">HTML</button>
+</div></div>
+      <div class="uploads" id="uploads" aria-live="polite"></div>
+    </div>
     {{if not .User}}<p class="small faint" style="margin-top:14px">Uploading as a guest: you get a private delete link for each image. <a href="/register">Create a free account</a> to keep a gallery.</p>{{end}}
     {{else}}
     <div class="card" style="max-width:520px;margin:0 auto">

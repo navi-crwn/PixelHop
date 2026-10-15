@@ -12,11 +12,14 @@ import (
 )
 
 type adminHomeData struct {
-	Stats   db.Stats
-	Recent  []*db.Image
-	MaxDay  int
-	Storage string
-	Version string
+	Usage     map[string]int // AI tool runs, last 7 days
+	DiskFree  int64
+	DiskTotal int64
+	Stats     db.Stats
+	Recent    []*db.Image
+	MaxDay    int
+	Storage   string
+	Version   string
 }
 
 func (a *App) adminHome(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +37,8 @@ func (a *App) adminHome(w http.ResponseWriter, r *http.Request) {
 		dc.Day = day
 		s.Daily = append(s.Daily, dc)
 	}
-	d := adminHomeData{Stats: s, Recent: recent, Storage: a.store.Name(), Version: Version}
+	d := adminHomeData{Stats: s, Recent: recent, Storage: a.store.Name(), Version: Version, Usage: a.db.Usage(r.Context(), 7)}
+	d.DiskFree, d.DiskTotal = diskSpace(a.cfg.DataDir)
 	for _, day := range s.Daily {
 		d.MaxDay = max(d.MaxDay, day.Count)
 	}

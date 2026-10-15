@@ -75,6 +75,21 @@
   }
   window.phSave = save;
 
+  // "Copy all links" in one format, for every image in the surrounding list.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy-all]');
+    if (!b) return;
+    var scope = b.closest('[data-copy-all-root]') || document;
+    var fmt = b.dataset.copyAll, lines = $$('[data-link]', scope).map(function (x) {
+      var d = x.dataset.direct, p = x.dataset.page, t = (x.dataset.title || 'image').replace(/[\[\]]/g, '');
+      return { direct: d, page: p, markdown: '![' + t + '](' + d + ')', bbcode: '[url=' + p + '][img]' + d + '[/img][/url]',
+        html: '<a href="' + p + '"><img src="' + d + '" alt="' + t.replace(/"/g, '&quot;') + '"></a>' }[fmt];
+    });
+    if (!lines.length) return;
+    copy(lines.join('\n'));
+    toast(lines.length + ' ' + b.textContent.trim() + ' links copied');
+  });
+
   // Confirmations and prompts without inline scripts (the CSP forbids them).
   document.addEventListener('submit', function (e) {
     var f = e.target, btn = e.submitter;
@@ -195,8 +210,13 @@
       inp.addEventListener('focus', function () { inp.select(); });
       link.appendChild(inp); r.meta.appendChild(link);
       if (im.duplicate) { var s = document.createElement('div'); s.className = 'small muted'; s.textContent = 'You uploaded this before, here is the same link.'; r.meta.appendChild(s); }
-      r.act.innerHTML = '<button class="btn sm primary" type="button">Copy</button><a class="btn sm" href="' + im.view_url + '">Open</a>';
-      r.act.firstChild.addEventListener('click', function () { copy(im.view_url); });
+      r.act.innerHTML = '<button class="btn sm primary" type="button">Copy</button><button class="btn sm" type="button">Direct</button><a class="btn sm" href="' + im.view_url + '">Open</a>';
+      r.act.children[0].addEventListener('click', function () { copy(im.view_url); });
+      r.act.children[1].addEventListener('click', function () { copy(im.url); });
+      // remembered for "Copy all links"
+      r.el.setAttribute('data-link', ''); r.el.dataset.direct = im.url; r.el.dataset.page = im.view_url; r.el.dataset.title = im.title || im.id;
+      var bar = $('#copy-all-bar');
+      if (bar && $$('#uploads [data-link]').length > 1) bar.classList.remove('hide');
       remember(im);
     }
 
@@ -300,15 +320,35 @@
     api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
   });
 
-  // ---------- dashboard: select & delete many ----------
+  // ---------- dashboard: select, copy, download & delete many ----------
   var selBtn = $('#select-mode'), gal = $('#my-gallery');
   if (selBtn && gal) {
-    var delSel = $('#delete-selected');
-    var count = function () { var n = $$('.tick:checked', gal).length; $('#sel-count').textContent = n; delSel.classList.toggle('hide', n === 0); };
-    selBtn.addEventListener('click', function () { gal.classList.toggle('selecting'); });
+    var picked = function () { return $$('.tick:checked', gal); };
+    var count = function () { $('#sel-count').textContent = picked().length; };
+    selBtn.addEventListener('click', function () {
+      var on = gal.classList.toggle('selecting');
+      $('#sel-actions').classList.toggle('hide', !on);
+      selBtn.textContent = on ? 'Done' : 'Select';
+    });
     gal.addEventListener('change', count);
-    delSel.addEventListener('click', function () {
-      var ids = $$('.tick:checked', gal).map(function (c) { return c.value; });
+    $('#select-all').addEventListener('click', function () {
+      var all = $$('.tick', gal), on = picked().length < all.length;
+      all.forEach(function (c) { c.checked = on; }); count();
+    });
+    $('#copy-selected').addEventListener('click', function () {
+      var links = picked().map(function (c) { return c.closest('.tile').dataset.direct; });
+      if (!links.length) return toast('Select some images first', true);
+      copy(links.join('\n')); toast(links.length + ' direct links copied');
+    });
+    $('#zip-selected').addEventListener('click', function () {
+      var f = $('#zip-form'); f.innerHTML = '';
+      picked().forEach(function (c) { var i = document.createElement('input'); i.type = 'hidden'; i.name = 'id'; i.value = c.value; f.appendChild(i); });
+      if (!f.children.length) return toast('Select some images first', true);
+      f.submit();
+    });
+    $('#delete-selected').addEventListener('click', function () {
+      var ids = picked().map(function (c) { return c.value; });
+      if (!ids.length) return toast('Select some images first', true);
       if (!confirm('Delete ' + ids.length + ' images for good?')) return;
       Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).catch(function () {}); }))
         .then(function () { location.reload(); });

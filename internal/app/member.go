@@ -1,10 +1,14 @@
 package app
 
 import (
+	"archive/zip"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 )
@@ -183,4 +187,48 @@ func (a *App) purgeUser(r *http.Request, u *db.User) {
 	}
 	a.db.DeleteUser(ctx, u.ID)
 	a.db.DeleteEmptyAlbums(ctx)
+}
+
+// downloadZip streams the chosen images (your own) as one ZIP file.
+func (a *App) downloadZip(w http.ResponseWriter, r *http.Request) {
+	u := currentUser(r)
+	r.ParseForm()
+	ids := r.Form["id"]
+	if len(ids) == 0 || len(ids) > 500 {
+		a.fail(w, r, http.StatusBadRequest, "Choose between 1 and 500 images.")
+		return
+	}
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", `attachment; filename="pixelhop-images.zip"`)
+	zw := zip.NewWriter(w)
+	defer zw.Close()
+	used := map[string]bool{}
+	for _, id := range ids {
+		im, err := a.db.Image(r.Context(), id)
+		if err != nil || (im.UserID.Int64 != u.ID && !u.IsAdmin()) {
+			continue
+		}
+		b := a.backends[im.Backend]
+		if b == nil {
+			continue
+		}
+		obj, err := b.Get(r.Context(), im.KeyFull, "")
+		if err != nil {
+			continue
+		}
+		name := slugify(im.Title)
+		if name == "" {
+			name = im.ID
+		}
+		for n, base := 2, name; used[name+"."+im.Ext]; n++ {
+			name = fmt.Sprintf("%s-%d", base, n)
+		}
+		used[name+"."+im.Ext] = true
+		// Images are already compressed; storing them keeps this fast.
+		f, err := zw.CreateHeader(&zip.FileHeader{Name: name + "." + im.Ext, Method: zip.Store, Modified: time.Unix(im.CreatedAt, 0)})
+		if err == nil {
+			io.Copy(f, obj.Body)
+		}
+		obj.Body.Close()
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -172,6 +173,32 @@ func (d *DB) Setting(ctx context.Context, key, def string) string {
 		return def
 	}
 	return v
+}
+
+// CountUsage adds one to today's counter for an action (e.g. an AI tool).
+func (d *DB) CountUsage(ctx context.Context, action string) {
+	key := "usage:" + time.Now().UTC().Format("2006-01-02") + ":" + action
+	d.ExecContext(ctx, `INSERT INTO settings (key,value) VALUES (?, '1')
+		ON CONFLICT(key) DO UPDATE SET value=CAST(value AS INTEGER)+1`, key)
+}
+
+// Usage sums the counters of the last n days, per action.
+func (d *DB) Usage(ctx context.Context, days int) map[string]int {
+	out := map[string]int{}
+	from := "usage:" + time.Now().UTC().AddDate(0, 0, -days+1).Format("2006-01-02")
+	rows, err := d.QueryContext(ctx, `SELECT key, CAST(value AS INTEGER) FROM settings WHERE key >= ? AND key < 'usage;'`, from)
+	if err != nil {
+		return out
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var k string
+		var n int
+		if rows.Scan(&k, &n) == nil {
+			out[k[strings.LastIndexByte(k, ':')+1:]] += n
+		}
+	}
+	return out
 }
 
 func (d *DB) SetSetting(ctx context.Context, key, value string) error {
