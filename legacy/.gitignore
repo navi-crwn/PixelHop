@@ -1,0 +1,49 @@
+# Credentials & Secrets
+credentials.md
+config/database.php
+config/oauth.php
+config/s3.php
+config/mail.php
+.env
+
+# Backup files
+*.bak
+*.old
+*.orig
+*.backup
+backup/
+
+# Temp files
+temp/
+*.tmp
+
+# Python
+python/venv/
+python/__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data files
+data/images.json
+data/abuse_reports.json
+data/expiration_log.json
+data/ratelimit/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+admin/backup_old/
+vendor/

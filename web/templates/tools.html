@@ -1,0 +1,52 @@
+{{define "content"}}
+<div class="wrap" style="max-width:1400px">
+  <div class="page-head">
+    <div><h1>Photo studio</h1><p class="muted" style="margin:4px 0 0">Everything happens on your device. Your image isn't uploaded unless you press “Upload result”.</p></div>
+    <div class="btn-row">
+      <button class="btn" type="button" id="st-open"><svg><use href="#i-image"/></svg>Open image</button>
+      <button class="btn ghost" type="button" id="st-undo" disabled><svg><use href="#i-rotate"/></svg>Undo</button>
+      <button class="btn ghost" type="button" id="st-reset" disabled>Start over</button>
+    </div>
+  </div>
+  <input type="file" id="st-file" accept="image/*" hidden>
+
+  <div class="studio">
+    <div class="tool-list" role="tablist" aria-label="Tools">
+      <button role="tab" data-tool="compress"><svg><use href="#i-compress"/></svg>Compress</button>
+      <button role="tab" data-tool="resize"><svg><use href="#i-resize"/></svg>Resize</button>
+      <button role="tab" data-tool="crop"><svg><use href="#i-crop"/></svg>Crop</button>
+      <button role="tab" data-tool="convert"><svg><use href="#i-convert"/></svg>Convert</button>
+      <button role="tab" data-tool="adjust"><svg><use href="#i-adjust"/></svg>Adjust &amp; rotate</button>
+      <button role="tab" data-tool="redact"><svg><use href="#i-blur"/></svg>Blur &amp; pixelate</button>
+      <button role="tab" data-tool="palette"><svg><use href="#i-palette"/></svg>Color palette</button>
+      <button role="tab" data-tool="ocr"><svg><use href="#i-text"/></svg>Image to text<small>AI</small></button>
+      <button role="tab" data-tool="rembg"><svg><use href="#i-eraser"/></svg>Remove background<small>AI</small></button>
+    </div>
+
+    <div class="canvas-box" id="st-box">
+      <div class="placeholder" id="st-empty" role="button" tabindex="0">
+        <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
+        <h2 style="font-size:1.2rem">Drop, paste or open an image</h2>
+        <p class="muted small">It stays on this device.</p>
+      </div>
+      <canvas id="st-canvas" class="hide"></canvas>
+      <div class="crop-box hide" id="st-crop"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div>
+      <div class="busy hide" id="st-busy"><div><div class="spinner"><i></i><i></i><i></i><i></i></div><div id="st-busy-text">Working…</div></div></div>
+    </div>
+
+    <div class="panel" id="st-panel">
+      <div id="st-tool"><h2>Pick a tool</h2><p class="desc">Open an image, then choose what to do with it on the left.</p></div>
+      <div id="st-export" class="hide">
+        <hr style="margin:18px 0">
+        <div class="out-info" id="st-info"></div>
+        <div class="btn-row">
+          <button class="btn primary" type="button" id="st-download"><svg><use href="#i-down"/></svg>Download</button>
+          <button class="btn" type="button" id="st-upload"><svg><use href="#i-upload"/></svg>Upload result</button>
+        </div>
+        <div id="st-uploaded" class="hide" style="margin-top:12px"><div class="copy"><input type="text" readonly id="st-link" aria-label="Link"><button class="btn sm" type="button" data-copy="#st-link"><svg><use href="#i-copy"/></svg></button></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}
+{{define "scripts"}}<script src="/static/js/studio.js?v={{.Asset}}" defer></script>{{end}}

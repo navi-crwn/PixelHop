@@ -1,0 +1,33 @@
+{{define "content"}}
+<div class="wrap">
+  <div class="prose" style="margin:0 auto">
+    <h1>Terms, privacy &amp; takedowns</h1>
+    <p class="muted">Short and plain. By uploading to {{.Site}} you agree to the rules below.</p>
+
+    <h2 id="terms">The rules</h2>
+    <ul>
+      <li>Only upload images you have the right to share.</li>
+      <li>No child sexual abuse material, ever. It is removed, and reported to the authorities.</li>
+      <li>No sexual or graphic images of people who didn't agree to it, no doxxing, no harassment.</li>
+      <li>No malware, phishing, spam or scams.</li>
+      <li>Images that break these rules are removed, and the account or address that uploaded them may be blocked.</li>
+      <li>The service is free and comes with no guarantee. Keep your own copies of anything important.</li>
+    </ul>
+
+    <h2 id="privacy">Privacy</h2>
+    <ul>
+      <li><b>Hidden photo data is removed.</b> GPS location, camera serial numbers and similar EXIF, XMP and IPTC data are stripped from every upload.</li>
+      <li><b>What we keep:</b> the image, its size and shape, the time of upload, a view counter, and the IP address it came from (to fight abuse).</li>
+      <li><b>Accounts</b> store your email, your name if you give one, and a securely hashed password.</li>
+      <li><b>No trackers.</b> There are no ads, analytics or tracking scripts. The only cookie is the one that keeps you signed in.</li>
+      <li><b>The studio</b> edits images on your own device. It downloads open-source models for text reading and background removal from a public CDN the first time you use them; your image is not sent anywhere.</li>
+      <li><b>Deleting</b> an image removes it and its thumbnail from storage straight away. Deleting your account removes all your images.</li>
+    </ul>
+
+    <h2 id="takedown">Reporting an image &amp; copyright takedowns</h2>
+    <p>Every image page has a <b>Report</b> button; reports reach the moderators right away. For copyright (DMCA) notices, send the image link, proof that you own the work, and your contact details{{with .Data}} to <a href="mailto:{{.}}">{{.}}</a>{{else}} using the Report button and choosing “My copyright”{{end}}.</p>
+
+    <p class="small faint">{{.Site}} runs <a href="https://github.com/navi-crwn/pixelhop">PixelHop</a>, open-source software under the MIT licence.</p>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,96 @@
+{{define "content"}}
+<div class="wrap">
+  <div class="doc">
+    <nav aria-label="On this page">
+      <a href="#start">Getting started</a>
+      <a href="#sharex">ShareX</a>
+      <a href="#upload">Upload</a>
+      <a href="#list">List images</a>
+      <a href="#image">Get, rename, delete</a>
+      <a href="#me">Account</a>
+      <a href="#errors">Errors &amp; limits</a>
+    </nav>
+    <div class="prose">
+      <h1>API &amp; ShareX</h1>
+      <p class="muted">Upload from screenshot tools, scripts, bots and apps. Everything is plain HTTP with JSON answers.</p>
+
+      <section id="start">
+        <h2>Getting started</h2>
+        <ol>
+          <li><a href="/register">Create an account</a> (or <a href="/login">sign in</a>).</li>
+          <li>Open <a href="/settings#api">Settings → API keys</a> and create a key. It starts with <code>ph_</code>.</li>
+          <li>Send it with every request: <code>Authorization: Bearer ph_…</code></li>
+        </ol>
+        <p>Guests can call <code>/api/v1/upload</code> without a key{{if not .GuestUploads}} when the owner allows it (turned off on this server){{end}}; the answer then includes a private <code>delete_url</code>.</p>
+      </section>
+
+      <section id="sharex">
+        <h2>ShareX</h2>
+        <p>Create a key in Settings and press <b>Download ShareX config</b>. Double-click the <code>.sxcu</code> file and ShareX sets everything up: every screenshot is uploaded and the link lands on your clipboard.</p>
+        <p class="small muted">Configs made for PixelHop 2 (posting to <code>/api/upload.php</code>) keep working.</p>
+      </section>
+
+      <section id="upload">
+        <h2>Upload</h2>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/upload</div>
+        <p>Send <code>multipart/form-data</code> with one or more files in <code>file</code>, or image links in <code>url</code> (one per line).</p>
+        <table>
+          <tr><th>Field</th><th>Meaning</th></tr>
+          <tr><td><code>file</code></td><td>The image. Repeat the field for several (up to {{.MaxBatch}}, {{.MaxMB}} MB each).</td></tr>
+          <tr><td><code>url</code></td><td>Instead of a file: links to images on the web.</td></tr>
+          <tr><td><code>expire</code></td><td>Delete automatically: <code>10m</code> <code>1h</code> <code>1d</code> <code>7d</code> <code>30d</code> <code>90d</code>. Leave out to keep forever.</td></tr>
+          <tr><td><code>slug</code></td><td><code>0</code> to use only random characters in the link instead of the file name.</td></tr>
+          <tr><td><code>album</code></td><td><code>0</code> to not group several files into an album.</td></tr>
+          <tr><td><code>title</code></td><td>Album title, when several files are sent.</td></tr>
+        </table>
+<pre><code>curl -H "Authorization: Bearer ph_yourkey" \
+     -F "file=@holiday.jpg" \
+     {{.Base}}/api/v1/upload</code></pre>
+        <p>Answer:</p>
+<pre><code>{
+  "success": true,
+  "data": {
+    "id": "holiday-x7Kp2Q",
+    "url": "{{.Base}}/i/holiday-x7Kp2Q.jpg",
+    "view_url": "{{.Base}}/holiday-x7Kp2Q",
+    "thumb_url": "{{.Base}}/t/holiday-x7Kp2Q.jpg",
+    "width": 4032, "height": 3024, "size": 2483112,
+    "embed": { "markdown": "…", "html": "…", "bbcode": "…" },
+    "images": [ … every uploaded image … ]
+  }
+}</code></pre>
+        <p>With several files, <code>data.images</code> lists each one, <code>data.album_url</code> links the album, and <code>data.errors</code> names any file that didn't make it.</p>
+      </section>
+
+      <section id="list">
+        <h2>List your images</h2>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/images?page=1&amp;limit=50&amp;q=&amp;sort=new</div>
+        <p><code>sort</code> is <code>new</code>, <code>old</code>, <code>views</code> or <code>size</code>. The answer has <code>images</code>, <code>total</code>, <code>page</code> and <code>limit</code>.</p>
+      </section>
+
+      <section id="image">
+        <h2>Get, rename or delete one image</h2>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}</div>
+        <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/images/{id}</div>
+        <p>Body: <code>{"title": "New name"}</code></p>
+        <div class="endpoint"><span class="method del">DELETE</span>/api/v1/images/{id}</div>
+<pre><code>curl -X DELETE -H "Authorization: Bearer ph_yourkey" {{.Base}}/api/v1/images/holiday-x7Kp2Q</code></pre>
+      </section>
+
+      <section id="me">
+        <h2>Your account</h2>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/me</div>
+        <p>Email, image count, <code>storage_used</code> and <code>storage_quota</code> in bytes.</p>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/stats</div>
+        <p>Public: total images and views on this server. No key needed.</p>
+      </section>
+
+      <section id="errors">
+        <h2>Errors &amp; limits</h2>
+        <p>Failed calls answer <code>{"success": false, "error": "what went wrong"}</code> with a matching status: <code>400</code> bad input, <code>401</code> missing or wrong key, <code>404</code> not found, <code>429</code> too fast.</p>
+        <p>Uploads are rate-limited per IP address; signed-in accounts get four times the guest limit. Accounts have a storage quota you can check at <code>/api/v1/me</code>.</p>
+      </section>
+    </div>
+  </div>
+</div>
+{{end}}

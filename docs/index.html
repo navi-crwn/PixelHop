@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelHop: open-source image hosting with a private photo studio</title>
+<meta name="description" content="Drop an image, get a link. PixelHop strips GPS data, makes albums, works with ShareX and runs as one small Go binary you can host yourself.">
+<meta name="theme-color" content="#07080b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PixelHop">
+<meta property="og:description" content="Open-source image hosting with a private, in-browser photo studio. One Go binary, self-hostable.">
+<meta property="og:url" content="https://navi-crwn.github.io/pixelhop/">
+<meta property="og:image" content="https://navi-crwn.github.io/pixelhop/social.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<script>
+// Runs before paint: language, theme, and "JS is on".
+// ?lang=id|en and ?theme=light|dark override both (used to render the README images); ?shot hides the nav.
+(function(){var d=document.documentElement,q=new URLSearchParams(location.search),l=null,t=null;d.classList.add('js');
+try{l=localStorage.getItem('lang');t=localStorage.getItem('theme')}catch(e){}
+l=q.get('lang')||l;t=q.get('theme')||t;if(q.has('shot'))d.classList.add('shot-mode');
+d.lang=l==='id'||l==='en'?l:((navigator.language||'').indexOf('id')===0?'id':'en');
+if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@1&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main"><span data-en>Skip to content</span><span data-id>Langsung ke isi</span></a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/><path d="M4 4l16 16"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13 3 4 14h7l-1 7 9-11h-7z"/></symbol>
+  <symbol id="i-album" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M17 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+</defs></svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28">PixelHop</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#features"><span data-en>Features</span><span data-id>Fitur</span></a>
+      <a href="#studio">Studio</a>
+      <a href="#privacy"><span data-en>Privacy</span><span data-id>Privasi</span></a>
+      <a href="#install"><span data-en>Self-host</span><span data-id>Self-host</span></a>
+      <a href="#api">API</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-r">
+      <button type="button" class="theme" id="theme" aria-label="Light or dark"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-en" aria-pressed="true" lang="en">EN</button>
+        <button type="button" id="lang-id" aria-pressed="false" lang="id">ID</button>
+      </div>
+      <a class="btn sm main" href="https://p.hel.ink"><span data-en>Try it</span><span data-id>Coba</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="glow" style="width:560px;height:560px;background:var(--violet);right:-160px;top:6%"></div>
+  <div class="glow" style="width:460px;height:460px;background:var(--lime);left:-180px;top:30%;opacity:.16"></div>
+  <div class="wrap">
+    <span class="pill"><b>v3</b><span data-en>Rebuilt in Go · one binary · MIT</span><span data-id>Dibangun ulang dengan Go · satu binary · MIT</span></span>
+    <h1><span data-en>Drop an image.<br><span class="grad">Get a link.</span></span><span data-id>Lempar gambar.<br><span class="grad">Dapat link.</span></span></h1>
+    <p class="lead"><span data-en>Open-source image hosting that strips your GPS location before anyone sees it, with albums, ShareX, an API, and a photo studio that never uploads your photo.</span><span data-id>Hosting gambar open source yang menghapus lokasi GPS sebelum ada yang melihatnya. Ada album, ShareX, API, dan studio foto yang tidak pernah mengunggah fotomu.</span></p>
+    <div class="cta">
+      <a class="btn main" href="https://p.hel.ink"><span data-en>Upload an image</span><span data-id>Unggah gambar</span></a>
+      <a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg><span data-en>Get the code</span><span data-id>Lihat kode</span></a>
+    </div>
+    <ul class="facts">
+      <li><span data-en>~16 MB single binary</span><span data-id>Binary tunggal ~16 MB</span></li>
+      <li><span data-en>SQLite inside, no database server</span><span data-id>SQLite di dalam, tanpa server database</span></li>
+      <li><span data-en>Disk or any S3 bucket</span><span data-id>Disk atau bucket S3 apa saja</span></li>
+      <li><span data-en>No ads, no trackers</span><span data-id>Tanpa iklan, tanpa pelacak</span></li>
+    </ul>
+    <div class="shot">
+      <div class="frame">
+        <div class="bar"><i></i><i></i><i></i><span>p.hel.ink</span></div>
+        <div class="themed"><img class="dk" src="media/app-view-dark.webp" alt="An image page on PixelHop: the photo, copy buttons, embed codes and a QR code" width="1440" height="900"><img class="lt" src="media/app-view-light.webp" alt="" width="1440" height="900"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="head c rv">
+      <div class="label"><span data-en>Features</span><span data-id>Fitur</span></div>
+      <h2><span data-en>Everything an image host should do. <em class="s grad">Nothing it shouldn’t.</em></span><span data-id>Semua yang harus dilakukan image host. <em class="s grad">Tanpa yang tidak perlu.</em></span></h2>
+      <p class="lead"><span data-en>No premium tier hiding the good parts. Every account gets every feature.</span><span data-id>Tidak ada paket premium yang menyembunyikan fitur bagus. Semua akun dapat semua fitur.</span></p>
+    </div>
+    <div class="feats rv">
+      <div class="w3" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3><span data-en>Location removed, quality kept</span><span data-id>Lokasi dihapus, kualitas tetap</span></h3><p><span data-en>Phone photos carry GPS coordinates and camera serials. PixelHop removes EXIF, XMP and IPTC by rewriting the file container, so the pixels are never re-compressed, and turns sideways photos upright first.</span><span data-id>Foto dari HP membawa koordinat GPS dan nomor seri kamera. PixelHop menghapus EXIF, XMP dan IPTC dengan menulis ulang wadah file, jadi piksel tidak dikompres ulang, dan foto yang miring diluruskan dulu.</span></p></div>
+      <div class="w3" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3><span data-en>Every link you need</span><span data-id>Semua jenis link</span></h3><p><span data-en>Readable links like <code>beach-sunset-x7Kp2Q</code>, a direct link, Markdown, HTML, BBCode and a QR code. Previews look right on Discord, X, WhatsApp and forums.</span><span data-id>Link yang mudah dibaca seperti <code>pantai-senja-x7Kp2Q</code>, link langsung, Markdown, HTML, BBCode dan QR code. Pratinjau tampil rapi di Discord, X, WhatsApp dan forum.</span></p></div>
+      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3><span data-en>Albums</span><span data-id>Album</span></h3><p><span data-en>Drop several photos and share them as one gallery link.</span><span data-id>Lempar beberapa foto, bagikan sebagai satu link galeri.</span></p></div>
+      <div style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3><span data-en>Self-destruct</span><span data-id>Hapus otomatis</span></h3><p><span data-en>Delete after 10 minutes, a day or a month. Guests get a private delete link.</span><span data-id>Hapus setelah 10 menit, sehari atau sebulan. Tamu dapat link hapus pribadi.</span></p></div>
+      <div style="--c:var(--amber)"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>ShareX &amp; API</h3><p><span data-en>One-click ShareX config, REST API with keys. Old PixelHop 2 configs keep working.</span><span data-id>Config ShareX sekali klik, REST API dengan key. Config PixelHop 2 tetap jalan.</span></p></div>
+      <div style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3><span data-en>Host it yourself</span><span data-id>Host sendiri</span></h3><p><span data-en>One binary, Docker image or systemd. Disk, R2, MinIO, B2, Contabo.</span><span data-id>Satu binary, image Docker atau systemd. Disk, R2, MinIO, B2, Contabo.</span></p></div>
+      <div style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3><span data-en>Moderation built in</span><span data-id>Moderasi bawaan</span></h3><p><span data-en>Reports, hide/delete, IP bans, lock or suspend accounts, warnings.</span><span data-id>Laporan, sembunyikan/hapus, ban IP, kunci atau suspend akun, peringatan.</span></p></div>
+      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-qr"/></svg></div><h3><span data-en>Your gallery</span><span data-id>Galeri pribadi</span></h3><p><span data-en>Search, sort, rename and bulk delete. Guests keep a list on their own device.</span><span data-id>Cari, urutkan, ganti nama dan hapus massal. Tamu menyimpan daftar di perangkatnya.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- STUDIO -->
+<section id="studio">
+  <div class="wrap split">
+    <div class="rv">
+      <div class="label">Studio</div>
+      <h2><span data-en>A photo studio that <em class="s grad">never uploads</em> your photo.</span><span data-id>Studio foto yang <em class="s grad">tidak pernah mengunggah</em> fotomu.</span></h2>
+      <p class="lead"><span data-en>Every tool runs on your own device with Canvas and WebAssembly. The image only leaves it if you press “Upload result”, and the server never runs AI models for anyone.</span><span data-id>Semua alat jalan di perangkatmu sendiri dengan Canvas dan WebAssembly. Gambar baru keluar kalau kamu menekan “Upload result”, dan server tidak pernah menjalankan model AI untuk siapa pun.</span></p>
+      <ul class="ticks">
+        <li><span data-en><b>Compress, resize, crop, convert</b> to JPG, PNG, WebP or AVIF, with live file size.</span><span data-id><b>Kompres, ubah ukuran, crop, konversi</b> ke JPG, PNG, WebP atau AVIF, ukuran file langsung terlihat.</span></li>
+        <li><span data-en><b>Adjust &amp; rotate</b>: light, contrast, color, black &amp; white, flip.</span><span data-id><b>Atur &amp; putar</b>: terang, kontras, warna, hitam putih, balik.</span></li>
+        <li><span data-en><b>Blur &amp; pixelate</b> faces, plates and names before you share.</span><span data-id><b>Blur &amp; pikselkan</b> wajah, plat nomor dan nama sebelum dibagikan.</span></li>
+        <li><span data-en><b>Image to text</b> (OCR) in English, Indonesian, Japanese, Chinese, Korean, Arabic.</span><span data-id><b>Gambar ke teks</b> (OCR) dalam bahasa Inggris, Indonesia, Jepang, Mandarin, Korea, Arab.</span></li>
+        <li><span data-en><b>Remove background</b> with an AI model that runs in the browser.</span><span data-id><b>Hapus background</b> dengan model AI yang jalan di browser.</span></li>
+        <li><span data-en><b>Color palette</b> you can copy as hex or CSS variables.</span><span data-id><b>Palet warna</b> yang bisa disalin sebagai hex atau variabel CSS.</span></li>
+      </ul>
+    </div>
+    <div class="mini-shot themed rv"><img class="dk" src="media/app-studio-dark.webp" alt="The PixelHop studio with the color palette tool open" width="1440" height="900" loading="lazy"><img class="lt" src="media/app-studio-light.webp" alt="" width="1440" height="900" loading="lazy"></div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="label"><span data-en>Privacy</span><span data-id>Privasi</span></div>
+      <h2><span data-en>What your photo says about you, <em class="s grad">before</em> and <em class="s grad">after</em>.</span><span data-id>Apa yang fotomu ceritakan, <em class="s grad">sebelum</em> dan <em class="s grad">sesudah</em>.</span></h2>
+    </div>
+    <div class="ba rv">
+      <div class="card"><h3><span data-en>Straight from the phone</span><span data-id>Langsung dari HP</span></h3>
+        <span class="bad">GPS 6°10′S 106°49′E</span><br><span class="bad">Make: Pixel 9 · Serial 3A1F…</span><br><span class="bad">Taken: 2026-10-14 07:42</span><br><span class="bad">Software, lens, owner name…</span><br>Orientation: 6 (rotated)</div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="card"><h3><span data-en>On PixelHop</span><span data-id>Di PixelHop</span></h3>
+        <del>GPS</del> <span class="ok">removed</span><br><del>Camera &amp; serial</del> <span class="ok">removed</span><br><del>Date &amp; software</del> <span class="ok">removed</span><br><span class="ok">Colour profile kept</span><br><span class="ok">Turned upright, same quality</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="label"><span data-en>Self-host</span><span data-id>Self-host</span></div>
+      <h2><span data-en>Running in <em class="s grad">one minute</em>.</span><span data-id>Jalan dalam <em class="s grad">satu menit</em>.</span></h2>
+      <p class="lead"><span data-en>No PHP, no Python, no MySQL, no cron. The first account you create becomes the admin.</span><span data-id>Tanpa PHP, Python, MySQL atau cron. Akun pertama yang dibuat otomatis jadi admin.</span></p>
+    </div>
+    <div class="rv">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="bin">Binary</button>
+        <button role="tab" aria-selected="false" data-tab="docker">Docker</button>
+        <button role="tab" aria-selected="false" data-tab="src"><span data-en>From source</span><span data-id>Dari source</span></button>
+      </div>
+      <div class="tabpanel" data-panel="bin"><div class="code"><button class="copy" type="button">Copy</button><pre><span class="c"># Linux (amd64). Builds for arm64, macOS and Windows are on the Releases page.</span>
+curl -L -o pixelhop https://github.com/navi-crwn/pixelhop/releases/latest/download/pixelhop-linux-amd64
+chmod +x pixelhop
+PIXELHOP_BASE_URL=https://img.example.com ./pixelhop</pre></div></div>
+      <div class="tabpanel" data-panel="docker" hidden><div class="code"><button class="copy" type="button">Copy</button><pre>docker run -d --name pixelhop -p 8080:8080 \
+  -e PIXELHOP_BASE_URL=https://img.example.com \
+  -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest</pre></div></div>
+      <div class="tabpanel" data-panel="src" hidden><div class="code"><button class="copy" type="button">Copy</button><pre><span class="c"># Go 1.27+</span>
+git clone https://github.com/navi-crwn/pixelhop.git && cd pixelhop
+make build && ./pixelhop</pre></div></div>
+      <div class="grid3" style="margin-top:20px">
+        <div class="box"><span class="big grad">~16 MB</span><p><span data-en>one static binary, templates and assets included</span><span data-id>satu binary statis, template dan aset sudah di dalam</span></p></div>
+        <div class="box"><span class="big grad">1</span><p><span data-en>process: web server, database and cleanup janitor</span><span data-id>proses: web server, database dan pembersih otomatis</span></p></div>
+        <div class="box"><span class="big grad">0</span><p><span data-en>third-party Go dependencies for storage: S3 signing is built in</span><span data-id>dependensi pihak ketiga untuk storage: penandatanganan S3 sudah bawaan</span></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MIGRATE -->
+<section id="migrate">
+  <div class="wrap split rev">
+    <div class="tbl rv">
+      <table>
+        <tr><th></th><th>PixelHop 2</th><th>PixelHop 3</th></tr>
+        <tr><td><span data-en>Runs on</span><span data-id>Butuh</span></td><td>PHP-FPM, MySQL, Python, cron</td><td class="y">1 binary</td></tr>
+        <tr><td><span data-en>Image records</span><span data-id>Data gambar</span></td><td>images.json</td><td class="y">SQLite (WAL)</td></tr>
+        <tr><td><span data-en>AI tools</span><span data-id>Alat AI</span></td><td><span data-en>on the server</span><span data-id>di server</span></td><td class="y"><span data-en>in the browser</span><span data-id>di browser</span></td></tr>
+        <tr><td><span data-en>Metadata</span><span data-id>Metadata</span></td><td><span data-en>re-encoded</span><span data-id>di-encode ulang</span></td><td class="y"><span data-en>stripped losslessly</span><span data-id>dihapus tanpa kompresi ulang</span></td></tr>
+        <tr><td><span data-en>Old links</span><span data-id>Link lama</span></td><td>—</td><td class="y"><span data-en>keep working</span><span data-id>tetap jalan</span></td></tr>
+      </table>
+    </div>
+    <div class="rv">
+      <div class="label"><span data-en>Upgrading</span><span data-id>Upgrade</span></div>
+      <h2><span data-en>Coming from <em class="s grad">PixelHop 2</em>?</span><span data-id>Dari <em class="s grad">PixelHop 2</em>?</span></h2>
+      <p class="lead"><span data-en>One command brings your users and images over. Passwords, page links, <code>/i/…</code> links and ShareX configs keep working.</span><span data-id>Satu perintah memindahkan user dan gambar. Password, link halaman, link <code>/i/…</code> dan config ShareX tetap jalan.</span></p>
+      <div class="code"><button class="copy" type="button">Copy</button><pre>pixelhop import --images /var/www/pichost/data/images.json \
+  --mysql "user:pass@tcp(127.0.0.1)/pixelhop" --copy</pre></div>
+      <p class="lead" style="font-size:1rem"><a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md"><span data-en>Read the audit that led to the rewrite →</span><span data-id>Baca audit yang melatarbelakangi rewrite →</span></a></p>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <div class="wrap split">
+    <div class="rv">
+      <div class="label">API</div>
+      <h2><span data-en>Upload from <em class="s grad">anything</em>.</span><span data-id>Unggah dari <em class="s grad">mana saja</em>.</span></h2>
+      <p class="lead"><span data-en>Create a key in Settings, then send files with any HTTP client. Answers are plain JSON with the direct link, page link, thumbnail and embed codes.</span><span data-id>Buat key di Settings, lalu kirim file dengan HTTP client apa saja. Jawabannya JSON biasa berisi link langsung, link halaman, thumbnail dan kode embed.</span></p>
+      <p><a class="btn sm" href="https://p.hel.ink/docs"><span data-en>Full API docs</span><span data-id>Dokumentasi API</span></a></p>
+    </div>
+    <div class="rv">
+      <div class="code"><button class="copy" type="button">Copy</button><pre>curl -H "Authorization: Bearer ph_yourkey" \
+     -F "file=@holiday.jpg" -F "expire=7d" \
+     https://p.hel.ink/api/v1/upload</pre></div>
+      <div class="code"><pre><span class="c">// 200 OK</span>
+{ "success": true,
+  "data": {
+    "id": "holiday-x7Kp2Q",
+    "url": "https://p.hel.ink/i/holiday-x7Kp2Q.jpg",
+    "view_url": "https://p.hel.ink/holiday-x7Kp2Q",
+    "thumb_url": "https://p.hel.ink/t/holiday-x7Kp2Q.jpg",
+    "width": 4032, "height": 3024 } }</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap" style="max-width:880px">
+    <div class="head rv"><div class="label">FAQ</div><h2><span data-en>Questions</span><span data-id>Pertanyaan</span></h2></div>
+    <div class="rv">
+      <details><summary><span data-en>Is it free?</span><span data-id>Gratis?</span></summary><p><span data-en>Yes. p.hel.ink is free to use, and the code is MIT-licensed, so you can run your own copy, even commercially.</span><span data-id>Ya. p.hel.ink gratis dipakai, dan kodenya berlisensi MIT, jadi kamu bisa menjalankan versimu sendiri, bahkan untuk komersial.</span></p></details>
+      <details><summary><span data-en>Do I need an account?</span><span data-id>Perlu akun?</span></summary><p><span data-en>No. Guests can upload and get a private delete link for each image (saved in their browser too). An account adds a gallery, a storage quota you can see, and API keys.</span><span data-id>Tidak. Tamu bisa mengunggah dan mendapat link hapus pribadi untuk setiap gambar (juga tersimpan di browser). Dengan akun kamu dapat galeri, kuota yang terlihat, dan API key.</span></p></details>
+      <details><summary><span data-en>Is the studio really offline?</span><span data-id>Studio benar-benar offline?</span></summary><p><span data-en>The editing happens on your device. The first time you use OCR or background removal, the browser downloads the open-source models (tesseract.js, @imgly/background-removal) from jsDelivr; your image is never sent anywhere.</span><span data-id>Pengeditan terjadi di perangkatmu. Saat pertama kali memakai OCR atau hapus background, browser mengunduh model open source (tesseract.js, @imgly/background-removal) dari jsDelivr; gambarmu tidak dikirim ke mana pun.</span></p></details>
+      <details><summary><span data-en>Which storage can I use?</span><span data-id>Storage apa saja yang bisa dipakai?</span></summary><p><span data-en>The local disk, or any S3-compatible bucket: AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo. Set <code>S3_PUBLIC_URL</code> to serve images straight from a CDN.</span><span data-id>Disk lokal, atau bucket S3 apa saja: AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo. Isi <code>S3_PUBLIC_URL</code> untuk menyajikan gambar langsung dari CDN.</span></p></details>
+      <details><summary><span data-en>How do I report an image?</span><span data-id>Bagaimana melaporkan gambar?</span></summary><p><span data-en>Every image page has a Report button. Reports go straight to the moderators' queue, where they can hide or delete the image and ban the uploader.</span><span data-id>Setiap halaman gambar punya tombol Report. Laporan langsung masuk antrean moderator, yang bisa menyembunyikan atau menghapus gambar dan memblokir pengunggahnya.</span></p></details>
+      <details><summary><span data-en>Why Go?</span><span data-id>Kenapa Go?</span></summary><p><span data-en>An image host spends its time moving bytes. Go does that with little memory, compiles to one file with everything inside, and cross-compiles to any server. PixelHop 2 needed PHP, MySQL, Python and cron; PixelHop 3 needs nothing but itself.</span><span data-id>Image host sebagian besar waktunya memindahkan byte. Go melakukannya dengan memori kecil, dikompilasi jadi satu file berisi semuanya, dan bisa dibuat untuk server apa pun. PixelHop 2 butuh PHP, MySQL, Python dan cron; PixelHop 3 tidak butuh apa-apa selain dirinya sendiri.</span></p></details>
+    </div>
+  </div>
+</section>
+
+<section class="end">
+  <div class="wrap">
+    <img src="logo.svg" alt="" width="84" height="84">
+    <h2><span data-en>Hop to it.</span><span data-id>Ayo mulai.</span></h2>
+    <div class="cta"><a class="btn main" href="https://p.hel.ink"><span data-en>Upload an image</span><span data-id>Unggah gambar</span></a><a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>GitHub</a></div>
+  </div>
+</section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span><b>PixelHop</b> · MIT · <span data-en>made by</span><span data-id>dibuat oleh</span> <a href="https://github.com/navi-crwn">navi-crwn</a></span>
+    <nav>
+      <a href="https://github.com/navi-crwn/pixelhop">GitHub</a>
+      <a href="https://github.com/navi-crwn/pixelhop/releases">Releases</a>
+      <a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md">Audit</a>
+      <a href="https://github.com/navi-crwn/pixelhop/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://navi-crwn.github.io/hel.ink/">HEL.ink</a>
+      <a href="https://navi-crwn.github.io/amnesia/">Amnesia</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

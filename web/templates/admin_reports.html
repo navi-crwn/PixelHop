@@ -1,0 +1,27 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head"><h1>Reports</h1>
+    <div class="tabs" style="margin:0;width:auto"><a class="btn sm {{if ne $d.Status "open"}}ghost{{end}}" href="/admin/reports">Open</a><a class="btn sm {{if ne $d.Status "actioned"}}ghost{{end}}" href="/admin/reports?status=actioned">Actioned</a><a class="btn sm {{if ne $d.Status "dismissed"}}ghost{{end}}" href="/admin/reports?status=dismissed">Dismissed</a></div></div>
+  {{template "admin_nav" .}}
+  {{if $d.Rows}}
+  <div class="table-wrap"><table>
+    <tr><th></th><th>Image</th><th>Reason</th><th>When</th><th></th></tr>
+    {{range $d.Rows}}
+    <tr>
+      <td>{{if .Image}}<a href="/{{.ImageID}}"><img class="mini-thumb" src="{{thumb .Image}}" alt=""></a>{{end}}</td>
+      <td><a class="mono small" href="/{{.ImageID}}">{{.ImageID}}</a>{{if not .Image}} <span class="pill">deleted</span>{{else if .Image.Hidden}} <span class="pill bad">hidden</span>{{end}}{{if gt .Count 1}} <span class="pill warn">{{.Count}} reports</span>{{end}}</td>
+      <td><span class="pill {{if eq .Reason "illegal"}}bad{{else}}warn{{end}}">{{.Reason}}</span>{{with .Note}}<div class="small muted" style="max-width:360px">{{.}}</div>{{end}}</td>
+      <td class="small muted">{{ago .CreatedAt}}</td>
+      <td style="white-space:nowrap">{{if eq $d.Status "open"}}
+        <form method="post" action="/admin/reports/{{.ID}}">
+          <button class="btn sm" name="action" value="dismiss">Dismiss</button>
+          <button class="btn sm" name="action" value="hide">Hide image</button>
+          <button class="btn sm danger" name="action" value="delete" data-confirm="Delete this image for good?">Delete image</button>
+        </form>{{end}}
+      </td>
+    </tr>
+    {{end}}
+  </table></div>
+  {{else}}<div class="empty"><p>No {{$d.Status}} reports. 🎉</p></div>{{end}}
+</div>
+{{end}}
