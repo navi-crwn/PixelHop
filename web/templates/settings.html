@@ -30,6 +30,14 @@
     <p class="small muted" style="margin:12px 0 0">Lost a key's ShareX file? <a href="/settings/sharex/ph">Download a blank config</a> and paste your key into it, or create a new key.</p>
   </div>
 
+  {{if and .SSO $u.HelinkID.Valid}}
+  <div class="card">
+    <h2>Your HEL.ink account</h2>
+    <p class="muted small">You sign in with HEL.ink, so your name, email, password, Google sign-in and two-factor codes are managed there, together with your short links and bio pages.</p>
+    <a class="btn" href="{{.Helink}}/settings">Open HEL.ink settings</a>
+  </div>
+  {{end}}
+  {{if not (and .SSO $u.HelinkID.Valid)}}
   <div class="card">
     <h2>Profile</h2>
     <form method="post" action="/settings/profile">
@@ -50,9 +58,10 @@
     </form>
   </div>
 
+  {{end}}
   <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
-    <h2>Delete account</h2>
-    <p class="muted small">Deletes your account and every image you uploaded. Links stop working right away.</p>
+    <h2>{{if $u.HelinkID.Valid}}Delete my images{{else}}Delete account{{end}}</h2>
+    <p class="muted small">{{if $u.HelinkID.Valid}}Deletes every image you uploaded here and your PixelHop profile. Your HEL.ink account, links and bio pages stay.{{else}}Deletes your account and every image you uploaded.{{end}} Links stop working right away.</p>
     <form method="post" action="/settings/delete-account" data-confirm="Delete your account and all your images? This can't be undone.">
       {{if $d.HasPass}}
       <div class="field"><label for="del-pw">Your password</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>

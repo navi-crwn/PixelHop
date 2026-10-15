@@ -307,6 +307,10 @@ dialog h2 { font-size: 1.15rem; }
 .or { display: flex; align-items: center; gap: 12px; color: var(--faint); font-size: .8rem; margin: 18px 0; }
 .or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 .btn.google { width: 100%; background: var(--bg-2); }
+.local-login { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+.local-login summary { cursor: pointer; text-align: center; list-style: none; }
+.local-login summary::-webkit-details-marker { display: none; }
+.btn img { flex: none; }
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
 .page-head h1 { font-size: 1.9rem; margin: 0; }
 .meter { height: 8px; border-radius: 8px; background: var(--panel-2); overflow: hidden; width: 220px; }

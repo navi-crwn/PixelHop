@@ -4,6 +4,7 @@
 //	pixelhop user add EMAIL [--admin]
 //	pixelhop user passwd EMAIL
 //	pixelhop user admin EMAIL
+//	pixelhop user merge OLD_EMAIL NEW_EMAIL
 //	pixelhop import --images images.json [--mysql DSN]
 //	pixelhop version
 package main
@@ -84,6 +85,7 @@ Usage:
   pixelhop user add EMAIL [--admin]    create an account (asks for a password)
   pixelhop user passwd EMAIL           set a new password
   pixelhop user admin EMAIL            make an account an admin
+  pixelhop user merge OLD NEW          move OLD's images into NEW, then delete OLD
   pixelhop import --images FILE [--mysql DSN]
                                        bring over images (and users) from PixelHop 2
   pixelhop version
@@ -111,6 +113,32 @@ func userCmd(cfg *config.Config, d *db.DB, args []string) error {
 			return err
 		}
 		fmt.Printf("Created %s (%s)\n", email, u.Role)
+	case "merge":
+		// pixelhop user merge OLD_EMAIL NEW_EMAIL — move OLD's images into NEW.
+		if len(args) < 3 {
+			return errors.New("usage: pixelhop user merge OLD_EMAIL NEW_EMAIL")
+		}
+		from, err := d.UserByEmail(ctx, email)
+		if err != nil {
+			return fmt.Errorf("no account with email %s", email)
+		}
+		into, err := d.UserByEmail(ctx, strings.TrimSpace(args[2]))
+		if err != nil {
+			return fmt.Errorf("no account with email %s (sign in with HEL.ink once first)", args[2])
+		}
+		if from.ID == into.ID {
+			return errors.New("that is the same account")
+		}
+		if from.Role == "admin" {
+			into.Role = "admin"
+			if err := d.UpdateUser(ctx, into); err != nil {
+				return err
+			}
+		}
+		if err := d.MergeUsers(ctx, from.ID, into.ID); err != nil {
+			return err
+		}
+		fmt.Printf("Moved everything from %s into %s and removed the old account.\n", email, into.Email)
 	case "passwd", "admin":
 		u, err := d.UserByEmail(ctx, email)
 		if err != nil {

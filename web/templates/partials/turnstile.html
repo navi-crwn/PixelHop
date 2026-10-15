@@ -1,0 +1,4 @@
+{{define "turnstile"}}{{with .Turnstile}}
+<div class="cf-turnstile" data-sitekey="{{.}}" data-theme="auto" style="margin:4px 0 14px;min-height:65px"></div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{{end}}{{end}}

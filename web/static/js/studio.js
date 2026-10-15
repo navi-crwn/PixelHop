@@ -553,10 +553,48 @@
 
   // ---------- remove background ----------
   var rembgLib = null;
+  var studioEl = $('#studio');
+  var serverRembg = studioEl && studioEl.dataset.rembgServer === '1';
+  var signedIn = studioEl && studioEl.dataset.signedIn === '1';
+  var rembgWhere = serverRembg && signedIn ? 'server' : 'device';
+
+  function rembgOnServer() {
+    busy('Removing the background on the server…');
+    return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
+      var fd = new FormData(); fd.append('file', blob, srcName + '.png');
+      return fetch('/api/v1/tools/remove-background', { method: 'POST', body: fd, headers: { Accept: 'image/png, application/json' } });
+    }).then(function (r) {
+      if (r.ok) return r.blob();
+      return r.json().then(function (j) { throw new Error(j.error || 'Server removal failed'); }, function () { throw new Error('Server removal failed (' + r.status + ')'); });
+    });
+  }
+
   tools.rembg = {
-    title: 'Remove background', desc: 'Cut out the subject and make the background transparent. The AI model (about 40 MB) downloads the first time and runs on your device.',
+    title: 'Remove background', desc: 'Cut out the subject and make the background transparent.',
     ui: function (p) {
+      if (serverRembg) {
+        p.appendChild(field('Where', seg([['server', 'On our server · fast'], ['device', 'On this device · private']], rembgWhere, function (w) {
+          rembgWhere = w; note.textContent = whereNote();
+        })));
+      }
+      var note = el('p', { class: 'small muted', style: 'margin:-6px 0 14px' });
+      function whereNote() {
+        if (rembgWhere === 'server') return signedIn
+          ? 'About a second. Your image is sent to this server, processed and discarded; it is not stored.'
+          : 'Sign in to use the server. “On this device” works without an account.';
+        return 'Nothing leaves your device. The AI model (about 40 MB) downloads once, then it is cached by your browser.';
+      }
+      note.textContent = whereNote();
+      p.appendChild(note);
       p.appendChild(btn('Remove background', function () {
+        if (rembgWhere === 'server') {
+          if (!signedIn) { location.href = '/login?next=' + encodeURIComponent('/tools#rembg'); return; }
+          rembgOnServer()
+            .then(function (b) { return createImageBitmap(b); })
+            .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
+            .catch(function (e) { busy(false); toast(e.message, true); });
+          return;
+        }
         busy('Loading the AI model…');
         (rembgLib ? Promise.resolve(rembgLib) : import(REMBG).then(function (m) { return (rembgLib = m); }))
           .then(function (m) {
@@ -571,7 +609,7 @@
           .catch(function (e) { busy(false); toast((e && e.message) || 'Background removal failed', true); });
       }, 'primary'));
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Saved as PNG to keep the transparency. Works best on people, products and animals.' }));
-      p.appendChild(el('p', { class: 'small faint', text: 'Uses @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr.' }));
+      p.appendChild(el('p', { class: 'small faint', text: 'On this device: @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr. On the server: rembg (MIT).' }));
     }
   };
 

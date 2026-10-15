@@ -30,6 +30,10 @@ type page struct {
 	Version      string
 	Asset        string // cache-busting query for /static files
 	Google       bool
+	SSO          bool   // accounts come from HEL.ink
+	Helink       string // HEL.ink base URL
+	Turnstile    string // Turnstile site key, when forms are protected
+	RembgServer  bool   // background removal can run on the server
 	GuestUploads bool
 	MaxMB        int64
 	MaxBatch     int
@@ -94,6 +98,12 @@ func (a *App) base(r *http.Request, p page) page {
 	p.Version = Version
 	p.Asset = Version + "-" + startedAt
 	p.Google = a.cfg.GoogleEnabled()
+	p.SSO = a.cfg.SSOEnabled()
+	p.Helink = a.cfg.HelinkURL
+	if a.cfg.TurnstileEnabled() {
+		p.Turnstile = a.cfg.TurnstileSiteKey
+	}
+	p.RembgServer = a.cfg.RembgURL != ""
 	p.Announcement = a.db.Setting(ctx, "announcement", "")
 	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
 	p.MaxMB = a.cfg.MaxUploadBytes >> 20
@@ -123,6 +133,10 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	h := w.Header()
 	h.Set("Content-Type", "text/html; charset=utf-8")
+	formHelink := ""
+	if a.cfg.HelinkURL != "" {
+		formHelink = " " + a.cfg.HelinkURL
+	}
 	// The studio's background remover (onnxruntime-web) compiles code at run
 	// time, so only that page may use eval. It shows no other people's content.
 	eval := ""
@@ -130,9 +144,9 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 		eval = " 'unsafe-eval'"
 	}
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; "+
-		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://cdn.jsdelivr.net blob:; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
+		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
 		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
-		"font-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com")
+		"font-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {
 		h.Set("Cache-Control", "private, no-store")
 	}

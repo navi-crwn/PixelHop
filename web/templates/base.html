@@ -43,6 +43,7 @@
           <div class="who">{{.User.Email}}</div>
           <a href="/dashboard"><svg width="16" height="16"><use href="#i-grid"/></svg>My images</a>
           <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>Settings &amp; API keys</a>
+          {{if .SSO}}<a href="{{.Helink}}/dashboard"><svg width="16" height="16"><use href="#i-link"/></svg>HEL.ink dashboard</a>{{end}}
           {{if .User.IsAdmin}}<a href="/admin"><svg width="16" height="16"><use href="#i-shield"/></svg>Admin</a>{{end}}
           <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>Sign out</button></form>
         </div>

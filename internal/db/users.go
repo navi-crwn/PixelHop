@@ -18,6 +18,7 @@ type User struct {
 	Status     string
 	StatusNote string
 	Warning    string // message from an admin, shown until acknowledged
+	HelinkID   sql.NullString
 	QuotaBytes int64
 	CreatedAt  int64
 	LastLogin  int64
@@ -25,12 +26,12 @@ type User struct {
 
 func (u *User) IsAdmin() bool { return u.Role == "admin" }
 
-const userCols = `id,email,name,pass_hash,google_id,avatar_url,role,status,status_note,quota_bytes,created_at,last_login,warning`
+const userCols = `id,email,name,pass_hash,google_id,avatar_url,role,status,status_note,quota_bytes,created_at,last_login,warning,helink_id`
 
 func scanUser(row interface{ Scan(...any) error }) (*User, error) {
 	var u User
 	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PassHash, &u.GoogleID, &u.AvatarURL, &u.Role, &u.Status,
-		&u.StatusNote, &u.QuotaBytes, &u.CreatedAt, &u.LastLogin, &u.Warning)
+		&u.StatusNote, &u.QuotaBytes, &u.CreatedAt, &u.LastLogin, &u.Warning, &u.HelinkID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -47,10 +48,10 @@ func (d *DB) InsertUser(ctx context.Context, u *User) error {
 	if u.Status == "" {
 		u.Status = "active"
 	}
-	q := `INSERT INTO users (email,name,pass_hash,google_id,avatar_url,role,status,quota_bytes,created_at) VALUES (?,?,?,?,?,?,?,?,?)`
-	args := []any{u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL, u.Role, u.Status, u.QuotaBytes, u.CreatedAt}
+	q := `INSERT INTO users (email,name,pass_hash,google_id,avatar_url,role,status,quota_bytes,created_at,helink_id) VALUES (?,?,?,?,?,?,?,?,?,?)`
+	args := []any{u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL, u.Role, u.Status, u.QuotaBytes, u.CreatedAt, u.HelinkID}
 	if u.ID > 0 { // keep ids when importing from the PHP version
-		q = `INSERT INTO users (id,email,name,pass_hash,google_id,avatar_url,role,status,quota_bytes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)`
+		q = `INSERT INTO users (id,email,name,pass_hash,google_id,avatar_url,role,status,quota_bytes,created_at,helink_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
 		args = append([]any{u.ID}, args...)
 	}
 	res, err := d.ExecContext(ctx, q, args...)
@@ -71,6 +72,34 @@ func (d *DB) UserByEmail(ctx context.Context, email string) (*User, error) {
 
 func (d *DB) UserByGoogle(ctx context.Context, gid string) (*User, error) {
 	return scanUser(d.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE google_id=?`, gid))
+}
+
+func (d *DB) UserByHelink(ctx context.Context, id string) (*User, error) {
+	return scanUser(d.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE helink_id=?`, id))
+}
+
+// MergeUsers moves everything from one account into another (images, albums,
+// API keys) and deletes the emptied account. Used to fold an old PixelHop-only
+// account into the person's HEL.ink-linked one.
+func (d *DB) MergeUsers(ctx context.Context, fromID, intoID int64) error {
+	tx, err := d.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, q := range []string{
+		`UPDATE images SET user_id=? WHERE user_id=?`,
+		`UPDATE albums SET user_id=? WHERE user_id=?`,
+		`UPDATE api_keys SET user_id=? WHERE user_id=?`,
+	} {
+		if _, err := tx.ExecContext(ctx, q, intoID, fromID); err != nil {
+			return err
+		}
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM users WHERE id=?`, fromID); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (d *DB) Users(ctx context.Context, search string, limit, offset int) ([]*User, int, error) {
@@ -101,8 +130,8 @@ func (d *DB) CountUsers(ctx context.Context) (n int) {
 
 func (d *DB) UpdateUser(ctx context.Context, u *User) error {
 	_, err := d.ExecContext(ctx, `UPDATE users SET email=?,name=?,pass_hash=?,google_id=?,avatar_url=?,role=?,status=?,
-		status_note=?,quota_bytes=?,last_login=?,warning=? WHERE id=?`, u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL,
-		u.Role, u.Status, u.StatusNote, u.QuotaBytes, u.LastLogin, u.Warning, u.ID)
+		status_note=?,quota_bytes=?,last_login=?,warning=?,helink_id=? WHERE id=?`, u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL,
+		u.Role, u.Status, u.StatusNote, u.QuotaBytes, u.LastLogin, u.Warning, u.HelinkID, u.ID)
 	return err
 }
 
