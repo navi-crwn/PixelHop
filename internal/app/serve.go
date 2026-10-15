@@ -233,6 +233,32 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 		Desc: humanDims(im.Width, im.Height) + " · " + humanBytes(im.Size) + " · shared with " + a.cfg.SiteName})
 }
 
+// legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
+// one image redirects to its page, several are shown like an album.
+func (a *App) legacyResult(w http.ResponseWriter, r *http.Request) {
+	var ims []*db.Image
+	now := time.Now().Unix()
+	for _, id := range strings.FieldsFunc(r.URL.Query().Get("id"), func(c rune) bool { return c == ',' || c == ' ' }) {
+		if len(ims) >= 50 || !validID(id) {
+			continue
+		}
+		if im, err := a.db.Image(r.Context(), id); err == nil && !im.Hidden && (im.ExpiresAt == 0 || im.ExpiresAt > now) {
+			ims = append(ims, im)
+		}
+	}
+	switch len(ims) {
+	case 0:
+		a.notFound(w, r)
+	case 1:
+		http.Redirect(w, r, "/"+ims[0].ID, http.StatusMovedPermanently)
+	default:
+		title := strconv.Itoa(len(ims)) + " images"
+		a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(ims[0]),
+			Desc: title + " on " + a.cfg.SiteName,
+			Data: albumData{Album: &db.Album{Title: title, CreatedAt: ims[0].CreatedAt}, Images: ims, Link: a.cfg.BaseURL + r.URL.RequestURI()}})
+	}
+}
+
 type albumData struct {
 	Album  *db.Album
 	Images []*db.Image

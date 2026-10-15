@@ -167,6 +167,11 @@ func (a *App) legal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
+	// PixelHop 2 trimmed slashes, so /{id}/ links exist in the wild.
+	if id, ok := strings.CutSuffix(strings.TrimPrefix(r.URL.Path, "/"), "/"); ok && r.Method == http.MethodGet && validID(id) {
+		http.Redirect(w, r, "/"+id, http.StatusMovedPermanently)
+		return
+	}
 	if strings.HasPrefix(r.URL.Path, "/api/") {
 		apiError(w, http.StatusNotFound, "not found")
 		return
