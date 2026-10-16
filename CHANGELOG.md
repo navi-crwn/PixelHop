@@ -2,6 +2,14 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.4.0] - 2026-10-16
+
+### Changed
+- **New upload page layout.** A shorter headline and one clear upload box. Options fold into an "Options" chip that shows what's set (e.g. "Delete after 7 days"), and the ticket into a "Ticket & note" chip.
+- **Results beside the upload box** on desktop (no scrolling), below it on phones (scrolled into view). Up to 3 files show there; bigger batches open the results page.
+- **"Install app"** moved to the top bar; "Rebuilt in Go" moved down to the features.
+- **Uploaded from this device** is folded by default (count and a few thumbnails), grouped by day inside, a dozen at a time.
+
 ## [3.3.2] - 2026-10-16
 
 ### Added
