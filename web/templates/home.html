@@ -1,20 +1,22 @@
 {{define "content"}}
 <div class="wrap">
   <section class="hero">
-    <span class="eyebrow"><b>v3</b> Rebuilt in Go: one tiny binary, open source</span>
-    <h1>Drop an image. <span class="grad">Get a link.</span></h1>
-    <p class="lead">Free image hosting that removes your GPS location before anyone sees it. Albums, ShareX, an API, and a photo studio that runs right in your browser.</p>
+    <div class="hero-intro">
+      <h1>Drop a file. <span class="grad">Get a link.</span></h1>
+      <p class="lead">Images, videos and PDFs, shared in seconds. Your GPS location is removed before anyone sees it.</p>
+    </div>
 
     {{if or .GuestUploads .User}}
+    <div class="hero-grid" id="hero-grid">
     <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
       <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
-        <h2>Drop images, videos or PDFs here</h2>
-        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> (on a phone: the Paste button) · images up to {{.MaxMB}} MB, videos and PDFs up to {{.MaxMediaMB}} MB (made smaller for you) · {{.MaxBatch}} at once</p>
+        <h2>Drop files here</h2>
+        <p class="sub">Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB · <span class="nowrap">or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
         <div class="btn-row">
           <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
           <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>
-          <button class="btn lg" type="button" id="show-url"><svg><use href="#i-link"/></svg>From a link</button>
+          <button class="btn lg icon-only" type="button" id="show-url" aria-label="Upload from a link" title="Upload from a link"><svg><use href="#i-link"/></svg></button>
         </div>
         <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
         <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="Paste here" data-placeholder="Press and hold here, then tap Paste"></div>
@@ -22,7 +24,12 @@
           <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
           <button class="btn" type="submit">Fetch</button>
         </form>
-        <div class="opts" id="opts">
+
+        <div class="chips" id="chips">
+          <button class="chip" type="button" id="opts-toggle" aria-expanded="false" aria-controls="opts"><svg><use href="#i-gear"/></svg><span id="opts-summary">Keep forever</span></button>
+          {{if .User}}<button class="chip" type="button" id="ticket-toggle" aria-expanded="false" aria-controls="ticket-box"><svg><use href="#i-album"/></svg>Ticket &amp; note</button>{{end}}
+        </div>
+        <div class="opts hide" id="opts">
           <label>Delete after
             <select id="expire">
               <option value="">Never</option>
@@ -35,39 +42,36 @@
             </select>
           </label>
           <label><input type="checkbox" id="slug" checked> File name in link</label>
-          <label><input type="checkbox" id="album" checked> Group several into an album</label>
+          <label><input type="checkbox" id="album" checked> Several files = one album</label>
           {{if .User}}<label><input type="checkbox" id="listed"> Show on my profile</label>{{end}}
-          {{if .User}}<div class="ticket" id="ticket-box">
-            <b><svg width="15" height="15" style="vertical-align:-2px"><use href="#i-album"/></svg> Ticket / case <span class="hint">optional: one link for all files, with your note</span></b>
-            <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
-            <textarea id="note" maxlength="1000" rows="2" placeholder="Note for the admin, e.g. transfer succeeded but status shows failed" aria-label="Note"></textarea>
-          </div>{{else}}<p class="ticket small muted"><a href="/login?next=/">Sign in</a> to group files under a ticket number with a note.</p>{{end}}
         </div>
+        {{if .User}}<div class="ticket hide" id="ticket-box">
+          <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
+          <textarea id="note" maxlength="1000" rows="2" placeholder="Note for the admin (optional)" aria-label="Note"></textarea>
+          <span class="small muted">All files go into one album with this title and note.</span>
+        </div>{{end}}
       </div>
+      {{if not .User}}<p class="guest-note">Guest upload: each file gets a private delete link. <a href="/login?next=/">Sign in</a> for a gallery and tickets.</p>{{end}}
     </div>
-    <div class="install-bar hide" id="install-bar">
-      <button class="btn" type="button" id="install-app"><svg><use href="#i-down"/></svg>Install app</button>
-      <span class="small muted" id="install-hint">Open {{.Site}} from your home screen and share files to it from WhatsApp or LINE.</span>
-    </div>
-    <div class="album-banner hide" id="album-banner" style="text-align:left">
-      <svg width="20" height="20"><use href="#i-album"/></svg><b>Album</b>
-      <input type="text" readonly id="album-link" aria-label="Album link">
-      <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
-      <a class="btn sm" id="album-open" href="#">Open</a>
-    </div>
-    <div data-copy-all-root class="uploads-wrap">
+
+    <aside class="results hide" id="results" data-copy-all-root aria-label="Your links">
+      <div class="results-head"><h2>Your links</h2><button class="btn sm ghost" type="button" id="results-clear">Clear</button></div>
+      <div class="album-banner hide" id="album-banner">
+        <svg width="18" height="18"><use href="#i-album"/></svg><b>Album</b>
+        <input type="text" readonly id="album-link" aria-label="Album link">
+        <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
+        <a class="btn sm ghost" id="album-open" href="#">Open</a>
+      </div>
       <div class="hide" id="copy-all-bar"><div class="copy-all" data-copy-all-scope>
-  <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
-  <span class="small muted">or all links as:</span>
-  <button class="btn sm" type="button" data-copy-all="direct">Direct</button>
-  <button class="btn sm" type="button" data-copy-all="page">View</button>
-  <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>
-  <button class="btn sm" type="button" data-copy-all="bbcode">BBCode</button>
-  <button class="btn sm" type="button" data-copy-all="html">HTML</button>
-</div></div>
+        <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
+        <button class="btn sm" type="button" data-copy-all="direct">All direct links</button>
+        <button class="btn sm ghost" type="button" data-copy-all="page">View</button>
+        <button class="btn sm ghost" type="button" data-copy-all="markdown">Markdown</button>
+        <button class="btn sm ghost" type="button" data-copy-all="bbcode">BBCode</button>
+      </div></div>
       <div class="uploads" id="uploads" aria-live="polite"></div>
+    </aside>
     </div>
-    {{if not .User}}<p class="small faint" style="margin-top:14px">Uploading as a guest: you get a private delete link for each image. <a href="/register">Create a free account</a> to keep a gallery.</p>{{end}}
     {{else}}
     <div class="card" style="max-width:520px;margin:0 auto">
       <h2>Sign in to upload</h2>
@@ -77,18 +81,28 @@
     {{end}}
 
     {{with .Data}}{{if gt .Images 0}}
-    <div class="stats"><div><b data-count="{{.Images}}">{{.Images}}</b>images hosted</div><div><b data-count="{{.Views}}">{{.Views}}</b>views served</div></div>
+    <div class="stats"><div><b data-count="{{.Images}}">{{.Images}}</b>files hosted</div><div><b data-count="{{.Views}}">{{.Views}}</b>views served</div></div>
     {{end}}{{end}}
   </section>
 
-  <section class="section" id="device-history-wrap" hidden>
-    <div class="page-head"><div><h2 style="margin:0">Uploaded from this device</h2><p class="muted small" style="margin:4px 0 0">Kept only in this browser, with each image's delete link.</p></div>
-      <button class="btn sm ghost" type="button" id="clear-history">Forget this list</button></div>
-    <div class="gallery" id="device-history"></div>
+  <section class="section history" id="device-history-wrap" hidden>
+    <details class="history-box" id="history-box">
+      <summary>
+        <span class="history-peek" id="history-peek" aria-hidden="true"></span>
+        <span class="history-title"><b>Uploaded from this device <span class="pill" id="history-count"></span></b><span class="small muted">Kept only in this browser, with each file's delete link</span></span>
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </summary>
+      <div id="device-history"></div>
+      <div class="history-foot">
+        <button class="btn sm" type="button" id="history-more">Show more</button>
+        <button class="btn sm ghost" type="button" id="clear-history">Forget this list</button>
+      </div>
+    </details>
   </section>
 
   <section class="section" id="features">
     <div class="section-head">
+      <span class="eyebrow"><b>v3</b> Rebuilt in Go: one tiny binary, open source</span>
       <h2>Everything an image host should do. <span class="grad">Nothing it shouldn't.</span></h2>
       <p>No ads, no tracking scripts, no premium tier hiding the good parts.</p>
     </div>

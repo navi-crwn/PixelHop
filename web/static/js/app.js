@@ -130,7 +130,24 @@
     var h = loadHistory();
     wrap.hidden = h.length === 0;
     box.innerHTML = '';
-    h.slice(0, 24).forEach(function (x) {
+    // Folded by default: a few stacked thumbnails and a count. Inside, files
+    // are grouped by day and shown a dozen at a time.
+    $('#history-count').textContent = h.length;
+    var peek = $('#history-peek'); peek.innerHTML = '';
+    h.slice(0, 4).forEach(function (x) { var i = document.createElement('img'); i.src = x.thumb; i.alt = ''; i.loading = 'lazy'; i.onerror = function () { i.remove(); }; peek.appendChild(i); });
+    var shown = +(box.dataset.shown || 12), day = '', grid = null;
+    var label = function (t) {
+      var d = new Date(t), today = new Date(); today.setHours(0, 0, 0, 0);
+      var diff = Math.round((today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
+      return diff === 0 ? 'Today' : diff === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric' });
+    };
+    $('#history-more').hidden = h.length <= shown;
+    h.slice(0, shown).forEach(function (x) {
+      var l = label(x.t || Date.now());
+      if (l !== day) {
+        day = l; var hd = document.createElement('h3'); hd.className = 'history-day'; hd.textContent = l; box.appendChild(hd);
+        grid = document.createElement('div'); grid.className = 'gallery history-grid'; box.appendChild(grid);
+      }
       var tile = document.createElement('div'); tile.className = 'tile';
       var a = document.createElement('a'); a.href = x.page;
       var img = document.createElement('img'); img.src = x.thumb; img.alt = ''; img.loading = 'lazy';
@@ -139,9 +156,13 @@
       var cap = document.createElement('div'); cap.className = 'cap';
       var s = document.createElement('span'); s.textContent = x.title; cap.appendChild(s);
       if (x.del) { var d = document.createElement('a'); d.href = x.del; d.textContent = 'delete'; d.style.color = '#fff'; cap.appendChild(d); }
-      tile.appendChild(cap); box.appendChild(tile);
+      tile.appendChild(cap); grid.appendChild(tile);
     });
   }
+  var moreBtn = $('#history-more');
+  if (moreBtn) moreBtn.addEventListener('click', function () {
+    var box = $('#device-history'); box.dataset.shown = +(box.dataset.shown || 12) + 24; renderHistory();
+  });
   if ($('#deleted-ok')) {
     var gone = location.pathname.split('/')[2];
     try { localStorage.setItem(HKEY, JSON.stringify(loadHistory().filter(function (x) { return x.id !== gone; }))); } catch (e) {}
@@ -163,7 +184,7 @@
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
     $('#drop-in').addEventListener('click', function (e) {
-      if (e.target.closest('#opts,#url-form,#paste-box,button,select,input,textarea,label,details')) return;
+      if (e.target.closest('#opts,#url-form,#paste-box,#chips,#ticket-box,button,select,input,textarea,label,details')) return;
       fileInput.click();
     });
     $('#drop-in').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop-in') { e.preventDefault(); fileInput.click(); } });
@@ -229,7 +250,42 @@
 
     function hasFiles(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0; }
 
+    // Options and the ticket stay folded away until asked for.
+    function fold(btnSel, boxSel) {
+      var b = $(btnSel), box = $(boxSel); if (!b || !box) return;
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = box.classList.toggle('hide') === false;
+        b.setAttribute('aria-expanded', String(open));
+        if (open && box.querySelector('input[type=text]')) box.querySelector('input[type=text]').focus();
+      });
+    }
+    fold('#opts-toggle', '#opts'); fold('#ticket-toggle', '#ticket-box');
+    function optsSummary() {
+      var e = $('#expire'), parts = [e.value ? 'Delete after ' + e.options[e.selectedIndex].text : 'Keep forever'];
+      if ($('#listed') && $('#listed').checked) parts.push('on profile');
+      $('#opts-summary').textContent = parts.join(' · ');
+    }
+    $('#opts').addEventListener('change', optsSummary); optsSummary();
+    var ticketInput = $('#ticket');
+    if (ticketInput) ticketInput.addEventListener('input', function () {
+      $('#ticket-toggle').lastChild.textContent = ticketInput.value.trim() ? 'Ticket: ' + ticketInput.value.trim().slice(0, 24) : 'Ticket & note';
+    });
+
+    // Results appear beside the upload box (below it on phones).
+    function showResults() {
+      var first = $('#results').classList.contains('hide');
+      $('#results').classList.remove('hide'); $('#hero-grid').classList.add('has-results'); $('.hero').classList.add('compact');
+      // on phones the results sit below the upload box: bring them into view
+      if (first && window.matchMedia && matchMedia('(max-width: 960px)').matches) setTimeout(function () { $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+    }
+    $('#results-clear').addEventListener('click', function () {
+      list.innerHTML = ''; $('#results').classList.add('hide'); $('#hero-grid').classList.remove('has-results'); $('.hero').classList.remove('compact');
+      $('#album-banner').classList.add('hide'); $('#copy-all-bar').classList.add('hide');
+    });
+
     function row(name, preview) {
+      showResults();
       var el = document.createElement('div'); el.className = 'up';
       var img = document.createElement('img'); img.className = 'thumb'; img.alt = '';
       if (preview) img.src = preview;
@@ -243,12 +299,11 @@
       return { el: el, img: img, meta: meta, bar: bar.firstChild, act: act, name: n };
     }
 
-    // Phones get a page of their own for the results of a bulk upload.
-    var phone = window.matchMedia && matchMedia('(max-width: 760px)').matches;
+    // A few results stay here; a bigger batch gets a page of its own.
     function settle(r, id) {
       var b = r.batch; if (!b) return;
       if (id) b.ids.push(id);
-      if (--b.left > 0 || b.ids.length < 2 || !phone) return;
+      if (--b.left > 0 || b.ids.length <= 3) return;
       setTimeout(function () { location.href = '/uploaded?id=' + b.ids.join(','); }, 500);
     }
 
@@ -593,18 +648,17 @@
     });
   }
 
-  // "Install app": Android/desktop Chrome offer it; iPhone needs Share → Add to Home Screen.
-  var ib = $('#install-bar'), deferred = null;
+  // "Install app" in the top bar: Android/desktop Chrome offer it; iPhone needs Share → Add to Home Screen.
+  var ib = $('#install-app'), deferred = null;
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
   if (ib && !standalone) {
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; ib.classList.remove('hide'); });
-    $('#install-app').addEventListener('click', function () {
+    window.addEventListener('appinstalled', function () { ib.classList.add('hide'); });
+    ib.addEventListener('click', function () {
       if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; ib.classList.add('hide'); }); return; }
       toast('On iPhone: tap Share, then “Add to Home Screen”.');
     });
-    if (/iPhone|iPad/.test(navigator.userAgent) && !navigator.standalone) {
-      ib.classList.remove('hide'); $('#install-hint').textContent = 'On iPhone: Share → Add to Home Screen';
-    }
+    if (/iPhone|iPad/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !navigator.standalone) ib.classList.remove('hide');
   }
 
   var warn = $('dialog[data-open]');

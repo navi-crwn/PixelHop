@@ -38,6 +38,7 @@
       {{if and .User .User.IsAdmin}}<a href="/admin" {{if eq .Path "/admin"}}aria-current="page"{{end}}>Admin</a>{{end}}
     </nav>
     <div class="nav-r">
+      <button class="btn sm install-nav hide" id="install-app" type="button" title="Add {{.Site}} to your home screen"><svg><use href="#i-down"/></svg><span>Install app</span></button>
       <button class="icon-btn" id="theme" type="button" aria-label="Switch light or dark"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
       {{if .User}}
       <div class="menu" id="menu">
