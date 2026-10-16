@@ -140,7 +140,7 @@ Dokumentasi lengkap ada di [`/docs`](https://p.hel.ink/docs) di setiap server Pi
 
 ## Upgrade dari PixelHop 2
 
-PixelHop 2 adalah aplikasi PHP dengan MySQL, Python venv dan cron. Kodenya disimpan di [`legacy/`](legacy/) dan tag [`v2.3.0-php`](../../tree/v2.3.0-php). Satu perintah memindahkan semuanya:
+PixelHop 2 adalah aplikasi PHP dengan MySQL, Python venv dan cron. Kodenya tetap ada di tag [`v2.3.0-php`](../../tree/v2.3.0-php). Satu perintah memindahkan semuanya:
 
 ```bash
 pixelhop import --images /var/www/pichost/data/images.json \

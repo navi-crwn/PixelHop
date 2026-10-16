@@ -199,7 +199,7 @@ Every answer looks like `{"success": true, "data": …}` or `{"success": false, 
 
 ## Upgrading from PixelHop 2
 
-PixelHop 2 was a PHP app with MySQL, a Python venv and cron jobs; its code is kept in [`legacy/`](legacy/) and tagged [`v2.3.0-php`](../../tree/v2.3.0-php). One command brings everything over:
+PixelHop 2 was a PHP app with MySQL, a Python venv and cron jobs; its code lives on in the [`v2.3.0-php`](../../tree/v2.3.0-php) tag. One command brings everything over:
 
 ```bash
 pixelhop import --images /var/www/pichost/data/images.json \
@@ -223,7 +223,6 @@ internal/storage/ local disk, S3 (own SigV4 signer), legacy URLs
 internal/netsafe/ SSRF-safe fetching for "upload from link"
 web/              templates and static files, embedded in the binary
 docs/             the GitHub Pages website and README images
-legacy/           PixelHop 2 (PHP), for reference
 ```
 
 `make test` runs the tests; `npm run readme-images` re-renders the README pictures from the website.

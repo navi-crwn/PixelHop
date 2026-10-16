@@ -11,6 +11,9 @@ All notable changes to PixelHop will be documented in this file.
 ### Fixed
 - The upload box fills its column again, as in 3.0. Since 3.4.0 it had shrunk to the width of its content. "From a link" has its label back, and on phones the three buttons fit on one row.
 
+### Removed
+- The PixelHop 2 PHP code (`legacy/`). It stays available in the `v2.3.0-php` tag; old links and `pixelhop import` keep working.
+
 ## [3.5.0] - 2026-10-16
 
 ### Added
