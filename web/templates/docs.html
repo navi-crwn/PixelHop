@@ -7,6 +7,12 @@
       <a href="#upload">Upload</a>
       <a href="#list">List images</a>
       <a href="#image">Get, rename, delete</a>
+      <a href="#privacy">Privacy &amp; stats</a>
+      <a href="#transform">Resize on the fly</a>
+      <a href="#albums">Albums</a>
+      <a href="#webhooks">Webhooks</a>
+      <a href="#embed">Embeds &amp; galleries</a>
+      <a href="#cli">Command line</a>
       <a href="#me">Account</a>
       <a href="#errors">Errors &amp; limits</a>
     </nav>
@@ -73,9 +79,66 @@
         <h2>Get, rename or delete one image</h2>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}</div>
         <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/images/{id}</div>
-        <p>Body: <code>{"title": "New name"}</code> and/or <code>{"listed": true}</code> to show it on your public profile (<code>/u/you</code>).</p>
+        <p>Body, any of: <code>{"title": "New name", "alt": "Describe it for screen readers", "listed": true}</code>. <code>listed</code> shows it on your public profile (<code>/u/you</code>) and Explore.</p>
         <div class="endpoint"><span class="method del">DELETE</span>/api/v1/images/{id}</div>
 <pre><code>curl -X DELETE -H "Authorization: Bearer ph_yourkey" {{.Base}}/api/v1/images/holiday-x7Kp2Q</code></pre>
+      </section>
+
+      <section id="privacy">
+        <h2>Privacy &amp; stats</h2>
+        <p>Every image is <b>unlisted</b> by default: only people with the link see it. Change that with the same <code>PATCH</code>:</p>
+<pre><code>{"visibility": "private"}                               // only you (and admins)
+{"visibility": "password", "password": "open-sesame"}  // a password page; the file itself is locked too
+{"visibility": "unlisted"}                              // back to normal</code></pre>
+        <p>Locked images never appear on profiles, Explore, oEmbed or the sitemap, and hotlinks to them stop working.</p>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}/stats</div>
+        <p>Views per day for the last 30 days and the sites that sent visitors (<code>referrers</code>, by host name only).</p>
+      </section>
+
+      <section id="transform">
+        <h2>Resize on the fly</h2>
+        <p>Add a query to any direct link and the server makes (and keeps) that size:</p>
+<pre><code>{{.Base}}/i/holiday-x7Kp2Q.jpg?w=800
+{{.Base}}/i/holiday-x7Kp2Q.jpg?w=400&amp;h=400&amp;fit=cover
+{{.Base}}/i/holiday-x7Kp2Q.jpg?w=1200&amp;format=webp&amp;q=75</code></pre>
+        <p><code>w</code>, <code>h</code> up to 4096 (never larger than the original), <code>fit</code> = <code>inside</code> (default) or <code>cover</code>, <code>format</code> = <code>jpeg</code>, <code>png</code>, <code>webp</code> or <code>avif</code>, <code>q</code> 30–95. Each image keeps at most 24 sizes; unusual ones are rounded.</p>
+      </section>
+
+      <section id="albums">
+        <h2>Albums</h2>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/albums</div>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/albums</div>
+        <p>Body: <code>{"title": "Trip", "ids": ["holiday-x7Kp2Q", "…"]}</code>. Uploading several files at once also makes an album (send <code>album=0</code> to skip it).</p>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/albums/{id}</div>
+        <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/albums/{id}</div>
+        <p>Any of <code>title</code>, <code>description</code>, <code>cover_id</code>, <code>order</code> (all ids in the new order), <code>add</code> and <code>remove</code> (lists of ids).</p>
+        <div class="endpoint"><span class="method del">DELETE</span>/api/v1/albums/{id}</div>
+        <p>Deletes the album only; its images stay online.</p>
+      </section>
+
+      <section id="webhooks">
+        <h2>Webhooks</h2>
+        <p>Add an https address in <a href="/settings#webhooks">Settings</a>. We <code>POST</code> JSON when you upload (<code>image.uploaded</code>) or delete (<code>image.deleted</code>) an image:</p>
+<pre><code>{"event": "image.uploaded", "created_at": 1760600000, "data": { …the image, as in the API… }}</code></pre>
+        <p>Check the <code>X-PixelHop-Signature</code> header: it is <code>sha256=</code> plus the hex HMAC-SHA256 of the raw body with your webhook secret. Failed deliveries are retried twice.</p>
+<pre><code>expected = "sha256=" + hmac_sha256_hex(secret, raw_body)</code></pre>
+      </section>
+
+      <section id="embed">
+        <h2>Embeds &amp; galleries</h2>
+        <div class="endpoint"><span class="method get">GET</span>/oembed?url={{.Base}}/{id}</div>
+        <p>oEmbed for WordPress, Discourse, Notion and friends. Image pages also advertise it in their HTML.</p>
+        <div class="endpoint"><span class="method get">GET</span>/api/v1/users/{username}/images</div>
+        <p>Public, no key: the images someone chose to show on their profile (<code>limit</code> up to 60). Handy for a gallery on your own site or a HEL.ink bio page.</p>
+      </section>
+
+      <section id="cli">
+        <h2>Command line</h2>
+        <p>The <code>pixelhop</code> binary from the <a href="https://github.com/navi-crwn/pixelhop/releases">releases page</a> is also an uploader:</p>
+<pre><code>pixelhop login --server {{.Base}} --key ph_yourkey
+pixelhop push screenshot.png photos/*.jpg --expire 7d --format markdown
+grim - | pixelhop push -        # from a pipe</code></pre>
+        <p><code>--format</code> is <code>page</code>, <code>direct</code>, <code>markdown</code>, <code>html</code>, <code>bbcode</code> or <code>json</code>; <code>--profile</code> shows the images on your profile; <code>--no-album</code> skips the album.</p>
       </section>
 
       <section id="me">

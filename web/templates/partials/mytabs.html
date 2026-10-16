@@ -1,0 +1,1 @@
+{{define "mytabs"}}<nav class="admin-nav" aria-label="My things"><a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>Images</a><a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}>Albums</a>{{with .User.Username.String}}{{if $.User.ShowOwner}}<a href="/u/{{.}}">Public profile</a>{{end}}{{end}}</nav>{{end}}

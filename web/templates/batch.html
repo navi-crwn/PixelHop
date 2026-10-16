@@ -24,6 +24,8 @@
       <div class="field"><label for="b-format">Format</label>
         <select id="b-format"><option value="">Same as original</option><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option><option value="image/avif">AVIF</option></select></div>
       <div class="field"><label>Quality</label><div class="range-row"><input type="range" id="b-quality" min="10" max="100" value="82"><output id="b-qout">82</output></div></div>
+      <div class="field"><label for="b-wm">Watermark <span class="hint">optional</span></label>
+        <div class="copy"><input type="text" id="b-wm" maxlength="80" placeholder="© your name"><select id="b-wm-pos" aria-label="Watermark position" style="max-width:120px"><option value="br">Bottom right</option><option value="bl">Bottom left</option><option value="tr">Top right</option><option value="tl">Top left</option><option value="cc">Center</option><option value="tile">Tiled</option></select></div></div>
       <div class="batch-ai">
         <label class="check"><input type="checkbox" id="b-rembg"> <span>Remove background <span class="pill acc">AI</span></span></label>
         <label class="check"><input type="checkbox" id="b-faces"> <span>Blur faces <span class="pill acc">AI</span></span></label>

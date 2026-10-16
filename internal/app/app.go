@@ -15,7 +15,7 @@ import (
 	"github.com/navi-crwn/pixelhop/web"
 )
 
-var Version = "3.1.0"
+var Version = "3.2.0"
 
 type App struct {
 	cfg      *config.Config
@@ -68,12 +68,15 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /legal", a.legal)
 	mux.HandleFunc("GET /a/{id}", a.album)
 	mux.HandleFunc("GET /u/{username}", a.profile)
+	mux.HandleFunc("GET /explore", a.explore)
+	mux.HandleFunc("GET /sitemap.xml", a.sitemap)
 	mux.HandleFunc("GET /avatar/{id}", a.serveAvatar)
 	mux.HandleFunc("GET /{id}", a.view)
 	mux.HandleFunc("GET /result", a.legacyResult) // PixelHop 2 upload results: /result?id=a,b
 	mux.HandleFunc("GET /delete/{id}/{token}", a.deleteConfirm)
 	mux.HandleFunc("POST /delete/{id}/{token}", a.deleteWithToken)
 	mux.HandleFunc("POST /report/{id}", a.report)
+	mux.HandleFunc("POST /unlock/{id}", a.unlock)
 
 	// image bytes
 	mux.HandleFunc("GET /i/{file}", a.serveFull)
@@ -82,6 +85,9 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /qr/{id}", a.qr)
 	mux.Handle("GET /static/", a.static)
 	mux.HandleFunc("GET /favicon.ico", a.favicon)
+	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
+	mux.HandleFunc("GET /sw.js", a.serviceWorker)
+	mux.HandleFunc("POST /share", a.share)
 	mux.HandleFunc("GET /robots.txt", a.robots)
 	mux.HandleFunc("GET /metrics", a.metrics)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
@@ -102,6 +108,11 @@ func (a *App) Handler() http.Handler {
 	// member area
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
 	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
+	mux.HandleFunc("GET /dashboard/albums", a.member(a.myAlbums))
+	mux.HandleFunc("GET /a/{id}/edit", a.member(a.editAlbum))
+	mux.HandleFunc("POST /settings/webhooks", a.member(a.createWebhook))
+	mux.HandleFunc("POST /settings/webhooks/{id}/delete", a.member(a.deleteWebhook))
+	mux.HandleFunc("POST /settings/webhooks/test", a.member(a.testWebhook))
 	mux.HandleFunc("GET /settings", a.member(a.settingsPage))
 	mux.HandleFunc("POST /settings/profile", a.member(a.saveProfile))
 	mux.HandleFunc("POST /settings/avatar", a.member(a.saveAvatar))
@@ -132,10 +143,18 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/upload.php", a.apiUpload) // ShareX configs made for PixelHop 2
 	mux.HandleFunc("GET /api/v1/images", a.apiImages)
 	mux.HandleFunc("GET /api/v1/images/{id}", a.apiImage)
-	mux.HandleFunc("PATCH /api/v1/images/{id}", a.apiRenameImage)
+	mux.HandleFunc("PATCH /api/v1/images/{id}", a.apiUpdateImage)
+	mux.HandleFunc("GET /api/v1/images/{id}/stats", a.apiImageStats)
 	mux.HandleFunc("DELETE /api/v1/images/{id}", a.apiDeleteImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
+	mux.HandleFunc("GET /api/v1/albums", a.apiAlbums)
+	mux.HandleFunc("POST /api/v1/albums", a.apiCreateAlbum)
+	mux.HandleFunc("GET /api/v1/albums/{id}", a.apiAlbum)
+	mux.HandleFunc("PATCH /api/v1/albums/{id}", a.apiUpdateAlbum)
+	mux.HandleFunc("DELETE /api/v1/albums/{id}", a.apiDeleteAlbum)
+	mux.HandleFunc("GET /api/v1/users/{username}/images", a.apiPublicGallery)
+	mux.HandleFunc("GET /oembed", a.oembed)
 	mux.HandleFunc("POST /api/v1/tools/{tool}", a.apiAITool)
 
 	// Pages and tool URLs from PixelHop 2.
@@ -155,6 +174,8 @@ func (a *App) Handler() http.Handler {
 	h = a.accessLog(h)
 	return h
 }
+
+func (a *App) ctx() context.Context { return context.Background() }
 
 // Run serves until ctx is cancelled, then drains in-flight requests.
 func (a *App) Run(ctx context.Context) error {

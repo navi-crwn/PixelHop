@@ -1,0 +1,14 @@
+{{define "content"}}
+<div class="wrap narrow">
+  <div class="card center" style="max-width:420px;margin:30px auto">
+    <div class="feature" style="--c:var(--amber);display:inline-block;padding:14px;border-radius:50%;border:0"><div class="ico" style="margin:0"><svg><use href="#i-lock"/></svg></div></div>
+    <h1 style="font-size:1.5rem;margin-top:12px">This image is password protected</h1>
+    <p class="muted">Ask the person who shared it for the password.</p>
+    {{with .Data.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
+    <form method="post" action="/unlock/{{.Data.ID}}">
+      <div class="field" style="text-align:left"><label for="pw">Password</label><input type="password" id="pw" name="password" autocomplete="off" required autofocus></div>
+      <button class="btn primary" type="submit" style="width:100%">Unlock</button>
+    </form>
+  </div>
+</div>
+{{end}}

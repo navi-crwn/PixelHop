@@ -72,6 +72,7 @@
     view.style.filter = '';
     $('#st-undo').disabled = undo.length === 0;
     $('#st-reset').disabled = !original;
+    if ($('#st-compare')) $('#st-compare').disabled = !original;
     info();
     if (overlay && overlay.refresh) overlay.refresh();
   }
@@ -473,6 +474,68 @@
   };
 
   // ---------- palette ----------
+  // ---------- watermark ----------
+  tools.watermark = {
+    title: 'Watermark', desc: 'Put your name, handle or logo on the image so it stays credited when shared.',
+    ui: function (p) {
+      var o = { text: '© ' + location.hostname, size: 5, opacity: 60, pos: 'br', color: '#ffffff', logo: null };
+      var txt = el('input', { type: 'text', value: o.text, maxlength: '80' });
+      txt.addEventListener('input', function () { o.text = txt.value; draw(); });
+      var logoIn = el('input', { type: 'file', accept: 'image/*', class: 'hide' });
+      var logoBtn = btn('Use a logo instead', function () { logoIn.click(); }, 'sm');
+      logoIn.addEventListener('change', function () {
+        var f = logoIn.files[0]; if (!f) return;
+        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = 'Logo: ' + f.name; draw(); }, function () { toast('That logo could not be opened', true); });
+      });
+      function render(c) {
+        var x = c.getContext('2d'), W = c.width, H = c.height, m = Math.round(Math.min(W, H) * 0.03);
+        x.save(); x.globalAlpha = o.opacity / 100;
+        var w, h, fs = Math.max(10, Math.round(Math.min(W, H) * o.size / 100));
+        if (o.logo) { h = fs * 2; w = Math.round(o.logo.width * h / o.logo.height); }
+        else { x.font = '700 ' + fs + 'px system-ui, sans-serif'; x.textBaseline = 'top'; w = x.measureText(o.text).width; h = fs; }
+        function put(px, py) {
+          if (o.logo) { x.drawImage(o.logo, px, py, w, h); return; }
+          x.shadowColor = o.color === '#ffffff' ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.45)'; x.shadowBlur = fs / 6;
+          x.fillStyle = o.color; x.fillText(o.text, px, py);
+        }
+        if (o.pos === 'tile') {
+          x.translate(W / 2, H / 2); x.rotate(-Math.PI / 8); x.translate(-W / 2, -H / 2);
+          for (var ty = -H; ty < H * 2; ty += h * 4) for (var tx = -W; tx < W * 2; tx += w + fs * 3) put(tx + ((ty / (h * 4)) % 2 ? (w + fs * 3) / 2 : 0), ty);
+        } else {
+          var px = o.pos[1] === 'l' ? m : o.pos[1] === 'r' ? W - w - m : (W - w) / 2;
+          var py = o.pos[0] === 't' ? m : o.pos[0] === 'b' ? H - h - m : (H - h) / 2;
+          put(px, py);
+        }
+        x.restore();
+      }
+      function draw() { var c = clone(cur); render(c); view.getContext('2d').drawImage(c, 0, 0); }
+      overlay = { off: function () { view.getContext('2d').drawImage(cur, 0, 0); }, refresh: draw };
+      p.appendChild(field('Text', txt));
+      p.appendChild(el('div', { style: 'margin:-6px 0 12px' }, [logoBtn, logoIn]));
+      p.appendChild(field('Position', seg([['tl', '↖'], ['tc', '↑'], ['tr', '↗'], ['cc', '•'], ['bl', '↙'], ['bc', '↓'], ['br', '↘'], ['tile', 'Tile']], o.pos, function (v) { o.pos = v; draw(); })));
+      p.appendChild(field('Size', range(1, 20, o.size, 1, function (v) { o.size = v; draw(); }, function (v) { return v + '%'; })));
+      p.appendChild(field('Opacity', range(10, 100, o.opacity, 5, function (v) { o.opacity = v; draw(); }, function (v) { return v + '%'; })));
+      p.appendChild(field('Color', seg([['#ffffff', 'White'], ['#000000', 'Black']], o.color, function (v) { o.color = v; draw(); })));
+      p.appendChild(btn('Apply watermark', function () { var c = clone(cur); render(c); overlay = null; commit(c); pick('watermark'); }, 'primary'));
+      draw();
+    }
+  };
+
+  // hold to see the original (before / after)
+  var cmp = $('#st-compare');
+  if (cmp) {
+    var before = function (e) {
+      if (!original || !cur) return; e.preventDefault();
+      var x = view.getContext('2d'); x.clearRect(0, 0, view.width, view.height); view.style.filter = 'none';
+      x.drawImage(original, 0, 0, view.width, view.height); cmp.setAttribute('aria-pressed', 'true');
+    };
+    var after = function () { if (cmp.getAttribute('aria-pressed') !== 'true') return; cmp.setAttribute('aria-pressed', 'false'); show(); };
+    cmp.addEventListener('pointerdown', before);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { cmp.addEventListener(ev, after); });
+    cmp.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') before(e); });
+    cmp.addEventListener('keyup', after);
+  }
+
   tools.palette = {
     title: 'Color palette', desc: 'The main colors in your image. Click a color to copy its code.',
     ui: function (p) {

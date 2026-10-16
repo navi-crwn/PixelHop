@@ -49,18 +49,21 @@ func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 type settingsData struct {
-	Keys    []db.APIKey
-	NewKey  string
-	Notice  string
-	Error   string
-	HasPass bool
-	Google  bool
+	Webhooks         []db.Webhook
+	NewWebhookSecret string
+	Keys             []db.APIKey
+	NewKey           string
+	Notice           string
+	Error            string
+	HasPass          bool
+	Google           bool
 }
 
 func (a *App) settingsData(r *http.Request) settingsData {
 	u := currentUser(r)
 	keys, _ := a.db.APIKeys(r.Context(), u.ID)
-	return settingsData{Keys: keys, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: r.URL.Query().Get("ok")}
+	hooks, _ := a.db.Webhooks(r.Context(), u.ID)
+	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: r.URL.Query().Get("ok")}
 }
 
 func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@
 package netsafe
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -41,6 +42,9 @@ var blocked = []netip.Prefix{
 	netip.MustParsePrefix("64:ff9b::/96"), // NAT64 can map to private IPv4
 	netip.MustParsePrefix("2002::/16"),    // 6to4, same
 }
+
+// Public reports whether a is an address outside every private range.
+func Public(a netip.Addr) bool { return allowed(a) }
 
 func control(_, address string, _ syscall.RawConn) error {
 	ap, err := netip.ParseAddrPort(address)
@@ -111,4 +115,31 @@ func Fetch(ctx context.Context, raw string, limit int64) ([]byte, string, error)
 	}
 	name := u.Path
 	return b, name, nil
+}
+
+// Post sends body to a public https URL (webhooks) through the same guard as
+// Fetch, and returns the status code.
+func Post(ctx context.Context, raw, contentType string, body []byte, headers map[string]string) (int, error) {
+	u, err := url.Parse(raw)
+	if err != nil || u.Scheme != "https" || u.Host == "" {
+		return 0, errors.New("webhook URLs must be https")
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), bytes.NewReader(body))
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", contentType)
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		if errors.Is(err, ErrBlocked) {
+			return 0, ErrBlocked
+		}
+		return 0, errors.New("couldn't reach it")
+	}
+	io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
+	resp.Body.Close()
+	return resp.StatusCode, nil
 }

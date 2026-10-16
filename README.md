@@ -60,7 +60,11 @@
   - Readable ids like `beach-sunset-x7Kp2Q`.
   - A direct link, Markdown, HTML, BBCode and a QR code.
   - Open Graph tags so previews look right on Discord, X and WhatsApp.
-- **🗂️ Albums.** Upload several images and share one gallery link.
+- **🗂️ Albums.** Upload several images and share one gallery link. Edit the title, description, cover and order afterwards, or make an album from any selection.
+- **🔒 Private or password-protected.** Per image: unlisted (default), only you, or behind a password. Locked files can't be hotlinked.
+- **📈 View stats.** Views per day and the sites that link to your image, without tracking visitors.
+- **📐 Resize on the fly.** `/i/photo.jpg?w=800&format=webp` makes and caches any size.
+- **📱 Installable app.** Add PixelHop to your home screen and share photos to it from any app. iPhone HEIC photos are converted automatically.
 - **⏳ Self-destruct.** Delete after 10 minutes, an hour, a day, a week or a month.
 - **🙋 No account needed.**
   - Guests get a private delete link for every image, also remembered in their browser.
@@ -68,7 +72,9 @@
 - **🎨 Photo studio.**
   - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in six languages (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
   - On the server, for signed-in users (optional [`tools/ai-server.py`](tools/ai-server.py)): **background removal** in about a second (rembg), **automatic face blur** (OpenCV), **magic eraser** (LaMa) and **HD upscale 2×** (Real-ESRGAN). One image at a time, daily limits, nothing stored.
-- **📦 Batch.** Resize, convert, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
+- **📦 Batch.** Resize, convert, watermark, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
+- **💧 Watermark & compare.** Put your name or logo on images, and hold a button to compare with the original.
+- **🌍 Explore, oEmbed & sitemap.** A public feed of images people chose to show, embeds for WordPress/Discourse/Notion, and a gallery API for other sites.
 - **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
 - **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
 - **👤 One account with HEL.ink** (optional). Set `HELINK_URL` and `HELINK_SSO_SECRET` and people sign in with their [HEL.ink](https://hel.ink) account; sign-up, passwords, Google and 2FA live there.
@@ -76,6 +82,8 @@
   - A REST API with `Bearer` keys.
   - The settings page makes a ready-to-use `.sxcu` file for ShareX.
   - ShareX configs made for PixelHop 2 keep working.
+  - Signed webhooks when you upload or delete.
+  - A command-line uploader in the same binary: `pixelhop push *.png --format markdown`.
 - **🛡️ Moderation.** A report button on every image, a report queue, hide/delete, IP bans, account lock/suspend, warning pop-ups, and an announcement bar.
 - **🔐 Safe by default.**
   - Argon2id passwords and Google sign-in.
@@ -153,6 +161,15 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 
 **ShareX:** go to **Settings → API keys**, create a key, then press **Download ShareX config with this key**. Double-click the file.
 
+**Command line:** the same `pixelhop` binary uploads to any PixelHop server.
+
+```bash
+pixelhop login --server https://p.hel.ink --key ph_yourkey
+pixelhop push screenshot.png photos/*.jpg --expire 7d --format markdown
+```
+
+**Phone:** open the site, choose **Add to Home Screen**, and PixelHop appears in your share sheet.
+
 ## API
 
 ```bash
@@ -164,6 +181,12 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://p.hel.
 | `POST /api/v1/upload` | Upload files (`file`, repeatable) or links (`url`); options `expire`, `slug`, `album`, `title` |
 | `GET /api/v1/images` | Your images (`page`, `limit`, `q`, `sort`) |
 | `GET` · `PATCH` · `DELETE /api/v1/images/{id}` | Read, rename (`{"title": …}`), show on your profile (`{"listed": true}`) or delete one |
+| `PATCH /api/v1/images/{id}` | Also `alt` and `visibility` (`unlisted`, `private`, `password` + `password`) |
+| `GET /api/v1/images/{id}/stats` | Views per day and referring sites |
+| `GET` · `POST /api/v1/albums`, `GET` · `PATCH` · `DELETE /api/v1/albums/{id}` | List, create, edit (title, description, cover, order, add, remove) and delete albums |
+| `GET /api/v1/users/{username}/images` | Public: someone's profile images |
+| `GET /oembed?url=…` | oEmbed for image pages |
+| `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Resized copies, made once and cached |
 | `GET /api/v1/me` | Your account and storage use |
 | `GET /api/v1/stats` | Public totals |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |

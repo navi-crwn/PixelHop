@@ -7,11 +7,14 @@ Answers on localhost only; PixelHop handles sign-in, limits and queueing.
   POST /faces    image bytes                      -> JSON {"faces": [[x, y, w, h], ...]}
   POST /erase    multipart: image, mask (white = erase) -> PNG, area filled in (LaMa)
   POST /upscale  image bytes                      -> PNG at 2x (Real-ESRGAN x2plus)
+  POST /normalize image bytes (HEIC, AVIF, ...)    -> JPEG (PNG if transparent), upright,
+                 no metadata; header X-Removed lists what was stripped (gps, camera, date, ...)
+  POST /transform?w=&h=&fit=inside|cover&format=jpeg|png|webp|avif&q=  -> resized/re-encoded image
   GET  /health   -> "ok"
 
 Models load the first time they're needed and are released after
 AI_IDLE_MINUTES without use, so an idle server doesn't hold gigabytes.
-Needs: rembg, onnxruntime, opencv-python-headless, numpy, pillow.
+Needs: rembg, onnxruntime, opencv-python-headless, numpy, pillow, pillow-heif.
 """
 import gc
 import io
@@ -27,6 +30,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import numpy as np
 from PIL import Image, ImageOps
 
+try:  # iPhone photos (HEIC/HEIF); AVIF is built into recent Pillow
+    import pillow_heif
+
+    pillow_heif.register_heif_opener()
+except ImportError:
+    pass
+
 HOST = os.environ.get("AI_HOST", os.environ.get("REMBG_HOST", "127.0.0.1"))
 PORT = int(os.environ.get("AI_PORT", os.environ.get("REMBG_PORT", "7001")))
 MAX_BYTES = int(os.environ.get("AI_MAX_MB", "25")) * 1024 * 1024
@@ -34,8 +44,10 @@ MAX_SIDE = int(os.environ.get("AI_MAX_SIDE", "4096"))
 UPSCALE_MAX_PIXELS = int(float(os.environ.get("AI_UPSCALE_MAX_MP", "1.0")) * 1_000_000)
 IDLE = int(os.environ.get("AI_IDLE_MINUTES", "15")) * 60
 REMBG_MODEL = os.environ.get("REMBG_MODEL", "u2net")
-LAMA = os.environ.get("LAMA_MODEL", "/var/www/.cache/lama/lama.onnx")
-ESRGAN = os.environ.get("ESRGAN_MODEL", "/var/www/.cache/realesrgan/RealESRGAN_x2plus.onnx")
+MODELS = os.environ.get("AI_MODELS", os.path.join(os.path.dirname(os.path.abspath(__file__)), "models"))
+LAMA = os.environ.get("LAMA_MODEL", os.path.join(MODELS, "lama.onnx"))
+ESRGAN = os.environ.get("ESRGAN_MODEL", os.path.join(MODELS, "RealESRGAN_x2plus.onnx"))
+os.environ.setdefault("U2NET_HOME", MODELS)  # rembg looks for u2net.onnx here
 THREADS = int(os.environ.get("AI_THREADS", "3"))
 
 
@@ -232,6 +244,67 @@ def upscale(data):
     return png(result)
 
 
+def removed_metadata(img):
+    """Which kinds of private data the file carried (names only, never values)."""
+    found = []
+    try:
+        exif = img.getexif()
+        if exif.get(0x8825) or exif.get_ifd(0x8825):
+            found.append("gps")
+        if exif.get(0x010F) or exif.get(0x0110):
+            found.append("camera")
+        if exif.get(0x0132) or exif.get_ifd(0x8769).get(0x9003):
+            found.append("date")
+        if exif.get(0x0131):
+            found.append("software")
+    except Exception:
+        pass
+    if img.info.get("xmp") or img.info.get("XML:com.adobe.xmp"):
+        found.append("xmp")
+    return found
+
+
+def normalize(data):
+    img = Image.open(io.BytesIO(data))
+    found = removed_metadata(img)
+    img = ImageOps.exif_transpose(img)
+    if max(img.size) > 12000:
+        raise ValueError("image is too large")
+    buf = io.BytesIO()
+    if img.mode in ("RGBA", "LA") or "transparency" in img.info:
+        img.convert("RGBA").save(buf, "PNG")
+        ctype = "image/png"
+    else:
+        img.convert("RGB").save(buf, "JPEG", quality=92, optimize=True)
+        ctype = "image/jpeg"
+    return buf.getvalue(), ctype, found
+
+
+FORMATS = {"jpeg": ("JPEG", "image/jpeg"), "png": ("PNG", "image/png"), "webp": ("WEBP", "image/webp"), "avif": ("AVIF", "image/avif")}
+
+
+def transform(data, q):
+    w, h = int(q.get("w", "0") or 0), int(q.get("h", "0") or 0)
+    fmt = q.get("format", "jpeg")
+    quality = max(30, min(95, int(q.get("q", "82") or 82)))
+    if fmt not in FORMATS or w < 0 or h < 0 or w > 4096 or h > 4096:
+        raise ValueError("bad transform")
+    img = ImageOps.exif_transpose(Image.open(io.BytesIO(data)))
+    if w or h:
+        if q.get("fit") == "cover" and w and h:
+            img = ImageOps.fit(img, (w, h), Image.LANCZOS)
+        else:
+            img.thumbnail((w or img.width, h or img.height), Image.LANCZOS)
+    name, ctype = FORMATS[fmt]
+    if name == "JPEG":
+        img = img.convert("RGB")
+    elif img.mode not in ("RGB", "RGBA"):
+        img = img.convert("RGBA")
+    buf = io.BytesIO()
+    img.save(buf, name, quality=quality, **({"method": 4} if name == "WEBP" else {}))
+    return buf.getvalue(), ctype
+
+
 # ---------------------------------------------------------------- HTTP
 class Handler(BaseHTTPRequestHandler):
     server_version = "pixelhop-ai/1"
@@ -239,9 +312,11 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         log(fmt % args)
 
-    def reply(self, code, body, ctype="text/plain"):
+    def reply(self, code, body, ctype="text/plain", extra=None):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
+        for k, v in (extra or {}).items():
+            self.send_header(k, v)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -261,8 +336,17 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(413, b"image missing or too large")
         body = self.rfile.read(n)
         started = time.time()
+        extra = {}
+        path, _, query = self.path.partition("?")
         try:
-            if self.path == "/remove":
+            if path == "/normalize":
+                out, ctype, found = normalize(body)
+                extra["X-Removed"] = ",".join(found)
+            elif path == "/transform":
+                from urllib.parse import parse_qsl
+
+                out, ctype = transform(body, dict(parse_qsl(query)))
+            elif self.path == "/remove":
                 out, ctype = remove_bg(body), "image/png"
             elif self.path == "/faces":
                 out, ctype = faces(body), "application/json"
@@ -280,8 +364,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             log("%s failed: %r" % (self.path, exc))
             return self.reply(500, ("could not process image: %s" % exc.__class__.__name__).encode())
-        log("%s done in %.1fs" % (self.path, time.time() - started))
-        self.reply(200, out, ctype)
+        log("%s done in %.1fs" % (path, time.time() - started))
+        self.reply(200, out, ctype, extra)
 
 
 def parse_multipart(ctype, body):

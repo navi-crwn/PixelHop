@@ -248,7 +248,7 @@ func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) robots(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /settings\nDisallow: /delete/\nDisallow: /api/\n")
+	fmt.Fprintf(w, "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /settings\nDisallow: /delete/\nDisallow: /api/\n\nSitemap: %s/sitemap.xml\n", a.cfg.BaseURL)
 }
 
 // ---- formatting ----

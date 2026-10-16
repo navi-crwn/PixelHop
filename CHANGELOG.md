@@ -2,6 +2,25 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.2.0] - 2026-10-16
+
+### Added
+- **Private and password-protected images.** Only you, or anyone with the password; the file itself is locked too, so hotlinks stop working. Unlocking is remembered for 30 days and resets when the password changes.
+- **Edit details** on an image page: title, alt text (used in embed codes), visibility and profile listing.
+- **View stats** for owners: views per day for 30 days and the sites that sent visitors.
+- **Resize on the fly**: `/i/{id}.jpg?w=800&h=600&fit=cover&format=webp&q=75`, cached per image.
+- **Album editor**: title, description, cover, drag-to-reorder, add and remove images; **My albums** page; **Make album** from a selection in My images; albums API.
+- **Explore** page with images people chose to show publicly, plus `sitemap.xml`, **oEmbed** and a public gallery API (`/api/v1/users/{username}/images`) for HEL.ink bio pages and other sites.
+- **Webhooks** for `image.uploaded` and `image.deleted`, signed with HMAC-SHA256.
+- **iPhone HEIC and AVIF uploads** are converted on the server; upload results list the hidden data that was removed (GPS location, camera details…).
+- **Installable app (PWA)** with a share target: share photos from your phone's share sheet straight to PixelHop.
+- **Watermark** tool in the studio and in batch (text or logo, position, size, opacity, tiled), and **hold to compare** with the original.
+- **Command-line uploader** in the same binary: `pixelhop login` and `pixelhop push`.
+
+### Changed
+- The AI sidecar keeps its models next to it and loads them only when needed.
+- The old `/result?id=…` page hides private and password-protected images.
+
 ## [3.1.0] - 2026-10-16
 
 ### Added

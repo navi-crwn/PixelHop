@@ -45,6 +45,13 @@ func run(args []string) error {
 		fmt.Print(usage)
 		return nil
 	}
+	// Client commands talk to a server and need no local data folder.
+	switch cmd {
+	case "push":
+		return pushCmd(args)
+	case "login":
+		return loginCmd(args)
+	}
 
 	cfg, err := config.Load()
 	if err != nil {

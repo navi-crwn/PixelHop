@@ -5,9 +5,11 @@
       <span class="pill acc"><svg width="12" height="12"><use href="#i-album"/></svg>{{if $d.Album.ID}}Album{{else}}Uploads{{end}}</span>
       <h1 style="margin-top:8px">{{if $d.Album.Title}}{{$d.Album.Title}}{{else}}{{len $d.Images}} images{{end}}</h1>
       {{template "owner" $d.By}}
+      {{with $d.Album.Description}}<p style="max-width:680px;white-space:pre-line">{{.}}</p>{{end}}
       <p class="muted" style="margin:0">Shared <time datetime="{{iso $d.Album.CreatedAt}}">{{ago $d.Album.CreatedAt}}</time></p>
     </div>
     <div class="btn-row">
+      {{if and $d.Owner $d.Album.ID}}<a class="btn" href="/a/{{$d.Album.ID}}/edit"><svg><use href="#i-edit"/></svg>Edit album</a>{{end}}
       <button class="btn primary" type="button" data-copy-text="{{$d.Link}}"><svg><use href="#i-link"/></svg>Copy album link</button>
       {{if $d.Album.ID}}<a class="btn" href="/qr/{{$d.Album.ID}}.png?a=1" target="_blank" rel="noopener"><svg><use href="#i-qr"/></svg>QR</a>{{end}}
     </div>

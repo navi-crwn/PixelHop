@@ -16,6 +16,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
 <link rel="icon" href="/static/img/logo.svg?v={{.Asset}}" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 {{block "head" .}}{{end}}
@@ -30,6 +32,7 @@
     <nav class="nav-links" aria-label="Main">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>Upload</a>
       <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>Studio</a>
+      <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>Explore</a>
       {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>My images</a>{{end}}
       <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>API</a>
       {{if and .User .User.IsAdmin}}<a href="/admin" {{if eq .Path "/admin"}}aria-current="page"{{end}}>Admin</a>{{end}}

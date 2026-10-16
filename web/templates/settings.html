@@ -65,6 +65,21 @@
   {{end}}
   {{if not (and .SSO $u.HelinkID.Valid)}}
 
+  <div class="card" id="webhooks">
+    <h2>Webhooks</h2>
+    <p class="muted small">We POST JSON to your URL when you upload or delete an image, signed with <code>X-PixelHop-Signature: sha256=…</code> (HMAC of the body with your secret). See the <a href="/docs#webhooks">docs</a>.</p>
+    {{with $d.NewWebhookSecret}}<div class="key-once"><b>Your webhook secret. Copy it now: it won't be shown again.</b><div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="wh-secret"><button class="btn sm" type="button" data-copy="#wh-secret"><svg><use href="#i-copy"/></svg>Copy</button></div></div>{{end}}
+    {{range $d.Webhooks}}
+    <div class="out-info" style="align-items:center"><span class="mono small" style="overflow:hidden;text-overflow:ellipsis">{{.URL}}<br><span class="faint">{{.Events}}{{with .LastStatus}} · last: {{.}}{{end}}</span></span>
+      <form method="post" action="/settings/webhooks/{{.ID}}/delete" data-confirm="Delete this webhook?"><button class="btn sm ghost danger" type="submit">Delete</button></form></div>
+    {{end}}
+    <form method="post" action="/settings/webhooks" class="copy" style="margin-top:8px">
+      <input type="url" name="url" placeholder="https://example.com/pixelhop-hook" required aria-label="Webhook URL">
+      <button class="btn" type="submit">Add webhook</button>
+    </form>
+    {{if $d.Webhooks}}<form method="post" action="/settings/webhooks/test" style="margin-top:8px"><button class="btn sm ghost" type="submit">Send a test event</button></form>{{end}}
+  </div>
+
   <div class="card">
     <h2>{{if $d.HasPass}}Change password{{else}}Set a password{{end}}</h2>
     {{if not $d.HasPass}}<p class="muted small">You sign in with Google. Add a password to also sign in with your email.</p>{{end}}

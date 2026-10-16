@@ -102,6 +102,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	}
 	useSlug := r.FormValue("slug") != "0" && r.FormValue("slug") != "false"
 	listed := u != nil && (r.FormValue("listed") == "1" || r.FormValue("listed") == "true")
+	alt := trim(strings.TrimSpace(r.FormValue("alt")), 300)
 
 	// Several files become an album with its own share link. Signed-in people
 	// can keep adding to one of their albums (batch uploads come in chunks).
@@ -151,7 +152,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			results = append(results, res)
 			continue
 		}
-		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed)
+		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed, alt)
 		res.Image, res.DeleteToken, res.Duplicate, res.Err = im, tok, dup, err
 		if err == nil && !dup {
 			used += im.Size
@@ -198,7 +199,7 @@ func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
 	return in
 }
 
-func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool) (*db.Image, string, bool, error) {
+func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (*db.Image, string, bool, error) {
 	sum := sha256.Sum256(in.data)
 	sha := hex.EncodeToString(sum[:])
 	var uid sql.NullInt64
@@ -209,6 +210,15 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		}
 	}
 
+	stripped := imaging.MetadataFound(in.data)
+	if kind := imaging.Container(in.data); kind != "" {
+		// iPhone (HEIC) and AVIF photos: the AI service turns them into JPEG/PNG.
+		data, removed, err := a.normalize(ctx, in.data)
+		if err != nil {
+			return nil, "", false, err
+		}
+		in.data, stripped = data, removed
+	}
 	p, err := imaging.Process(in.data, a.cfg.MaxPixels)
 	if err != nil {
 		return nil, "", false, userError{err.Error()}
@@ -222,6 +232,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
 		Mime: p.Format.Mime, Ext: p.Format.Ext, Size: int64(len(p.Data)), Width: p.Width, Height: p.Height,
 		SHA256: sha, Color: p.Color, Backend: a.store.Name(), IP: ip, ExpiresAt: expiresAt, Listed: listed,
+		Stripped: strings.Join(stripped, ","), Alt: alt,
 	}
 	if albumID != "" {
 		im.AlbumID = sql.NullString{String: albumID, Valid: true}
@@ -254,7 +265,39 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 			return nil, "", false, err
 		}
 	}
+	if u != nil {
+		a.fireWebhooks(u.ID, "image.uploaded", a.imageJSON(im))
+	}
 	return im, token, false, nil
+}
+
+// normalize converts HEIC/AVIF to JPEG/PNG through the AI service and
+// reports which kinds of metadata the original carried.
+func (a *App) normalize(ctx context.Context, data []byte) ([]byte, []string, error) {
+	if a.cfg.RembgURL == "" {
+		return nil, nil, userError{"iPhone (HEIC) and AVIF photos aren't supported on this server yet; save them as JPG first."}
+	}
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, a.cfg.RembgURL+"/normalize", bytes.NewReader(data))
+	req.Header.Set("Content-Type", "application/octet-stream")
+	resp, err := aiClient.Do(req)
+	if err != nil {
+		return nil, nil, userError{"Couldn't convert this photo right now; please try again."}
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, userError{"This photo couldn't be read."}
+	}
+	out, err := io.ReadAll(io.LimitReader(resp.Body, a.cfg.MaxUploadBytes*3))
+	if err != nil {
+		return nil, nil, err
+	}
+	var removed []string
+	for _, k := range strings.Split(resp.Header.Get("X-Removed"), ",") {
+		if k = strings.TrimSpace(k); k != "" {
+			removed = append(removed, k)
+		}
+	}
+	return out, removed, nil
 }
 
 // ImportCopy downloads an image from its old public address and stores it
@@ -297,8 +340,15 @@ func (a *App) ImportCopy(ctx context.Context, im *db.Image, url string) error {
 
 // removeImage deletes an image's row and its stored files.
 func (a *App) removeImage(ctx context.Context, im *db.Image) error {
+	variants := a.db.Variants(ctx, im.ID) // read before the row (and its variants) go
+	if im.UserID.Valid {
+		a.fireWebhooks(im.UserID.Int64, "image.deleted", map[string]any{"id": im.ID})
+	}
 	if err := a.db.DeleteImage(ctx, im.ID); err != nil {
 		return err
+	}
+	for _, k := range variants {
+		a.store.Delete(ctx, k)
 	}
 	if b := a.backends[im.Backend]; b != nil && a.db.CountKeyRefs(ctx, im.KeyFull) == 0 {
 		b.Delete(ctx, im.KeyFull)
