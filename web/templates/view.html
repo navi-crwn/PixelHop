@@ -65,11 +65,11 @@
           {{else if and (ne $im.Backend "remote") (ne $im.Kind "pdf")}}<dt>Metadata</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>clean</span></dd>{{end}}
           {{with $im.Alt}}<dt>Alt text</dt><dd class="small" style="text-align:right">{{.}}</dd>{{end}}
         </dl>
-      </div>
-
-      <div class="card center">
-        <img class="qr" src="/qr/{{$im.ID}}.png" alt="QR code for this page" loading="lazy" width="136" height="136">
-        <p class="small muted" style="margin:10px 0 0">Scan to open on a phone</p>
+        <div class="qr-row">
+          <img class="qr" src="/qr/{{$im.ID}}.png" alt="QR code for this page" loading="lazy" width="84" height="84">
+          <div><b class="small">Open on a phone</b><span class="small muted">Scan this code with the camera.</span>
+            <a class="small" href="/qr/{{$im.ID}}.png" download="{{$im.ID}}-qr.png">Download QR</a></div>
+        </div>
       </div>
 
       <div class="btn-row">

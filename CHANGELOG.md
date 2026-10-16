@@ -2,6 +2,11 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.4.2] - 2026-10-16
+
+### Changed
+- Image page: the QR code is a compact row inside the details card (with a "Download QR" link) instead of a big card of its own, so the side column no longer runs far below the image.
+
 ## [3.4.1] - 2026-10-16
 
 ### Fixed
