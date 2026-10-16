@@ -2,6 +2,15 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.5.1] - 2026-10-16
+
+### Added
+- **Member dashboard.** Upload straight from the dashboard: links show beside the box and new files appear at the top of "My files" right away. Number cards for files (images, videos, PDFs), views, albums and storage; shortcuts to the studio, albums, public profile, ShareX/API and HEL.ink; a filter by file type.
+- One member menu (Dashboard, Albums, Public profile, Studio, Settings) on the dashboard, albums, settings and your own public profile, so every member page links back to the others.
+
+### Fixed
+- The upload box fills its column again, as in 3.0. Since 3.4.0 it had shrunk to the width of its content. "From a link" has its label back, and on phones the three buttons fit on one row.
+
 ## [3.5.0] - 2026-10-16
 
 ### Added
