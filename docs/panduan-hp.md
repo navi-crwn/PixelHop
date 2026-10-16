@@ -25,7 +25,7 @@ Untuk CS yang menerima bukti dari pelanggan (screenshot, rekaman layar, video AT
 
 ## Cara 2: dengan nomor tiket dan catatan (paling rapi)
 
-1. Buka aplikasi PixelHop dan buka bagian **Report / ticket**.
+1. Buka aplikasi PixelHop (harus sudah login). Di bawah tombol upload ada kotak **Ticket / case**.
 2. Isi **nomor tiket atau transaksi**, misalnya `TRX-20261016-0042`, dan **catatan singkat**, misalnya "TF berhasil, status di aplikasi gagal".
 3. Di **Delete after**, pilih masa simpan. Saran: **90 days**.
 4. Tekan **Choose files** dan pilih semua bukti. Video besar diupload sedikit demi sedikit; kalau sinyal putus, upload lanjut sendiri.
