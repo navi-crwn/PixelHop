@@ -76,7 +76,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	if r.MultipartForm != nil {
 		for _, field := range []string{"file", "files", "files[]", "image", "images", "images[]"} {
 			for _, fh := range r.MultipartForm.File[field] {
-				inputs = append(inputs, a.readPart(fh))
+				inputs = append(inputs, a.readPart(fh, u))
 			}
 		}
 	}
@@ -141,7 +141,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		if in.err == nil && in.data == nil && in.path == "" { // a URL to fetch
 			fctx, cancel := context.WithTimeout(ctx, 40*time.Second)
 			var p string
-			in.data, p, in.err = netsafe.Fetch(fctx, in.name, a.cfg.MaxUploadBytes)
+			in.data, p, in.err = netsafe.Fetch(fctx, in.name, a.imageLimit(u))
 			cancel()
 			if in.err == nil {
 				in.name = path.Base(p)
@@ -190,20 +190,50 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	return results, albumID, nil
 }
 
-func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
+// imageLimit and mediaLimit are the largest picture and video/PDF one person
+// may upload: guests get the smaller guest limit for everything.
+func (a *App) imageLimit(u *db.User) int64 {
+	if u == nil {
+		return min(a.cfg.MaxUploadBytes, a.cfg.GuestMaxBytes)
+	}
+	return a.cfg.MaxUploadBytes
+}
+
+func (a *App) mediaLimit(u *db.User) int64 {
+	if u == nil {
+		return min(a.cfg.MaxMediaBytes, a.cfg.GuestMaxBytes)
+	}
+	return a.cfg.MaxMediaBytes
+}
+
+// tooLarge says how big a file may be, and how to get more room when signing in would help.
+func (a *App) tooLarge(name string, u *db.User, limit int64) userError {
+	msg := fmt.Sprintf("%s is larger than %d MB.", name, limit>>20)
+	if u == nil && a.cfg.MaxMediaBytes > limit {
+		msg += fmt.Sprintf(" Sign in to upload videos and PDFs up to %d MB.", a.cfg.MaxMediaBytes>>20)
+	}
+	return userError{msg}
+}
+
+func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 	in := uploadInput{name: fh.Filename}
-	if fh.Size > a.cfg.MaxUploadBytes {
+	imgMax := a.imageLimit(u)
+	if fh.Size > imgMax {
 		// Videos and PDFs may be bigger: keep them on disk.
 		if f, err := fh.Open(); err == nil {
 			hb := make([]byte, 64)
 			n, _ := io.ReadFull(f, hb)
 			f.Close()
-			if mediaKind(hb[:n]) != "" && fh.Size <= a.cfg.MaxMediaBytes {
-				in.path, in.size, in.err = a.spool(fh)
+			if kind := mediaKind(hb[:n]); kind != "" {
+				if fh.Size <= a.mediaLimit(u) {
+					in.path, in.size, in.err = a.spool(fh)
+					return in
+				}
+				in.err = a.tooLarge(fh.Filename, u, a.mediaLimit(u))
 				return in
 			}
 		}
-		in.err = userError{fmt.Sprintf("%s is larger than %d MB.", fh.Filename, a.cfg.MaxUploadBytes>>20)}
+		in.err = a.tooLarge(fh.Filename, u, imgMax)
 		return in
 	}
 	f, err := fh.Open()
@@ -212,9 +242,9 @@ func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
 		return in
 	}
 	defer f.Close()
-	in.data, in.err = io.ReadAll(io.LimitReader(f, a.cfg.MaxUploadBytes+1))
-	if in.err == nil && int64(len(in.data)) > a.cfg.MaxUploadBytes {
-		in.err = userError{fmt.Sprintf("%s is larger than %d MB.", fh.Filename, a.cfg.MaxUploadBytes>>20)}
+	in.data, in.err = io.ReadAll(io.LimitReader(f, imgMax+1))
+	if in.err == nil && int64(len(in.data)) > imgMax {
+		in.err = a.tooLarge(fh.Filename, u, imgMax)
 	}
 	return in
 }
@@ -235,8 +265,8 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 			if err != nil {
 				return nil, "", false, err
 			}
-			if int64(len(data)) > a.cfg.MaxUploadBytes {
-				return nil, "", false, userError{fmt.Sprintf("%s is larger than %d MB.", in.name, a.cfg.MaxUploadBytes>>20)}
+			if limit := a.imageLimit(u); int64(len(data)) > limit {
+				return nil, "", false, a.tooLarge(in.name, u, limit)
 			}
 			in.data, in.path = data, ""
 		} else {

@@ -20,6 +20,7 @@ type Config struct {
 
 	MaxUploadBytes int64
 	MaxMediaBytes  int64 // videos and PDFs (uploaded in pieces, then compressed)
+	GuestMaxBytes  int64 // any one file from someone not signed in
 	MaxPixels      int64 // decompression-bomb guard (width*height)
 	MaxBatch       int   // files per upload request
 
@@ -84,7 +85,8 @@ func Load() (*Config, error) {
 		SiteName:         env("PIXELHOP_SITE_NAME", "PixelHop"),
 		SecretKey:        env("PIXELHOP_SECRET", ""),
 		MaxUploadBytes:   int64(envInt("PIXELHOP_MAX_UPLOAD_MB", 20)) << 20,
-		MaxMediaBytes:    int64(envInt("PIXELHOP_MAX_MEDIA_MB", 500)) << 20,
+		MaxMediaBytes:    int64(envInt("PIXELHOP_MAX_MEDIA_MB", 100)) << 20,
+		GuestMaxBytes:    int64(envInt("PIXELHOP_GUEST_MAX_MB", 20)) << 20,
 		MaxPixels:        int64(envInt("PIXELHOP_MAX_MEGAPIXELS", 80)) * 1_000_000,
 		MaxBatch:         envInt("PIXELHOP_MAX_BATCH", 20),
 		GuestUploads:     envBool("PIXELHOP_GUEST_UPLOADS", true),

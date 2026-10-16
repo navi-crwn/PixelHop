@@ -26,22 +26,23 @@ type page struct {
 	NoIndex         bool
 	Data            any
 
-	User         *db.User
-	Site         string
-	Base         string
-	Path         string
-	Announcement string
-	Version      string
-	Asset        string // cache-busting query for /static files
-	Google       bool
-	SSO          bool   // accounts come from HEL.ink
-	Helink       string // HEL.ink base URL
-	Turnstile    string // Turnstile site key, when forms are protected
-	RembgServer  bool   // background removal can run on the server
-	GuestUploads bool
-	MaxMB        int64
-	MaxMediaMB   int64
-	MaxBatch     int
+	User          *db.User
+	Site          string
+	Base          string
+	Path          string
+	Announcement  string
+	Version       string
+	Asset         string // cache-busting query for /static files
+	Google        bool
+	SSO           bool   // accounts come from HEL.ink
+	Helink        string // HEL.ink base URL
+	Turnstile     string // Turnstile site key, when forms are protected
+	RembgServer   bool   // background removal can run on the server
+	GuestUploads  bool
+	MaxMB         int64
+	MaxMediaMB    int64
+	MemberMediaMB int64 // what signing in would allow, for the guest hint
+	MaxBatch      int
 }
 
 var startedAt = fmt.Sprint(time.Now().Unix())
@@ -115,8 +116,9 @@ func (a *App) base(r *http.Request, p page) page {
 	p.RembgServer = a.cfg.RembgURL != ""
 	p.Announcement = a.db.Setting(ctx, "announcement", "")
 	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
-	p.MaxMB = a.cfg.MaxUploadBytes >> 20
-	p.MaxMediaMB = a.cfg.MaxMediaBytes >> 20
+	p.MaxMB = a.imageLimit(p.User) >> 20
+	p.MaxMediaMB = a.mediaLimit(p.User) >> 20
+	p.MemberMediaMB = a.cfg.MaxMediaBytes >> 20
 	p.MaxBatch = a.cfg.MaxBatch
 	return p
 }

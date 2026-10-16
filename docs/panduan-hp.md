@@ -47,7 +47,7 @@ Admin cukup buka satu link album untuk melihat semuanya: video bisa diputar dan 
 - **Video** langsung bisa ditonton lewat link. Di belakang layar, video diperkecil, misalnya rekaman 50 MB menjadi sekitar 2 MB, supaya cepat dibuka di HP admin.
 - **PDF** dikompres. Halaman pertamanya tampil sebagai pratinjau.
 - **Lokasi GPS** dan data tersembunyi lain di foto dan video dihapus.
-- Batas ukuran: gambar 20 MB, video dan PDF 500 MB per file.
+- Batas ukuran (sudah login): gambar 20 MB, video dan PDF 100 MB per file. Tanpa login: semua file maksimal 20 MB.
 
 ## Privasi
 

@@ -100,8 +100,8 @@ func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusBadRequest, `send JSON like {"name": "video.mp4", "size": 12345678}`)
 		return
 	}
-	if body.Size > a.cfg.MaxMediaBytes {
-		apiError(w, http.StatusBadRequest, fmt.Sprintf("%s is larger than %d MB.", body.Name, a.cfg.MaxMediaBytes>>20))
+	if limit := a.mediaLimit(u); body.Size > limit {
+		apiError(w, http.StatusBadRequest, a.tooLarge(body.Name, u, limit).msg)
 		return
 	}
 	if u != nil {
