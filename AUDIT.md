@@ -2,7 +2,7 @@
 
 This is the audit that led to PixelHop 3. It covers two code bases that had drifted apart:
 
-- **Repo**: `main` at v2.3.0 (`3b7119a`), the code people clone from GitHub. Kept unchanged in [`legacy/`](legacy/) and tagged `v2.3.0-php`.
+- **Repo**: `main` at v2.3.0 (`3b7119a`), the code people clone from GitHub. Kept unchanged in the `v2.3.0-php` tag.
 - **Production**: the PHP install serving p.hel.ink, read-only.
 
 ## Summary

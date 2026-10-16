@@ -19,7 +19,7 @@
 
 Icons and the pixel-bunny logo were drawn for PixelHop. The GitHub mark is from Octicons (MIT).
 
-PixelHop 2 (PHP, in `legacy/`) also used PHP, MySQL, TailwindCSS, Lucide, Tesseract, rembg, Pillow and Cloudflare Turnstile.
+PixelHop 2 (PHP, tag `v2.3.0-php`) also used PHP, MySQL, TailwindCSS, Lucide, Tesseract, rembg, Pillow and Cloudflare Turnstile.
 
 ## Contributing
 
