@@ -1,34 +1,53 @@
 {{define "content"}}{{$d := .Data}}
-<div class="wrap" style="max-width:760px">
+<div class="wrap result-page">
   {{with $d.Error}}
   <div class="page-head"><h1>Upload failed</h1></div>
   <div class="empty"><p>{{.}}</p><p><a class="btn primary" href="/">Open {{$.Site}}</a></p></div>
   {{else}}
-  <div class="page-head"><div><h1>Uploaded</h1><p class="muted" style="margin:4px 0 0">Your links are ready.{{if not $.User}} Keep the delete links somewhere safe: they are the only way to remove these images.{{end}}</p></div>
-    <div class="btn-row">{{with $d.Album}}<button class="btn primary" type="button" data-copy-text="{{.}}"><svg><use href="#i-album"/></svg>Copy album link</button>{{end}}</div></div>
-  <div data-copy-all-root data-report-link="{{$d.Album}}">
-  <div class="copy-all" data-copy-all-scope>
-    <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
-    <span class="small muted">or all links as:</span>
-    <button class="btn sm primary" type="button" data-copy-all="direct">Direct</button>
-    <button class="btn sm" type="button" data-copy-all="page">View</button>
-    <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>
-    <button class="btn sm" type="button" data-copy-all="bbcode">BBCode</button>
+  <div class="result-head">
+    <span class="pill ok"><svg width="12" height="12"><use href="#i-check"/></svg>{{len $d.Items}} uploaded</span>
+    <h1>{{with $d.Title}}{{.}}{{else}}Your links are ready{{end}}</h1>
+    {{with $d.Note}}<p class="result-note">{{.}}</p>{{end}}
+    {{if not $.User}}<p class="small muted">Keep the delete links somewhere safe: they are the only way to remove these files.</p>{{end}}
   </div>
-  <div id="uploads" class="uploads">
-    {{range $d.Items}}
-    {{if .Error}}<div class="up err"><div class="meta"><div class="name">{{.Name}}</div><div class="small" style="color:var(--red)">{{.Error}}</div></div></div>
-    {{else}}
-    <div class="up" data-link data-page="{{.Page}}" data-direct="{{.Direct}}" data-title="{{.Name}}">
-      <img class="thumb" src="{{.Thumb}}" alt="">
-      <div class="meta"><div class="name">{{.Name}}</div><div class="link"><input type="text" readonly value="{{.Page}}"></div>
-        {{with .Delete}}<div class="small muted">Delete link: <a href="{{.}}">{{.}}</a></div>{{end}}</div>
-      <div class="actions"><button class="btn sm primary" type="button" data-copy-text="{{.Page}}">Copy</button><button class="btn sm" type="button" data-copy-text="{{.Direct}}">Direct</button><a class="btn sm" href="{{.Page}}">Open</a></div>
+
+  <div data-copy-all-root data-report-title="{{$d.Title}}" data-report-note="{{$d.Note}}" data-report-link="{{$d.Album}}">
+    <div class="result-actions">
+      <button class="btn primary lg" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
+      <button class="btn lg" type="button" data-copy-all="direct"><svg><use href="#i-link"/></svg>Copy all direct links</button>
+      {{with $d.Album}}<button class="btn" type="button" data-copy-text="{{.}}"><svg><use href="#i-album"/></svg>Copy album link</button>{{end}}
+      <div class="copy-all" data-copy-all-scope>
+        <span class="small muted">All links as:</span>
+        <button class="btn sm" type="button" data-copy-all="page">View</button>
+        <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>
+        <button class="btn sm" type="button" data-copy-all="bbcode">BBCode</button>
+        <button class="btn sm" type="button" data-copy-all="html">HTML</button>
+      </div>
     </div>
-    {{end}}
-    {{end}}
+
+    <ol class="result-list" id="uploads">
+      {{range $d.Items}}
+      {{if .Error}}
+      <li class="result-item err"><div class="result-meta"><b>{{.Name}}</b><span class="small" style="color:var(--red)">{{.Error}}</span></div></li>
+      {{else}}
+      <li class="result-item" data-link data-id="{{.ID}}" data-page="{{.Page}}" data-direct="{{.Direct}}" data-title="{{.Name}}">
+        <a class="result-thumb" href="{{.Page}}"><img src="{{.Thumb}}" alt="" loading="lazy">{{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}</a>
+        <div class="result-meta">
+          <b>{{.Name}}</b>
+          <input type="text" readonly value="{{.Page}}" aria-label="Link">
+          <div class="result-btns">
+            <button class="btn sm primary" type="button" data-copy-text="{{.Page}}">Copy link</button>
+            <button class="btn sm" type="button" data-copy-text="{{.Direct}}">Direct</button>
+            <a class="btn sm ghost" href="{{.Page}}">Open</a>
+          </div>
+          <a class="small del-link {{if not .Delete}}hide{{end}}" href="{{.Delete}}">Delete link</a>
+        </div>
+      </li>
+      {{end}}
+      {{end}}
+    </ol>
   </div>
-  </div>
+  <p class="center" style="margin-top:22px"><a class="btn" href="/"><svg><use href="#i-upload"/></svg>Upload more</a> {{if $.User}}<a class="btn ghost" href="/dashboard">My images</a>{{end}}</p>
   {{end}}
 </div>
 {{end}}

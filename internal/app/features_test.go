@@ -242,3 +242,21 @@ func TestWebhookRules(t *testing.T) {
 	}
 	_ = u
 }
+
+func TestUploadedPage(t *testing.T) {
+	a, h := ssoApp(t)
+	_, key := member(t, a, "res@example.com")
+	ids := upload(t, h, key, 3)
+	rec := fetch(h, "/uploaded?id="+strings.Join(ids, ","))
+	body := rec.Body.String()
+	if rec.Code != 200 || strings.Count(body, `class="result-item"`) != 3 || !strings.Contains(body, "Copy all direct links") {
+		t.Fatalf("uploaded page: %d", rec.Code)
+	}
+	call(t, h, "PATCH", "/api/v1/images/"+ids[0], key, map[string]any{"visibility": "private"})
+	if rec := fetch(h, "/uploaded?id="+strings.Join(ids, ",")); strings.Count(rec.Body.String(), `class="result-item"`) != 2 {
+		t.Fatal("private files must not be listed to others")
+	}
+	if rec := fetch(h, "/uploaded?id=nope"); rec.Code != 404 {
+		t.Fatalf("no files: %d", rec.Code)
+	}
+}

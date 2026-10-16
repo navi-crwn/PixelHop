@@ -213,6 +213,15 @@
       return { el: el, img: img, meta: meta, bar: bar.firstChild, act: act, name: n };
     }
 
+    // Phones get a page of their own for the results of a bulk upload.
+    var phone = window.matchMedia && matchMedia('(max-width: 760px)').matches;
+    function settle(r, id) {
+      var b = r.batch; if (!b) return;
+      if (id) b.ids.push(id);
+      if (--b.left > 0 || b.ids.length < 2 || !phone) return;
+      setTimeout(function () { location.href = '/uploaded?id=' + b.ids.join(','); }, 500);
+    }
+
     function done(r, im) {
       if (!r.img.src) r.img.src = im.thumb_url; // keep the local preview when there is one
       r.name.textContent = im.title || im.id;
@@ -231,6 +240,7 @@
       var bar = $('#copy-all-bar');
       if (bar && $$('#uploads [data-link]').length > 1) bar.classList.remove('hide');
       remember(im);
+      settle(r, im.id);
     }
 
     function fail(r, msg) {
@@ -238,6 +248,7 @@
       if (r.bar.parentNode) r.bar.parentNode.remove();
       var e = document.createElement('div'); e.className = 'small'; e.style.color = 'var(--red)'; e.textContent = msg;
       r.meta.appendChild(e);
+      settle(r);
     }
 
     var maxMediaMB = +drop.dataset.maxMediaMb || maxMB, signedIn = !!drop.dataset.signedIn;
@@ -262,7 +273,8 @@
       var count = files.length + (url ? 1 : 0);
       // A ticket, or a mix with videos/PDFs, becomes one album made up front.
       var wantAlbum = signedIn && (ticket || (media.length && count > 1 && $('#album').checked));
-      var mediaRows = media.map(function (f) { return row(f.name, ''); });
+      var batch = { left: count, ids: [] };
+      var mediaRows = media.map(function (f) { var r = row(f.name, ''); r.batch = batch; return r; });
       var albumReady = wantAlbum
         ? api('POST', '/api/v1/albums', { title: ticket, description: note }).then(function (al) {
             $('#album-banner').classList.remove('hide');
@@ -272,14 +284,14 @@
         : Promise.resolve('');
 
       albumReady.then(function (albumId) {
-        if (images.length || url) sendImages(images, url, albumId, ticket, note);
+        if (images.length || url) sendImages(images, url, albumId, ticket, note, batch);
         // Big files go one at a time, in pieces, so a weak phone signal only repeats one piece.
         media.reduce(function (p, f, i) { return p.then(function () { return sendMedia(f, mediaRows[i], albumId); }); }, Promise.resolve())
           .then(renderHistory);
       });
     }
 
-    function sendImages(files, url, albumId, ticket, note) {
+    function sendImages(files, url, albumId, ticket, note, batch) {
       var fd = new FormData();
       files.forEach(function (f) { fd.append('file', f, f.name); });
       if (url) fd.append('url', url);
@@ -292,6 +304,7 @@
 
       var rows = files.map(function (f) { return row(f.name, /heic|heif|avif/i.test(f.type + f.name) ? '' : URL.createObjectURL(f)); });
       if (url) rows.push(row(url, ''));
+      rows.forEach(function (r) { r.batch = batch; });
 
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/v1/upload');
@@ -539,6 +552,29 @@
       if (!confirm('Delete this album? The images themselves stay.')) return;
       api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
     });
+  }
+
+  // results page: guests' delete links live in this browser's history
+  if ($('.result-page')) {
+    var hist = {}; loadHistory().forEach(function (x) { hist[x.id] = x.del; });
+    $$('.result-item[data-id]').forEach(function (it) {
+      var a = $('.del-link', it);
+      if (a && !a.getAttribute('href') && hist[it.dataset.id]) { a.href = hist[it.dataset.id]; a.classList.remove('hide'); }
+    });
+  }
+
+  // "Install app": Android/desktop Chrome offer it; iPhone needs Share → Add to Home Screen.
+  var ib = $('#install-bar'), deferred = null;
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+  if (ib && !standalone) {
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; ib.classList.remove('hide'); });
+    $('#install-app').addEventListener('click', function () {
+      if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; ib.classList.add('hide'); }); return; }
+      toast('On iPhone: tap Share, then “Add to Home Screen”.');
+    });
+    if (/iPhone|iPad/.test(navigator.userAgent) && !navigator.standalone) {
+      ib.classList.remove('hide'); $('#install-hint').textContent = 'On iPhone: Share → Add to Home Screen';
+    }
   }
 
   var warn = $('dialog[data-open]');

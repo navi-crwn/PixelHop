@@ -15,7 +15,7 @@ import (
 	"github.com/navi-crwn/pixelhop/web"
 )
 
-var Version = "3.3.0"
+var Version = "3.3.1"
 
 type App struct {
 	cfg      *config.Config
@@ -92,6 +92,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
 	mux.HandleFunc("GET /sw.js", a.serviceWorker)
 	mux.HandleFunc("POST /share", a.share)
+	mux.HandleFunc("GET /uploaded", a.uploadedPage)
 	mux.HandleFunc("GET /robots.txt", a.robots)
 	mux.HandleFunc("GET /metrics", a.metrics)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
