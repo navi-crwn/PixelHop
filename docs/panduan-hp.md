@@ -4,7 +4,7 @@ Untuk CS yang menerima bukti dari pelanggan (screenshot, rekaman layar, video AT
 
 ## Sekali saja: persiapan
 
-1. Buka **https://p.hel.ink** di HP dan masuk dengan akun HEL.ink.
+1. Buka alamat PixelHop kamu di HP (misalnya **https://p.hel.ink**) dan masuk ke akunmu. Di p.hel.ink, login memakai akun HEL.ink.
 2. **Android (Chrome):** menu ⋮ → **Tambahkan ke layar utama / Install aplikasi**. Ikon PixelHop muncul di layar HP.
 3. **iPhone:** ikuti bagian [iPhone](#iphone) di bawah.
 4. Minta admin menaikkan kuota penyimpanan akun CS (bawaan 1 GB) kalau sering menerima video.

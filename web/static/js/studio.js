@@ -814,7 +814,7 @@
     title: 'QR code', desc: 'Make a QR code for any link or text. Download it, or open it here to edit further.',
     noImage: true,
     ui: function (p) {
-      var text = el('textarea', { placeholder: 'https://hel.ink/b/you', rows: 3, maxlength: 1500 });
+      var text = el('textarea', { placeholder: 'https://example.com', rows: 3, maxlength: 1500 });
       var fg = el('input', { type: 'color', value: '#000000' }), bg = el('input', { type: 'color', value: '#ffffff' });
       var trans = el('label', { class: 'check' }, [el('input', { type: 'checkbox' }), ' Transparent background']);
       var level = 'M', img = el('img', { alt: 'QR code preview', class: 'qr', style: 'width:200px;height:200px;margin:14px auto;display:none' });

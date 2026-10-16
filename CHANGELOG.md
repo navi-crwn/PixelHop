@@ -7,6 +7,9 @@ All notable changes to PixelHop will be documented in this file.
 ### Fixed
 - The guest note sat on the upload box's colored border and was hard to read; it is now below the box. Phones no longer see the Ctrl+V hint.
 
+### Changed
+- PixelHop is fully standalone: HEL.ink sign-in is an optional add-on that stays off unless `HELINK_URL` and `HELINK_SSO_SECRET` are set, and examples no longer point at HEL.ink.
+
 ## [3.4.0] - 2026-10-16
 
 ### Changed

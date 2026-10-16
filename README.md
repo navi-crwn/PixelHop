@@ -79,7 +79,7 @@
 - **🌍 Explore, oEmbed & sitemap.** A public feed of images people chose to show, embeds for WordPress/Discourse/Notion, and a gallery API for other sites.
 - **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
 - **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
-- **👤 One account with HEL.ink** (optional). Set `HELINK_URL` and `HELINK_SSO_SECRET` and people sign in with their [HEL.ink](https://hel.ink) account; sign-up, passwords, Google and 2FA live there.
+- **👤 Own accounts, or HEL.ink sign-in** (optional add-on). PixelHop has its own sign-up, passwords and Google sign-in and needs nothing else. Only if you also run [HEL.ink](https://github.com/navi-crwn/hel.ink) can you set `HELINK_URL` and `HELINK_SSO_SECRET` to let people use one account for both; leave them empty and PixelHop never contacts HEL.ink.
 - **🔌 API & ShareX.**
   - A REST API with `Bearer` keys.
   - The settings page makes a ready-to-use `.sxcu` file for ShareX.
