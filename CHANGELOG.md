@@ -2,6 +2,20 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.5.2] - 2026-10-16
+
+### Fixed
+- **Admin → Users: quota changes no longer get lost.** The quota is typed in GB now (10, 2.5, "2,5" and "10 GB" all work). A value that can't be read is refused with a message instead of being skipped without a word, which is what happened in 3.5.1 when the MB field got a number like "10.240".
+- Every admin action on a user (quota, status, role, warning, password, delete) says what happened, or why nothing changed, and keeps your search and page.
+- Dashboard: showing, hiding or deleting many files at once reports how many worked. Files that failed, and private or password-protected files that can't go on a profile, are no longer skipped silently.
+- Clearer messages when the server answers with an error page instead of JSON (for example "too large").
+- Settings → Webhooks: "Send test" with no webhook explains that one is needed first, instead of saying a test was sent.
+- IP bans and admin settings confirm the change and report database errors.
+- Video and PDF pages no longer advertise an oEmbed link that answered 404.
+
+### Security
+- Confirmation messages on Settings, Admin → Users and IP bans come from short codes, so a crafted link can no longer put arbitrary text on those pages.
+
 ## [3.5.1] - 2026-10-16
 
 ### Added

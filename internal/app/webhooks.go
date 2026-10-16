@@ -102,14 +102,18 @@ func (a *App) createWebhook(w http.ResponseWriter, r *http.Request) {
 func (a *App) deleteWebhook(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	a.db.DeleteWebhook(r.Context(), currentUser(r).ID, id)
-	http.Redirect(w, r, "/settings?ok=Webhook+deleted#webhooks", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=webhook-deleted#webhooks", http.StatusSeeOther)
 }
 
 func (a *App) testWebhook(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
+	if hooks, _ := a.db.Webhooks(r.Context(), u.ID); len(hooks) == 0 {
+		a.settingsError(w, r, "Add a webhook first; there is nothing to send a test to yet.")
+		return
+	}
 	a.fireWebhooks(u.ID, "image.uploaded", map[string]any{"test": true, "id": "example-x7Kp2Q",
 		"url": a.cfg.BaseURL + "/i/example-x7Kp2Q.jpg", "view_url": a.cfg.BaseURL + "/example-x7Kp2Q"})
-	http.Redirect(w, r, "/settings?ok=Test+sent;+refresh+in+a+few+seconds+to+see+the+result#webhooks", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=webhook-test#webhooks", http.StatusSeeOther)
 }
 
 // checkWebhookURL refuses obviously internal targets up front; netsafe also

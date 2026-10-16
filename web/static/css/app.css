@@ -635,3 +635,4 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
   .kind-tabs::-webkit-scrollbar { display: none; }
   .kind-tabs a { flex: none; }
 }
+.quota-field { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; }

@@ -58,6 +58,18 @@ func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "dashboard", "Dashboard", d)
 }
 
+// settingsNotices are the confirmations Settings shows after a change. The
+// link carries a short code, not the text, so nobody can put words on the page.
+var settingsNotices = map[string]string{
+	"profile":         "Profile saved.",
+	"photo":           "Profile photo updated.",
+	"photo-removed":   "Profile photo removed.",
+	"password":        "Password changed. Other devices were signed out.",
+	"key-deleted":     "API key deleted.",
+	"webhook-deleted": "Webhook deleted.",
+	"webhook-test":    "Test sent; refresh in a few seconds to see the result.",
+}
+
 type settingsData struct {
 	Webhooks         []db.Webhook
 	NewWebhookSecret string
@@ -73,7 +85,7 @@ func (a *App) settingsData(r *http.Request) settingsData {
 	u := currentUser(r)
 	keys, _ := a.db.APIKeys(r.Context(), u.ID)
 	hooks, _ := a.db.Webhooks(r.Context(), u.ID)
-	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: r.URL.Query().Get("ok")}
+	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: settingsNotices[r.URL.Query().Get("ok")]}
 }
 
 func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +112,7 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	// Sign out everywhere else, then start a fresh session here.
 	a.db.DeleteUserSessions(r.Context(), u.ID)
 	a.startSession(w, r, u)
-	http.Redirect(w, r, "/settings?ok=Password+changed", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=password", http.StatusSeeOther)
 }
 
 func (a *App) createKey(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +140,7 @@ func (a *App) createKey(w http.ResponseWriter, r *http.Request) {
 func (a *App) deleteKey(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	a.db.DeleteAPIKey(r.Context(), currentUser(r).ID, id)
-	http.Redirect(w, r, "/settings?ok=Key+deleted#api", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=key-deleted#api", http.StatusSeeOther)
 }
 
 // sharexConfig downloads a blank .sxcu file. Keys are only stored as hashes,

@@ -2,6 +2,7 @@
 <div class="wrap">
   <div class="page-head"><h1>IP bans</h1></div>
   {{template "admin_nav" .}}
+  {{with $d.Notice}}<div class="alert ok" role="status">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err">{{.}}</div>{{end}}
   <div class="card">
     <h2>Ban an address</h2>

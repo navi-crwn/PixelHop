@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/netip"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -76,20 +78,28 @@ func (a *App) adminImageAction(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
+	var err2 error
 	switch r.FormValue("action") {
 	case "hide":
-		a.db.SetImageHidden(r.Context(), im.ID, true)
+		err2 = a.db.SetImageHidden(r.Context(), im.ID, true)
 	case "unhide":
-		a.db.SetImageHidden(r.Context(), im.ID, false)
+		err2 = a.db.SetImageHidden(r.Context(), im.ID, false)
 	case "delete":
-		a.removeImage(r.Context(), im)
+		err2 = a.removeImage(r.Context(), im)
 		a.db.DeleteEmptyAlbums(r.Context())
 	case "ban":
 		if im.IP != "" {
-			a.db.Ban(r.Context(), im.IP, "uploaded "+im.ID)
-			a.invalidateBans()
+			if err2 = a.db.Ban(r.Context(), im.IP, "uploaded "+im.ID); err2 == nil {
+				a.invalidateBans()
+			}
 		}
-		a.removeImage(r.Context(), im)
+		if err2 == nil {
+			err2 = a.removeImage(r.Context(), im)
+		}
+	}
+	if err2 != nil {
+		a.serverError(w, r, err2)
+		return
 	}
 	back := r.FormValue("back")
 	http.Redirect(w, r, safeNext(back), http.StatusSeeOther)
@@ -103,6 +113,59 @@ type adminUsersData struct {
 	Page    int
 	Pages   int
 	Default int64
+	Notice  string
+	Error   string
+}
+
+// adminUserMessages turn the short codes adminUserUpdate redirects with into
+// the line shown above the table. Codes, not free text, so a crafted link
+// can't put words on the admin page.
+var adminUserMessages = map[string]string{
+	"quota":        "Storage quota for %s is now %s.",
+	"status":       "Status for %s saved.",
+	"role":         "Role for %s saved.",
+	"warn":         "Warning for %s saved.",
+	"unwarn":       "Warning for %s cleared.",
+	"password":     "New password set for %s; they were signed out everywhere.",
+	"delete":       "%s and their files were deleted.",
+	"bad-quota":    "Quota for %s not changed: type a number of GB, for example 10 or 2.5.",
+	"self":         "You can't change the status, role or existence of your own account here.",
+	"bad-password": "Password for %s not changed: use at least 8 characters.",
+	"bad-value":    "Nothing changed for %s: that value isn't allowed.",
+	"failed":       "Saving %s failed. Try again; if it keeps failing, check the server log.",
+}
+
+func (a *App) adminUserMessage(r *http.Request, code string) string {
+	tpl, ok := adminUserMessages[code]
+	if !ok {
+		return ""
+	}
+	if !strings.Contains(tpl, "%s") {
+		return tpl
+	}
+	who, quota := "The account", ""
+	if id, err := strconv.ParseInt(r.URL.Query().Get("user"), 10, 64); err == nil {
+		if u, err := a.db.UserByID(r.Context(), id); err == nil {
+			who, quota = u.Email, humanBytes(u.QuotaBytes)
+		}
+	}
+	if code == "quota" {
+		return fmt.Sprintf(tpl, who, quota)
+	}
+	return fmt.Sprintf(tpl, who)
+}
+
+// parseQuotaGB reads a quota typed in GB. It takes "10", "2.5", "2,5" and
+// "10 GB", and refuses anything else instead of guessing.
+func parseQuotaGB(s string) (int64, bool) {
+	s = strings.ToLower(strings.TrimSpace(s))
+	s = strings.TrimSpace(strings.TrimSuffix(s, "gb"))
+	s = strings.Replace(s, ",", ".", 1)
+	gb, err := strconv.ParseFloat(s, 64)
+	if err != nil || gb < 0 || gb > 1<<20 || math.IsNaN(gb) {
+		return 0, false
+	}
+	return int64(math.Round(gb*1024)) << 20, true
 }
 
 func (a *App) adminUsers(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +186,8 @@ func (a *App) adminUsers(w http.ResponseWriter, r *http.Request) {
 		usage[u.ID] = [2]int64{b, int64(n)}
 	}
 	a.render(w, r, "admin_users", "Users", adminUsersData{Users: users, Usage: usage, Total: total, Query: q.Get("q"),
-		Page: pg, Pages: (total + per - 1) / per, Default: a.cfg.DefaultQuota})
+		Page: pg, Pages: (total + per - 1) / per, Default: a.cfg.DefaultQuota,
+		Notice: a.adminUserMessage(r, q.Get("done")), Error: a.adminUserMessage(r, q.Get("error"))})
 }
 
 func (a *App) adminUserUpdate(w http.ResponseWriter, r *http.Request) {
@@ -134,44 +198,94 @@ func (a *App) adminUserUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	me := currentUser(r)
-	switch r.FormValue("action") {
-	case "status":
+	ctx := r.Context()
+	// Every outcome is reported back: nothing is skipped without a word.
+	done, problem := "", ""
+	save := func(code string) {
+		if err := a.db.UpdateUser(ctx, u); err != nil {
+			a.log.Error("admin user update", "user", u.ID, "err", err)
+			problem = "failed"
+			return
+		}
+		done = code
+	}
+	action := r.FormValue("action")
+	switch {
+	case u.ID == me.ID && (action == "status" || action == "role" || action == "delete"):
+		problem = "self"
+	case action == "status":
 		st := r.FormValue("status")
-		if (st == "active" || st == "locked" || st == "suspended") && u.ID != me.ID {
-			u.Status = st
-			u.StatusNote = trim(r.FormValue("note"), 300)
-			a.db.UpdateUser(r.Context(), u)
+		if st != "active" && st != "locked" && st != "suspended" {
+			problem = "bad-value"
+			break
+		}
+		u.Status = st
+		u.StatusNote = trim(r.FormValue("note"), 300)
+		save("status")
+		if problem == "" {
 			if st != "active" {
-				a.db.DeleteUserSessions(r.Context(), u.ID)
+				a.db.DeleteUserSessions(ctx, u.ID)
 			}
 			// Suspended accounts' images go offline; anything else brings them back.
-			a.db.ExecContext(r.Context(), `UPDATE images SET hidden=? WHERE user_id=?`, st == "suspended", u.ID)
+			a.db.ExecContext(ctx, `UPDATE images SET hidden=? WHERE user_id=?`, st == "suspended", u.ID)
 		}
-	case "role":
-		if role := r.FormValue("role"); (role == "user" || role == "admin") && u.ID != me.ID {
-			u.Role = role
-			a.db.UpdateUser(r.Context(), u)
+	case action == "role":
+		role := r.FormValue("role")
+		if role != "user" && role != "admin" {
+			problem = "bad-value"
+			break
 		}
-	case "quota":
-		if mb, err := strconv.ParseInt(r.FormValue("quota_mb"), 10, 64); err == nil && mb >= 0 {
-			u.QuotaBytes = mb << 20
-			a.db.UpdateUser(r.Context(), u)
+		u.Role = role
+		save("role")
+	case action == "quota":
+		raw := r.FormValue("quota_gb")
+		q, ok := parseQuotaGB(raw)
+		if raw == "" { // forms from before 3.5.2 sent megabytes
+			mb, err := strconv.ParseInt(strings.TrimSpace(r.FormValue("quota_mb")), 10, 64)
+			q, ok = mb<<20, err == nil && mb >= 0
 		}
-	case "warn":
+		if !ok {
+			problem = "bad-quota"
+			break
+		}
+		u.QuotaBytes = q
+		save("quota")
+	case action == "warn":
 		u.Warning = trim(strings.TrimSpace(r.FormValue("warning")), 1000)
-		a.db.UpdateUser(r.Context(), u)
-	case "password":
-		if pw := r.FormValue("password"); len(pw) >= 8 {
-			u.PassHash = HashPassword(pw)
-			a.db.UpdateUser(r.Context(), u)
-			a.db.DeleteUserSessions(r.Context(), u.ID)
+		if u.Warning == "" {
+			save("unwarn")
+		} else {
+			save("warn")
 		}
-	case "delete":
-		if u.ID != me.ID {
-			a.purgeUser(r, u)
+	case action == "password":
+		pw := r.FormValue("password")
+		if len(pw) < 8 {
+			problem = "bad-password"
+			break
 		}
+		u.PassHash = HashPassword(pw)
+		save("password")
+		if problem == "" {
+			a.db.DeleteUserSessions(ctx, u.ID)
+		}
+	case action == "delete":
+		a.purgeUser(r, u)
+		done = "delete"
+	default:
+		problem = "bad-value"
 	}
-	http.Redirect(w, r, safeNext(r.FormValue("back")), http.StatusSeeOther)
+	back, _ := url.Parse(safeNext(r.FormValue("back")))
+	v := back.Query()
+	v.Del("done")
+	v.Del("error")
+	v.Set("user", strconv.FormatInt(u.ID, 10))
+	if problem != "" {
+		v.Set("error", problem)
+	} else {
+		v.Set("done", done)
+	}
+	back.RawQuery = v.Encode()
+	http.Redirect(w, r, back.String(), http.StatusSeeOther)
 }
 
 type reportRow struct {
@@ -229,25 +343,40 @@ func (a *App) adminReportAction(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) adminBans(w http.ResponseWriter, r *http.Request) {
 	bans, _ := a.db.Bans(r.Context())
-	a.render(w, r, "admin_bans", "IP bans", map[string]any{"Bans": bans, "Error": r.URL.Query().Get("err")})
+	a.render(w, r, "admin_bans", "IP bans", map[string]any{"Bans": bans, "Error": adminBanMessages[r.URL.Query().Get("err")], "Notice": adminBanMessages[r.URL.Query().Get("ok")]})
 }
 
 func (a *App) adminBan(w http.ResponseWriter, r *http.Request) {
 	ip := strings.TrimSpace(r.FormValue("ip"))
 	addr, err := netip.ParseAddr(ip)
 	if err != nil {
-		http.Redirect(w, r, "/admin/bans?err=That+isn't+an+IP+address", http.StatusSeeOther)
+		http.Redirect(w, r, "/admin/bans?err=not-ip", http.StatusSeeOther)
 		return
 	}
-	a.db.Ban(r.Context(), addr.Unmap().String(), trim(r.FormValue("reason"), 200))
+	if err := a.db.Ban(r.Context(), addr.Unmap().String(), trim(r.FormValue("reason"), 200)); err != nil {
+		a.log.Error("ban", "err", err)
+		http.Redirect(w, r, "/admin/bans?err=failed", http.StatusSeeOther)
+		return
+	}
 	a.invalidateBans()
-	http.Redirect(w, r, "/admin/bans", http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/bans?ok=banned", http.StatusSeeOther)
+}
+
+var adminBanMessages = map[string]string{
+	"banned":   "IP address banned.",
+	"unbanned": "Ban removed.",
+	"not-ip":   "That isn't an IP address. Use one like 203.0.113.7 or 2001:db8::1.",
+	"failed":   "Saving failed. Try again; if it keeps failing, check the server log.",
 }
 
 func (a *App) adminUnban(w http.ResponseWriter, r *http.Request) {
-	a.db.Unban(r.Context(), r.FormValue("ip"))
+	if err := a.db.Unban(r.Context(), r.FormValue("ip")); err != nil {
+		a.log.Error("unban", "err", err)
+		http.Redirect(w, r, "/admin/bans?err=failed", http.StatusSeeOther)
+		return
+	}
 	a.invalidateBans()
-	http.Redirect(w, r, "/admin/bans", http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/bans?ok=unbanned", http.StatusSeeOther)
 }
 
 type siteSettings struct {
@@ -277,10 +406,17 @@ func (a *App) adminSettings(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) adminSaveSettings(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	a.db.SetSetting(ctx, "guest_uploads", fmt.Sprint(r.FormValue("guest_uploads") == "on"))
-	a.db.SetSetting(ctx, "registration", fmt.Sprint(r.FormValue("registration") == "on"))
-	a.db.SetSetting(ctx, "announcement", trim(strings.TrimSpace(r.FormValue("announcement")), 300))
-	a.db.SetSetting(ctx, "seo_title", trim(strings.TrimSpace(r.FormValue("seo_title")), 120))
-	a.db.SetSetting(ctx, "seo_description", trim(strings.TrimSpace(r.FormValue("seo_description")), 300))
+	for k, v := range map[string]string{
+		"guest_uploads":   fmt.Sprint(r.FormValue("guest_uploads") == "on"),
+		"registration":    fmt.Sprint(r.FormValue("registration") == "on"),
+		"announcement":    trim(strings.TrimSpace(r.FormValue("announcement")), 300),
+		"seo_title":       trim(strings.TrimSpace(r.FormValue("seo_title")), 120),
+		"seo_description": trim(strings.TrimSpace(r.FormValue("seo_description")), 300),
+	} {
+		if err := a.db.SetSetting(ctx, k, v); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+	}
 	http.Redirect(w, r, "/admin/settings?saved", http.StatusSeeOther)
 }
