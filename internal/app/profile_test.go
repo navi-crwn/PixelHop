@@ -17,6 +17,18 @@ import (
 	"github.com/navi-crwn/pixelhop/internal/imaging"
 )
 
+func TestUsernameNeverFromEmail(t *testing.T) {
+	a, _ := ssoApp(t)
+	u := &db.User{ID: 0, Email: "carawin.secret@example.com"}
+	if got := a.suggestUsername(context.Background(), u); strings.Contains(got, "carawin") || !strings.HasPrefix(got, "user") {
+		t.Fatalf("username %q leaks the email", got)
+	}
+	u.Name = "Rina Putri"
+	if got := a.suggestUsername(context.Background(), u); got != "rinaputri" {
+		t.Fatalf("got %q", got)
+	}
+}
+
 func TestUsernameRules(t *testing.T) {
 	for _, ok := range []string{"ivan", "ivan.n", "pixel_hop", "a1-b2"} {
 		if p := usernameProblem(ok); p != "" {
