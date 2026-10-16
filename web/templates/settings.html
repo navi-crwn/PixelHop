@@ -1,6 +1,7 @@
 {{define "content"}}{{$d := .Data}}{{$u := .User}}
 <div class="wrap narrow">
   <div class="page-head"><h1>Settings</h1></div>
+  {{template "mytabs" .}}
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
 

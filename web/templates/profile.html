@@ -1,5 +1,6 @@
 {{define "content"}}{{$d := .Data}}{{$u := $d.User}}
 <div class="wrap">
+  {{if $d.Mine}}{{template "mytabs" .}}{{end}}
   <header class="profile-head">
     <span class="avatar xxl">{{with $d.Owner.Avatar}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{$d.Owner.Initial}}{{end}}</span>
     <div>
@@ -22,7 +23,7 @@
   {{else}}
   <div class="empty">
     <svg width="40" height="40" style="margin:0 auto 10px;opacity:.6"><use href="#i-image"/></svg>
-    {{if $d.Mine}}<p>Your profile is ready. Choose which images appear here: open an image and press <b>Show on my profile</b>, or select several in <a href="/dashboard">My images</a>.</p>
+    {{if $d.Mine}}<p>Your profile is ready. Choose which images appear here: open an image and press <b>Show on my profile</b>, or select several in your <a href="/dashboard#files">Dashboard</a>.</p>
     {{else}}<p>{{$d.Owner.Name}} hasn't put any images on their profile yet.</p>{{end}}
   </div>
   {{end}}

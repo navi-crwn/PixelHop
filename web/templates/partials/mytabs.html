@@ -1,1 +1,7 @@
-{{define "mytabs"}}<nav class="admin-nav" aria-label="My things"><a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>Images</a><a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}>Albums</a>{{with .User.Username.String}}{{if $.User.ShowOwner}}<a href="/u/{{.}}">Public profile</a>{{end}}{{end}}</nav>{{end}}
+{{define "mytabs"}}<nav class="member-nav" aria-label="My account">
+  <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>Dashboard</a>
+  <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>Albums</a>
+  {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}" {{if eq .Path (print "/u/" .User.Username.String)}}aria-current="page"{{end}}><svg><use href="#i-users"/></svg>Public profile</a>{{end}}
+  <a href="/tools"><svg><use href="#i-adjust"/></svg>Studio</a>
+  <a href="/settings" {{if eq .Path "/settings"}}aria-current="page"{{end}}><svg><use href="#i-gear"/></svg>Settings</a>
+</nav>{{end}}
