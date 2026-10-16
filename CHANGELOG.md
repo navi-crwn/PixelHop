@@ -2,6 +2,11 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.3.2] - 2026-10-16
+
+### Added
+- **Paste button** for phones (no Ctrl+V there): uploads the image on the clipboard, for example one copied inside a work chat app that has no Share button. Chrome asks once for permission; where reading the clipboard isn't allowed, a box appears that takes press-and-hold → Paste. A copied link is fetched like "From a link".
+
 ## [3.3.1] - 2026-10-16
 
 ### Added
