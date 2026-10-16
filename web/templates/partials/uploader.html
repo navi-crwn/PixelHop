@@ -1,10 +1,10 @@
 {{define "uploader"}}
     <div class="hero-grid" id="hero-grid">
-    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
+    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-member-media-mb="{{.MemberMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
       <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
         <h2>Drop files here</h2>
-        <p class="sub">Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB<span class="nowrap"> · or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
+        <p class="sub">{{if eq .MaxMB .MaxMediaMB}}Images, videos &amp; PDFs up to {{.MaxMB}} MB each{{else}}Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB{{end}}<span class="nowrap"> · or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
         <div class="btn-row">
           <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
           <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>

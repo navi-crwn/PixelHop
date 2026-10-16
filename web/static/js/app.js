@@ -357,14 +357,14 @@
       settle(r);
     }
 
-    var maxMediaMB = +drop.dataset.maxMediaMb || maxMB, signedIn = !!drop.dataset.signedIn;
+    var maxMediaMB = +drop.dataset.maxMediaMb || maxMB, memberMediaMB = +drop.dataset.memberMediaMb || maxMediaMB, signedIn = !!drop.dataset.signedIn;
     var mediaRe = /^(video\/|application\/pdf$)/, mediaExt = /\.(mp4|mov|m4v|webm|3gp|mkv|pdf)$/i;
     function isMedia(f) { return mediaRe.test(f.type) || (!f.type && mediaExt.test(f.name)); }
 
     function send(files, url) {
       files = files.filter(function (f) {
         if (isMedia(f)) {
-          if (f.size > maxMediaMB * 1048576) { toast(f.name + ' is larger than ' + maxMediaMB + ' MB', true); return false; }
+          if (f.size > maxMediaMB * 1048576) { toast(f.name + ' is larger than ' + maxMediaMB + ' MB.' + (!signedIn && memberMediaMB > maxMediaMB ? ' Sign in to upload videos and PDFs up to ' + memberMediaMB + ' MB.' : ''), true); return false; }
           return true;
         }
         if (!okTypes.test(f.type) && !(f.type === '' && okExt.test(f.name))) { toast(f.name + ': not a supported file', true); return false; }

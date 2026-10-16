@@ -132,7 +132,9 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 |---|---|---|
 | `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address, used in every link |
 | `PIXELHOP_DATA` | `./data` | Database and (local) images |
-| `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per file |
+| `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
+| `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
+| `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in Admin) |
 | `PIXELHOP_TRUSTED_PROXIES` | — | `cloudflare`, or IPs/CIDRs of your reverse proxy |
 | `PIXELHOP_STORAGE` | `local` | `local` or `s3` |

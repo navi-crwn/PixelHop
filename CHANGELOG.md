@@ -2,6 +2,12 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.5.3] - 2026-10-16
+
+### Changed
+- **Upload limits per person.** Guests can upload any file (picture, video or PDF) up to 20 MB (`PIXELHOP_GUEST_MAX_MB`). Signed-in members keep 20 MB per picture and get up to 100 MB per video or PDF (`PIXELHOP_MAX_MEDIA_MB`, default lowered from 500 to 100).
+- The upload box shows each person their own limits, and a guest whose file is too big is told how far signing in goes.
+
 ## [3.5.2] - 2026-10-16
 
 ### Fixed
