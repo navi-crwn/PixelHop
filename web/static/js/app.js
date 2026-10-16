@@ -183,6 +183,7 @@
     var okTypes = /^image\/(jpeg|png|gif|webp|bmp|heic|heif|avif)$/, okExt = /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i;
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+    $$('[data-pick-files]').forEach(function (b) { b.addEventListener('click', function () { fileInput.click(); }); });
     $('#drop-in').addEventListener('click', function (e) {
       if (e.target.closest('#opts,#url-form,#paste-box,#chips,#ticket-box,button,select,input,textarea,label,details')) return;
       fileInput.click();
@@ -275,12 +276,12 @@
     // Results appear beside the upload box (below it on phones).
     function showResults() {
       var first = $('#results').classList.contains('hide');
-      $('#results').classList.remove('hide'); $('#hero-grid').classList.add('has-results'); $('.hero').classList.add('compact');
+      $('#results').classList.remove('hide'); $('#hero-grid').classList.add('has-results'); if ($('.hero')) $('.hero').classList.add('compact');
       // on phones the results sit below the upload box: bring them into view
       if (first && window.matchMedia && matchMedia('(max-width: 960px)').matches) setTimeout(function () { $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
     }
     $('#results-clear').addEventListener('click', function () {
-      list.innerHTML = ''; $('#results').classList.add('hide'); $('#hero-grid').classList.remove('has-results'); $('.hero').classList.remove('compact');
+      list.innerHTML = ''; $('#results').classList.add('hide'); $('#hero-grid').classList.remove('has-results'); if ($('.hero')) $('.hero').classList.remove('compact');
       $('#album-banner').classList.add('hide'); $('#copy-all-bar').classList.add('hide');
     });
 
@@ -325,7 +326,27 @@
       var bar = $('#copy-all-bar');
       if (bar && $$('#uploads [data-link]').length > 1) bar.classList.remove('hide');
       remember(im);
+      addToGallery(im);
       settle(r, im.id);
+    }
+
+    // On the dashboard a new upload lands at the top of "My files" straight away.
+    function addToGallery(im) {
+      var g = $('#my-gallery'); if (!g || im.duplicate || g.querySelector('[data-id="' + im.id + '"]')) return;
+      g.hidden = false; if ($('#dash-empty')) $('#dash-empty').remove();
+      var tile = document.createElement('div'); tile.className = 'tile fresh'; tile.dataset.id = im.id;
+      tile.dataset.direct = im.url; tile.dataset.page = im.view_url;
+      var a = document.createElement('a'); a.href = im.view_url;
+      var img = document.createElement('img'); img.src = im.thumb_url; img.alt = im.title || ''; img.loading = 'lazy';
+      a.appendChild(img); tile.appendChild(a);
+      var tick = document.createElement('input'); tick.type = 'checkbox'; tick.className = 'tick'; tick.value = im.id; tick.setAttribute('aria-label', 'Select ' + (im.title || im.id));
+      tile.appendChild(tick);
+      var cap = document.createElement('div'); cap.className = 'cap';
+      var t = document.createElement('span'); t.textContent = im.title || im.id; cap.appendChild(t);
+      var nb = document.createElement('span'); nb.className = 'pill acc'; nb.textContent = 'new'; cap.appendChild(nb);
+      tile.appendChild(cap);
+      g.prepend(tile);
+      var c = $('[data-stat="files"]'); if (c) c.textContent = +c.textContent + 1;
     }
 
     function fail(r, msg) {

@@ -1,69 +1,131 @@
-{{define "content"}}{{$d := .Data}}
-<div class="wrap">
+{{define "content"}}{{$d := .Data}}{{$files := add (add $d.Sum.Images $d.Sum.Videos) $d.Sum.PDFs}}
+<div class="wrap dash">
   {{if $d.Welcome}}<div class="alert ok">Welcome to {{.Site}}! Uploads you make while signed in land here. Grab an API key in <a href="/settings#api">Settings</a> to upload from ShareX or scripts.</div>{{end}}
-  <div class="page-head">
-    <div>
-      <h1>My images</h1>
-      <p class="muted" style="margin:4px 0 0">{{with .User.Username.String}}{{if $.User.ShowOwner}}<a href="/u/{{.}}">@{{.}}</a> · {{end}}{{end}}{{$d.Total}} images · {{bytes $d.Used}} of {{bytes $d.Quota}} used</p>
-      <div class="meter" style="margin-top:8px" title="{{$d.Percent}}%"><i style="width:{{$d.Percent}}%"></i></div>
+
+  <header class="dash-head">
+    <span class="avatar xl">{{with avatar .User}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{initial .User}}{{end}}</span>
+    <div class="dash-hello">
+      <h1>Hi, {{display .User}}</h1>
+      <p class="muted">{{with .User.Username.String}}@{{.}} · {{end}}member since {{date .User.CreatedAt}}{{if $d.Sum.Week}} · <b class="up-week">{{$d.Sum.Week}} new this week</b>{{end}}</p>
     </div>
-    <div class="btn-row">
-      <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>Select</button>
-      <span class="sel-actions hide" id="sel-actions">
-        <button class="btn ghost" type="button" id="select-all">Select all</button>
-        <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>Copy links</button>
-        <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
-        <button class="btn" type="button" id="album-selected"><svg><use href="#i-album"/></svg>Make album</button>
-        <button class="btn" type="button" id="list-selected"><svg><use href="#i-users"/></svg>Show on profile</button>
-        <button class="btn ghost" type="button" id="unlist-selected">Hide from profile</button>
-        <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
-      </span>
-      <form method="post" action="/dashboard/download" id="zip-form" hidden></form>
-      <a class="btn primary" href="/"><svg><use href="#i-upload"/></svg>Upload</a>
+    <div class="btn-row dash-head-actions">
+      <button class="btn primary" type="button" data-pick-files><svg><use href="#i-upload"/></svg>Upload</button>
+      <a class="btn" href="/settings"><svg><use href="#i-gear"/></svg>Settings</a>
     </div>
-  </div>
+  </header>
 
   {{template "mytabs" .}}
-  <div class="toolbar">
-    <form method="get" role="search">
-      <input type="search" name="q" value="{{$d.Query}}" placeholder="Search by name or link" aria-label="Search">
-      <select name="sort" aria-label="Sort" data-autosubmit>
-        <option value="">Newest</option>
-        <option value="old" {{if eq $d.Sort "old"}}selected{{end}}>Oldest</option>
-        <option value="views" {{if eq $d.Sort "views"}}selected{{end}}>Most viewed</option>
-        <option value="size" {{if eq $d.Sort "size"}}selected{{end}}>Largest</option>
-      </select>
-      <button class="btn" type="submit">Search</button>
-    </form>
-  </div>
 
-  {{if $d.Images}}
-  <div class="gallery" id="my-gallery">
-    {{range $d.Images}}
-    <div class="tile" style="background:{{.Color}}" data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}">
-      <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
-      {{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}
-      {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
-      {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
-      {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}Only you{{else}}Password{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}
-      {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="Shown on your public profile"><svg width="11" height="11"><use href="#i-users"/></svg>profile</span>{{end}}
-      <input class="tick" type="checkbox" value="{{.ID}}" aria-label="Select {{.Title}}">
-      <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>
+  <section class="dash-stats" aria-label="Your numbers">
+    <a class="stat" href="#files" style="--c:var(--cyan)">
+      <span class="stat-ico"><svg><use href="#i-image"/></svg></span>
+      <span class="stat-label">Files</span>
+      <b data-stat="files">{{$files}}</b>
+      <span class="stat-sub">{{$d.Sum.Images}} images · {{$d.Sum.Videos}} videos · {{$d.Sum.PDFs}} PDFs</span>
+    </a>
+    <div class="stat" style="--c:var(--lime)">
+      <span class="stat-ico"><svg><use href="#i-eye"/></svg></span>
+      <span class="stat-label">Views</span>
+      <b>{{$d.Sum.Views}}</b>
+      <span class="stat-sub">across all your files</span>
+    </div>
+    <a class="stat" href="/dashboard/albums" style="--c:var(--violet)">
+      <span class="stat-ico"><svg><use href="#i-album"/></svg></span>
+      <span class="stat-label">Albums</span>
+      <b>{{$d.Sum.Albums}}</b>
+      <span class="stat-sub">{{$d.Sum.Listed}} files on your profile</span>
+    </a>
+    <div class="stat" style="--c:var(--amber)">
+      <span class="stat-ico"><svg><use href="#i-server"/></svg></span>
+      <span class="stat-label">Storage</span>
+      <b>{{bytes $d.Used}}</b>
+      {{if $d.Quota}}<span class="meter" title="{{$d.Percent}}%"><i style="width:{{$d.Percent}}%"></i></span>
+      <span class="stat-sub">{{$d.Percent}}% of {{bytes $d.Quota}}</span>{{else}}<span class="stat-sub">No limit</span>{{end}}
+    </div>
+  </section>
+
+  <section class="dash-upload" id="upload" aria-label="Upload">
+    {{template "uploader" .}}
+  </section>
+
+  <section class="dash-shortcuts" aria-label="Shortcuts">
+    <a class="shortcut" href="/tools" style="--c:var(--pink)"><svg><use href="#i-adjust"/></svg><span><b>Photo studio</b><small>Compress, crop, blur, remove backgrounds</small></span></a>
+    <a class="shortcut" href="/dashboard/albums" style="--c:var(--violet)"><svg><use href="#i-album"/></svg><span><b>Albums</b><small>Group files and share one link</small></span></a>
+    {{if and .User.ShowOwner .User.Username.Valid}}
+    <a class="shortcut" href="/u/{{.User.Username.String}}" style="--c:var(--cyan)"><svg><use href="#i-users"/></svg><span><b>Public profile</b><small>{{$d.Sum.Listed}} files shown</small></span></a>
+    {{else}}
+    <a class="shortcut" href="/settings#profile" style="--c:var(--cyan)"><svg><use href="#i-users"/></svg><span><b>Public profile</b><small>Off. Turn it on in Settings</small></span></a>
+    {{end}}
+    <a class="shortcut" href="/settings#api" style="--c:var(--amber)"><svg><use href="#i-terminal"/></svg><span><b>ShareX &amp; API</b><small>{{if $d.Keys}}{{$d.Keys}} key{{if gt $d.Keys 1}}s{{end}} set up{{else}}Upload from screenshots and scripts{{end}}</small></span></a>
+    {{if .SSO}}<a class="shortcut" href="{{.Helink}}/dashboard" style="--c:var(--lime)"><svg><use href="#i-link"/></svg><span><b>HEL.ink</b><small>Short links with the same account</small></span></a>{{end}}
+  </section>
+
+  <section class="dash-files" id="files">
+    <div class="page-head">
+      <div><h2>My files</h2><p class="muted" style="margin:2px 0 0">{{$d.Total}} {{if eq $d.Kind "image"}}images{{else if eq $d.Kind "video"}}videos{{else if eq $d.Kind "pdf"}}PDFs{{else}}files{{end}}{{with $d.Query}} matching “{{.}}”{{end}}</p></div>
+      <div class="btn-row">
+        <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>Select</button>
+        <span class="sel-actions hide" id="sel-actions">
+          <button class="btn ghost" type="button" id="select-all">Select all</button>
+          <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>Copy links</button>
+          <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
+          <button class="btn" type="button" id="album-selected"><svg><use href="#i-album"/></svg>Make album</button>
+          <button class="btn" type="button" id="list-selected"><svg><use href="#i-users"/></svg>Show on profile</button>
+          <button class="btn ghost" type="button" id="unlist-selected">Hide from profile</button>
+          <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
+        </span>
+        <form method="post" action="/dashboard/download" id="zip-form" hidden></form>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <nav class="kind-tabs" aria-label="File type">
+        <a href="?q={{$d.Query}}&sort={{$d.Sort}}#files" {{if not $d.Kind}}aria-current="page"{{end}}>All <span>{{$files}}</span></a>
+        <a href="?kind=image&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "image"}}aria-current="page"{{end}}>Images <span>{{$d.Sum.Images}}</span></a>
+        <a href="?kind=video&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "video"}}aria-current="page"{{end}}>Videos <span>{{$d.Sum.Videos}}</span></a>
+        <a href="?kind=pdf&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "pdf"}}aria-current="page"{{end}}>PDFs <span>{{$d.Sum.PDFs}}</span></a>
+      </nav>
+      <form method="get" role="search" action="#files">
+        {{with $d.Kind}}<input type="hidden" name="kind" value="{{.}}">{{end}}
+        <input type="search" name="q" value="{{$d.Query}}" placeholder="Search by name or link" aria-label="Search">
+        <select name="sort" aria-label="Sort" data-autosubmit>
+          <option value="">Newest</option>
+          <option value="old" {{if eq $d.Sort "old"}}selected{{end}}>Oldest</option>
+          <option value="views" {{if eq $d.Sort "views"}}selected{{end}}>Most viewed</option>
+          <option value="size" {{if eq $d.Sort "size"}}selected{{end}}>Largest</option>
+        </select>
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+
+    <div class="gallery" id="my-gallery" {{if not $d.Images}}hidden{{end}}>
+      {{range $d.Images}}
+      <div class="tile" style="background:{{.Color}}" data-id="{{.ID}}" data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}">
+        <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
+        {{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}
+        {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
+        {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
+        {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}Only you{{else}}Password{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}
+        {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="Shown on your public profile"><svg width="11" height="11"><use href="#i-users"/></svg>profile</span>{{end}}
+        <input class="tick" type="checkbox" value="{{.ID}}" aria-label="Select {{.Title}}">
+        <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>
+      </div>
+      {{end}}
+    </div>
+    {{if gt $d.Pages 1}}
+    <nav class="pager" aria-label="Pages">
+      {{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}&kind={{$d.Kind}}&q={{$d.Query}}&sort={{$d.Sort}}#files">Previous</a>{{end}}
+      <span class="btn sm ghost">Page {{$d.Page}} of {{$d.Pages}}</span>
+      {{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}&kind={{$d.Kind}}&q={{$d.Query}}&sort={{$d.Sort}}#files">Next</a>{{end}}
+    </nav>
+    {{end}}
+    {{if not $d.Images}}
+    <div class="empty" id="dash-empty">
+      <svg width="40" height="40" style="margin:0 auto 10px;opacity:.6"><use href="#i-image"/></svg>
+      {{if or $d.Query $d.Kind}}<p>Nothing here{{with $d.Query}} matching “{{.}}”{{end}}.</p><a class="btn" href="/dashboard#files">Show all files</a>
+      {{else}}<p>No files yet. Drop something in the box above and it shows up here.</p>{{end}}
     </div>
     {{end}}
-  </div>
-  {{if gt $d.Pages 1}}
-  <nav class="pager" aria-label="Pages">
-    {{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}&q={{$d.Query}}&sort={{$d.Sort}}">Previous</a>{{end}}
-    <span class="btn sm ghost">Page {{$d.Page}} of {{$d.Pages}}</span>
-    {{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}&q={{$d.Query}}&sort={{$d.Sort}}">Next</a>{{end}}
-  </nav>
-  {{end}}
-  {{else}}
-  <div class="empty">
-    <svg width="40" height="40" style="margin:0 auto 10px;opacity:.6"><use href="#i-image"/></svg>
-    {{if $d.Query}}<p>Nothing matches “{{$d.Query}}”.</p>{{else}}<p>No images yet. Your uploads show up here.</p><a class="btn primary" href="/">Upload your first image</a>{{end}}
-  </div>
-  {{end}}
+  </section>
 </div>
 {{end}}

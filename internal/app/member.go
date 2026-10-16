@@ -24,6 +24,9 @@ type dashData struct {
 	Quota   int64
 	Percent int
 	Welcome bool
+	Kind    string
+	Sum     db.UserSummary
+	Keys    int // API keys made, to nudge people towards ShareX
 }
 
 func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
@@ -34,18 +37,25 @@ func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
 		pg = 1
 	}
 	const per = 48
-	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Search: q.Get("q"), Sort: q.Get("sort"), Limit: per, Offset: (pg - 1) * per})
+	kind := q.Get("kind")
+	if kind != "image" && kind != "video" && kind != "pdf" {
+		kind = ""
+	}
+	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Search: q.Get("q"), Sort: q.Get("sort"), Kind: kind, Limit: per, Offset: (pg - 1) * per})
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
 	used, _ := a.db.UserStorage(r.Context(), u.ID)
 	d := dashData{Images: ims, Total: total, Page: pg, Pages: (total + per - 1) / per, Query: q.Get("q"), Sort: q.Get("sort"),
-		Used: used, Quota: u.QuotaBytes, Welcome: q.Has("welcome")}
+		Used: used, Quota: u.QuotaBytes, Welcome: q.Has("welcome"), Kind: kind, Sum: a.db.UserSummary(r.Context(), u.ID)}
+	if keys, _ := a.db.APIKeys(r.Context(), u.ID); keys != nil {
+		d.Keys = len(keys)
+	}
 	if u.QuotaBytes > 0 {
 		d.Percent = int(min(100, used*100/u.QuotaBytes))
 	}
-	a.render(w, r, "dashboard", "My images", d)
+	a.render(w, r, "dashboard", "Dashboard", d)
 }
 
 type settingsData struct {

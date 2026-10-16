@@ -7,70 +7,7 @@
     </div>
 
     {{if or .GuestUploads .User}}
-    <div class="hero-grid" id="hero-grid">
-    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
-      <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
-        <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
-        <h2>Drop files here</h2>
-        <p class="sub">Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB<span class="nowrap"> · or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
-        <div class="btn-row">
-          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
-          <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>
-          <button class="btn lg icon-only" type="button" id="show-url" aria-label="Upload from a link" title="Upload from a link"><svg><use href="#i-link"/></svg></button>
-        </div>
-        <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
-        <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="Paste here" data-placeholder="Press and hold here, then tap Paste"></div>
-        <form class="url-row hide" id="url-form">
-          <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
-          <button class="btn" type="submit">Fetch</button>
-        </form>
-
-        <div class="chips" id="chips">
-          <button class="chip" type="button" id="opts-toggle" aria-expanded="false" aria-controls="opts"><svg><use href="#i-gear"/></svg><span id="opts-summary">Keep forever</span></button>
-          {{if .User}}<button class="chip" type="button" id="ticket-toggle" aria-expanded="false" aria-controls="ticket-box"><svg><use href="#i-album"/></svg>Ticket &amp; note</button>{{end}}
-        </div>
-        <div class="opts hide" id="opts">
-          <label>Delete after
-            <select id="expire">
-              <option value="">Never</option>
-              <option value="10m">10 minutes</option>
-              <option value="1h">1 hour</option>
-              <option value="1d">1 day</option>
-              <option value="7d">7 days</option>
-              <option value="30d">30 days</option>
-              <option value="90d">90 days</option>
-            </select>
-          </label>
-          <label><input type="checkbox" id="slug" checked> File name in link</label>
-          <label><input type="checkbox" id="album" checked> Several files = one album</label>
-          {{if .User}}<label><input type="checkbox" id="listed"> Show on my profile</label>{{end}}
-        </div>
-        {{if .User}}<div class="ticket hide" id="ticket-box">
-          <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
-          <textarea id="note" maxlength="1000" rows="2" placeholder="Note for the admin (optional)" aria-label="Note"></textarea>
-          <span class="small muted">All files go into one album with this title and note.</span>
-        </div>{{end}}
-      </div>
-    </div>
-
-    <aside class="results hide" id="results" data-copy-all-root aria-label="Your links">
-      <div class="results-head"><h2>Your links</h2><button class="btn sm ghost" type="button" id="results-clear">Clear</button></div>
-      <div class="album-banner hide" id="album-banner">
-        <svg width="18" height="18"><use href="#i-album"/></svg><b>Album</b>
-        <input type="text" readonly id="album-link" aria-label="Album link">
-        <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
-        <a class="btn sm ghost" id="album-open" href="#">Open</a>
-      </div>
-      <div class="hide" id="copy-all-bar"><div class="copy-all" data-copy-all-scope>
-        <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
-        <button class="btn sm" type="button" data-copy-all="direct">All direct links</button>
-        <button class="btn sm ghost" type="button" data-copy-all="page">View</button>
-        <button class="btn sm ghost" type="button" data-copy-all="markdown">Markdown</button>
-        <button class="btn sm ghost" type="button" data-copy-all="bbcode">BBCode</button>
-      </div></div>
-      <div class="uploads" id="uploads" aria-live="polite"></div>
-    </aside>
-    </div>
+    {{template "uploader" .}}
     {{if not .User}}<p class="guest-note">Guest upload: each file gets a private delete link. <a href="/login?next=/">Sign in</a> for a gallery and tickets.</p>{{end}}
     {{else}}
     <div class="card" style="max-width:520px;margin:0 auto">

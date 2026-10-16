@@ -115,6 +115,7 @@ type ImageQuery struct {
 	Listed      bool   // only images shown on the owner's profile (and still live)
 	PublicOwner bool   // only images whose owner shows their profile
 	Sort        string // new | old | views | size
+	Kind        string // "" = any | image | video | pdf
 	Limit       int
 	Offset      int
 }
@@ -136,6 +137,14 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	}
 	if q.PublicOwner {
 		where = append(where, "user_id IN (SELECT id FROM users WHERE show_owner=1 AND status='active')")
+	}
+	switch q.Kind {
+	case "video":
+		where = append(where, "mime LIKE 'video/%'")
+	case "pdf":
+		where = append(where, "mime='application/pdf'")
+	case "image":
+		where = append(where, "mime NOT LIKE 'video/%' AND mime<>'application/pdf'")
 	}
 	if s := strings.TrimSpace(q.Search); s != "" {
 		where = append(where, "(id LIKE ? OR title LIKE ? OR orig_name LIKE ?)")
@@ -234,6 +243,28 @@ func (d *DB) ExpiredImages(ctx context.Context, inactiveDays int, limit int) ([]
 
 func (d *DB) UserStorage(ctx context.Context, userID int64) (bytes int64, count int) {
 	d.QueryRowContext(ctx, `SELECT COALESCE(SUM(size),0), COUNT(*) FROM images WHERE user_id=?`, userID).Scan(&bytes, &count)
+	return
+}
+
+// UserSummary is the at-a-glance numbers on a member's dashboard.
+type UserSummary struct {
+	Images, Videos, PDFs int
+	Views                int64
+	Albums               int
+	Listed               int
+	Week                 int // files uploaded in the last 7 days
+}
+
+func (d *DB) UserSummary(ctx context.Context, userID int64) (s UserSummary) {
+	d.QueryRowContext(ctx, `SELECT
+		COALESCE(SUM(mime NOT LIKE 'video/%' AND mime<>'application/pdf'),0),
+		COALESCE(SUM(mime LIKE 'video/%'),0),
+		COALESCE(SUM(mime='application/pdf'),0),
+		COALESCE(SUM(views),0),
+		COALESCE(SUM(listed),0),
+		COALESCE(SUM(created_at>?),0)
+		FROM images WHERE user_id=?`, now()-7*86400, userID).Scan(&s.Images, &s.Videos, &s.PDFs, &s.Views, &s.Listed, &s.Week)
+	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM albums WHERE user_id=?`, userID).Scan(&s.Albums)
 	return
 }
 
