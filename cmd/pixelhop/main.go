@@ -131,7 +131,7 @@ func userCmd(cfg *config.Config, d *db.DB, args []string) error {
 		}
 		into, err := d.UserByEmail(ctx, strings.TrimSpace(args[2]))
 		if err != nil {
-			return fmt.Errorf("no account with email %s (sign in with HEL.ink once first)", args[2])
+			return fmt.Errorf("no account with email %s (sign in once first)", args[2])
 		}
 		if from.ID == into.ID {
 			return errors.New("that is the same account")
