@@ -160,7 +160,7 @@ Kenapa ditulis ulang? Baca [AUDIT.md](AUDIT.md).
 
 ## Lisensi
 
-- [MIT](LICENSE.md) © Ivan Novskies (navi-crwn).
+- [MIT](LICENSE.md) © Ivan Novskies (navi-crwn). Komponen pihak ketiga ada di [CREDITS.md](CREDITS.md).
 - Studio memuat [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) dan [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, tanpa modifikasi, dari jsDelivr) saat dibutuhkan.
 
 Karya lain dari pembuat yang sama: [HEL.ink](https://github.com/navi-crwn/hel.ink) · [Amnesia](https://github.com/navi-crwn/amnesia).

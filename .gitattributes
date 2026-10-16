@@ -1,0 +1,3 @@
+# Count only PixelHop 3 (Go) for the repository's language bar.
+legacy/** linguist-vendored
+docs/** linguist-documentation

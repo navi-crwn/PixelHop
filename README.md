@@ -247,7 +247,7 @@ PixelHop runs on a 512 MB VPS or a Raspberry Pi. It uses a few tens of MB of mem
 
 ## Credits & license
 
-- [MIT](LICENSE.md) © Ivan Novskies (navi-crwn).
+- [MIT](LICENSE.md) © Ivan Novskies (navi-crwn). Third-party parts are listed in [CREDITS.md](CREDITS.md).
 - Built with [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) and [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
 - The studio loads [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) and [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, unmodified, from jsDelivr) on demand.
 
