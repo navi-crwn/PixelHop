@@ -60,6 +60,8 @@
   - Readable ids like `beach-sunset-x7Kp2Q`.
   - A direct link, Markdown, HTML, BBCode and a QR code.
   - Open Graph tags so previews look right on Discord, X and WhatsApp.
+- **🎬 Videos & PDFs too.** Screen recordings, phone videos and PDFs get a page, a preview and a link. Videos are stripped of their location and shrunk to 720p in the background; PDFs are compressed. Big files upload in resumable pieces.
+- **🧾 Reports / tickets.** Give an upload a ticket number and a note, and get one link for everything plus a ready-to-paste list for WhatsApp or LINE.
 - **🗂️ Albums.** Upload several images and share one gallery link. Edit the title, description, cover and order afterwards, or make an album from any selection.
 - **🔒 Private or password-protected.** Per image: unlisted (default), only you, or behind a password. Locked files can't be hotlinked.
 - **📈 View stats.** Views per day and the sites that link to your image, without tracking visitors.

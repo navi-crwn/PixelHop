@@ -5,6 +5,8 @@
       <a href="#start">Getting started</a>
       <a href="#sharex">ShareX</a>
       <a href="#upload">Upload</a>
+      <a href="#big">Videos, PDFs &amp; big files</a>
+      <a href="#phone">Phones &amp; iPhone Shortcut</a>
       <a href="#list">List images</a>
       <a href="#image">Get, rename, delete</a>
       <a href="#privacy">Privacy &amp; stats</a>
@@ -67,6 +69,32 @@
   }
 }</code></pre>
         <p>With several files, <code>data.images</code> lists each one, <code>data.album_url</code> links the album, and <code>data.errors</code> names any file that didn't make it.</p>
+      </section>
+
+      <section id="big">
+        <h2>Videos, PDFs &amp; big files</h2>
+        <p>Videos (MP4, MOV, WebM, 3GP) and PDFs upload like images and get a page, a poster and a link. Videos lose their location and other metadata at once, then are made smaller in the background (720p H.264, plays on every phone); the link works the whole time. PDFs are compressed right away. The limit is {{.MaxMediaMB}} MB per file.</p>
+        <p>Files up to {{.MaxMB}} MB can go to <code>/api/v1/upload</code> as usual. Bigger ones are sent in pieces, so a weak connection only repeats one piece:</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/uploads</div>
+        <p>Body <code>{"name": "recording.mp4", "size": 123456789}</code>. Answers <code>{"id": "…", "chunk_size": 8388608}</code>.</p>
+        <div class="endpoint"><span class="method patch">PUT</span>/api/v1/uploads/{id}?offset=N</div>
+        <p>The raw bytes from <code>N</code>, at most <code>chunk_size</code>. If the offset is wrong you get <code>409</code> with <code>"received"</code>: continue from there.</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/uploads/{id}/finish</div>
+        <p>Optional form fields <code>expire</code>, <code>album_id</code>, <code>slug</code>. Answers with the file, like an upload.</p>
+      </section>
+
+      <section id="phone">
+        <h2>Phones &amp; iPhone Shortcut</h2>
+        <p><b>Android:</b> open this site in Chrome, choose <b>Add to Home screen</b>. {{.Site}} then shows up when you press <b>Share</b> on a photo, video or PDF in WhatsApp, LINE, Gallery or Files.</p>
+        <p><b>iPhone:</b> Safari can't add websites to the share sheet, so use a Shortcut (once, about two minutes):</p>
+        <ol>
+          <li>Create an API key in <a href="/settings#api">Settings → API keys</a>.</li>
+          <li>Open <b>Shortcuts</b>, tap <b>+</b>, name it <i>Upload to {{.Site}}</i>. In its settings turn on <b>Show in Share Sheet</b> and accept Images, Media, PDFs and Files.</li>
+          <li>Add <b>Repeat with Each</b> item in <i>Shortcut Input</i>. Inside it add <b>Get Contents of URL</b>: URL <code>{{.Base}}/api/v1/upload</code>, Method <b>POST</b>, Header <code>Authorization</code> = <code>Bearer ph_yourkey</code>, Request Body <b>Form</b> with a <b>File</b> field named <code>file</code> = <i>Repeat Item</i>.</li>
+          <li>Still inside, add <b>Get Dictionary Value</b> <code>data</code>, then <b>Get Dictionary Value</b> <code>view_url</code>.</li>
+          <li>After <b>End Repeat</b>, add <b>Combine Text</b> (<i>Repeat Results</i>, New Lines), <b>Copy to Clipboard</b> and <b>Show Notification</b> “Links copied”.</li>
+        </ol>
+        <p>Now <b>Share → Upload to {{.Site}}</b> on any photo, video or PDF copies the links. One file can be up to 100 MB this way; for bigger videos use this website.</p>
       </section>
 
       <section id="list">

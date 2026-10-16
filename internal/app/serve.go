@@ -46,7 +46,7 @@ func (a *App) serveFull(w http.ResponseWriter, r *http.Request) {
 	if im == nil || !a.fileAllowed(w, r, im) {
 		return
 	}
-	if a.transformRequested(r) {
+	if a.transformRequested(r) && im.IsImage() {
 		a.serveTransformed(w, r, im)
 		return
 	}
@@ -101,7 +101,13 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 	}
 	h := w.Header()
 	// Images can never run script, even if someone smuggles markup in.
-	h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+	if im.Kind() == "pdf" && key == im.KeyFull {
+		// Browsers refuse to show PDFs inside a sandbox; their viewer runs apart from the page.
+		h.Set("Content-Security-Policy", "default-src 'none'; object-src 'self'; plugin-types application/pdf")
+		h.Set("X-Content-Type-Options", "nosniff")
+	} else {
+		h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+	}
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Del("X-Frame-Options")
@@ -172,13 +178,14 @@ func (a *App) missingObject(w http.ResponseWriter, r *http.Request, im *db.Image
 // ---- pages ----
 
 type viewData struct {
-	Removed  []string // what metadata was stripped, in words
-	Owner    *owner
-	Image    *db.Image
-	Album    *db.Album
-	Siblings []*db.Image
-	Mine     bool // the viewer may rename/delete/list it
-	Links    links
+	Removed    []string // what metadata was stripped, in words
+	Owner      *owner
+	Image      *db.Image
+	Album      *db.Album
+	Siblings   []*db.Image
+	Mine       bool // the viewer may rename/delete/list it
+	Optimizing bool // a video still being shrunk in the background
+	Links      links
 }
 
 type links struct {
@@ -198,6 +205,14 @@ func (a *App) linksFor(im *db.Image) links {
 		HTML:     `<a href="` + page + `"><img src="` + direct + `" alt="` + htmlAttr(alt) + `" width="` + strconv.Itoa(im.Width) + `" height="` + strconv.Itoa(im.Height) + `"></a>`,
 		BBCode:   "[url=" + page + "][img]" + direct + "[/img][/url]",
 	}
+}
+
+// previewURL is the picture for link previews: the image, or a video's poster / a PDF's first page.
+func (a *App) previewURL(im *db.Image) string {
+	if im.IsImage() {
+		return a.directURL(im)
+	}
+	return a.thumbURL(im)
 }
 
 func (a *App) directURL(im *db.Image) string { return a.cfg.BaseURL + "/i/" + im.ID + "." + im.Ext }
@@ -233,7 +248,7 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	a.countView(r, im)
 	u := currentUser(r)
 	d := viewData{Image: im, Links: a.linksFor(im), Mine: u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()),
-		Owner: a.ownerOf(r.Context(), im.UserID)}
+		Owner: a.ownerOf(r.Context(), im.UserID), Optimizing: im.Kind() == "video" && a.db.MediaJobPending(r.Context(), im.ID)}
 	for _, k := range removedList(im.Stripped) {
 		if w := removedWords[k]; w != "" {
 			d.Removed = append(d.Removed, w)
@@ -250,10 +265,19 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 		title = im.ID
 	}
 	desc := humanDims(im.Width, im.Height) + " · " + humanBytes(im.Size) + " · shared on " + a.cfg.SiteName
+	switch im.Kind() {
+	case "video":
+		desc = "Video · " + desc
+	case "pdf":
+		desc = "PDF · " + humanBytes(im.Size) + " · shared on " + a.cfg.SiteName
+	}
 	if d.Owner != nil {
 		desc = "Shared by " + d.Owner.Name + " · " + desc
 	}
 	og := a.directURL(im)
+	if !im.IsImage() {
+		og = a.thumbURL(im)
+	}
 	if im.Locked() {
 		og = "" // previews of locked images show no picture
 	}
@@ -280,7 +304,7 @@ func (a *App) legacyResult(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/"+ims[0].ID, http.StatusMovedPermanently)
 	default:
 		title := strconv.Itoa(len(ims)) + " images"
-		a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(ims[0]),
+		a.renderPage(w, r, "album", page{Title: title, OGImage: a.previewURL(ims[0]),
 			Desc: title + " on " + a.cfg.SiteName,
 			Data: albumData{Album: &db.Album{Title: title, CreatedAt: ims[0].CreatedAt}, Images: ims, Link: a.cfg.BaseURL + r.URL.RequestURI()}})
 	}
@@ -329,7 +353,7 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 			cover = im
 		}
 	}
-	a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(cover),
+	a.renderPage(w, r, "album", page{Title: title, OGImage: a.previewURL(cover),
 		Desc: albumDesc(len(live), by, a.cfg.SiteName),
 		Data: albumData{Album: al, Images: live, Link: a.cfg.BaseURL + "/a/" + al.ID, Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
 }

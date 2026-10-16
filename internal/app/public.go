@@ -81,7 +81,7 @@ func (a *App) oembed(w http.ResponseWriter, r *http.Request) {
 	}
 	id := strings.Trim(u.Path, "/")
 	im, err := a.db.Image(r.Context(), id)
-	if err != nil || im.Hidden || im.Locked() || (im.ExpiresAt > 0 && im.ExpiresAt < time.Now().Unix()) {
+	if err != nil || im.Hidden || im.Locked() || !im.IsImage() || (im.ExpiresAt > 0 && im.ExpiresAt < time.Now().Unix()) {
 		apiError(w, http.StatusNotFound, "not found")
 		return
 	}

@@ -15,7 +15,7 @@ import (
 	"github.com/navi-crwn/pixelhop/web"
 )
 
-var Version = "3.2.0"
+var Version = "3.3.0"
 
 type App struct {
 	cfg      *config.Config
@@ -28,10 +28,14 @@ type App struct {
 	log      *slog.Logger
 	static   http.Handler
 	bans     banList
+
+	mediaQueue chan string // videos waiting to be optimised
+	chunks     *chunkStore // uploads that arrive in pieces
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
-	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour)}
+	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour),
+		mediaQueue: make(chan string, 256), chunks: newChunkStore()}
 
 	local, err := storage.NewLocal(cfg.DataDir + "/images")
 	if err != nil {
@@ -140,6 +144,9 @@ func (a *App) Handler() http.Handler {
 
 	// JSON API (session cookie or API key)
 	mux.HandleFunc("POST /api/v1/upload", a.apiUpload)
+	mux.HandleFunc("POST /api/v1/uploads", a.apiStartUpload)
+	mux.HandleFunc("PUT /api/v1/uploads/{id}", a.apiPutChunk)
+	mux.HandleFunc("POST /api/v1/uploads/{id}/finish", a.apiFinishUpload)
 	mux.HandleFunc("POST /api/upload.php", a.apiUpload) // ShareX configs made for PixelHop 2
 	mux.HandleFunc("GET /api/v1/images", a.apiImages)
 	mux.HandleFunc("GET /api/v1/images/{id}", a.apiImage)
@@ -189,6 +196,8 @@ func (a *App) Run(ctx context.Context) error {
 		MaxHeaderBytes:    64 << 10,
 	}
 	go a.janitor(ctx)
+	go a.mediaWorker(ctx)
+	go a.chunks.sweep(ctx)
 	errc := make(chan error, 1)
 	go func() { errc <- srv.ListenAndServe() }()
 	a.log.Info("PixelHop is running", "addr", a.cfg.Addr, "url", a.cfg.BaseURL, "storage", a.store.Name(), "version", Version)
