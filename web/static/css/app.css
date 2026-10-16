@@ -433,6 +433,9 @@ dialog h2 { font-size: 1.15rem; }
 .or { display: flex; align-items: center; gap: 12px; color: var(--faint); font-size: .8rem; margin: 18px 0; }
 .or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 .btn.google { width: 100%; background: var(--bg-2); }
+.one-account { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 18px; padding: 12px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent); background: color-mix(in srgb, var(--cyan) 7%, transparent); font-size: .88rem; color: var(--muted); }
+.one-account svg { flex: none; margin-top: 2px; color: var(--cyan); }
+.one-account b { color: var(--text); }
 .local-login { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
 .local-login summary { cursor: pointer; text-align: center; list-style: none; }
 .local-login summary::-webkit-details-marker { display: none; }

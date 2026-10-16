@@ -2,6 +2,15 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.5.0] - 2026-10-16
+
+### Added
+- **Own sign-in and sign-up forms with HEL.ink accounts on.** With `HELINK_URL` set, the email and password form on the sign-in page now also accepts HEL.ink accounts (checked with HEL.ink server to server, signed with the shared secret), and signing up here creates the account on HEL.ink too, so one account works in both apps without visiting HEL.ink. "Continue with HEL.ink" stays for Google and two-factor accounts. Needs HEL.ink with `POST /api/pixelhop/login|register`.
+- Optional `HELINK_API_ADDR` (e.g. `127.0.0.1:443`) to reach HEL.ink on the same machine for those checks.
+
+### Security
+- An unconfirmed HEL.ink address never takes over an existing PixelHop profile with the same email.
+
 ## [3.4.2] - 2026-10-16
 
 ### Changed

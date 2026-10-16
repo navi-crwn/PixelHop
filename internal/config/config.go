@@ -43,8 +43,9 @@ type Config struct {
 	// HEL.ink accounts: when both are set, people sign in with their HEL.ink
 	// account and PixelHop's own sign-up, password reset and Google login
 	// are handed over to HEL.ink.
-	HelinkURL    string
-	HelinkSecret string
+	HelinkURL     string
+	HelinkSecret  string
+	HelinkAPIAddr string // optional "127.0.0.1:443": reach HEL.ink on this machine for password checks
 
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
@@ -132,6 +133,7 @@ func Load() (*Config, error) {
 	c.GoogleRedirect = env("GOOGLE_REDIRECT_URI", c.BaseURL+"/auth/google/callback")
 	c.HelinkURL = strings.TrimRight(env("HELINK_URL", ""), "/")
 	c.HelinkSecret = env("HELINK_SSO_SECRET", "")
+	c.HelinkAPIAddr = env("HELINK_API_ADDR", "")
 	c.TurnstileSiteKey = env("TURNSTILE_SITE_KEY", "")
 	c.TurnstileSecret = env("TURNSTILE_SECRET_KEY", "")
 	c.RembgURL = strings.TrimRight(env("PIXELHOP_REMBG_URL", ""), "/")
