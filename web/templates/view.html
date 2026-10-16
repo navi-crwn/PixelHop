@@ -4,7 +4,13 @@
   <div class="viewer">
     <div>
       <div class="stage" id="stage" style="background-color:{{$im.Color}}22">
+        {{if eq $im.Kind "video"}}
+        <video src="{{direct $im}}" poster="{{thumb $im}}" controls playsinline preload="metadata" width="{{$im.Width}}" height="{{$im.Height}}" id="photo"></video>
+        {{else if eq $im.Kind "pdf"}}
+        <a class="pdf-page" href="{{direct $im}}" target="_blank" rel="noopener"><img src="{{thumb $im}}" alt="First page of {{$im.Title}}" id="photo"><span class="btn primary"><svg><use href="#i-text"/></svg>Open PDF</span></a>
+        {{else}}
         <img src="{{direct $im}}" alt="{{if $im.Alt}}{{$im.Alt}}{{else}}{{$im.Title}}{{end}}" width="{{$im.Width}}" height="{{$im.Height}}" id="photo" style="background:{{$im.Color}}">
+        {{end}}
       </div>
       {{with $d.Siblings}}{{if gt (len .) 1}}
       <div class="strip" aria-label="Other images in this album">
@@ -22,7 +28,7 @@
         <div class="btn-row" style="margin-top:14px">
           <button class="btn primary sm" type="button" data-copy-text="{{$d.Links.Page}}"><svg><use href="#i-link"/></svg>Copy link</button>
           <a class="btn sm" href="{{$d.Links.Download}}"><svg><use href="#i-down"/></svg>Download</a>
-          <a class="btn sm" href="/tools?src={{$im.ID}}"><svg><use href="#i-adjust"/></svg>Edit</a>
+          {{if $im.IsImage}}<a class="btn sm" href="/tools?src={{$im.ID}}"><svg><use href="#i-adjust"/></svg>Edit</a>{{end}}
         </div>
         <div class="share" aria-label="Share">
   <span class="small muted">Share</span>
@@ -31,15 +37,17 @@
   <a class="btn sm ghost" target="_blank" rel="noopener" href="https://x.com/intent/post?url={{urlquery $d.Links.Page}}">X</a>
   <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u={{urlquery $d.Links.Page}}">Facebook</a>
 </div>
+        {{if $d.Optimizing}}<p class="small muted" style="margin:12px 0 0"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-clock"/></svg> Making this video smaller so it plays fast on phones. The link already works.</p>{{end}}
+        {{with $d.Album}}{{with .Description}}<p class="small" style="margin:12px 0 0;white-space:pre-line">{{.}}</p>{{end}}{{end}}
         {{with $d.Album}}<p class="small" style="margin:12px 0 0"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-album"/></svg> Part of <a href="/a/{{.ID}}">an album</a></p>{{end}}
       </div>
 
       <div class="card">
         <div class="tabs" role="tablist">
           <button role="tab" aria-selected="true" data-tab="direct">Direct</button>
-          <button role="tab" aria-selected="false" data-tab="md">Markdown</button>
+          {{if $im.IsImage}}<button role="tab" aria-selected="false" data-tab="md">Markdown</button>
           <button role="tab" aria-selected="false" data-tab="html">HTML</button>
-          <button role="tab" aria-selected="false" data-tab="bb">BBCode</button>
+          <button role="tab" aria-selected="false" data-tab="bb">BBCode</button>{{end}}
           <button role="tab" aria-selected="false" data-tab="thumb">Thumb</button>
         </div>
         <div class="copy" data-panel="direct"><input type="text" readonly value="{{$d.Links.Direct}}" aria-label="Direct link"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
@@ -49,12 +57,12 @@
         <div class="copy hide" data-panel="bb"><input type="text" readonly value="{{$d.Links.BBCode}}" aria-label="BBCode"><button class="btn sm" type="button" data-copy-prev aria-label="Copy"><svg><use href="#i-copy"/></svg></button></div>
 
         <dl class="facts">
-          <dt>Size</dt><dd>{{dims $im.Width $im.Height}} px</dd>
+          {{if ne $im.Kind "pdf"}}<dt>Size</dt><dd>{{dims $im.Width $im.Height}} px</dd>{{end}}
           <dt>File</dt><dd>{{bytes $im.Size}} · {{$im.Ext}}</dd>
-          <dt>Color</dt><dd><span class="swatch" style="background:{{$im.Color}}"></span><span class="mono">{{$im.Color}}</span></dd>
+          {{if $im.IsImage}}<dt>Color</dt><dd><span class="swatch" style="background:{{$im.Color}}"></span><span class="mono">{{$im.Color}}</span></dd>{{end}}
           <dt>Views</dt><dd>{{$im.Views}}</dd>
           {{if $d.Removed}}<dt>Removed</dt><dd class="removed">{{range $i, $w := $d.Removed}}{{if $i}}, {{end}}{{$w}}{{end}}</dd>
-          {{else if ne $im.Backend "remote"}}<dt>Metadata</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>clean</span></dd>{{end}}
+          {{else if and (ne $im.Backend "remote") (ne $im.Kind "pdf")}}<dt>Metadata</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>clean</span></dd>{{end}}
           {{with $im.Alt}}<dt>Alt text</dt><dd class="small" style="text-align:right">{{.}}</dd>{{end}}
         </dl>
       </div>

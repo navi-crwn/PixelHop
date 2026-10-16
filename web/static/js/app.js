@@ -80,6 +80,18 @@
     var b = e.target.closest('[data-copy-all]');
     if (!b) return;
     var scope = b.closest('[data-copy-all-root]') || document;
+    if (b.dataset.copyAll === 'report') {
+      var root = b.closest('[data-copy-all-root]') || document.body, items = $$('[data-link]', scope);
+      if (!items.length) return;
+      var head = [], title = root.dataset.reportTitle || ($('#ticket') && $('#ticket').value.trim()), note = root.dataset.reportNote || ($('#note') && $('#note').value.trim());
+      if (title) head.push(title);
+      if (note) head.push(note);
+      var link = root.dataset.reportLink || ($('#album-link') && !$('#album-banner').classList.contains('hide') && $('#album-link').value);
+      if (link && items.length > 1) head.push('All files: ' + link);
+      var list = items.map(function (x, i) { return (i + 1) + '. ' + (x.dataset.title || 'file') + ': ' + x.dataset.page; });
+      copy((head.length ? head.join('\n') + '\n\n' : '') + list.join('\n'));
+      return toast(items.length + ' links copied, ready to paste in chat');
+    }
     var fmt = b.dataset.copyAll, lines = $$('[data-link]', scope).map(function (x) {
       var d = x.dataset.direct, p = x.dataset.page, t = (x.dataset.title || 'image').replace(/[\[\]]/g, '');
       return { direct: d, page: p, markdown: '![' + t + '](' + d + ')', bbcode: '[url=' + p + '][img]' + d + '[/img][/url]',
@@ -151,7 +163,7 @@
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
     $('#drop-in').addEventListener('click', function (e) {
-      if (e.target.closest('#opts,#url-form,button,select,input,label')) return;
+      if (e.target.closest('#opts,#url-form,button,select,input,textarea,label,details')) return;
       fileInput.click();
     });
     $('#drop-in').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop-in') { e.preventDefault(); fileInput.click(); } });
@@ -228,21 +240,54 @@
       r.meta.appendChild(e);
     }
 
+    var maxMediaMB = +drop.dataset.maxMediaMb || maxMB, signedIn = !!drop.dataset.signedIn;
+    var mediaRe = /^(video\/|application\/pdf$)/, mediaExt = /\.(mp4|mov|m4v|webm|3gp|mkv|pdf)$/i;
+    function isMedia(f) { return mediaRe.test(f.type) || (!f.type && mediaExt.test(f.name)); }
+
     function send(files, url) {
       files = files.filter(function (f) {
-        if (!okTypes.test(f.type) && !(f.type === '' && okExt.test(f.name))) { toast(f.name + ': not a supported image', true); return false; }
+        if (isMedia(f)) {
+          if (f.size > maxMediaMB * 1048576) { toast(f.name + ' is larger than ' + maxMediaMB + ' MB', true); return false; }
+          return true;
+        }
+        if (!okTypes.test(f.type) && !(f.type === '' && okExt.test(f.name))) { toast(f.name + ': not a supported file', true); return false; }
         if (f.size > maxMB * 1048576) { toast(f.name + ' is larger than ' + maxMB + ' MB', true); return false; }
         return true;
       });
       if (!files.length && !url) return;
-      if (files.length > maxBatch) { toast('Up to ' + maxBatch + ' images at once; uploading the first ' + maxBatch, true); files = files.slice(0, maxBatch); }
+      if (files.length > maxBatch) { toast('Up to ' + maxBatch + ' files at once; uploading the first ' + maxBatch, true); files = files.slice(0, maxBatch); }
 
+      var media = files.filter(isMedia), images = files.filter(function (f) { return !isMedia(f); });
+      var ticket = $('#ticket') ? $('#ticket').value.trim() : '', note = $('#note') ? $('#note').value.trim() : '';
+      var count = files.length + (url ? 1 : 0);
+      // A ticket, or a mix with videos/PDFs, becomes one album made up front.
+      var wantAlbum = signedIn && (ticket || (media.length && count > 1 && $('#album').checked));
+      var mediaRows = media.map(function (f) { return row(f.name, ''); });
+      var albumReady = wantAlbum
+        ? api('POST', '/api/v1/albums', { title: ticket, description: note }).then(function (al) {
+            $('#album-banner').classList.remove('hide');
+            $('#album-link').value = al.url; $('#album-open').href = al.url;
+            return al.id;
+          }, function (e) { toast('Could not make the album: ' + e.message, true); return ''; })
+        : Promise.resolve('');
+
+      albumReady.then(function (albumId) {
+        if (images.length || url) sendImages(images, url, albumId, ticket, note);
+        // Big files go one at a time, in pieces, so a weak phone signal only repeats one piece.
+        media.reduce(function (p, f, i) { return p.then(function () { return sendMedia(f, mediaRows[i], albumId); }); }, Promise.resolve())
+          .then(renderHistory);
+      });
+    }
+
+    function sendImages(files, url, albumId, ticket, note) {
       var fd = new FormData();
       files.forEach(function (f) { fd.append('file', f, f.name); });
       if (url) fd.append('url', url);
       fd.append('expire', $('#expire').value);
       fd.append('slug', $('#slug').checked ? '1' : '0');
       fd.append('album', $('#album').checked ? '1' : '0');
+      if (albumId) fd.append('album_id', albumId);
+      else if (ticket) { fd.append('album', 'force'); fd.append('title', ticket); fd.append('note', note); }
       if ($('#listed') && $('#listed').checked) fd.append('listed', '1');
 
       var rows = files.map(function (f) { return row(f.name, /heic|heif|avif/i.test(f.type + f.name) ? '' : URL.createObjectURL(f)); });
@@ -266,16 +311,60 @@
           if (err) { fail(r, err.error); return; }
           if (imgs[used]) done(r, imgs[used++]);
         });
-        if (res.data.album_url && imgs.length > 1) {
+        if (res.data.album_url && !albumId && (imgs.length > 1 || ticket)) {
           $('#album-banner').classList.remove('hide');
           $('#album-link').value = res.data.album_url;
           $('#album-open').href = res.data.album_url;
         }
-        if (used === 1 && rows.length === 1) copy(imgs[0].view_url);
+        if (used === 1 && rows.length === 1 && !ticket) copy(imgs[0].view_url);
         renderHistory();
       };
       xhr.onerror = function () { rows.forEach(function (r) { fail(r, 'Network error. Check your connection and try again.'); }); };
       xhr.send(fd);
+    }
+
+    function putChunk(id, off, blob, onProgress) {
+      return new Promise(function (res, rej) {
+        var x = new XMLHttpRequest();
+        x.open('PUT', '/api/v1/uploads/' + id + '?offset=' + off);
+        x.setRequestHeader('Accept', 'application/json');
+        x.upload.onprogress = function (e) { if (e.lengthComputable) onProgress(e.loaded); };
+        x.onload = function () {
+          var j; try { j = JSON.parse(x.responseText); } catch (e) { j = {}; }
+          if (x.status === 200 && j.success) return res(j.data.received);
+          if (x.status === 409 && typeof j.received === 'number') return res(j.received); // carry on from where the server is
+          var err = new Error(j.error || 'Upload failed (' + x.status + ')'); err.fatal = x.status === 404 || x.status === 400; rej(err);
+        };
+        x.onerror = function () { rej(new Error('Network error')); };
+        x.send(blob);
+      });
+    }
+
+    function sendMedia(f, r, albumId) {
+      var size = f.size, tries = 0;
+      return api('POST', '/api/v1/uploads', { name: f.name, size: size }).then(function (start) {
+        var cs = start.chunk_size;
+        function from(off) {
+          if (off >= size) return Promise.resolve();
+          return putChunk(start.id, off, f.slice(off, off + cs), function (n) { r.bar.style.width = Math.min(97, (off + n) / size * 100) + '%'; })
+            .then(function (got) { tries = 0; return from(got); }, function (e) {
+              if (e.fatal || ++tries > 6) throw e;
+              r.name.textContent = f.name + ' · connection lost, retrying…';
+              return new Promise(function (ok) { setTimeout(ok, 1500 * tries); }).then(function () { r.name.textContent = f.name; return from(off); });
+            });
+        }
+        return from(0).then(function () {
+          r.name.textContent = f.name + ' · ' + (/pdf$/i.test(f.type + f.name) ? 'compressing…' : 'preparing video…');
+          var fd = new FormData();
+          fd.append('expire', $('#expire').value);
+          fd.append('slug', $('#slug').checked ? '1' : '0');
+          if (albumId) fd.append('album_id', albumId);
+          return fetch('/api/v1/uploads/' + start.id + '/finish', { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).then(function (x) { return x.json(); });
+        });
+      }).then(function (j) {
+        if (!j.success) throw new Error(j.error || 'Upload failed');
+        done(r, j.data);
+      }).catch(function (e) { fail(r, e.message || 'Upload failed'); });
     }
   }
 
@@ -451,12 +540,6 @@
       api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
     });
   }
-
-  var cas = $('#copy-all-shared');
-  if (cas) cas.addEventListener('click', function () {
-    var links = $$('#uploads [data-link]').map(function (x) { return x.dataset.page; });
-    copy(links.join('\n')); toast(links.length + ' links copied');
-  });
 
   var warn = $('dialog[data-open]');
   if (warn && warn.showModal) { warn.showModal(); warn.addEventListener('cancel', function (e) { e.preventDefault(); }); }

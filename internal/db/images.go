@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"time"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -39,6 +40,21 @@ type Image struct {
 	PassHash   string // "" or a password visitors must enter
 	Position   int    // order inside its album
 }
+
+// Kind is "image", "video" or "pdf".
+func (im *Image) Kind() string {
+	switch {
+	case strings.HasPrefix(im.Mime, "video/"):
+		return "video"
+	case im.Mime == "application/pdf":
+		return "pdf"
+	}
+	return "image"
+}
+
+// IsImage reports whether the file is a picture (the transforms, studio and
+// embed codes only make sense for those).
+func (im *Image) IsImage() bool { return im.Kind() == "image" }
 
 // Locked reports whether visitors need a password (or must be the owner).
 func (im *Image) Locked() bool { return im.Private || im.PassHash != "" }
@@ -291,4 +307,42 @@ func (d *DB) DeleteAlbum(ctx context.Context, id string) error {
 
 func (d *DB) DeleteEmptyAlbums(ctx context.Context) {
 	d.ExecContext(ctx, `DELETE FROM albums WHERE id NOT IN (SELECT album_id FROM images WHERE album_id IS NOT NULL)`)
+}
+
+// ---- media optimisation queue ----
+
+func (d *DB) AddMediaJob(ctx context.Context, id string) error {
+	_, err := d.ExecContext(ctx, `INSERT OR IGNORE INTO media_jobs (image_id, created_at) VALUES (?, ?)`, id, time.Now().Unix())
+	return err
+}
+
+func (d *DB) DoneMediaJob(ctx context.Context, id string) {
+	d.ExecContext(ctx, `DELETE FROM media_jobs WHERE image_id=?`, id)
+}
+
+func (d *DB) MediaJobPending(ctx context.Context, id string) bool {
+	var n int
+	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM media_jobs WHERE image_id=?`, id).Scan(&n)
+	return n > 0
+}
+
+func (d *DB) MediaJobs(ctx context.Context) []string {
+	rows, err := d.QueryContext(ctx, `SELECT image_id FROM media_jobs ORDER BY created_at`)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+	var ids []string
+	for rows.Next() {
+		var id string
+		rows.Scan(&id)
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+// ReplaceFile points an image at a new stored file (after optimising it).
+func (d *DB) ReplaceFile(ctx context.Context, id, key, mime, ext string, size int64, w, h int) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET key_full=?, mime=?, ext=?, size=?, width=?, height=? WHERE id=?`, key, mime, ext, size, w, h, id)
+	return err
 }

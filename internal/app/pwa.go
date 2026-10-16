@@ -29,7 +29,7 @@ func (a *App) manifest(w http.ResponseWriter, r *http.Request) {
 		"share_target": map[string]any{
 			"action": "/share", "method": "POST", "enctype": "multipart/form-data",
 			"params": map[string]any{"title": "title", "files": []map[string]any{
-				{"name": "file", "accept": []string{"image/*", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".avif"}},
+				{"name": "file", "accept": []string{"image/*", "video/*", "application/pdf", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".avif", ".mp4", ".mov", ".pdf"}},
 			}},
 		},
 	})

@@ -2,6 +2,19 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.3.0] - 2026-10-16
+
+### Added
+- **Videos and PDFs.** MP4, MOV, WebM, 3GP and PDF files get a page, a poster/first-page preview and a link, like images. Up to 500 MB per file (`PIXELHOP_MAX_MEDIA_MB`).
+- **Automatic compression.** Videos lose their location and other metadata at once, then are shrunk in the background to 720p H.264 (plays on every phone; a 53 MB screen recording became 2 MB). PDFs are compressed with Ghostscript on upload. Both need `ffmpeg` / `gs` on the server and are skipped without them.
+- **Uploads in pieces** (`/api/v1/uploads`), resumable after a dropped connection, so big phone videos get past proxy limits.
+- **Reports / tickets.** Give an upload a ticket number and a note: every file goes into one album with that title and note.
+- **Copy for chat**: one tap copies the ticket, note, album link and a numbered list of every file's link, on the upload page, albums, `/result` and the share page. "Copy all direct links" is now a primary button.
+- The share target accepts videos and PDFs; an **iPhone Shortcut** guide in the docs.
+
+### Changed
+- Upload rows stack their buttons on phones so the link stays readable.
+
 ## [3.2.0] - 2026-10-16
 
 ### Added

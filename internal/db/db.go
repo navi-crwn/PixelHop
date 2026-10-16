@@ -185,6 +185,8 @@ CREATE TABLE variants (
   created_at INTEGER NOT NULL,
   PRIMARY KEY (image_id, key)
 );`,
+	// 6: video and PDF optimisation that runs after upload
+	`CREATE TABLE media_jobs (image_id TEXT PRIMARY KEY REFERENCES images(id) ON DELETE CASCADE, created_at INTEGER NOT NULL);`,
 }
 
 func (d *DB) migrate() error {

@@ -216,6 +216,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .up .link input { height: 34px; font: .85rem var(--mono); }
 .up.err { border-color: color-mix(in srgb, var(--red) 45%, transparent); }
 .up .actions { display: flex; gap: 6px; }
+@media (max-width: 560px) { .up { grid-template-columns: 52px 1fr; gap: 10px; } .up .thumb { width: 52px; height: 52px; } .up .actions { grid-column: 1 / -1; } .up .actions > * { flex: 1; justify-content: center; } }
 .avatar.sm { width: 34px; height: 34px; font-size: .85rem; }
 .avatar.xl { width: 84px; height: 84px; font-size: 2rem; flex: none; }
 .avatar.xxl { width: 112px; height: 112px; font-size: 2.6rem; flex: none; box-shadow: 0 0 0 4px var(--panel), 0 0 0 6px var(--line-2); }
@@ -235,6 +236,14 @@ a.owner[href]:hover { text-decoration: none; border-color: var(--accent); }
 @media (max-width: 640px) { .profile-head { flex-direction: column; text-align: center; } .profile-head .btn-row { justify-content: center; } }
 .removed { color: var(--green); text-align: right; font-size: .85rem; }
 .ref-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--text); }
+.stage video { display: block; max-width: 100%; max-height: 78vh; margin: 0 auto; background: #000; border-radius: 10px; }
+.pdf-page { position: relative; display: block; max-width: 520px; margin: 0 auto; }
+.pdf-page img { width: 100%; height: auto; border-radius: 6px; box-shadow: 0 6px 30px rgba(0,0,0,.35); background: #fff; }
+.pdf-page .btn { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); }
+.kind-badge { position: absolute; bottom: 8px; left: 8px; padding: 2px 7px; border-radius: 6px; background: rgba(0,0,0,.65); color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .03em; }
+.ticket { flex-basis: 100%; text-align: left; }
+.ticket summary { cursor: pointer; font-weight: 600; }
+.ticket input, .ticket textarea { width: 100%; margin-top: 8px; }
 .albums .album-card { display: grid; gap: 8px; }
 .album-meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
 .pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; max-height: 260px; overflow: auto; }
@@ -300,7 +309,7 @@ a.owner[href]:hover { text-decoration: none; border-color: var(--accent); }
 .tile .tick { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; opacity: 0; }
 .selecting .tile .tick, .tile .tick:checked { opacity: 1; }
 .masonry { columns: 4 240px; column-gap: 12px; }
-.masonry a { display: block; margin-bottom: 12px; break-inside: avoid; border-radius: 14px; overflow: hidden; background: var(--panel-2); }
+.masonry a { position: relative; display: block; margin-bottom: 12px; break-inside: avoid; border-radius: 14px; overflow: hidden; background: var(--panel-2); }
 .masonry img { width: 100%; height: auto; }
 .empty { text-align: center; padding: 60px 20px; border: 1px dashed var(--line-2); border-radius: var(--radius); color: var(--muted); }
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }

@@ -42,6 +42,7 @@
     {{range $d.Images}}
     <div class="tile" style="background:{{.Color}}" data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}">
       <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
+      {{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}
       {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
       {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
       {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}Only you{{else}}Password{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}

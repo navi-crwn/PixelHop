@@ -38,6 +38,7 @@ type page struct {
 	RembgServer  bool   // background removal can run on the server
 	GuestUploads bool
 	MaxMB        int64
+	MaxMediaMB   int64
 	MaxBatch     int
 }
 
@@ -112,6 +113,7 @@ func (a *App) base(r *http.Request, p page) page {
 	p.Announcement = a.db.Setting(ctx, "announcement", "")
 	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
 	p.MaxMB = a.cfg.MaxUploadBytes >> 20
+	p.MaxMediaMB = a.cfg.MaxMediaBytes >> 20
 	p.MaxBatch = a.cfg.MaxBatch
 	return p
 }

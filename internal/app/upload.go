@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -31,6 +32,8 @@ var expiries = map[string]time.Duration{
 type uploadInput struct {
 	name string
 	data []byte
+	path string // big videos and PDFs wait on disk instead of in memory
+	size int64
 	err  error
 }
 
@@ -81,7 +84,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		inputs = append(inputs, uploadInput{name: raw})
 	}
 	if len(inputs) == 0 {
-		return nil, "", userError{"Choose an image to upload."}
+		return nil, "", userError{"Choose a file to upload."}
 	}
 	if len(inputs) > maxBatch {
 		return nil, "", userError{fmt.Sprintf("You can upload up to %d images at once.", maxBatch)}
@@ -120,6 +123,10 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 		if err := a.db.InsertAlbum(ctx, al); err == nil {
 			albumID = al.ID
+			if note := trim(strings.TrimSpace(r.FormValue("note")), 1000); note != "" {
+				al.Description = note
+				a.db.UpdateAlbum(ctx, al)
+			}
 		}
 	}
 
@@ -131,7 +138,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	results := make([]uploadResult, 0, len(inputs))
 	for _, in := range inputs {
 		res := uploadResult{Name: in.name}
-		if in.err == nil && in.data == nil { // a URL to fetch
+		if in.err == nil && in.data == nil && in.path == "" { // a URL to fetch
 			fctx, cancel := context.WithTimeout(ctx, 40*time.Second)
 			var p string
 			in.data, p, in.err = netsafe.Fetch(fctx, in.name, a.cfg.MaxUploadBytes)
@@ -147,7 +154,10 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			results = append(results, res)
 			continue
 		}
-		if u != nil && used+int64(len(in.data)) > u.QuotaBytes {
+		if in.size == 0 {
+			in.size = int64(len(in.data))
+		}
+		if u != nil && used+in.size > u.QuotaBytes {
 			res.Err = userError{fmt.Sprintf("Your storage is full (%s of %s). Delete some images to make room.", humanBytes(used), humanBytes(u.QuotaBytes))}
 			results = append(results, res)
 			continue
@@ -183,6 +193,16 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
 	in := uploadInput{name: fh.Filename}
 	if fh.Size > a.cfg.MaxUploadBytes {
+		// Videos and PDFs may be bigger: keep them on disk.
+		if f, err := fh.Open(); err == nil {
+			hb := make([]byte, 64)
+			n, _ := io.ReadFull(f, hb)
+			f.Close()
+			if mediaKind(hb[:n]) != "" && fh.Size <= a.cfg.MaxMediaBytes {
+				in.path, in.size, in.err = a.spool(fh)
+				return in
+			}
+		}
 		in.err = userError{fmt.Sprintf("%s is larger than %d MB.", fh.Filename, a.cfg.MaxUploadBytes>>20)}
 		return in
 	}
@@ -200,6 +220,30 @@ func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
 }
 
 func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (*db.Image, string, bool, error) {
+	if in.path == "" {
+		if kind := mediaKind(in.data[:min(len(in.data), 64)]); kind != "" {
+			if in.path, in.err = a.spoolBytes(in.data); in.err != nil {
+				return nil, "", false, in.err
+			}
+		}
+	}
+	if in.path != "" {
+		defer os.Remove(in.path)
+		kind := mediaKind(head(in.path, 64))
+		if kind == "" { // an image that arrived in pieces
+			data, err := os.ReadFile(in.path)
+			if err != nil {
+				return nil, "", false, err
+			}
+			if int64(len(data)) > a.cfg.MaxUploadBytes {
+				return nil, "", false, userError{fmt.Sprintf("%s is larger than %d MB.", in.name, a.cfg.MaxUploadBytes>>20)}
+			}
+			in.data, in.path = data, ""
+		} else {
+			return a.storeMedia(ctx, in.path, in.name, kind, u, ip, albumID, expiresAt, useSlug, alt)
+		}
+	}
+
 	sum := sha256.Sum256(in.data)
 	sha := hex.EncodeToString(sum[:])
 	var uid sql.NullInt64
@@ -417,4 +461,38 @@ func validID(id string) bool {
 		}
 	}
 	return true
+}
+
+// spool copies a big uploaded part to our own temporary file.
+func (a *App) spool(fh *multipart.FileHeader) (string, int64, error) {
+	src, err := fh.Open()
+	if err != nil {
+		return "", 0, err
+	}
+	defer src.Close()
+	f, err := os.CreateTemp(a.tmpDir(), "up-")
+	if err != nil {
+		return "", 0, err
+	}
+	n, err := io.Copy(f, src)
+	f.Close()
+	if err != nil {
+		os.Remove(f.Name())
+		return "", 0, err
+	}
+	return f.Name(), n, nil
+}
+
+func (a *App) spoolBytes(b []byte) (string, error) {
+	f, err := os.CreateTemp(a.tmpDir(), "up-")
+	if err != nil {
+		return "", err
+	}
+	_, err = f.Write(b)
+	f.Close()
+	if err != nil {
+		os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
 }

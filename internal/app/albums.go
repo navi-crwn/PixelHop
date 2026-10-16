@@ -66,8 +66,9 @@ func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title string   `json:"title"`
-		IDs   []string `json:"ids"`
+		Title       string   `json:"title"`
+		Description string   `json:"description"`
+		IDs         []string `json:"ids"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10)).Decode(&body); err != nil {
 		apiError(w, http.StatusBadRequest, `send JSON like {"title": "Trip", "ids": ["…"]}`)
@@ -77,6 +78,10 @@ func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 	if err := a.db.InsertAlbum(r.Context(), al); err != nil {
 		apiError(w, http.StatusInternalServerError, "couldn't create the album")
 		return
+	}
+	if d := trim(strings.TrimSpace(body.Description), 1000); d != "" {
+		al.Description = d
+		a.db.UpdateAlbum(r.Context(), al)
 	}
 	a.addToAlbum(r, u, al, body.IDs)
 	apiOK(w, a.albumJSON(r, al))

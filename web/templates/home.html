@@ -6,16 +6,16 @@
     <p class="lead">Free image hosting that removes your GPS location before anyone sees it. Albums, ShareX, an API, and a photo studio that runs right in your browser.</p>
 
     {{if or .GuestUploads .User}}
-    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-batch="{{.MaxBatch}}">
-      <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose images to upload">
+    <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
+      <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
-        <h2>Drop images here</h2>
-        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> · JPG, PNG, GIF, WebP, BMP · up to {{.MaxMB}} MB each, {{.MaxBatch}} at once</p>
+        <h2>Drop images, videos or PDFs here</h2>
+        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> · images up to {{.MaxMB}} MB, videos and PDFs up to {{.MaxMediaMB}} MB (made smaller for you) · {{.MaxBatch}} at once</p>
         <div class="btn-row">
-          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose images</button>
+          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
           <button class="btn lg" type="button" id="show-url"><svg><use href="#i-link"/></svg>From a link</button>
         </div>
-        <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif" multiple hidden>
+        <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
         <form class="url-row hide" id="url-form">
           <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
           <button class="btn" type="submit">Fetch</button>
@@ -29,11 +29,16 @@
               <option value="1d">1 day</option>
               <option value="7d">7 days</option>
               <option value="30d">30 days</option>
+              <option value="90d">90 days</option>
             </select>
           </label>
           <label><input type="checkbox" id="slug" checked> File name in link</label>
           <label><input type="checkbox" id="album" checked> Group several into an album</label>
           {{if .User}}<label><input type="checkbox" id="listed"> Show on my profile</label>{{end}}
+          {{if .User}}<details class="ticket" id="ticket-box"><summary>Report / ticket <span class="hint">group everything under one link with a note</span></summary>
+            <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
+            <textarea id="note" maxlength="1000" rows="2" placeholder="Short note for the admin, e.g. transfer succeeded but status shows failed" aria-label="Note"></textarea>
+          </details>{{end}}
         </div>
       </div>
     </div>
@@ -45,7 +50,8 @@
     </div>
     <div data-copy-all-root class="uploads-wrap">
       <div class="hide" id="copy-all-bar"><div class="copy-all" data-copy-all-scope>
-  <span class="small muted"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-copy"/></svg> Copy all links:</span>
+  <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
+  <span class="small muted">or all links as:</span>
   <button class="btn sm" type="button" data-copy-all="direct">Direct</button>
   <button class="btn sm" type="button" data-copy-all="page">View</button>
   <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>

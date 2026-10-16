@@ -21,17 +21,18 @@
   <a class="btn sm ghost" target="_blank" rel="noopener" href="https://x.com/intent/post?url={{urlquery $d.Link}}">X</a>
   <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u={{urlquery $d.Link}}">Facebook</a>
 </div>
-  <div data-copy-all-root>
+  <div data-copy-all-root data-report-title="{{$d.Album.Title}}" data-report-note="{{$d.Album.Description}}" data-report-link="{{$d.Link}}">
   <div class="copy-all" data-copy-all-scope>
-  <span class="small muted"><svg width="14" height="14" style="vertical-align:-2px"><use href="#i-copy"/></svg> Copy all links:</span>
-  <button class="btn sm" type="button" data-copy-all="direct">Direct</button>
+  <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
+  <span class="small muted">or all links as:</span>
+  <button class="btn sm primary" type="button" data-copy-all="direct">Direct</button>
   <button class="btn sm" type="button" data-copy-all="page">View</button>
   <button class="btn sm" type="button" data-copy-all="markdown">Markdown</button>
   <button class="btn sm" type="button" data-copy-all="bbcode">BBCode</button>
   <button class="btn sm" type="button" data-copy-all="html">HTML</button>
 </div>
   <div class="masonry">
-    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}" data-link data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}" data-title="{{.Title}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}"></a>{{end}}
+    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}" data-link data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}" data-title="{{.Title}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}">{{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}</a>{{end}}
   </div>
   </div>
 </div>
