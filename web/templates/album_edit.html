@@ -1,0 +1,34 @@
+{{define "content"}}{{$d := .Data}}{{$al := $d.Album}}
+<div class="wrap" id="album-edit" data-id="{{$al.ID}}">
+  <div class="page-head"><div><h1>Edit album</h1><p class="muted" style="margin:4px 0 0"><a href="/a/{{$al.ID}}">{{.Base}}/a/{{$al.ID}}</a></p></div>
+    <div class="btn-row"><a class="btn" href="/a/{{$al.ID}}">View album</a><button class="btn primary" type="button" id="ae-save"><svg><use href="#i-check"/></svg>Save</button></div></div>
+  <div class="grid-2" style="align-items:start">
+    <div class="card">
+      <div class="field"><label for="ae-title">Title</label><input type="text" id="ae-title" value="{{$al.Title}}" maxlength="120" placeholder="Trip to Bromo"></div>
+      <div class="field"><label for="ae-desc">Description</label><textarea id="ae-desc" maxlength="1000" rows="3">{{$al.Description}}</textarea></div>
+      <button class="btn sm danger" type="button" id="ae-delete"><svg><use href="#i-trash"/></svg>Delete album (keeps the images)</button>
+    </div>
+    <div class="card">
+      <h2>Add from my images</h2>
+      {{if $d.Others}}
+      <div class="pick-grid" id="ae-others">{{range $d.Others}}<label class="pick"><input type="checkbox" value="{{.ID}}"><img src="{{thumb .}}" alt="" loading="lazy"></label>{{end}}</div>
+      <button class="btn sm" type="button" id="ae-add" style="margin-top:10px"><svg><use href="#i-upload"/></svg>Add selected</button>
+      {{else}}<p class="muted small">All your images are already in this album.</p>{{end}}
+    </div>
+  </div>
+  <h2 style="margin-top:24px">Images <span class="muted small">drag to reorder · ★ sets the cover</span></h2>
+  <div class="order-grid" id="ae-order">
+    {{range $d.Images}}
+    <div class="order-item {{if eq .ID $al.CoverID}}is-cover{{end}}" draggable="true" data-id="{{.ID}}">
+      <img src="{{thumb .}}" alt="" loading="lazy">
+      <div class="order-actions">
+        <button type="button" class="icon-btn" data-act="left" aria-label="Move left">‹</button>
+        <button type="button" class="icon-btn" data-act="cover" aria-label="Use as cover">★</button>
+        <button type="button" class="icon-btn" data-act="remove" aria-label="Remove from album">✕</button>
+        <button type="button" class="icon-btn" data-act="right" aria-label="Move right">›</button>
+      </div>
+    </div>
+    {{else}}<p class="muted">No images in this album yet.</p>{{end}}
+  </div>
+</div>
+{{end}}

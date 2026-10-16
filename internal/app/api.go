@@ -42,6 +42,10 @@ func (a *App) imageJSON(im *db.Image) map[string]any {
 		m["album_url"] = a.cfg.BaseURL + "/a/" + im.AlbumID.String
 	}
 	m["listed"] = im.Listed
+	m["alt"] = im.Alt
+	m["private"] = im.Private
+	m["password"] = im.PassHash != ""
+	m["removed"] = removedList(im.Stripped)
 	return m
 }
 
@@ -162,36 +166,6 @@ func (a *App) apiImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) apiRenameImage(w http.ResponseWriter, r *http.Request) {
-	im := a.ownImage(w, r)
-	if im == nil {
-		return
-	}
-	var body struct {
-		Title  *string `json:"title"`
-		Listed *bool   `json:"listed"`
-	}
-	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&body); err != nil {
-		apiError(w, http.StatusBadRequest, `send JSON like {"title": "…"} or {"listed": true}`)
-		return
-	}
-	if body.Title != nil {
-		im.Title = trim(strings.TrimSpace(*body.Title), 120)
-		if err := a.db.SetImageTitle(r.Context(), im.ID, im.Title); err != nil {
-			apiError(w, http.StatusInternalServerError, "couldn't rename")
-			return
-		}
-	}
-	if body.Listed != nil {
-		im.Listed = *body.Listed
-		if err := a.db.SetImageListed(r.Context(), im.ID, im.Listed); err != nil {
-			apiError(w, http.StatusInternalServerError, "couldn't change that")
-			return
-		}
-	}
-	apiOK(w, a.imageJSON(im))
-}
-
 func (a *App) apiDeleteImage(w http.ResponseWriter, r *http.Request) {
 	im := a.ownImage(w, r)
 	if im == nil {
@@ -218,4 +192,23 @@ func (a *App) apiMe(w http.ResponseWriter, r *http.Request) {
 func (a *App) apiStats(w http.ResponseWriter, r *http.Request) {
 	n, views := a.db.PublicStats(r.Context())
 	apiOK(w, map[string]any{"images": n, "views": views, "version": Version})
+}
+
+// removedList turns "gps,camera" into ["gps","camera"] (empty list, not null).
+func removedList(s string) []string {
+	out := []string{}
+	for _, k := range strings.Split(s, ",") {
+		if w, ok := removedWords[k]; ok {
+			out = append(out, w)
+		} else if k != "" {
+			out = append(out, k)
+		}
+	}
+	return out
+}
+
+// removedWords describes stripped metadata for people.
+var removedWords = map[string]string{
+	"gps": "GPS location", "camera": "camera details", "date": "date taken", "software": "editing software",
+	"xmp": "XMP data", "iptc": "IPTC data", "comment": "hidden comment", "text": "embedded text",
 }

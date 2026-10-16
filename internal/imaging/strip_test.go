@@ -134,3 +134,28 @@ func TestStripWebP(t *testing.T) {
 		t.Fatal("RIFF size wrong")
 	}
 }
+
+func TestMetadataFound(t *testing.T) {
+	tagged := withExif(sampleJPEG(t, 10, 10), 1) // orientation only
+	if got := MetadataFound(tagged); len(got) != 0 {
+		t.Fatalf("orientation alone reported as %v", got)
+	}
+	// IFD0 with Make (0x010F) and GPSInfo (0x8825)
+	tiff := []byte("II*\x00\x08\x00\x00\x00")
+	ifd := make([]byte, 2+24+4)
+	binary.LittleEndian.PutUint16(ifd[0:], 2)
+	binary.LittleEndian.PutUint16(ifd[2:], 0x010F)
+	binary.LittleEndian.PutUint16(ifd[14:], 0x8825)
+	body := append([]byte("Exif\x00\x00"), append(tiff, ifd...)...)
+	seg := []byte{0xFF, 0xE1, 0, 0}
+	binary.BigEndian.PutUint16(seg[2:], uint16(len(body)+2))
+	j := sampleJPEG(t, 10, 10)
+	in := append(append(append([]byte{0xFF, 0xD8}, seg...), body...), j[2:]...)
+	got := MetadataFound(in)
+	if len(got) != 2 || got[0] != "gps" || got[1] != "camera" {
+		t.Fatalf("got %v", got)
+	}
+	if Container([]byte("\x00\x00\x00\x18ftypheic\x00\x00")) != "heic" || Container([]byte("\x00\x00\x00\x18ftypavif\x00\x00")) != "avif" {
+		t.Fatal("container sniffing")
+	}
+}

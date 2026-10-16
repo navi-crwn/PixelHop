@@ -6,6 +6,7 @@
       <button class="btn" type="button" id="st-open"><svg><use href="#i-image"/></svg>Open image</button>
       <button class="btn ghost" type="button" id="st-undo" disabled><svg><use href="#i-rotate"/></svg>Undo</button>
       <button class="btn ghost" type="button" id="st-reset" disabled>Start over</button>
+      <button class="btn ghost" type="button" id="st-compare" disabled aria-pressed="false" title="Hold to see the original"><svg><use href="#i-eye"/></svg>Hold to compare</button>
     </div>
   </div>
   <input type="file" id="st-file" accept="image/*" hidden>
@@ -18,6 +19,7 @@
       <button role="tab" data-tool="convert"><svg><use href="#i-convert"/></svg>Convert</button>
       <button role="tab" data-tool="adjust"><svg><use href="#i-adjust"/></svg>Adjust &amp; rotate</button>
       <button role="tab" data-tool="redact"><svg><use href="#i-blur"/></svg>Blur &amp; pixelate</button>
+      <button role="tab" data-tool="watermark"><svg><use href="#i-flag"/></svg>Watermark</button>
       <button role="tab" data-tool="palette"><svg><use href="#i-palette"/></svg>Color palette</button>
       <button role="tab" data-tool="ocr"><svg><use href="#i-text"/></svg>Image to text<small>AI</small></button>
       <button role="tab" data-tool="rembg"><svg><use href="#i-eraser"/></svg>Remove background<small>AI</small></button>

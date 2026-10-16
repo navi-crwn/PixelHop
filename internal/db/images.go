@@ -32,17 +32,27 @@ type Image struct {
 	Hidden     bool
 	CreatedAt  int64
 	ExpiresAt  int64
-	Listed     bool // shown on the owner's public profile
+	Listed     bool   // shown on the owner's public profile
+	Alt        string // description for screen readers and embeds
+	Stripped   string // kinds of metadata removed on upload: "gps,camera,date"
+	Private    bool   // only the owner (and admins) can see it
+	PassHash   string // "" or a password visitors must enter
+	Position   int    // order inside its album
 }
 
+// Locked reports whether visitors need a password (or must be the owner).
+func (im *Image) Locked() bool { return im.Private || im.PassHash != "" }
+
 const imageCols = `id,user_id,album_id,owner_token,title,orig_name,mime,ext,size,width,height,sha256,color,
-backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed`
+backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed,
+alt,stripped,private,pass_hash,position`
 
 func scanImage(row interface{ Scan(...any) error }) (*Image, error) {
 	var im Image
 	err := row.Scan(&im.ID, &im.UserID, &im.AlbumID, &im.OwnerToken, &im.Title, &im.OrigName, &im.Mime, &im.Ext,
 		&im.Size, &im.Width, &im.Height, &im.SHA256, &im.Color, &im.Backend, &im.KeyFull, &im.KeyThumb,
-		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt, &im.Listed)
+		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt, &im.Listed,
+		&im.Alt, &im.Stripped, &im.Private, &im.PassHash, &im.Position)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -53,10 +63,10 @@ func (d *DB) InsertImage(ctx context.Context, im *Image) error {
 	if im.CreatedAt == 0 {
 		im.CreatedAt = now()
 	}
-	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		im.ID, im.UserID, im.AlbumID, im.OwnerToken, im.Title, im.OrigName, im.Mime, im.Ext, im.Size, im.Width, im.Height,
 		im.SHA256, im.Color, im.Backend, im.KeyFull, im.KeyThumb, im.Views, im.LastViewed, im.IP, im.Hidden,
-		im.CreatedAt, im.ExpiresAt, im.Listed)
+		im.CreatedAt, im.ExpiresAt, im.Listed, im.Alt, im.Stripped, im.Private, im.PassHash, im.Position)
 	return err
 }
 
@@ -83,13 +93,14 @@ func (d *DB) CountKeyRefs(ctx context.Context, key string) int {
 }
 
 type ImageQuery struct {
-	UserID  int64  // 0 = any
-	AlbumID string // "" = any
-	Search  string
-	Listed  bool   // only images shown on the owner's profile (and still live)
-	Sort    string // new | old | views | size
-	Limit   int
-	Offset  int
+	UserID      int64  // 0 = any
+	AlbumID     string // "" = any
+	Search      string
+	Listed      bool   // only images shown on the owner's profile (and still live)
+	PublicOwner bool   // only images whose owner shows their profile
+	Sort        string // new | old | views | size
+	Limit       int
+	Offset      int
 }
 
 func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
@@ -104,8 +115,11 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 		args = append(args, q.AlbumID)
 	}
 	if q.Listed {
-		where = append(where, "listed=1 AND hidden=0 AND (expires_at=0 OR expires_at>?)")
+		where = append(where, "listed=1 AND hidden=0 AND private=0 AND pass_hash='' AND (expires_at=0 OR expires_at>?)")
 		args = append(args, now())
+	}
+	if q.PublicOwner {
+		where = append(where, "user_id IN (SELECT id FROM users WHERE show_owner=1 AND status='active')")
 	}
 	if s := strings.TrimSpace(q.Search); s != "" {
 		where = append(where, "(id LIKE ? OR title LIKE ? OR orig_name LIKE ?)")
@@ -116,7 +130,7 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	if len(where) > 0 {
 		w = " WHERE " + strings.Join(where, " AND ")
 	}
-	order := map[string]string{"old": "created_at ASC", "views": "views DESC", "size": "size DESC"}[q.Sort]
+	order := map[string]string{"old": "created_at ASC", "views": "views DESC", "size": "size DESC", "album": "position ASC, created_at ASC"}[q.Sort]
 	if order == "" {
 		order = "created_at DESC"
 	}
@@ -151,6 +165,13 @@ func (d *DB) DeleteImage(ctx context.Context, id string) error {
 
 func (d *DB) SetImageHidden(ctx context.Context, id string, hidden bool) error {
 	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=? WHERE id=?`, hidden, id)
+	return err
+}
+
+// UpdateImageMeta saves the fields an owner can edit after upload.
+func (d *DB) UpdateImageMeta(ctx context.Context, im *Image) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET title=?, alt=?, listed=?, private=?, pass_hash=?, album_id=?, position=? WHERE id=?`,
+		im.Title, im.Alt, im.Listed, im.Private, im.PassHash, im.AlbumID, im.Position, im.ID)
 	return err
 }
 
@@ -203,11 +224,13 @@ func (d *DB) UserStorage(ctx context.Context, userID int64) (bytes int64, count 
 // ---- albums ----
 
 type Album struct {
-	ID         string
-	UserID     sql.NullInt64
-	Title      string
-	OwnerToken string
-	CreatedAt  int64
+	ID          string
+	UserID      sql.NullInt64
+	Title       string
+	OwnerToken  string
+	CreatedAt   int64
+	CoverID     string
+	Description string
 }
 
 func (d *DB) InsertAlbum(ctx context.Context, a *Album) error {
@@ -219,12 +242,51 @@ func (d *DB) InsertAlbum(ctx context.Context, a *Album) error {
 
 func (d *DB) Album(ctx context.Context, id string) (*Album, error) {
 	var a Album
-	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at FROM albums WHERE id=?`, id).
-		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt)
+	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at,cover_id,description FROM albums WHERE id=?`, id).
+		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
 	return &a, err
+}
+
+func (d *DB) UpdateAlbum(ctx context.Context, a *Album) error {
+	_, err := d.ExecContext(ctx, `UPDATE albums SET title=?, cover_id=?, description=? WHERE id=?`, a.Title, a.CoverID, a.Description, a.ID)
+	return err
+}
+
+// Albums lists someone's albums, newest first, with how many images each has.
+func (d *DB) Albums(ctx context.Context, userID int64) ([]AlbumRow, error) {
+	rows, err := d.QueryContext(ctx, `SELECT a.id, a.title, a.cover_id, a.created_at, COUNT(i.id),
+		COALESCE((SELECT id FROM images WHERE album_id=a.id ORDER BY position, created_at LIMIT 1), '')
+		FROM albums a LEFT JOIN images i ON i.album_id=a.id WHERE a.user_id=? GROUP BY a.id ORDER BY a.created_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []AlbumRow
+	for rows.Next() {
+		var r AlbumRow
+		if err := rows.Scan(&r.ID, &r.Title, &r.CoverID, &r.CreatedAt, &r.Count, &r.FirstID); err != nil {
+			return nil, err
+		}
+		if r.CoverID == "" {
+			r.CoverID = r.FirstID
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+type AlbumRow struct {
+	ID, Title, CoverID, FirstID string
+	CreatedAt                   int64
+	Count                       int
+}
+
+func (d *DB) DeleteAlbum(ctx context.Context, id string) error {
+	_, err := d.ExecContext(ctx, `DELETE FROM albums WHERE id=?`, id) // images stay; album_id is set to NULL
+	return err
 }
 
 func (d *DB) DeleteEmptyAlbums(ctx context.Context) {

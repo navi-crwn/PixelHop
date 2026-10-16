@@ -39,17 +39,15 @@ func (a *App) lookup(w http.ResponseWriter, r *http.Request, id string, page boo
 	return im
 }
 
-func (a *App) countView(r *http.Request, im *db.Image) {
-	if a.views.first(clientIP(r) + "|" + im.ID) {
-		a.db.AddView(r.Context(), im.ID)
-	}
-}
-
 // serveFull sends /i/{id}.{ext}.
 func (a *App) serveFull(w http.ResponseWriter, r *http.Request) {
 	id, _, _ := strings.Cut(r.PathValue("file"), ".")
 	im := a.lookup(w, r, id, false)
-	if im == nil {
+	if im == nil || !a.fileAllowed(w, r, im) {
+		return
+	}
+	if a.transformRequested(r) {
+		a.serveTransformed(w, r, im)
 		return
 	}
 	if r.Header.Get("Range") == "" && r.Header.Get("Sec-Fetch-Dest") != "image" {
@@ -62,7 +60,7 @@ func (a *App) serveFull(w http.ResponseWriter, r *http.Request) {
 func (a *App) serveThumb(w http.ResponseWriter, r *http.Request) {
 	id, _, _ := strings.Cut(r.PathValue("file"), ".")
 	im := a.lookup(w, r, id, false)
-	if im == nil {
+	if im == nil || !a.fileAllowed(w, r, im) {
 		return
 	}
 	mime := "image/jpeg"
@@ -85,7 +83,7 @@ func (a *App) serveLegacy(w http.ResponseWriter, r *http.Request) {
 	}
 	id, size := base[:i], base[i+1:]
 	im := a.lookup(w, r, id, false)
-	if im == nil {
+	if im == nil || !a.fileAllowed(w, r, im) {
 		return
 	}
 	if size == "thumb" || size == "medium" {
@@ -107,7 +105,9 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Del("X-Frame-Options")
-	if im.ExpiresAt > 0 {
+	if im.Locked() {
+		h.Set("Cache-Control", "private, no-store") // never let a CDN keep a private image
+	} else if im.ExpiresAt > 0 {
 		h.Set("Cache-Control", "public, max-age=300")
 	} else {
 		h.Set("Cache-Control", "public, max-age=2592000")
@@ -172,6 +172,7 @@ func (a *App) missingObject(w http.ResponseWriter, r *http.Request, im *db.Image
 // ---- pages ----
 
 type viewData struct {
+	Removed  []string // what metadata was stripped, in words
 	Owner    *owner
 	Image    *db.Image
 	Album    *db.Album
@@ -187,10 +188,14 @@ type links struct {
 func (a *App) linksFor(im *db.Image) links {
 	page := a.cfg.BaseURL + "/" + im.ID
 	direct := a.directURL(im)
+	alt := im.Alt
+	if alt == "" {
+		alt = im.Title
+	}
 	return links{
 		Page: page, Direct: direct, Thumb: a.thumbURL(im), Download: direct + "?download",
-		Markdown: "![" + mdEscape(im.Title) + "](" + direct + ")",
-		HTML:     `<a href="` + page + `"><img src="` + direct + `" alt="` + htmlAttr(im.Title) + `"></a>`,
+		Markdown: "![" + mdEscape(alt) + "](" + direct + ")",
+		HTML:     `<a href="` + page + `"><img src="` + direct + `" alt="` + htmlAttr(alt) + `" width="` + strconv.Itoa(im.Width) + `" height="` + strconv.Itoa(im.Height) + `"></a>`,
 		BBCode:   "[url=" + page + "][img]" + direct + "[/img][/url]",
 	}
 }
@@ -217,14 +222,27 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if im == nil {
 		return
 	}
+	if !a.canSee(r, im) {
+		if im.Private {
+			a.notFound(w, r)
+		} else {
+			a.renderLocked(w, r, im, "")
+		}
+		return
+	}
 	a.countView(r, im)
 	u := currentUser(r)
 	d := viewData{Image: im, Links: a.linksFor(im), Mine: u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()),
 		Owner: a.ownerOf(r.Context(), im.UserID)}
+	for _, k := range removedList(im.Stripped) {
+		if w := removedWords[k]; w != "" {
+			d.Removed = append(d.Removed, w)
+		}
+	}
 	if im.AlbumID.Valid {
 		if al, err := a.db.Album(r.Context(), im.AlbumID.String); err == nil {
 			d.Album = al
-			d.Siblings, _, _ = a.db.Images(r.Context(), db.ImageQuery{AlbumID: al.ID, Sort: "old", Limit: 50})
+			d.Siblings, _, _ = a.db.Images(r.Context(), db.ImageQuery{AlbumID: al.ID, Sort: "album", Limit: 50})
 		}
 	}
 	title := im.Title
@@ -235,7 +253,11 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if d.Owner != nil {
 		desc = "Shared by " + d.Owner.Name + " · " + desc
 	}
-	a.renderPage(w, r, "view", page{Title: title, Data: d, OGImage: a.directURL(im), OGType: "image", Desc: desc})
+	og := a.directURL(im)
+	if im.Locked() {
+		og = "" // previews of locked images show no picture
+	}
+	a.renderPage(w, r, "view", page{Title: title, Data: d, OGImage: og, OGType: "image", Desc: desc, NoIndex: im.Locked()})
 }
 
 // legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
@@ -247,7 +269,7 @@ func (a *App) legacyResult(w http.ResponseWriter, r *http.Request) {
 		if len(ims) >= 50 || !validID(id) {
 			continue
 		}
-		if im, err := a.db.Image(r.Context(), id); err == nil && !im.Hidden && (im.ExpiresAt == 0 || im.ExpiresAt > now) {
+		if im, err := a.db.Image(r.Context(), id); err == nil && !im.Hidden && (im.ExpiresAt == 0 || im.ExpiresAt > now) && a.canSee(r, im) {
 			ims = append(ims, im)
 		}
 	}
@@ -283,11 +305,11 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
-	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{AlbumID: id, Sort: "old", Limit: 200})
+	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{AlbumID: id, Sort: "album", Limit: 200})
 	live := ims[:0]
 	now := time.Now().Unix()
 	for _, im := range ims {
-		if !im.Hidden && (im.ExpiresAt == 0 || im.ExpiresAt > now) {
+		if !im.Hidden && (im.ExpiresAt == 0 || im.ExpiresAt > now) && a.canSee(r, im) {
 			live = append(live, im)
 		}
 	}
@@ -301,7 +323,13 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 		title = strconv.Itoa(len(live)) + " images"
 	}
 	by := a.ownerOf(r.Context(), al.UserID)
-	a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(live[0]),
+	cover := live[0]
+	for _, im := range live {
+		if im.ID == al.CoverID {
+			cover = im
+		}
+	}
+	a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(cover),
 		Desc: albumDesc(len(live), by, a.cfg.SiteName),
 		Data: albumData{Album: al, Images: live, Link: a.cfg.BaseURL + "/a/" + al.ID, Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
 }
@@ -393,4 +421,19 @@ func albumDesc(n int, by *owner, site string) string {
 		return "An album of " + strconv.Itoa(n) + " images shared by " + by.Name + " on " + site
 	}
 	return "An album of " + strconv.Itoa(n) + " images on " + site
+}
+
+// fileAllowed stops private and password-protected files for visitors who
+// may not see them (404 for private, 403 for "needs a password").
+func (a *App) fileAllowed(w http.ResponseWriter, r *http.Request, im *db.Image) bool {
+	if a.canSee(r, im) {
+		return true
+	}
+	w.Header().Set("Cache-Control", "private, no-store")
+	if im.Private {
+		http.Error(w, "not found", http.StatusNotFound)
+	} else {
+		http.Error(w, "this image is password protected", http.StatusForbidden)
+	}
+	return false
 }

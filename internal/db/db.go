@@ -143,6 +143,48 @@ ALTER TABLE users ADD COLUMN avatar_key TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ADD COLUMN show_owner INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE images ADD COLUMN listed INTEGER NOT NULL DEFAULT 0;
 CREATE INDEX images_listed ON images(user_id, created_at DESC) WHERE listed = 1;`,
+	// 5: alt text, what metadata was stripped, private and password-protected
+	// images, album order and covers, per-image daily views and referrers,
+	// webhooks
+	`ALTER TABLE images ADD COLUMN alt TEXT NOT NULL DEFAULT '';
+ALTER TABLE images ADD COLUMN stripped TEXT NOT NULL DEFAULT '';
+ALTER TABLE images ADD COLUMN private INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE images ADD COLUMN pass_hash TEXT NOT NULL DEFAULT '';
+ALTER TABLE images ADD COLUMN position INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE albums ADD COLUMN cover_id TEXT NOT NULL DEFAULT '';
+ALTER TABLE albums ADD COLUMN description TEXT NOT NULL DEFAULT '';
+CREATE TABLE image_views (
+  image_id TEXT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+  day      TEXT NOT NULL,
+  views    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (image_id, day)
+);
+CREATE TABLE image_referrers (
+  image_id TEXT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+  host     TEXT NOT NULL,
+  views    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (image_id, host)
+);
+CREATE TABLE webhooks (
+  id         INTEGER PRIMARY KEY,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  url        TEXT NOT NULL,
+  secret     TEXT NOT NULL,
+  events     TEXT NOT NULL DEFAULT 'image.uploaded,image.deleted',
+  created_at INTEGER NOT NULL,
+  last_status TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE secrets (
+  name  TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+CREATE TABLE variants (
+  image_id TEXT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+  key      TEXT NOT NULL,
+  size     INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (image_id, key)
+);`,
 }
 
 func (d *DB) migrate() error {
@@ -182,6 +224,87 @@ func (d *DB) Setting(ctx context.Context, key, def string) string {
 		return def
 	}
 	return v
+}
+
+// Secret returns a long-lived random value stored in the database (made on
+// first use), e.g. the key that signs "unlocked" cookies for password images.
+func (d *DB) Secret(ctx context.Context, name string, make func() string) string {
+	var v string
+	if d.QueryRowContext(ctx, `SELECT value FROM secrets WHERE name=?`, name).Scan(&v) == nil {
+		return v
+	}
+	v = make()
+	d.ExecContext(ctx, `INSERT OR IGNORE INTO secrets (name,value) VALUES (?,?)`, name, v)
+	d.QueryRowContext(ctx, `SELECT value FROM secrets WHERE name=?`, name).Scan(&v)
+	return v
+}
+
+// CountView records one view of an image for today, and where it came from.
+func (d *DB) CountView(ctx context.Context, id, refHost string) {
+	day := time.Now().UTC().Format("2006-01-02")
+	d.ExecContext(ctx, `UPDATE images SET views=views+1, last_viewed=? WHERE id=?`, now(), id)
+	d.ExecContext(ctx, `INSERT INTO image_views (image_id,day,views) VALUES (?,?,1)
+		ON CONFLICT(image_id,day) DO UPDATE SET views=views+1`, id, day)
+	if refHost != "" {
+		d.ExecContext(ctx, `INSERT INTO image_referrers (image_id,host,views) VALUES (?,?,1)
+			ON CONFLICT(image_id,host) DO UPDATE SET views=views+1`, id, refHost)
+	}
+}
+
+type DayViews struct {
+	Day   string `json:"day"`
+	Views int    `json:"views"`
+}
+
+type HostViews struct {
+	Host  string `json:"host"`
+	Views int    `json:"views"`
+}
+
+// ImageStats returns daily views for the last 30 days and the top referrers.
+func (d *DB) ImageStats(ctx context.Context, id string) ([]DayViews, []HostViews) {
+	var days []DayViews
+	rows, err := d.QueryContext(ctx, `SELECT day, views FROM image_views WHERE image_id=? AND day>=? ORDER BY day`,
+		id, time.Now().UTC().AddDate(0, 0, -29).Format("2006-01-02"))
+	if err == nil {
+		for rows.Next() {
+			var v DayViews
+			rows.Scan(&v.Day, &v.Views)
+			days = append(days, v)
+		}
+		rows.Close()
+	}
+	var hosts []HostViews
+	rows, err = d.QueryContext(ctx, `SELECT host, views FROM image_referrers WHERE image_id=? ORDER BY views DESC LIMIT 10`, id)
+	if err == nil {
+		for rows.Next() {
+			var v HostViews
+			rows.Scan(&v.Host, &v.Views)
+			hosts = append(hosts, v)
+		}
+		rows.Close()
+	}
+	return days, hosts
+}
+
+// Variants lists the resized copies made for an image.
+func (d *DB) Variants(ctx context.Context, imageID string) []string {
+	var out []string
+	rows, err := d.QueryContext(ctx, `SELECT key FROM variants WHERE image_id=?`, imageID)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var k string
+		rows.Scan(&k)
+		out = append(out, k)
+	}
+	return out
+}
+
+func (d *DB) AddVariant(ctx context.Context, imageID, key string, size int) {
+	d.ExecContext(ctx, `INSERT OR IGNORE INTO variants (image_id,key,size,created_at) VALUES (?,?,?,?)`, imageID, key, size, now())
 }
 
 // CountUsage adds one to today's counter for an action (e.g. an AI tool).

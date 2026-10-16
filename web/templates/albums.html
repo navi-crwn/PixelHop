@@ -1,0 +1,20 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head"><div><h1>My albums</h1><p class="muted" style="margin:4px 0 0">Group images, pick a cover and an order, then share one link.</p></div>
+    <a class="btn primary" href="/dashboard?select=1"><svg><use href="#i-album"/></svg>New album from my images</a></div>
+  {{template "mytabs" .}}
+  {{if $d.Albums}}
+  <div class="gallery albums">
+    {{range $d.Albums}}
+    <div class="album-card">
+      <a class="tile" href="/a/{{.ID}}">{{with index $.Data.Thumbs .ID}}<img src="{{.}}" alt="" loading="lazy">{{end}}<span class="pill badge">{{.Count}} images</span></a>
+      <div class="album-meta"><b>{{if .Title}}{{.Title}}{{else}}Untitled album{{end}}</b><span class="small muted">{{ago .CreatedAt}}</span></div>
+      <div class="btn-row"><a class="btn sm" href="/a/{{.ID}}/edit"><svg><use href="#i-edit"/></svg>Edit</a><button class="btn sm ghost" type="button" data-copy-text="{{$.Base}}/a/{{.ID}}"><svg><use href="#i-copy"/></svg>Link</button></div>
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <div class="empty"><p>No albums yet. Upload several images at once, or select images in <a href="/dashboard">My images</a> and press <b>Make album</b>.</p></div>
+  {{end}}
+</div>
+{{end}}

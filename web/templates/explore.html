@@ -1,0 +1,16 @@
+{{define "content"}}{{$d := .Data}}
+<div class="wrap">
+  <div class="page-head"><div><h1>Explore</h1><p class="muted" style="margin:4px 0 0">Images people chose to show on their public profiles.</p></div></div>
+  {{if $d.Images}}
+  <div class="masonry explore">
+    {{range $d.Images}}{{$o := index $d.Owners .UserID.Int64}}
+    <figure>
+      <a href="/{{.ID}}" style="background:{{.Color}}"><img src="{{thumb .}}" alt="{{if .Alt}}{{.Alt}}{{else}}{{.Title}}{{end}}" loading="lazy" width="{{.Width}}" height="{{.Height}}"></a>
+      {{with $o}}<figcaption><a href="{{.ProfileURL}}"><span class="avatar sm">{{with .Avatar}}<img src="{{.}}" alt="" loading="lazy" referrerpolicy="no-referrer">{{else}}{{.Initial}}{{end}}</span>{{.Name}}</a></figcaption>{{end}}
+    </figure>
+    {{end}}
+  </div>
+  {{if gt $d.Pages 1}}<nav class="pager">{{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}">Newer</a>{{end}}<span class="btn sm ghost">Page {{$d.Page}} of {{$d.Pages}}</span>{{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}">Older</a>{{end}}</nav>{{end}}
+  {{else}}<div class="empty"><p>Nothing here yet. Images appear when their owners press <b>Show on my profile</b>.</p></div>{{end}}
+</div>
+{{end}}

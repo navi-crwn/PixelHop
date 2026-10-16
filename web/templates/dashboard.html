@@ -13,6 +13,7 @@
         <button class="btn ghost" type="button" id="select-all">Select all</button>
         <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>Copy links</button>
         <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
+        <button class="btn" type="button" id="album-selected"><svg><use href="#i-album"/></svg>Make album</button>
         <button class="btn" type="button" id="list-selected"><svg><use href="#i-users"/></svg>Show on profile</button>
         <button class="btn ghost" type="button" id="unlist-selected">Hide from profile</button>
         <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
@@ -22,6 +23,7 @@
     </div>
   </div>
 
+  {{template "mytabs" .}}
   <div class="toolbar">
     <form method="get" role="search">
       <input type="search" name="q" value="{{$d.Query}}" placeholder="Search by name or link" aria-label="Search">
@@ -42,6 +44,7 @@
       <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
       {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
       {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
+      {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}Only you{{else}}Password{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}
       {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="Shown on your public profile"><svg width="11" height="11"><use href="#i-users"/></svg>profile</span>{{end}}
       <input class="tick" type="checkbox" value="{{.ID}}" aria-label="Select {{.Title}}">
       <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>

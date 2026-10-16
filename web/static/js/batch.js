@@ -42,7 +42,7 @@
   }
 
   // Any change to the steps means results must be made again.
-  ['#b-size', '#b-format', '#b-quality', '#b-rembg', '#b-faces', '#b-upscale'].forEach(function (s) {
+  ['#b-size', '#b-format', '#b-quality', '#b-rembg', '#b-faces', '#b-upscale', '#b-wm', '#b-wm-pos'].forEach(function (s) {
     $(s).addEventListener('change', function () { items.forEach(function (it) { it.out = null; state(it, 'Ready'); }); refresh(); });
   });
   $('#b-quality').addEventListener('input', function () { $('#b-qout').textContent = this.value; });
@@ -104,6 +104,20 @@
     });
   }
 
+  function watermark(c, text, pos) {
+    var x = c.getContext('2d'), W = c.width, H = c.height, fs = Math.max(10, Math.round(Math.min(W, H) * 0.045)), m = Math.round(Math.min(W, H) * 0.03);
+    x.save(); x.globalAlpha = 0.6; x.font = '700 ' + fs + 'px system-ui, sans-serif'; x.textBaseline = 'top';
+    x.fillStyle = '#fff'; x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = fs / 6;
+    var w = x.measureText(text).width;
+    if (pos === 'tile') {
+      x.translate(W / 2, H / 2); x.rotate(-Math.PI / 8); x.translate(-W / 2, -H / 2);
+      for (var ty = -H; ty < H * 2; ty += fs * 4) for (var tx = -W; tx < W * 2; tx += w + fs * 3) x.fillText(text, tx, ty);
+    } else {
+      x.fillText(text, pos[1] === 'l' ? m : pos[1] === 'r' ? W - w - m : (W - w) / 2, pos[0] === 't' ? m : pos[0] === 'b' ? H - fs - m : (H - fs) / 2);
+    }
+    x.restore(); return c;
+  }
+
   function process(it) {
     if (it.out) return Promise.resolve(it);
     var size = +$('#b-size').value, fmt = $('#b-format').value, q = +$('#b-quality').value / 100;
@@ -114,6 +128,7 @@
       if ($('#b-rembg').checked) step = step.then(function (c) { state(it, 'Removing background…'); return ai('remove-background', c); });
       if ($('#b-faces').checked) step = step.then(function (c) { state(it, 'Blurring faces…'); return blurFaces(c); });
       if (size) step = step.then(function (c) { return shrink(c, size); });
+      if ($('#b-wm').value.trim()) step = step.then(function (c) { return watermark(c, $('#b-wm').value.trim(), $('#b-wm-pos').value); });
       return step.then(function (c) {
         var type = fmt || it.file.type;
         if ($('#b-rembg').checked && (type === 'image/jpeg' || !fmt)) type = 'image/png'; // keep the transparency
