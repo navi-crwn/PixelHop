@@ -3,9 +3,11 @@ package app
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"net/url"
 	"strings"
@@ -47,16 +49,14 @@ func usernameProblem(name string) string {
 	return ""
 }
 
-// suggestUsername makes a free handle from a name or email.
+// suggestUsername makes a free handle from the display name. Accounts without
+// a name get "user" plus digits: the email is never used, since the handle is
+// public and would give part of the address away.
 func (a *App) suggestUsername(ctx context.Context, u *db.User) string {
-	base := slugify(u.Name)
-	if base == "" {
-		local, _, _ := strings.Cut(u.Email, "@")
-		base = slugify(local)
-	}
-	base = strings.ReplaceAll(base, "-", "")
+	base := strings.ReplaceAll(slugify(u.Name), "-", "")
 	if len(base) < 3 {
-		base = "user" + base
+		n, _ := rand.Int(rand.Reader, big.NewInt(90000))
+		base = fmt.Sprintf("user%d", 10000+n.Int64())
 	}
 	if len(base) > 24 {
 		base = base[:24]
