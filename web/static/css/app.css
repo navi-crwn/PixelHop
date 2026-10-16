@@ -209,12 +209,13 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .results .uploads { margin: 0; }
 .results .copy-all { padding: 8px; }
 .nowrap { white-space: nowrap; }
+@media (pointer: coarse) { .drop .sub .nowrap { display: none; } }
 .chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
 .chip svg { width: 14px; height: 14px; }
 .chip:hover, .chip[aria-expanded="true"] { color: var(--text); border-color: var(--accent); }
 .btn.icon-only { padding: 0; width: 48px; justify-content: center; }
-.guest-note { margin: 10px 4px 0; font-size: .82rem; color: var(--faint, var(--muted)); text-align: center; }
+.guest-note { margin: 12px 4px 0; font-size: .82rem; color: var(--faint, var(--muted)); text-align: center; }
 .install-nav span { display: inline; }
 @media (max-width: 420px) { .install-nav span { display: none; } }
 .history-box { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }

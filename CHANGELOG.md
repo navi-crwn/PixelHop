@@ -2,6 +2,11 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.4.1] - 2026-10-16
+
+### Fixed
+- The guest note sat on the upload box's colored border and was hard to read; it is now below the box. Phones no longer see the Ctrl+V hint.
+
 ## [3.4.0] - 2026-10-16
 
 ### Changed

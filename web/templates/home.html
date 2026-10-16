@@ -12,7 +12,7 @@
       <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
         <h2>Drop files here</h2>
-        <p class="sub">Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB · <span class="nowrap">or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
+        <p class="sub">Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB<span class="nowrap"> · or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
         <div class="btn-row">
           <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
           <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>
@@ -51,7 +51,6 @@
           <span class="small muted">All files go into one album with this title and note.</span>
         </div>{{end}}
       </div>
-      {{if not .User}}<p class="guest-note">Guest upload: each file gets a private delete link. <a href="/login?next=/">Sign in</a> for a gallery and tickets.</p>{{end}}
     </div>
 
     <aside class="results hide" id="results" data-copy-all-root aria-label="Your links">
@@ -72,6 +71,7 @@
       <div class="uploads" id="uploads" aria-live="polite"></div>
     </aside>
     </div>
+    {{if not .User}}<p class="guest-note">Guest upload: each file gets a private delete link. <a href="/login?next=/">Sign in</a> for a gallery and tickets.</p>{{end}}
     {{else}}
     <div class="card" style="max-width:520px;margin:0 auto">
       <h2>Sign in to upload</h2>
