@@ -4,6 +4,32 @@
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
 
+  <div class="card" id="profile">
+    <h2>Public profile</h2>
+    <p class="muted small">How others see you on images you share{{if $u.Username.Valid}} and at <a href="/u/{{$u.Username.String}}">{{.Base}}/u/{{$u.Username.String}}</a>{{end}}. Your email is never shown.</p>
+    <div class="profile-photo">
+      <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="Your profile photo" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
+      <div>
+        <form method="post" action="/settings/avatar" enctype="multipart/form-data" class="btn-row" id="avatar-form">
+          <label class="btn sm" for="avatar-file"><svg><use href="#i-image"/></svg>{{if $u.AvatarKey}}Change photo{{else}}Upload photo{{end}}</label>
+          <input type="file" id="avatar-file" name="avatar" accept="image/*" hidden data-autosubmit>
+        </form>
+        {{if $u.AvatarKey}}<form method="post" action="/settings/avatar/delete" style="margin-top:6px"><button class="btn sm ghost" type="submit">Remove photo</button></form>{{end}}
+        <p class="small faint" style="margin:6px 0 0">Square crop, JPG/PNG/WebP up to 8 MB.{{if and (not $u.AvatarKey) $u.AvatarURL}} Until you upload one, your {{if $u.HelinkID.Valid}}HEL.ink{{else}}Google{{end}} picture is used.{{end}}</p>
+      </div>
+    </div>
+    <form method="post" action="/settings/profile">
+      <div class="grid-2" style="gap:12px">
+        <div class="field"><label for="name">Display name</label><input type="text" id="name" name="name" value="{{$u.Name}}" maxlength="60" placeholder="Your name"></div>
+        <div class="field"><label for="username">Username</label><div class="input-prefix"><span>@</span><input type="text" id="username" name="username" value="{{$u.Username.String}}" maxlength="30" pattern="[a-z0-9][a-z0-9._\-]{2,29}" required autocapitalize="none" spellcheck="false"></div></div>
+      </div>
+      <div class="field"><label for="bio">Bio <span class="hint">up to 300 characters</span></label><textarea id="bio" name="bio" maxlength="300" rows="3" placeholder="Photographer from Bandung. Mostly street & coffee.">{{$u.Bio}}</textarea></div>
+      <div class="field"><label for="website">Website</label><input type="text" inputmode="url" autocapitalize="none" spellcheck="false" id="website" name="website" value="{{$u.Website}}" placeholder="hel.ink/b/you" maxlength="200"></div>
+      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="show_owner" {{if $u.ShowOwner}}checked{{end}}><span>Show my name and photo on images I share, and turn on my profile page<br><span class="small muted">Off: your images show no owner and your profile page is hidden.</span></span></label>
+      <button class="btn primary" type="submit">Save profile</button>
+    </form>
+  </div>
+
   <div class="card" id="api">
     <h2>API keys &amp; ShareX</h2>
     <p class="muted small">Keys let ShareX, scripts and apps upload to your account. Treat them like passwords. See the <a href="/docs">API docs</a>.</p>
@@ -33,19 +59,11 @@
   {{if and .SSO $u.HelinkID.Valid}}
   <div class="card">
     <h2>Your HEL.ink account</h2>
-    <p class="muted small">You sign in with HEL.ink, so your name, email, password, Google sign-in and two-factor codes are managed there, together with your short links and bio pages.</p>
+    <p class="muted small">You sign in with HEL.ink, so your email, password, Google sign-in and two-factor codes are managed there, together with your short links and bio pages. Your public profile above belongs to {{.Site}}.</p>
     <a class="btn" href="{{.Helink}}/settings">Open HEL.ink settings</a>
   </div>
   {{end}}
   {{if not (and .SSO $u.HelinkID.Valid)}}
-  <div class="card">
-    <h2>Profile</h2>
-    <form method="post" action="/settings/profile">
-      <div class="field"><label>Email</label><input type="email" value="{{$u.Email}}" disabled></div>
-      <div class="field"><label for="name">Name</label><input type="text" id="name" name="name" value="{{$u.Name}}" maxlength="60"></div>
-      <button class="btn" type="submit">Save</button>
-    </form>
-  </div>
 
   <div class="card">
     <h2>{{if $d.HasPass}}Change password{{else}}Set a password{{end}}</h2>

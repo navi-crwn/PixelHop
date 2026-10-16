@@ -134,6 +134,15 @@ CREATE TABLE settings (
 	// 3: link to the person's HEL.ink account (one account for all HEL.ink apps)
 	`ALTER TABLE users ADD COLUMN helink_id TEXT;
 CREATE UNIQUE INDEX users_helink ON users(helink_id) WHERE helink_id IS NOT NULL;`,
+	// 4: public profiles: who owns an image, and which images they show off
+	`ALTER TABLE users ADD COLUMN username TEXT;
+CREATE UNIQUE INDEX users_username ON users(username COLLATE NOCASE) WHERE username IS NOT NULL;
+ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN website TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN avatar_key TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN show_owner INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE images ADD COLUMN listed INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX images_listed ON images(user_id, created_at DESC) WHERE listed = 1;`,
 }
 
 func (d *DB) migrate() error {

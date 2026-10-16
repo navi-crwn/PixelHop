@@ -42,6 +42,7 @@
           <tr><td><code>slug</code></td><td><code>0</code> to use only random characters in the link instead of the file name.</td></tr>
           <tr><td><code>album</code></td><td><code>0</code> to not group several files into an album.</td></tr>
           <tr><td><code>title</code></td><td>Album title, when several files are sent.</td></tr>
+          <tr><td><code>listed</code></td><td><code>1</code> to show the images on your public profile (signed in only). Off by default: images are only reachable by their link.</td></tr>
         </table>
 <pre><code>curl -H "Authorization: Bearer ph_yourkey" \
      -F "file=@holiday.jpg" \
@@ -72,7 +73,7 @@
         <h2>Get, rename or delete one image</h2>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}</div>
         <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/images/{id}</div>
-        <p>Body: <code>{"title": "New name"}</code></p>
+        <p>Body: <code>{"title": "New name"}</code> and/or <code>{"listed": true}</code> to show it on your public profile (<code>/u/you</code>).</p>
         <div class="endpoint"><span class="method del">DELETE</span>/api/v1/images/{id}</div>
 <pre><code>curl -X DELETE -H "Authorization: Bearer ph_yourkey" {{.Base}}/api/v1/images/holiday-x7Kp2Q</code></pre>
       </section>

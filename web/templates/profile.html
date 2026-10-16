@@ -1,0 +1,30 @@
+{{define "content"}}{{$d := .Data}}{{$u := $d.User}}
+<div class="wrap">
+  <header class="profile-head">
+    <span class="avatar xxl">{{with $d.Owner.Avatar}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{$d.Owner.Initial}}{{end}}</span>
+    <div>
+      <h1>{{$d.Owner.Name}}</h1>
+      <p class="muted" style="margin:0 0 8px">@{{$u.Username.String}} · on {{.Site}} since {{date $u.CreatedAt}}</p>
+      {{with $u.Bio}}<p class="bio">{{.}}</p>{{end}}
+      <div class="btn-row">
+        {{with $d.Website}}<a class="btn sm" href="{{$u.Website}}" rel="nofollow ugc noopener" target="_blank"><svg><use href="#i-link"/></svg>{{.}}</a>{{end}}
+        <button class="btn sm ghost" type="button" data-copy-text="{{.Base}}/u/{{$u.Username.String}}"><svg><use href="#i-copy"/></svg>Copy profile link</button>
+        {{if $d.Mine}}<a class="btn sm ghost" href="/settings#profile"><svg><use href="#i-edit"/></svg>Edit profile</a>{{end}}
+      </div>
+    </div>
+  </header>
+
+  {{if $d.Images}}
+  <p class="small muted">{{$d.Total}} {{if eq $d.Total 1}}image{{else}}images{{end}}</p>
+  <div class="masonry">
+    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}" title="{{.Title}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}"></a>{{end}}
+  </div>
+  {{else}}
+  <div class="empty">
+    <svg width="40" height="40" style="margin:0 auto 10px;opacity:.6"><use href="#i-image"/></svg>
+    {{if $d.Mine}}<p>Your profile is ready. Choose which images appear here: open an image and press <b>Show on my profile</b>, or select several in <a href="/dashboard">My images</a>.</p>
+    {{else}}<p>{{$d.Owner.Name}} hasn't put any images on their profile yet.</p>{{end}}
+  </div>
+  {{end}}
+</div>
+{{end}}

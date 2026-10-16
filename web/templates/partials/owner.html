@@ -1,0 +1,4 @@
+{{define "owner"}}{{with .}}<a class="owner" {{with .ProfileURL}}href="{{.}}"{{end}}>
+  <span class="avatar sm">{{with .Avatar}}<img src="{{.}}" alt="" referrerpolicy="no-referrer" loading="lazy">{{else}}{{.Initial}}{{end}}</span>
+  <span><span class="small muted">Shared by</span><b>{{.Name}}</b>{{with .Username}}<span class="small muted">@{{.}}</span>{{end}}</span>
+</a>{{end}}{{end}}

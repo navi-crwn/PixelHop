@@ -19,6 +19,11 @@ type User struct {
 	StatusNote string
 	Warning    string // message from an admin, shown until acknowledged
 	HelinkID   sql.NullString
+	Username   sql.NullString // public handle: /u/{username}
+	Bio        string
+	Website    string
+	AvatarKey  string // uploaded profile photo in storage ("" = none)
+	ShowOwner  bool   // show name & photo on their images and profile page
 	QuotaBytes int64
 	CreatedAt  int64
 	LastLogin  int64
@@ -26,12 +31,13 @@ type User struct {
 
 func (u *User) IsAdmin() bool { return u.Role == "admin" }
 
-const userCols = `id,email,name,pass_hash,google_id,avatar_url,role,status,status_note,quota_bytes,created_at,last_login,warning,helink_id`
+const userCols = `id,email,name,pass_hash,google_id,avatar_url,role,status,status_note,quota_bytes,created_at,last_login,warning,helink_id,username,bio,website,avatar_key,show_owner`
 
 func scanUser(row interface{ Scan(...any) error }) (*User, error) {
 	var u User
 	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.PassHash, &u.GoogleID, &u.AvatarURL, &u.Role, &u.Status,
-		&u.StatusNote, &u.QuotaBytes, &u.CreatedAt, &u.LastLogin, &u.Warning, &u.HelinkID)
+		&u.StatusNote, &u.QuotaBytes, &u.CreatedAt, &u.LastLogin, &u.Warning, &u.HelinkID,
+		&u.Username, &u.Bio, &u.Website, &u.AvatarKey, &u.ShowOwner)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -48,6 +54,7 @@ func (d *DB) InsertUser(ctx context.Context, u *User) error {
 	if u.Status == "" {
 		u.Status = "active"
 	}
+	u.ShowOwner = true
 	q := `INSERT INTO users (email,name,pass_hash,google_id,avatar_url,role,status,quota_bytes,created_at,helink_id) VALUES (?,?,?,?,?,?,?,?,?,?)`
 	args := []any{u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL, u.Role, u.Status, u.QuotaBytes, u.CreatedAt, u.HelinkID}
 	if u.ID > 0 { // keep ids when importing from the PHP version
@@ -72,6 +79,35 @@ func (d *DB) UserByEmail(ctx context.Context, email string) (*User, error) {
 
 func (d *DB) UserByGoogle(ctx context.Context, gid string) (*User, error) {
 	return scanUser(d.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE google_id=?`, gid))
+}
+
+func (d *DB) UserByUsername(ctx context.Context, name string) (*User, error) {
+	return scanUser(d.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE username=? COLLATE NOCASE`, name))
+}
+
+// UsernameTaken reports whether another account already uses name.
+func (d *DB) UsernameTaken(ctx context.Context, name string, exceptID int64) bool {
+	var n int
+	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE username=? COLLATE NOCASE AND id<>?`, name, exceptID).Scan(&n)
+	return n > 0
+}
+
+// UsersWithoutUsername lists accounts that still need a handle.
+func (d *DB) UsersWithoutUsername(ctx context.Context) ([]*User, error) {
+	rows, err := d.QueryContext(ctx, `SELECT `+userCols+` FROM users WHERE username IS NULL`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*User
+	for rows.Next() {
+		u, err := scanUser(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, u)
+	}
+	return out, rows.Err()
 }
 
 func (d *DB) UserByHelink(ctx context.Context, id string) (*User, error) {
@@ -130,8 +166,10 @@ func (d *DB) CountUsers(ctx context.Context) (n int) {
 
 func (d *DB) UpdateUser(ctx context.Context, u *User) error {
 	_, err := d.ExecContext(ctx, `UPDATE users SET email=?,name=?,pass_hash=?,google_id=?,avatar_url=?,role=?,status=?,
-		status_note=?,quota_bytes=?,last_login=?,warning=?,helink_id=? WHERE id=?`, u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL,
-		u.Role, u.Status, u.StatusNote, u.QuotaBytes, u.LastLogin, u.Warning, u.HelinkID, u.ID)
+		status_note=?,quota_bytes=?,last_login=?,warning=?,helink_id=?,username=?,bio=?,website=?,avatar_key=?,show_owner=?
+		WHERE id=?`, u.Email, u.Name, u.PassHash, u.GoogleID, u.AvatarURL,
+		u.Role, u.Status, u.StatusNote, u.QuotaBytes, u.LastLogin, u.Warning, u.HelinkID,
+		u.Username, u.Bio, u.Website, u.AvatarKey, u.ShowOwner, u.ID)
 	return err
 }
 

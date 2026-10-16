@@ -69,6 +69,7 @@
   - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in six languages (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
   - On the server, for signed-in users (optional [`tools/ai-server.py`](tools/ai-server.py)): **background removal** in about a second (rembg), **automatic face blur** (OpenCV), **magic eraser** (LaMa) and **HD upscale 2×** (Real-ESRGAN). One image at a time, daily limits, nothing stored.
 - **📦 Batch.** Resize, convert, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
+- **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
 - **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
 - **👤 One account with HEL.ink** (optional). Set `HELINK_URL` and `HELINK_SSO_SECRET` and people sign in with their [HEL.ink](https://hel.ink) account; sign-up, passwords, Google and 2FA live there.
 - **🔌 API & ShareX.**
@@ -162,7 +163,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://p.hel.
 |---|---|
 | `POST /api/v1/upload` | Upload files (`file`, repeatable) or links (`url`); options `expire`, `slug`, `album`, `title` |
 | `GET /api/v1/images` | Your images (`page`, `limit`, `q`, `sort`) |
-| `GET` · `PATCH` · `DELETE /api/v1/images/{id}` | Read, rename (`{"title": …}`) or delete one |
+| `GET` · `PATCH` · `DELETE /api/v1/images/{id}` | Read, rename (`{"title": …}`), show on your profile (`{"listed": true}`) or delete one |
 | `GET /api/v1/me` | Your account and storage use |
 | `GET /api/v1/stats` | Public totals |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |

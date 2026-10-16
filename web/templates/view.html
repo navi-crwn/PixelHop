@@ -15,6 +15,7 @@
     <aside class="side">
       <div class="card">
         <h1 id="title">{{if $im.Title}}{{$im.Title}}{{else}}{{$im.ID}}{{end}}</h1>
+        {{template "owner" $d.Owner}}
         <div class="muted small">Uploaded <time datetime="{{iso $im.CreatedAt}}">{{ago $im.CreatedAt}}</time>{{if $im.ExpiresAt}} · <span class="pill warn"><svg width="12" height="12"><use href="#i-clock"/></svg>deletes in {{until $im.ExpiresAt}}</span>{{end}}{{if $im.Hidden}} · <span class="pill bad">hidden by moderators</span>{{end}}</div>
         <div class="btn-row" style="margin-top:14px">
           <button class="btn primary sm" type="button" data-copy-text="{{$d.Links.Page}}"><svg><use href="#i-link"/></svg>Copy link</button>
@@ -60,8 +61,9 @@
       </div>
 
       <div class="btn-row">
-        {{if $d.Owner}}
+        {{if $d.Mine}}
         <button class="btn sm ghost" type="button" id="rename" data-id="{{$im.ID}}"><svg><use href="#i-edit"/></svg>Rename</button>
+        {{if $im.UserID.Valid}}<button class="btn sm ghost" type="button" id="list-toggle" data-id="{{$im.ID}}" data-listed="{{if $im.Listed}}1{{end}}"><svg><use href="#i-users"/></svg><span>{{if $im.Listed}}On my profile{{else}}Show on my profile{{end}}</span></button>{{end}}
         <button class="btn sm ghost danger" type="button" id="delete" data-id="{{$im.ID}}"><svg><use href="#i-trash"/></svg>Delete</button>
         {{end}}
         <button class="btn sm ghost" type="button" id="report-open" style="margin-left:auto"><svg><use href="#i-flag"/></svg>Report</button>

@@ -41,6 +41,7 @@ func (a *App) imageJSON(im *db.Image) map[string]any {
 	if im.AlbumID.Valid {
 		m["album_url"] = a.cfg.BaseURL + "/a/" + im.AlbumID.String
 	}
+	m["listed"] = im.Listed
 	return m
 }
 
@@ -167,15 +168,26 @@ func (a *App) apiRenameImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title string `json:"title"`
+		Title  *string `json:"title"`
+		Listed *bool   `json:"listed"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&body); err != nil {
-		body.Title = r.FormValue("title")
-	}
-	im.Title = trim(strings.TrimSpace(body.Title), 120)
-	if err := a.db.SetImageTitle(r.Context(), im.ID, im.Title); err != nil {
-		apiError(w, http.StatusInternalServerError, "couldn't rename")
+		apiError(w, http.StatusBadRequest, `send JSON like {"title": "…"} or {"listed": true}`)
 		return
+	}
+	if body.Title != nil {
+		im.Title = trim(strings.TrimSpace(*body.Title), 120)
+		if err := a.db.SetImageTitle(r.Context(), im.ID, im.Title); err != nil {
+			apiError(w, http.StatusInternalServerError, "couldn't rename")
+			return
+		}
+	}
+	if body.Listed != nil {
+		im.Listed = *body.Listed
+		if err := a.db.SetImageListed(r.Context(), im.ID, im.Listed); err != nil {
+			apiError(w, http.StatusInternalServerError, "couldn't change that")
+			return
+		}
 	}
 	apiOK(w, a.imageJSON(im))
 }

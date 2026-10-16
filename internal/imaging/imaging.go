@@ -230,3 +230,38 @@ func orient(img image.Image, o int) image.Image {
 	}
 	return dst
 }
+
+// Avatar turns any supported image into a square JPEG profile photo of
+// size×size, centred. Re-encoding drops every bit of metadata.
+func Avatar(data []byte, maxPixels int64, size int) ([]byte, error) {
+	if _, ok := Sniff(data); !ok {
+		return nil, ErrUnsupported
+	}
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("this file looks damaged: %w", err)
+	}
+	if int64(cfg.Width)*int64(cfg.Height) > maxPixels {
+		return nil, errors.New("that image is too large for a profile photo")
+	}
+	decodeSlots <- struct{}{}
+	defer func() { <-decodeSlots }()
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("this file looks damaged: %w", err)
+	}
+	if o := jpegOrientation(data); o > 1 && o <= 8 {
+		img = orient(img, o)
+	}
+	b := img.Bounds()
+	side := min(b.Dx(), b.Dy())
+	x0, y0 := b.Min.X+(b.Dx()-side)/2, b.Min.Y+(b.Dy()-side)/2
+	dst := image.NewRGBA(image.Rect(0, 0, size, size))
+	draw.Draw(dst, dst.Bounds(), image.White, image.Point{}, draw.Src) // transparent PNGs get a white background
+	xdraw.CatmullRom.Scale(dst, dst.Bounds(), img, image.Rect(x0, y0, x0+side, y0+side), draw.Over, nil)
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, dst, &jpeg.Options{Quality: 88}); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}

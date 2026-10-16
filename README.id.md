@@ -68,6 +68,7 @@
   - Di browser: kompres, ubah ukuran, crop, konversi (JPG, PNG, WebP, AVIF), atur & putar, blur & pikselkan, palet warna, **pembuat QR code**, **OCR** enam bahasa dan hapus background. Tidak ada yang diunggah kecuali kamu menekan *Upload result*.
   - Di server, untuk user yang login (opsional, [`tools/ai-server.py`](tools/ai-server.py)): **hapus background** sekitar 1 detik, **blur wajah otomatis**, **magic eraser** (LaMa) dan **HD upscale 2×** (Real-ESRGAN). Satu gambar per giliran, ada batas harian, tidak ada yang disimpan.
 - **📦 Batch.** Ubah ukuran, konversi, hapus background, blur wajah atau upscale banyak gambar sekaligus, lalu unduh satu ZIP atau unggah jadi satu album.
+- **🪪 Profil publik.** Nama, @username, foto, bio dan website. Halaman gambar dan album (beserta pratinjau link-nya) menampilkan siapa yang membagikan; `/u/username` hanya menampilkan gambar yang kamu pilih. Bisa dimatikan.
 - **📋 Copy semua link.** Setelah upload massal, di album dan galeri: semua link direct, halaman, Markdown, BBCode atau HTML dengan satu klik.
 - **👤 Satu akun dengan HEL.ink** (opsional). Isi `HELINK_URL` dan `HELINK_SSO_SECRET`, maka user login memakai akun [HEL.ink](https://hel.ink); daftar, password, Google dan 2FA diurus di sana.
 - **🔌 API & ShareX.**

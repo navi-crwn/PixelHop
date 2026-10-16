@@ -172,10 +172,11 @@ func (a *App) missingObject(w http.ResponseWriter, r *http.Request, im *db.Image
 // ---- pages ----
 
 type viewData struct {
+	Owner    *owner
 	Image    *db.Image
 	Album    *db.Album
 	Siblings []*db.Image
-	Owner    bool
+	Mine     bool // the viewer may rename/delete/list it
 	Links    links
 }
 
@@ -218,7 +219,8 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	}
 	a.countView(r, im)
 	u := currentUser(r)
-	d := viewData{Image: im, Links: a.linksFor(im), Owner: u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin())}
+	d := viewData{Image: im, Links: a.linksFor(im), Mine: u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()),
+		Owner: a.ownerOf(r.Context(), im.UserID)}
 	if im.AlbumID.Valid {
 		if al, err := a.db.Album(r.Context(), im.AlbumID.String); err == nil {
 			d.Album = al
@@ -229,8 +231,11 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if title == "" {
 		title = im.ID
 	}
-	a.renderPage(w, r, "view", page{Title: title, Data: d, OGImage: a.directURL(im), OGType: "image",
-		Desc: humanDims(im.Width, im.Height) + " · " + humanBytes(im.Size) + " · shared with " + a.cfg.SiteName})
+	desc := humanDims(im.Width, im.Height) + " · " + humanBytes(im.Size) + " · shared on " + a.cfg.SiteName
+	if d.Owner != nil {
+		desc = "Shared by " + d.Owner.Name + " · " + desc
+	}
+	a.renderPage(w, r, "view", page{Title: title, Data: d, OGImage: a.directURL(im), OGType: "image", Desc: desc})
 }
 
 // legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
@@ -260,6 +265,7 @@ func (a *App) legacyResult(w http.ResponseWriter, r *http.Request) {
 }
 
 type albumData struct {
+	By     *owner
 	Album  *db.Album
 	Images []*db.Image
 	Owner  bool
@@ -294,9 +300,10 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 	if title == "" {
 		title = strconv.Itoa(len(live)) + " images"
 	}
+	by := a.ownerOf(r.Context(), al.UserID)
 	a.renderPage(w, r, "album", page{Title: title, OGImage: a.directURL(live[0]),
-		Desc: "An album of " + strconv.Itoa(len(live)) + " images on " + a.cfg.SiteName,
-		Data: albumData{Album: al, Images: live, Link: a.cfg.BaseURL + "/a/" + al.ID, Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin())}})
+		Desc: albumDesc(len(live), by, a.cfg.SiteName),
+		Data: albumData{Album: al, Images: live, Link: a.cfg.BaseURL + "/a/" + al.ID, Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
 }
 
 // qr draws a QR code that opens the image page; ?a=1 points at an album.
@@ -379,4 +386,11 @@ func (a *App) report(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	apiOK(w, map[string]any{"reported": true})
+}
+
+func albumDesc(n int, by *owner, site string) string {
+	if by != nil {
+		return "An album of " + strconv.Itoa(n) + " images shared by " + by.Name + " on " + site
+	}
+	return "An album of " + strconv.Itoa(n) + " images on " + site
 }
