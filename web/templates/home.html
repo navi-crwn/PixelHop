@@ -35,12 +35,17 @@
           <label><input type="checkbox" id="slug" checked> File name in link</label>
           <label><input type="checkbox" id="album" checked> Group several into an album</label>
           {{if .User}}<label><input type="checkbox" id="listed"> Show on my profile</label>{{end}}
-          {{if .User}}<details class="ticket" id="ticket-box"><summary>Report / ticket <span class="hint">group everything under one link with a note</span></summary>
+          {{if .User}}<div class="ticket" id="ticket-box">
+            <b><svg width="15" height="15" style="vertical-align:-2px"><use href="#i-album"/></svg> Ticket / case <span class="hint">optional: one link for all files, with your note</span></b>
             <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
-            <textarea id="note" maxlength="1000" rows="2" placeholder="Short note for the admin, e.g. transfer succeeded but status shows failed" aria-label="Note"></textarea>
-          </details>{{end}}
+            <textarea id="note" maxlength="1000" rows="2" placeholder="Note for the admin, e.g. transfer succeeded but status shows failed" aria-label="Note"></textarea>
+          </div>{{else}}<p class="ticket small muted"><a href="/login?next=/">Sign in</a> to group files under a ticket number with a note.</p>{{end}}
         </div>
       </div>
+    </div>
+    <div class="install-bar hide" id="install-bar">
+      <button class="btn" type="button" id="install-app"><svg><use href="#i-down"/></svg>Install app</button>
+      <span class="small muted" id="install-hint">Open {{.Site}} from your home screen and share files to it from WhatsApp or LINE.</span>
     </div>
     <div class="album-banner hide" id="album-banner" style="text-align:left">
       <svg width="20" height="20"><use href="#i-album"/></svg><b>Album</b>

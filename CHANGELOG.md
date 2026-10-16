@@ -2,6 +2,15 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.3.1] - 2026-10-16
+
+### Added
+- **Results page for phones**: after uploading several files on a phone you land on `/uploaded`, a page with just those files, their links, "Copy for chat", "Copy all direct links" and (for guests) the delete links. Desktop keeps showing results on the upload page.
+- **Install app** button on the upload page when the browser offers it (Android/desktop Chrome), and a hint for iPhone.
+
+### Changed
+- The **Ticket / case** box is always visible for signed-in people (it was folded away), with a sign-in hint for guests.
+
 ## [3.3.0] - 2026-10-16
 
 ### Added

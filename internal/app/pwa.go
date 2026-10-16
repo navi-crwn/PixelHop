@@ -4,6 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
+
+	"github.com/navi-crwn/pixelhop/internal/db"
 )
 
 // PixelHop installs as an app (PWA). On phones it then shows up in the
@@ -68,20 +72,17 @@ func (a *App) share(w http.ResponseWriter, r *http.Request) {
 		a.renderPage(w, r, "uploaded", page{Title: "Upload failed", NoIndex: true, Data: map[string]any{"Error": ue.msg}})
 		return
 	}
-	type item struct {
-		ID, Page, Direct, Thumb, Delete, Name, Error string
-	}
-	var items []item
+	var items []resultItem
 	for _, res := range results {
 		if res.Err != nil {
 			msg := "couldn't save this file"
 			if errors.As(res.Err, &ue) {
 				msg = ue.msg
 			}
-			items = append(items, item{Name: res.Name, Error: msg})
+			items = append(items, resultItem{Name: res.Name, Error: msg})
 			continue
 		}
-		it := item{ID: res.Image.ID, Page: a.cfg.BaseURL + "/" + res.Image.ID, Direct: a.directURL(res.Image), Thumb: a.thumbURL(res.Image), Name: res.Name}
+		it := a.resultItem(res.Image)
 		if res.DeleteToken != "" {
 			it.Delete = a.cfg.BaseURL + "/delete/" + res.Image.ID + "/" + res.DeleteToken
 		}
@@ -92,4 +93,53 @@ func (a *App) share(w http.ResponseWriter, r *http.Request) {
 		album = a.cfg.BaseURL + "/a/" + albumID
 	}
 	a.renderPage(w, r, "uploaded", page{Title: "Uploaded", NoIndex: true, Data: map[string]any{"Items": items, "Album": album}})
+}
+
+type resultItem struct {
+	ID, Page, Direct, Thumb, Delete, Name, Error, Kind string
+}
+
+func (a *App) resultItem(im *db.Image) resultItem {
+	name := im.Title
+	if name == "" {
+		name = im.ID
+	}
+	return resultItem{ID: im.ID, Page: a.cfg.BaseURL + "/" + im.ID, Direct: a.directURL(im), Thumb: a.thumbURL(im), Name: name, Kind: im.Kind()}
+}
+
+// uploadedPage is the results page phones go to after uploading several
+// files: just these files, their links and "copy all", nothing else.
+// GET /uploaded?id=a,b,c
+func (a *App) uploadedPage(w http.ResponseWriter, r *http.Request) {
+	var items []resultItem
+	var albumID string
+	same := true
+	now := time.Now().Unix()
+	for _, id := range strings.FieldsFunc(r.URL.Query().Get("id"), func(c rune) bool { return c == ',' || c == ' ' }) {
+		if len(items) >= 50 || !validID(id) {
+			continue
+		}
+		im, err := a.db.Image(r.Context(), id)
+		if err != nil || im.Hidden || (im.ExpiresAt > 0 && im.ExpiresAt <= now) || !a.canSee(r, im) {
+			continue
+		}
+		if len(items) == 0 {
+			albumID = im.AlbumID.String
+		} else if im.AlbumID.String != albumID {
+			same = false
+		}
+		items = append(items, a.resultItem(im))
+	}
+	if len(items) == 0 {
+		a.notFound(w, r)
+		return
+	}
+	data := map[string]any{"Items": items}
+	if same && albumID != "" {
+		if al, err := a.db.Album(r.Context(), albumID); err == nil {
+			data["Album"] = a.cfg.BaseURL + "/a/" + al.ID
+			data["Title"], data["Note"] = al.Title, al.Description
+		}
+	}
+	a.renderPage(w, r, "uploaded", page{Title: "Uploaded", NoIndex: true, Data: data})
 }
