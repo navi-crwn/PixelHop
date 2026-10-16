@@ -242,6 +242,7 @@
       fd.append('expire', $('#expire').value);
       fd.append('slug', $('#slug').checked ? '1' : '0');
       fd.append('album', $('#album').checked ? '1' : '0');
+      if ($('#listed') && $('#listed').checked) fd.append('listed', '1');
 
       var rows = files.map(function (f) { return row(f.name, URL.createObjectURL(f)); });
       if (url) rows.push(row(url, ''));
@@ -314,6 +315,14 @@
     if (t === null) return;
     api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast('Renamed'); }, function (e) { toast(e.message, true); });
   });
+  var lt = $('#list-toggle');
+  if (lt) lt.addEventListener('click', function () {
+    var on = lt.dataset.listed !== '1';
+    api('PATCH', '/api/v1/images/' + lt.dataset.id, { listed: on }).then(function () {
+      lt.dataset.listed = on ? '1' : ''; lt.querySelector('span').textContent = on ? 'On my profile' : 'Show on my profile';
+      toast(on ? 'Now shown on your public profile' : 'Removed from your profile');
+    }, function (e) { toast(e.message, true); });
+  });
   var del = $('#delete');
   if (del) del.addEventListener('click', function () {
     if (!confirm('Delete this image for good? The link stops working right away.')) return;
@@ -345,6 +354,15 @@
       picked().forEach(function (c) { var i = document.createElement('input'); i.type = 'hidden'; i.name = 'id'; i.value = c.value; f.appendChild(i); });
       if (!f.children.length) return toast('Select some images first', true);
       f.submit();
+    });
+    [['#list-selected', true], ['#unlist-selected', false]].forEach(function (p) {
+      var b = $(p[0]); if (!b) return;
+      b.addEventListener('click', function () {
+        var ids = picked().map(function (c) { return c.value; });
+        if (!ids.length) return toast('Select some images first', true);
+        Promise.all(ids.map(function (id) { return api('PATCH', '/api/v1/images/' + id, { listed: p[1] }).catch(function () {}); }))
+          .then(function () { location.reload(); });
+      });
     });
     $('#delete-selected').addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });

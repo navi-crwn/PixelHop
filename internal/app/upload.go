@@ -101,6 +101,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		expiresAt = time.Now().Add(d).Unix()
 	}
 	useSlug := r.FormValue("slug") != "0" && r.FormValue("slug") != "false"
+	listed := u != nil && (r.FormValue("listed") == "1" || r.FormValue("listed") == "true")
 
 	// Several files become an album with its own share link. Signed-in people
 	// can keep adding to one of their albums (batch uploads come in chunks).
@@ -150,7 +151,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			results = append(results, res)
 			continue
 		}
-		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug)
+		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed)
 		res.Image, res.DeleteToken, res.Duplicate, res.Err = im, tok, dup, err
 		if err == nil && !dup {
 			used += im.Size
@@ -197,7 +198,7 @@ func (a *App) readPart(fh *multipart.FileHeader) uploadInput {
 	return in
 }
 
-func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug bool) (*db.Image, string, bool, error) {
+func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool) (*db.Image, string, bool, error) {
 	sum := sha256.Sum256(in.data)
 	sha := hex.EncodeToString(sum[:])
 	var uid sql.NullInt64
@@ -220,7 +221,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	im := &db.Image{
 		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
 		Mime: p.Format.Mime, Ext: p.Format.Ext, Size: int64(len(p.Data)), Width: p.Width, Height: p.Height,
-		SHA256: sha, Color: p.Color, Backend: a.store.Name(), IP: ip, ExpiresAt: expiresAt,
+		SHA256: sha, Color: p.Color, Backend: a.store.Name(), IP: ip, ExpiresAt: expiresAt, Listed: listed,
 	}
 	if albumID != "" {
 		im.AlbumID = sql.NullString{String: albumID, Valid: true}

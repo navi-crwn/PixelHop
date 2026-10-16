@@ -216,6 +216,23 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .up .link input { height: 34px; font: .85rem var(--mono); }
 .up.err { border-color: color-mix(in srgb, var(--red) 45%, transparent); }
 .up .actions { display: flex; gap: 6px; }
+.avatar.sm { width: 34px; height: 34px; font-size: .85rem; }
+.avatar.xl { width: 84px; height: 84px; font-size: 2rem; flex: none; }
+.avatar.xxl { width: 112px; height: 112px; font-size: 2.6rem; flex: none; box-shadow: 0 0 0 4px var(--panel), 0 0 0 6px var(--line-2); }
+.owner { display: flex; align-items: center; gap: 10px; margin: 6px 0 10px; color: var(--text); width: fit-content; padding: 4px 10px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg-2); }
+a.owner[href]:hover { text-decoration: none; border-color: var(--accent); }
+.owner > span:last-child { display: flex; flex-direction: column; line-height: 1.2; }
+.owner b { font-size: .92rem; }
+.profile-photo { display: flex; gap: 16px; align-items: center; margin: 12px 0 18px; }
+.input-prefix { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: 11px; background: var(--bg-2); padding-left: 12px; }
+.input-prefix:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.input-prefix span { color: var(--muted); }
+.input-prefix input { border: 0; background: none; box-shadow: none !important; padding-left: 4px; }
+.profile-head { display: flex; gap: 26px; align-items: center; margin: 10px 0 30px; padding: 28px; border-radius: 22px; border: 1px solid var(--line);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 12%, var(--panel)), var(--panel)); }
+.profile-head h1 { font-size: 2rem; margin: 0 0 2px; }
+.profile-head .bio { max-width: 620px; white-space: pre-line; margin: 0 0 12px; }
+@media (max-width: 640px) { .profile-head { flex-direction: column; text-align: center; } .profile-head .btn-row { justify-content: center; } }
 .share { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 12px; }
 .share .small { margin-right: 4px; }
 .copy-all { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); margin-bottom: 12px; }

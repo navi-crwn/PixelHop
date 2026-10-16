@@ -2,6 +2,16 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.1.0] - 2026-10-16
+
+### Added
+- **Public profiles**: display name, @username, profile photo (square, metadata stripped), bio and website, edited in Settings. Every account gets a username automatically.
+- **Image ownership**: image and album pages show who shared them, with photo and a link to their profile; link previews say "Shared by …". Owners can switch this off.
+- **Profile pages** at `/u/username` showing only the images their owner chooses ("Show on my profile" on an image, in bulk from My images, or `listed` when uploading / via the API).
+
+### Changed
+- Signing in with HEL.ink no longer overwrites a name you edited here; HEL.ink's name and photo only fill in empty ones.
+
 ## [3.0.0] - 2026-10-15
 
 PixelHop rebuilt from scratch in Go. See [AUDIT.md](AUDIT.md) for why.

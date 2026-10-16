@@ -4,7 +4,7 @@
   <div class="page-head">
     <div>
       <h1>My images</h1>
-      <p class="muted" style="margin:4px 0 0">{{$d.Total}} images · {{bytes $d.Used}} of {{bytes $d.Quota}} used</p>
+      <p class="muted" style="margin:4px 0 0">{{with .User.Username.String}}{{if $.User.ShowOwner}}<a href="/u/{{.}}">@{{.}}</a> · {{end}}{{end}}{{$d.Total}} images · {{bytes $d.Used}} of {{bytes $d.Quota}} used</p>
       <div class="meter" style="margin-top:8px" title="{{$d.Percent}}%"><i style="width:{{$d.Percent}}%"></i></div>
     </div>
     <div class="btn-row">
@@ -13,6 +13,8 @@
         <button class="btn ghost" type="button" id="select-all">Select all</button>
         <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>Copy links</button>
         <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
+        <button class="btn" type="button" id="list-selected"><svg><use href="#i-users"/></svg>Show on profile</button>
+        <button class="btn ghost" type="button" id="unlist-selected">Hide from profile</button>
         <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>Delete <span id="sel-count">0</span></button>
       </span>
       <form method="post" action="/dashboard/download" id="zip-form" hidden></form>
@@ -40,6 +42,7 @@
       <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
       {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
       {{if .Hidden}}<span class="pill bad badge">hidden</span>{{end}}
+      {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="Shown on your public profile"><svg width="11" height="11"><use href="#i-users"/></svg>profile</span>{{end}}
       <input class="tick" type="checkbox" value="{{.ID}}" aria-label="Select {{.Title}}">
       <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>
     </div>

@@ -38,9 +38,10 @@
       <button class="icon-btn" id="theme" type="button" aria-label="Switch light or dark"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
       {{if .User}}
       <div class="menu" id="menu">
-        <button type="button" aria-haspopup="true" aria-label="Account menu"><span class="avatar">{{if .User.AvatarURL}}<img src="{{.User.AvatarURL}}" alt="" referrerpolicy="no-referrer">{{else}}{{slice .User.Email 0 1}}{{end}}</span></button>
+        <button type="button" aria-haspopup="true" aria-label="Account menu"><span class="avatar">{{with avatar .User}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{initial .User}}{{end}}</span></button>
         <div class="menu-list">
-          <div class="who">{{.User.Email}}</div>
+          <div class="who"><b>{{display .User}}</b><br>{{with .User.Username.String}}@{{.}}{{end}}</div>
+          {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg width="16" height="16"><use href="#i-users"/></svg>My public profile</a>{{end}}
           <a href="/dashboard"><svg width="16" height="16"><use href="#i-grid"/></svg>My images</a>
           <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>Settings &amp; API keys</a>
           {{if .SSO}}<a href="{{.Helink}}/dashboard"><svg width="16" height="16"><use href="#i-link"/></svg>HEL.ink dashboard</a>{{end}}

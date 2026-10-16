@@ -147,6 +147,9 @@ func (a *App) startSession(w http.ResponseWriter, r *http.Request, u *db.User) e
 		return err
 	}
 	u.LastLogin = time.Now().Unix()
+	if !u.Username.Valid {
+		u.Username = sql.NullString{String: a.suggestUsername(r.Context(), u), Valid: true}
+	}
 	a.db.UpdateUser(r.Context(), u)
 	http.SetCookie(w, &http.Cookie{
 		Name: sessionCookie, Value: tok, Path: "/", HttpOnly: true, Secure: a.cfg.SecureCookies(),

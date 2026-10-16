@@ -32,16 +32,17 @@ type Image struct {
 	Hidden     bool
 	CreatedAt  int64
 	ExpiresAt  int64
+	Listed     bool // shown on the owner's public profile
 }
 
 const imageCols = `id,user_id,album_id,owner_token,title,orig_name,mime,ext,size,width,height,sha256,color,
-backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at`
+backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed`
 
 func scanImage(row interface{ Scan(...any) error }) (*Image, error) {
 	var im Image
 	err := row.Scan(&im.ID, &im.UserID, &im.AlbumID, &im.OwnerToken, &im.Title, &im.OrigName, &im.Mime, &im.Ext,
 		&im.Size, &im.Width, &im.Height, &im.SHA256, &im.Color, &im.Backend, &im.KeyFull, &im.KeyThumb,
-		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt)
+		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt, &im.Listed)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -52,10 +53,10 @@ func (d *DB) InsertImage(ctx context.Context, im *Image) error {
 	if im.CreatedAt == 0 {
 		im.CreatedAt = now()
 	}
-	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		im.ID, im.UserID, im.AlbumID, im.OwnerToken, im.Title, im.OrigName, im.Mime, im.Ext, im.Size, im.Width, im.Height,
 		im.SHA256, im.Color, im.Backend, im.KeyFull, im.KeyThumb, im.Views, im.LastViewed, im.IP, im.Hidden,
-		im.CreatedAt, im.ExpiresAt)
+		im.CreatedAt, im.ExpiresAt, im.Listed)
 	return err
 }
 
@@ -85,6 +86,7 @@ type ImageQuery struct {
 	UserID  int64  // 0 = any
 	AlbumID string // "" = any
 	Search  string
+	Listed  bool   // only images shown on the owner's profile (and still live)
 	Sort    string // new | old | views | size
 	Limit   int
 	Offset  int
@@ -100,6 +102,10 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	if q.AlbumID != "" {
 		where = append(where, "album_id=?")
 		args = append(args, q.AlbumID)
+	}
+	if q.Listed {
+		where = append(where, "listed=1 AND hidden=0 AND (expires_at=0 OR expires_at>?)")
+		args = append(args, now())
 	}
 	if s := strings.TrimSpace(q.Search); s != "" {
 		where = append(where, "(id LIKE ? OR title LIKE ? OR orig_name LIKE ?)")
@@ -145,6 +151,11 @@ func (d *DB) DeleteImage(ctx context.Context, id string) error {
 
 func (d *DB) SetImageHidden(ctx context.Context, id string, hidden bool) error {
 	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=? WHERE id=?`, hidden, id)
+	return err
+}
+
+func (d *DB) SetImageListed(ctx context.Context, id string, listed bool) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET listed=? WHERE id=?`, listed, id)
 	return err
 }
 

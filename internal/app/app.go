@@ -15,7 +15,7 @@ import (
 	"github.com/navi-crwn/pixelhop/web"
 )
 
-var Version = "3.0.0"
+var Version = "3.1.0"
 
 type App struct {
 	cfg      *config.Config
@@ -45,6 +45,7 @@ func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
 		a.store = s3
 	}
 
+	a.backfillUsernames(context.Background())
 	if a.pages, err = loadPages(a); err != nil {
 		return nil, err
 	}
@@ -66,6 +67,8 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /help", a.help)
 	mux.HandleFunc("GET /legal", a.legal)
 	mux.HandleFunc("GET /a/{id}", a.album)
+	mux.HandleFunc("GET /u/{username}", a.profile)
+	mux.HandleFunc("GET /avatar/{id}", a.serveAvatar)
 	mux.HandleFunc("GET /{id}", a.view)
 	mux.HandleFunc("GET /result", a.legacyResult) // PixelHop 2 upload results: /result?id=a,b
 	mux.HandleFunc("GET /delete/{id}/{token}", a.deleteConfirm)
@@ -101,6 +104,8 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
 	mux.HandleFunc("GET /settings", a.member(a.settingsPage))
 	mux.HandleFunc("POST /settings/profile", a.member(a.saveProfile))
+	mux.HandleFunc("POST /settings/avatar", a.member(a.saveAvatar))
+	mux.HandleFunc("POST /settings/avatar/delete", a.member(a.deleteAvatar))
 	mux.HandleFunc("POST /settings/password", a.member(a.savePassword))
 	mux.HandleFunc("POST /settings/keys", a.member(a.createKey))
 	mux.HandleFunc("POST /settings/keys/{id}/delete", a.member(a.deleteKey))

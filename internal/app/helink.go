@@ -155,13 +155,14 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	if err != nil {
 		return nil, err
 	}
-	// HEL.ink is the source of truth for who someone is.
+	// HEL.ink owns the email; the public name and photo are edited here, so
+	// HEL.ink's only fill them in when they're empty.
 	u.Email = t.Email
-	if t.Name != "" {
+	if strings.TrimSpace(u.Name) == "" && t.Name != "" {
 		u.Name = trim(t.Name, 60)
 	}
 	if t.Avatar != "" {
-		u.AvatarURL = t.Avatar
+		u.AvatarURL = t.Avatar // used only while no photo is uploaded here
 	}
 	if t.Admin {
 		u.Role = "admin" // HEL.ink's owner runs PixelHop too; never demoted from here

@@ -67,16 +67,6 @@ func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "settings", "Settings", a.settingsData(r))
 }
 
-func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
-	u := currentUser(r)
-	u.Name = trim(strings.TrimSpace(r.FormValue("name")), 60)
-	if err := a.db.UpdateUser(r.Context(), u); err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	http.Redirect(w, r, "/settings?ok=Profile+saved", http.StatusSeeOther)
-}
-
 func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	d := a.settingsData(r)
