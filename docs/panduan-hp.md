@@ -16,6 +16,13 @@ Untuk CS yang menerima bukti dari pelanggan (screenshot, rekaman layar, video AT
 3. Tunggu sampai halaman "Uploaded" muncul.
 4. Tekan **Copy for chat**, lalu tempel di chat admin.
 
+## Cara 1b: dari aplikasi yang tidak punya tombol Share (copy–paste)
+
+1. Di aplikasi chat kerja, tekan lama gambar dan pilih **Salin / Copy**.
+2. Buka PixelHop, lalu tekan tombol **Paste** di sebelah *Choose files*.
+3. Pertama kali, Chrome menanyakan izin membaca clipboard: pilih **Izinkan**. Gambar langsung terupload.
+4. Kalau yang muncul justru kotak "Press and hold here, then tap Paste", tekan lama kotak itu lalu pilih **Tempel / Paste**.
+
 ## Cara 2: dengan nomor tiket dan catatan (paling rapi)
 
 1. Buka aplikasi PixelHop dan buka bagian **Report / ticket**.

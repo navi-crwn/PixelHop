@@ -163,7 +163,7 @@
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
     $('#drop-in').addEventListener('click', function (e) {
-      if (e.target.closest('#opts,#url-form,button,select,input,textarea,label,details')) return;
+      if (e.target.closest('#opts,#url-form,#paste-box,button,select,input,textarea,label,details')) return;
       fileInput.click();
     });
     $('#drop-in').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop-in') { e.preventDefault(); fileInput.click(); } });
@@ -194,8 +194,38 @@
       });
       if (files.length) { e.preventDefault(); send(files); return; }
       var text = e.clipboardData.getData('text');
-      if (/^https?:\/\/\S+$/i.test(text.trim())) { e.preventDefault(); send([], text.trim()); }
+      if (/^https?:\/\/\S+$/i.test(text.trim())) { e.preventDefault(); send([], text.trim()); return; }
+      if (e.target.id === 'paste-box') { e.preventDefault(); toast('There is no image in the clipboard. Copy an image first.', true); }
     });
+
+    // Phones have no Ctrl+V: the Paste button reads the clipboard directly
+    // (Chrome asks once for permission). Where that isn't allowed, a box
+    // appears that takes a long-press → Paste instead.
+    var pasteBox = $('#paste-box');
+    function pasteName(type) {
+      var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
+      return 'pasted-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '.' + (type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+    }
+    function showPasteBox() { pasteBox.classList.remove('hide'); pasteBox.focus(); }
+    $('#paste-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (!navigator.clipboard || !navigator.clipboard.read) return showPasteBox();
+      navigator.clipboard.read().then(function (items) {
+        var jobs = [];
+        items.forEach(function (it) {
+          var t = it.types.filter(function (x) { return /^image\//.test(x); })[0];
+          if (t) jobs.push(it.getType(t).then(function (b) { return new File([b], pasteName(t), { type: t }); }));
+        });
+        if (jobs.length) return Promise.all(jobs).then(function (files) { send(files); });
+        return navigator.clipboard.readText().then(function (txt) {
+          txt = (txt || '').trim();
+          if (/^https?:\/\/\S+$/i.test(txt)) return send([], txt);
+          toast('There is no image in the clipboard. Copy an image first.', true);
+        });
+      }).catch(function () { showPasteBox(); });
+    });
+    pasteBox.addEventListener('input', function () { pasteBox.innerHTML = ''; });
+    pasteBox.addEventListener('blur', function () { if (!pasteBox.textContent) pasteBox.classList.add('hide'); });
 
     function hasFiles(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0; }
 

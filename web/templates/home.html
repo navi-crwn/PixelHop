@@ -10,12 +10,14 @@
       <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
         <h2>Drop images, videos or PDFs here</h2>
-        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> · images up to {{.MaxMB}} MB, videos and PDFs up to {{.MaxMediaMB}} MB (made smaller for you) · {{.MaxBatch}} at once</p>
+        <p class="sub">or paste with <span class="kbd">Ctrl</span> + <span class="kbd">V</span> (on a phone: the Paste button) · images up to {{.MaxMB}} MB, videos and PDFs up to {{.MaxMediaMB}} MB (made smaller for you) · {{.MaxBatch}} at once</p>
         <div class="btn-row">
           <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
+          <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>
           <button class="btn lg" type="button" id="show-url"><svg><use href="#i-link"/></svg>From a link</button>
         </div>
         <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
+        <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="Paste here" data-placeholder="Press and hold here, then tap Paste"></div>
         <form class="url-row hide" id="url-form">
           <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
           <button class="btn" type="submit">Fetch</button>

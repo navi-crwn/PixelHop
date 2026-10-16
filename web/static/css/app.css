@@ -263,6 +263,8 @@ div.ticket { padding: 12px; border-radius: 12px; border: 1px solid var(--line); 
 .result-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 .del-link { color: var(--muted); }
 @media (min-width: 761px) { .result-actions { grid-template-columns: 1fr 1fr; } .result-actions .copy-all, .result-actions > .btn:nth-child(3) { grid-column: 1 / -1; } }
+.paste-box { margin: 14px auto 0; max-width: 420px; min-height: 64px; padding: 18px; border: 2px dashed var(--accent); border-radius: 12px; color: var(--text); text-align: center; outline: none; cursor: text; }
+.paste-box:empty::before { content: attr(data-placeholder); color: var(--muted); }
 .install-bar { display: flex; align-items: center; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 14px auto 0; }
 .albums .album-card { display: grid; gap: 8px; }
 .album-meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
