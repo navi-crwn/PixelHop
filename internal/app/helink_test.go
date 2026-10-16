@@ -138,11 +138,3 @@ func TestHelinkRejectsBadTickets(t *testing.T) {
 	}
 }
 
-func TestRegisterGoesToHelink(t *testing.T) {
-	_, h := ssoApp(t)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest("GET", "/register", nil))
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "https://hel.example.com/register" {
-		t.Fatalf("register: %d %s", rec.Code, rec.Header().Get("Location"))
-	}
-}

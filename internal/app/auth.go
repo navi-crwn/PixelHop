@@ -207,7 +207,23 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		CheckPassword(dummyHash, pw)
 	}
-	if err != nil || !CheckPassword(u.PassHash, pw) {
+	local := err == nil && CheckPassword(u.PassHash, pw)
+	if !local && a.cfg.SSOEnabled() {
+		// Not a password kept here: ask HEL.ink, where the account may live.
+		hu, msg, redirect := a.helinkLogin(r, f.Email, pw)
+		if redirect {
+			http.Redirect(w, r, "/auth/helink?next="+url.QueryEscape(safeNext(f.Next)), http.StatusSeeOther)
+			return
+		}
+		if hu == nil {
+			f.Error = msg
+			w.WriteHeader(http.StatusUnauthorized)
+			a.render(w, r, "login", "Sign in", f)
+			return
+		}
+		u, local = hu, true
+	}
+	if !local {
 		f.Error = "That email and password don't match."
 		w.WriteHeader(http.StatusUnauthorized)
 		a.render(w, r, "login", "Sign in", f)
@@ -220,7 +236,7 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Upgrade old hashes to the current parameters while we have the password.
-	if !strings.HasPrefix(u.PassHash, fmt.Sprintf("$argon2id$v=19$m=%d,t=%d,p=%d$", argonMem, argonTime, argonPar)) {
+	if u.PassHash != "" && !strings.HasPrefix(u.PassHash, fmt.Sprintf("$argon2id$v=19$m=%d,t=%d,p=%d$", argonMem, argonTime, argonPar)) {
 		u.PassHash = HashPassword(pw)
 	}
 	if err := a.startSession(w, r, u); err != nil {
@@ -245,18 +261,10 @@ func (a *App) registrationOpen(ctx context.Context) bool {
 }
 
 func (a *App) registerPage(w http.ResponseWriter, r *http.Request) {
-	if a.cfg.SSOEnabled() { // accounts are made on HEL.ink
-		http.Redirect(w, r, a.cfg.HelinkURL+"/register", http.StatusSeeOther)
-		return
-	}
 	a.render(w, r, "register", "Create account", a.authForm(r))
 }
 
 func (a *App) register(w http.ResponseWriter, r *http.Request) {
-	if a.cfg.SSOEnabled() {
-		http.Redirect(w, r, a.cfg.HelinkURL+"/register", http.StatusSeeOther)
-		return
-	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	f.Name = trim(strings.TrimSpace(r.FormValue("name")), 60)
@@ -275,6 +283,21 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 		f.Error = "Use at least 8 characters for your password."
 	case len(pw) > 200:
 		f.Error = "That password is too long."
+	case a.cfg.SSOEnabled() && r.FormValue("tos") == "":
+		f.Error = "Please accept the terms."
+	}
+	if f.Error == "" && a.cfg.SSOEnabled() {
+		// The account lives on HEL.ink, so it works in both apps.
+		u, msg := a.helinkRegister(r, f.Name, strings.ToLower(f.Email), pw)
+		if u != nil {
+			if err := a.startSession(w, r, u); err != nil {
+				a.serverError(w, r, err)
+				return
+			}
+			http.Redirect(w, r, "/dashboard?welcome=1", http.StatusSeeOther)
+			return
+		}
+		f.Error = msg
 	}
 	if f.Error == "" {
 		u := &db.User{Email: f.Email, Name: f.Name, PassHash: HashPassword(pw), QuotaBytes: a.cfg.DefaultQuota}

@@ -140,6 +140,7 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 | `S3_PUBLIC_URL` | — | CDN address of the bucket; image links redirect there |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
 | `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
+| `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
 | `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
 | `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
