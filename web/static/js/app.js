@@ -12,7 +12,7 @@
     t.className = 'toast' + (err ? ' err' : '');
     t.textContent = msg;
     box.appendChild(t);
-    setTimeout(function () { t.remove(); }, 2600);
+    setTimeout(function () { t.remove(); }, err ? 5000 : 2600);
   }
   window.phToast = toast;
 
@@ -515,7 +515,10 @@
 
   function api(method, path, body) {
     return fetch(path, { method: method, headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: body ? JSON.stringify(body) : undefined })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        // nginx or Cloudflare can answer with an HTML page (file too large, timeout): say what happened.
+        return r.json().catch(function () { throw new Error(r.status === 413 ? 'That is too large for the server' : 'The server answered ' + r.status + '. Try again in a moment.'); });
+      })
       .then(function (j) { if (!j.success) throw new Error(j.error || 'Failed'); return j.data; });
   }
   var ren = $('#rename');
@@ -600,10 +603,22 @@
       b.addEventListener('click', function () {
         var ids = picked().map(function (c) { return c.value; });
         if (!ids.length) return toast('Select some images first', true);
-        Promise.all(ids.map(function (id) { return api('PATCH', '/api/v1/images/' + id, { listed: p[1] }).catch(function () {}); }))
-          .then(function () { location.reload(); });
+        Promise.all(ids.map(function (id) {
+          return api('PATCH', '/api/v1/images/' + id, { listed: p[1] }).then(function (d) { return d.listed === p[1] ? 'ok' : 'locked'; }, function () { return 'failed'; });
+        })).then(function (res) { reloadAfter(res, p[1] ? 'shown on your profile' : 'hidden from your profile'); });
       });
     });
+    // Many files at once: say how many worked and which didn't, then show the new state.
+    var reloadAfter = function (res, what) {
+      var n = function (k) { return res.filter(function (x) { return x === k; }).length; };
+      var ok = n('ok'), locked = n('locked'), failed = n('failed'), msg = [];
+      if (ok) msg.push(ok + ' ' + what);
+      if (locked) msg.push(locked + ' skipped: private or password-protected files never appear on profiles');
+      if (failed) msg.push(failed + ' failed; try those again');
+      var bad = locked || failed;
+      toast(msg.join(' · '), bad);
+      setTimeout(function () { location.reload(); }, bad ? 3500 : 700);
+    };
     var mk = $('#album-selected');
     if (mk) mk.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
@@ -617,8 +632,8 @@
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast('Select some images first', true);
       if (!confirm('Delete ' + ids.length + ' images for good?')) return;
-      Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).catch(function () {}); }))
-        .then(function () { location.reload(); });
+      Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
+        .then(function (res) { reloadAfter(res, 'deleted'); });
     });
   }
 

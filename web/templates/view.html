@@ -1,4 +1,4 @@
-{{define "head"}}{{with .Data}}{{if not .Image.Locked}}<link rel="alternate" type="application/json+oembed" href="{{$.Base}}/oembed?url={{$.Base}}/{{.Image.ID}}" title="{{.Image.Title}}">{{end}}{{end}}{{end}}
+{{define "head"}}{{with .Data}}{{if and (not .Image.Locked) .Image.IsImage}}<link rel="alternate" type="application/json+oembed" href="{{$.Base}}/oembed?url={{$.Base}}/{{.Image.ID}}" title="{{.Image.Title}}">{{end}}{{end}}{{end}}
 {{define "content"}}{{$d := .Data}}{{$im := $d.Image}}
 <div class="wrap">
   <div class="viewer">

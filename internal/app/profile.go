@@ -220,7 +220,7 @@ func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
 	if old != "" {
 		a.store.Delete(r.Context(), old)
 	}
-	http.Redirect(w, r, "/settings?ok=Profile+photo+updated#profile", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=photo#profile", http.StatusSeeOther)
 }
 
 func (a *App) deleteAvatar(w http.ResponseWriter, r *http.Request) {
@@ -230,7 +230,7 @@ func (a *App) deleteAvatar(w http.ResponseWriter, r *http.Request) {
 		u.AvatarKey = ""
 		a.db.UpdateUser(r.Context(), u)
 	}
-	http.Redirect(w, r, "/settings?ok=Profile+photo+removed#profile", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=photo-removed#profile", http.StatusSeeOther)
 }
 
 // saveProfile stores the public profile: name, handle, bio, website, visibility.
@@ -269,7 +269,7 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/settings?ok=Profile+saved#profile", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=profile#profile", http.StatusSeeOther)
 }
 
 func (a *App) settingsError(w http.ResponseWriter, r *http.Request, msg string) {
