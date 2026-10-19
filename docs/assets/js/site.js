@@ -1,20 +1,12 @@
-// PixelHop website: language, theme, tabs, copy buttons, nav shadow, reveal on scroll.
-// The language and theme are picked before paint by the inline script in <head>.
+// PixelHop website: theme, language menu, tabs, copy buttons, nav shadow, reveal on scroll.
+// Each language is its own page (built by site/build.py); the theme is picked before paint in <head>.
 (function () {
   var root = document.documentElement;
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
-  var en = document.getElementById('lang-en'), id = document.getElementById('lang-id');
-  function setLang(l, keep) {
-    root.lang = l;
-    en.setAttribute('aria-pressed', l === 'en');
-    id.setAttribute('aria-pressed', l === 'id');
-    document.title = l === 'id' ? 'PixelHop: hosting gambar open source dengan studio foto pribadi' : 'PixelHop: open-source image hosting with a private photo studio';
-    if (keep) save('lang', l);
-  }
-  en.addEventListener('click', function () { setLang('en', true); });
-  id.addEventListener('click', function () { setLang('id', true); });
-  setLang(root.lang === 'id' ? 'id' : 'en', false);
+  // close the language menu when clicking elsewhere
+  var menu = document.querySelector('.lang-menu');
+  if (menu) document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.open = false; });
 
   document.getElementById('theme').addEventListener('click', function () {
     var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -33,7 +25,7 @@
   document.querySelectorAll('.copy').forEach(function (b) {
     b.addEventListener('click', function () {
       var text = b.parentElement.querySelector('pre').innerText.split('\n').filter(function (l) { return l.charAt(0) !== '#'; }).join('\n').trim();
-      var done = function () { var t = b.textContent; b.textContent = root.lang === 'id' ? 'Tersalin' : 'Copied'; setTimeout(function () { b.textContent = t; }, 1400); };
+      var done = function () { var t = b.textContent; b.textContent = root.dataset.copied || 'Copied'; setTimeout(function () { b.textContent = t; }, 1400); };
       if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {}); else done();
     });
   });

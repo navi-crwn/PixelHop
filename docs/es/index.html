@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="es" data-copied="Copiado">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelHop: alojamiento de imágenes de código abierto con un estudio de fotos privado</title>
+<meta name="description" content="Suelta una imagen y obtén un enlace. PixelHop elimina los datos GPS, crea álbumes, funciona con ShareX y se ejecuta como un pequeño binario de Go que puedes alojar tú mismo.">
+<meta name="theme-color" content="#07080b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PixelHop">
+<meta property="og:description" content="Alojamiento de imágenes de código abierto con un estudio de fotos privado en el navegador. Un binario de Go, autoalojable.">
+<meta property="og:url" content="https://navi-crwn.github.io/pixelhop/es/">
+<link rel="canonical" href="https://navi-crwn.github.io/pixelhop/es/">
+<link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/pixelhop/">
+<link rel="alternate" hreflang="zh-CN" href="https://navi-crwn.github.io/pixelhop/zh-cn/">
+<link rel="alternate" hreflang="de" href="https://navi-crwn.github.io/pixelhop/de/">
+<link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/pixelhop/id/">
+<link rel="alternate" hreflang="ja" href="https://navi-crwn.github.io/pixelhop/ja/">
+<link rel="alternate" hreflang="pt-BR" href="https://navi-crwn.github.io/pixelhop/pt-br/">
+<link rel="alternate" hreflang="es" href="https://navi-crwn.github.io/pixelhop/es/">
+<link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/pixelhop/">
+<meta property="og:image" content="https://navi-crwn.github.io/pixelhop/social.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../logo.svg" type="image/svg+xml">
+<script>
+// Runs before paint: theme and "JS is on". ?theme=light|dark overrides (used to render the README images); ?shot hides the nav.
+(function(){var d=document.documentElement,q=new URLSearchParams(location.search),t=null;d.classList.add('js');
+try{t=localStorage.getItem('theme')}catch(e){}
+t=q.get('theme')||t;if(q.has('shot'))d.classList.add('shot-mode');
+if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@1&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/><path d="M4 4l16 16"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13 3 4 14h7l-1 7 9-11h-7z"/></symbol>
+  <symbol id="i-album" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M17 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+</defs></svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="../logo.svg" alt="" width="28" height="28">PixelHop</a>
+    <nav class="nav-links" aria-label="Secciones">
+      <a href="#features">Funciones</a>
+      <a href="#studio">Studio</a>
+      <a href="#privacy">Privacidad</a>
+      <a href="#install">Autoalojar</a>
+      <a href="#api">API</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-r">
+      <button type="button" class="theme" id="theme" aria-label="Claro u oscuro"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
+      <details class="lang-menu"><summary aria-label="Idioma"><svg><use href="#i-globe"/></svg><span>ES</span></summary><div class="lang-list"><a href="../" hreflang="en" lang="en">English</a><a href="../zh-cn/" hreflang="zh-CN" lang="zh-CN">简体中文</a><a href="../de/" hreflang="de" lang="de">Deutsch</a><a href="../id/" hreflang="id" lang="id">Bahasa Indonesia</a><a href="../ja/" hreflang="ja" lang="ja">日本語</a><a href="../pt-br/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a><a href="../es/" hreflang="es" lang="es" aria-current="page">Español</a></div></details>
+      <a class="btn sm main" href="https://p.hel.ink">Pruébalo</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="glow" style="width:560px;height:560px;background:var(--violet);right:-160px;top:6%"></div>
+  <div class="glow" style="width:460px;height:460px;background:var(--lime);left:-180px;top:30%;opacity:.16"></div>
+  <div class="wrap">
+    <span class="pill"><b>v3</b>Reescrito en Go · un binario · MIT</span>
+    <h1>Suelta una imagen.<br><span class="grad">Obtén un enlace.</span></h1>
+    <p class="lead">Alojamiento de imágenes de código abierto que elimina tu ubicación GPS antes de que nadie la vea, con álbumes, ShareX, una API y un estudio de fotos que nunca sube tu foto.</p>
+    <div class="cta">
+      <a class="btn main" href="https://p.hel.ink">Subir una imagen</a>
+      <a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>Ver el código</a>
+    </div>
+    <ul class="facts">
+      <li>Un solo binario de ~16 MB</li>
+      <li>SQLite integrado, sin servidor de base de datos</li>
+      <li>Disco o cualquier bucket S3</li>
+      <li>Sin anuncios ni rastreadores</li>
+    </ul>
+    <div class="shot">
+      <div class="frame">
+        <div class="bar"><i></i><i></i><i></i><span>p.hel.ink</span></div>
+        <div class="themed"><img class="dk" src="../media/app-view-dark.webp" alt="Una página de imagen en PixelHop: la foto, botones para copiar, códigos de inserción y un código QR" width="1440" height="900"><img class="lt" src="../media/app-view-light.webp" alt="" width="1440" height="900"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="head c rv">
+      <div class="label">Funciones</div>
+      <h2>Todo lo que debe hacer un alojamiento de imágenes. <em class="s grad">Nada de lo que no.</em></h2>
+      <p class="lead">Sin plan premium que esconda lo bueno. Todas las cuentas tienen todas las funciones.</p>
+    </div>
+    <div class="feats rv">
+      <div class="w3" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3>Ubicación eliminada, calidad intacta</h3><p>Las fotos del móvil llevan coordenadas GPS y números de serie de la cámara. PixelHop elimina EXIF, XMP e IPTC reescribiendo el contenedor del archivo, así que los píxeles nunca se vuelven a comprimir, y antes endereza las fotos giradas.</p></div>
+      <div class="w3" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>Todos los enlaces que necesitas</h3><p>Enlaces legibles como <code>beach-sunset-x7Kp2Q</code>, un enlace directo, Markdown, HTML, BBCode y un código QR. Las vistas previas se ven bien en Discord, X, WhatsApp y foros.</p></div>
+      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>Álbumes</h3><p>Suelta varias fotos y compártelas con un solo enlace de galería.</p></div>
+      <div style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3>Autodestrucción</h3><p>Borrar a los 10 minutos, al día o al mes. Los invitados reciben un enlace privado para borrar.</p></div>
+      <div style="--c:var(--amber)"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>ShareX &amp; API</h3><p>Configuración de ShareX en un clic, API REST con claves. Las configuraciones antiguas de PixelHop 2 siguen funcionando.</p></div>
+      <div style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3>Alójalo tú mismo</h3><p>Un binario, una imagen de Docker o systemd. Disco, R2, MinIO, B2, Contabo.</p></div>
+      <div style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>Moderación integrada</h3><p>Denuncias, ocultar/borrar, bloqueo de IP, bloquear o suspender cuentas, avisos.</p></div>
+      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-qr"/></svg></div><h3>Copia todos los enlaces a la vez</h3><p>Tras una subida múltiple: todos los enlaces directos, de página, Markdown, BBCode o HTML con un clic. También descarga de la galería en ZIP.</p></div>
+      <div style="--c:var(--amber)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>Privado o con contraseña</h3><p>Por imagen: cualquiera con el enlace, solo tú, o con contraseña. Los archivos bloqueados no se pueden enlazar desde otros sitios.</p></div>
+      <div style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>Redimensionar por URL, estadísticas de visitas</h3><p><code>?w=800&amp;format=webp</code> genera cualquier tamaño. Los propietarios ven las visitas por día y qué sitios los enlazan.</p></div>
+      <div style="--c:var(--lime)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>App instalable, HEIC, marca de agua</h3><p>Añádela a tu pantalla de inicio y comparte fotos directamente con ella. Las fotos HEIC del iPhone se convierten solas. Pon marca de agua a una imagen o a un lote entero.</p></div>
+      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>Webhooks, oEmbed, CLI</h3><p>Webhooks firmados, inserciones para WordPress y Notion, un feed Explore y <code>pixelhop push</code> desde la terminal.</p></div>
+      <div class="w3" style="--c:var(--pink)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>Una cuenta con HEL.ink</h3><p>En p.hel.ink inicias sesión con tu cuenta de HEL.ink: el mismo acceso para enlaces cortos, páginas de bio e imágenes, con inicio de sesión de Google y códigos de dos factores. Si lo alojas tú, puedes desactivarlo.</p></div>
+      <div class="w3" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>Los enlaces antiguos siguen funcionando</h3><p>Todos los enlaces de página, directos y de miniatura de PixelHop 2, además de sus configuraciones de ShareX y páginas de resultados de subida, responden igual que antes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- STUDIO -->
+<section id="studio">
+  <div class="wrap split">
+    <div class="rv">
+      <div class="label">Studio</div>
+      <h2>Un estudio de fotos que <em class="s grad">nunca sube</em> tu foto.</h2>
+      <p class="lead">La mayoría de las herramientas funcionan en tu propio dispositivo con Canvas y WebAssembly, así que la imagen solo sale de él si pulsas «Subir resultado». Las herramientas de IA más pesadas se ejecutan en el servidor, para miembros, y no guardan nada.</p>
+      <ul class="ticks">
+        <li><b>Comprimir, redimensionar, recortar, convertir</b> a JPG, PNG, WebP o AVIF, con el tamaño del archivo en vivo.</li>
+        <li><b>Ajustar y girar</b>: luz, contraste, color, blanco y negro, voltear.</li>
+        <li><b>Desenfocar y pixelar</b> caras, matrículas y nombres antes de compartir.</li>
+        <li><b>Imagen a texto</b> (OCR) en seis idiomas, entre ellos inglés, chino, japonés, coreano y árabe.</li>
+        <li><b>Quitar el fondo</b> con un modelo de IA que se ejecuta en el navegador.</li>
+        <li><b>Paleta de colores</b> y un <b>generador de códigos QR</b> (PNG o SVG).</li>
+        <li><b>En el servidor, para miembros:</b> quitar el fondo en un segundo, desenfoque automático de caras, una goma mágica y ampliación HD 2×. Se procesa en memoria y nunca se guarda.</li>
+        <li><b>Por lotes:</b> aplica los mismos pasos a muchas imágenes y obtén un ZIP o un álbum.</li>
+      </ul>
+    </div>
+    <div class="mini-shot themed rv"><img class="dk" src="../media/app-studio-dark.webp" alt="El estudio de PixelHop con la herramienta de paleta de colores abierta" width="1440" height="900" loading="lazy"><img class="lt" src="../media/app-studio-light.webp" alt="" width="1440" height="900" loading="lazy"></div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="label">Privacidad</div>
+      <h2>Lo que tu foto dice de ti, <em class="s grad">antes</em> y <em class="s grad">después</em>.</h2>
+    </div>
+    <div class="ba rv">
+      <div class="card"><h3>Directo del móvil</h3>
+        <span class="bad">GPS 48°51′N 2°21′E</span><br><span class="bad">Marca: Pixel 9 · N.º de serie 3A1F…</span><br><span class="bad">Tomada: 2026-10-14 07:42</span><br><span class="bad">Software, objetivo, nombre del propietario…</span><br>Orientación: 6 (girada)</div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="card"><h3>En PixelHop</h3>
+        <del>GPS</del> <span class="ok">eliminado</span><br><del>Cámara y n.º de serie</del> <span class="ok">eliminado</span><br><del>Fecha y software</del> <span class="ok">eliminado</span><br><span class="ok">Perfil de color conservado</span><br><span class="ok">Enderezada, misma calidad</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="label">Autoalojar</div>
+      <h2>Funcionando en <em class="s grad">un minuto</em>.</h2>
+      <p class="lead">Sin PHP, sin Python, sin MySQL, sin cron. La primera cuenta que crees será la de administrador.</p>
+    </div>
+    <div class="rv">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="bin">Binario</button>
+        <button role="tab" aria-selected="false" data-tab="docker">Docker</button>
+        <button role="tab" aria-selected="false" data-tab="src">Desde el código</button>
+      </div>
+      <div class="tabpanel" data-panel="bin"><div class="code"><button class="copy" type="button">Copiar</button><pre><span class="c"># Linux (amd64). Las versiones para arm64, macOS y Windows están en la página de Releases.</span>
+curl -L -o pixelhop https://github.com/navi-crwn/pixelhop/releases/latest/download/pixelhop-linux-amd64
+chmod +x pixelhop
+PIXELHOP_BASE_URL=https://img.example.com ./pixelhop</pre></div></div>
+      <div class="tabpanel" data-panel="docker" hidden><div class="code"><button class="copy" type="button">Copiar</button><pre>docker run -d --name pixelhop -p 8080:8080 \
+  -e PIXELHOP_BASE_URL=https://img.example.com \
+  -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest</pre></div></div>
+      <div class="tabpanel" data-panel="src" hidden><div class="code"><button class="copy" type="button">Copiar</button><pre><span class="c"># Go 1.27+</span>
+git clone https://github.com/navi-crwn/pixelhop.git && cd pixelhop
+make build && ./pixelhop</pre></div></div>
+      <div class="grid3" style="margin-top:20px">
+        <div class="box"><span class="big grad">~16 MB</span><p>un binario estático, con plantillas y recursos incluidos</p></div>
+        <div class="box"><span class="big grad">1</span><p>proceso: servidor web, base de datos y limpieza</p></div>
+        <div class="box"><span class="big grad">0</span><p>dependencias de Go de terceros para el almacenamiento: la firma S3 viene integrada</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MIGRATE -->
+<section id="migrate">
+  <div class="wrap split rev">
+    <div class="tbl rv">
+      <table>
+        <tr><th></th><th>PixelHop 2</th><th>PixelHop 3</th></tr>
+        <tr><td>Funciona con</td><td>PHP-FPM, MySQL, Python, cron</td><td class="y">1 binary</td></tr>
+        <tr><td>Registros de imágenes</td><td>images.json</td><td class="y">SQLite (WAL)</td></tr>
+        <tr><td>Herramientas de IA</td><td>en el servidor</td><td class="y">en el navegador</td></tr>
+        <tr><td>Metadatos</td><td>recodificados</td><td class="y">eliminados sin pérdida</td></tr>
+        <tr><td>Enlaces antiguos</td><td>—</td><td class="y">siguen funcionando</td></tr>
+      </table>
+    </div>
+    <div class="rv">
+      <div class="label">Actualizar</div>
+      <h2>¿Vienes de <em class="s grad">PixelHop 2</em>?</h2>
+      <p class="lead">Un solo comando trae tus usuarios e imágenes. Las contraseñas, los enlaces de página, los enlaces <code>/i/…</code> y las configuraciones de ShareX siguen funcionando.</p>
+      <div class="code"><button class="copy" type="button">Copiar</button><pre>pixelhop import --images /var/www/pichost/data/images.json \
+  --mysql "user:pass@tcp(127.0.0.1)/pixelhop" --copy</pre></div>
+      <p class="lead" style="font-size:1rem"><a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md">Lee la auditoría que llevó a la reescritura →</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <div class="wrap split">
+    <div class="rv">
+      <div class="label">API</div>
+      <h2>Sube desde <em class="s grad">cualquier sitio</em>.</h2>
+      <p class="lead">Crea una clave en Ajustes y envía archivos con cualquier cliente HTTP. Las respuestas son JSON sencillo con el enlace directo, el enlace de la página, la miniatura y los códigos de inserción.</p>
+      <p><a class="btn sm" href="https://p.hel.ink/docs">Documentación completa de la API</a></p>
+    </div>
+    <div class="rv">
+      <div class="code"><button class="copy" type="button">Copiar</button><pre>curl -H "Authorization: Bearer ph_yourkey" \
+     -F "file=@holiday.jpg" -F "expire=7d" \
+     https://p.hel.ink/api/v1/upload</pre></div>
+      <div class="code"><pre><span class="c">// 200 OK</span>
+{ "success": true,
+  "data": {
+    "id": "holiday-x7Kp2Q",
+    "url": "https://p.hel.ink/i/holiday-x7Kp2Q.jpg",
+    "view_url": "https://p.hel.ink/holiday-x7Kp2Q",
+    "thumb_url": "https://p.hel.ink/t/holiday-x7Kp2Q.jpg",
+    "width": 4032, "height": 3024 } }</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap" style="max-width:880px">
+    <div class="head rv"><div class="label">FAQ</div><h2>Preguntas</h2></div>
+    <div class="rv">
+      <details><summary>¿Es gratis?</summary><p>Sí. p.hel.ink es gratuito y el código tiene licencia MIT, así que puedes ejecutar tu propia copia, incluso con fines comerciales.</p></details>
+      <details><summary>¿Necesito una cuenta?</summary><p>No. Los invitados pueden subir imágenes y reciben un enlace privado para borrar cada una (también guardado en su navegador). Una cuenta añade una galería, una cuota de almacenamiento visible y claves de API.</p></details>
+      <details><summary>¿El estudio es privado?</summary><p>La mayoría de las herramientas funcionan en tu dispositivo y nunca envían la imagen a ningún sitio. Las herramientas de IA marcadas como «servidor» (quitar el fondo rápido, desenfoque de caras, goma mágica, ampliación HD) la envían al servidor que usas, la procesan en memoria y la descartan; tú decides cuándo usarlas.</p></details>
+      <details><summary>¿Qué almacenamiento puedo usar?</summary><p>El disco local o cualquier bucket compatible con S3: AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo. Configura <code>S3_PUBLIC_URL</code> para servir las imágenes directamente desde una CDN.</p></details>
+      <details><summary>¿Cómo denuncio una imagen?</summary><p>Cada página de imagen tiene un botón de denuncia. Las denuncias van directamente a la cola de los moderadores, que pueden ocultar o borrar la imagen y bloquear a quien la subió.</p></details>
+      <details><summary>¿Por qué Go?</summary><p>Un alojamiento de imágenes pasa el tiempo moviendo bytes. Go lo hace con poca memoria, compila a un solo archivo con todo dentro y se compila para cualquier servidor. PixelHop 2 necesitaba PHP, MySQL, Python y cron; PixelHop 3 solo se necesita a sí mismo.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="end">
+  <div class="wrap">
+    <img src="../logo.svg" alt="" width="84" height="84">
+    <h2>¡Manos a la obra!</h2>
+    <div class="cta"><a class="btn main" href="https://p.hel.ink">Subir una imagen</a><a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>GitHub</a></div>
+  </div>
+</section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span><b>PixelHop</b> · MIT · hecho por <a href="https://github.com/navi-crwn">navi-crwn</a></span>
+    <nav>
+      <a href="https://github.com/navi-crwn/pixelhop">GitHub</a>
+      <a href="https://github.com/navi-crwn/pixelhop/releases">Versiones</a>
+      <a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md">Audit</a>
+      <a href="https://github.com/navi-crwn/pixelhop/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://navi-crwn.github.io/hel.ink/">HEL.ink</a>
+      <a href="https://navi-crwn.github.io/amnesia/">Amnesia</a>
+    </nav>
+  </div>
+</footer>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>
