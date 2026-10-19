@@ -72,7 +72,7 @@
   - Guests get a private delete link for every image, also remembered in their browser.
   - Accounts add a gallery with search, sorting, renaming, bulk delete and a storage quota.
 - **🎨 Photo studio.**
-  - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in six languages (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
+  - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in 30 languages, several at once (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
   - On the server, for signed-in users (optional [`tools/ai-server.py`](tools/ai-server.py)): **background removal** in about a second (rembg), **automatic face blur** (OpenCV), **magic eraser** (LaMa) and **HD upscale 2×** (Real-ESRGAN). One image at a time, daily limits, nothing stored.
 - **📦 Batch.** Resize, convert, watermark, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
 - **💧 Watermark & compare.** Put your name or logo on images, and hold a button to compare with the original.

@@ -595,20 +595,76 @@
       document.head.appendChild(s);
     });
   }
+  // OCR languages: English first, the rest by English name. Tesseract reads
+  // several at once ("eng+jpn"); more languages make it slower, so we cap it.
+  var OCR_LANGS = [
+    ['eng', 'English'], ['ara', 'العربية', 'Arabic'], ['ben', 'বাংলা', 'Bengali'], ['chi_sim', '简体中文', 'Chinese (Simplified)'],
+    ['chi_tra', '繁體中文', 'Chinese (Traditional)'], ['ces', 'Čeština', 'Czech'], ['nld', 'Nederlands', 'Dutch'], ['fil', 'Filipino'],
+    ['fra', 'Français', 'French'], ['deu', 'Deutsch', 'German'], ['ell', 'Ελληνικά', 'Greek'], ['heb', 'עברית', 'Hebrew'],
+    ['hin', 'हिन्दी', 'Hindi'], ['ind', 'Bahasa Indonesia', 'Indonesian'], ['ita', 'Italiano', 'Italian'], ['jpn', '日本語', 'Japanese'],
+    ['kor', '한국어', 'Korean'], ['msa', 'Bahasa Melayu', 'Malay'], ['fas', 'فارسی', 'Persian'], ['pol', 'Polski', 'Polish'],
+    ['por', 'Português', 'Portuguese'], ['ron', 'Română', 'Romanian'], ['rus', 'Русский', 'Russian'], ['spa', 'Español', 'Spanish'],
+    ['swe', 'Svenska', 'Swedish'], ['tha', 'ไทย', 'Thai'], ['tur', 'Türkçe', 'Turkish'], ['ukr', 'Українська', 'Ukrainian'],
+    ['urd', 'اردو', 'Urdu'], ['vie', 'Tiếng Việt', 'Vietnamese']
+  ];
+  var OCR_COMMON = ['eng', 'chi_sim', 'deu', 'spa', 'fra', 'jpn', 'kor', 'por'];
+  var OCR_MAX = 5;
+  // browser language -> tesseract code, for a sensible first choice
+  var OCR_FROM_BROWSER = { ar: 'ara', bn: 'ben', zh: 'chi_sim', 'zh-tw': 'chi_tra', 'zh-hk': 'chi_tra', cs: 'ces', nl: 'nld', fil: 'fil', tl: 'fil',
+    fr: 'fra', de: 'deu', el: 'ell', he: 'heb', hi: 'hin', id: 'ind', it: 'ita', ja: 'jpn', ko: 'kor', ms: 'msa', fa: 'fas', pl: 'pol',
+    pt: 'por', ro: 'ron', ru: 'rus', es: 'spa', sv: 'swe', th: 'tha', tr: 'tur', uk: 'ukr', ur: 'urd', vi: 'vie' };
+  var ocrLangs = (function () {
+    var known = OCR_LANGS.map(function (l) { return l[0]; });
+    try {
+      var saved = JSON.parse(localStorage.getItem('ocrLangs') || 'null');
+      if (saved && saved.length) return saved.filter(function (c) { return known.indexOf(c) >= 0; }).slice(0, OCR_MAX);
+    } catch (e) {}
+    var nav = (navigator.language || '').toLowerCase(), extra = OCR_FROM_BROWSER[nav] || OCR_FROM_BROWSER[nav.split('-')[0]];
+    return extra ? ['eng', extra] : ['eng'];
+  })();
+  function ocrLangPicker() {
+    var wrap = el('div', { class: 'ocr-langs' }), grid = el('div', { class: 'lang-chips' }), showAll = false;
+    var summary = el('p', { class: 'small muted', style: 'margin:6px 0 0' });
+    function save() { try { localStorage.setItem('ocrLangs', JSON.stringify(ocrLangs)); } catch (e) {} }
+    function draw() {
+      grid.innerHTML = '';
+      OCR_LANGS.forEach(function (l) {
+        var on = ocrLangs.indexOf(l[0]) >= 0;
+        if (!showAll && !on && OCR_COMMON.indexOf(l[0]) < 0) return;
+        var b = el('button', { type: 'button', class: 'lang-chip', 'aria-pressed': String(on), title: l[2] || l[1], text: l[1] });
+        b.addEventListener('click', function () {
+          var i = ocrLangs.indexOf(l[0]);
+          if (i >= 0) { if (ocrLangs.length === 1) return toast('Pick at least one language', true); ocrLangs.splice(i, 1); }
+          else { if (ocrLangs.length >= OCR_MAX) return toast('Up to ' + OCR_MAX + ' languages at once', true); ocrLangs.push(l[0]); }
+          save(); draw();
+        });
+        grid.appendChild(b);
+      });
+      more.textContent = showAll ? 'Fewer languages' : 'More languages (' + OCR_LANGS.length + ')';
+      summary.textContent = 'Reading: ' + ocrLangs.map(function (c) { var l = OCR_LANGS.filter(function (x) { return x[0] === c; })[0]; return l[2] || l[1]; }).join(' + ') +
+        (ocrLangs.length > 2 ? ' · more languages read a little slower' : '');
+    }
+    var more = btn('', function () { showAll = !showAll; draw(); }, 'sm ghost');
+    wrap.appendChild(grid); wrap.appendChild(el('div', { style: 'margin-top:6px' }, [more])); wrap.appendChild(summary);
+    draw();
+    return wrap;
+  }
+
   tools.ocr = {
-    title: 'Image to text', desc: 'Read the text in a photo or screenshot. The reading model (about 10 MB per language) downloads once, then runs on your device.',
+    title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.',
     ui: function (p) {
-      var lang = 'eng+ind';
-      p.appendChild(field('Language', seg([['eng+ind', 'English + Indonesian'], ['eng', 'English'], ['jpn', '日本語'], ['chi_sim', '中文'], ['kor', '한국어'], ['ara', 'العربية']], lang, function (l) { lang = l; })));
+      p.appendChild(field('Languages in the image', ocrLangPicker(), 'pick up to ' + OCR_MAX));
       var outBox = el('textarea', { class: 'ocr-out', placeholder: 'The text will appear here.' });
       p.appendChild(btn('Read text', function () {
         busy('Loading the reader…');
         script(TESSERACT).then(function () {
-          return window.Tesseract.recognize(cur, lang, { logger: function (m) {
+          return window.Tesseract.recognize(cur, ocrLangs.join('+'), { logger: function (m) {
             if (m.status) busy(m.status.replace(/^\w/, function (c) { return c.toUpperCase(); }) + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
           } });
         }).then(function (r) {
-          outBox.value = r.data.text.trim() || '(no text found)'; busy(false);
+          // Tesseract spaces out Chinese and Japanese characters; join them again.
+          var text = r.data.text.replace(/([\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])[ \t]+(?=[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])/g, '$1');
+          outBox.value = text.trim() || '(no text found)'; busy(false);
         }).catch(function (e) { busy(false); toast(e.message || 'Reading failed', true); });
       }, 'primary'));
       p.appendChild(el('div', { style: 'margin-top:14px' }, [outBox]));
