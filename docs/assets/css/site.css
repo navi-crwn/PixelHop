@@ -38,7 +38,6 @@
 }
 
 /* language: show only the active one */
-html[lang=en] [data-id], html[lang=id] [data-en] { display: none !important; }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -83,7 +82,18 @@ section { padding: 110px 0 0; scroll-margin-top: 60px; }
 .theme svg { width: 18px; height: 18px; } .t-sun { display: none; }
 :root[data-theme=light] .t-sun { display: block; } :root[data-theme=light] .t-moon { display: none; }
 @media (prefers-color-scheme: light) { :root:not([data-theme]) .t-sun { display: block; } :root:not([data-theme]) .t-moon { display: none; } }
-.lang { display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.lang-menu { position: relative; }
+.lang-menu summary { list-style: none; display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font: 700 .78rem var(--mono); cursor: pointer; }
+.lang-menu summary::-webkit-details-marker { display: none; }
+.lang-menu summary::after, .lang-menu summary::before { content: none !important; display: none !important; }
+.lang-menu summary span { white-space: nowrap; }
+details.lang-menu { border: 0; padding: 0; margin: 0; background: none; }
+.lang-menu summary svg { width: 16px; height: 16px; }
+.lang-menu[open] summary, .lang-menu summary:hover { color: var(--text); }
+.lang-list { position: absolute; right: 0; top: calc(100% + 6px); min-width: 190px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 18px 40px rgba(0,0,0,.35); display: grid; z-index: 60; }
+.lang-list a { padding: 8px 10px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: .9rem; }
+.lang-list a:hover { background: var(--panel-2); }
+.lang-list a[aria-current] { color: var(--accent, var(--cyan)); font-weight: 700; }
 .lang button { border: 0; background: none; color: var(--muted); font: 700 .78rem var(--mono); padding: 0 10px; height: 34px; cursor: pointer; }
 .lang button[aria-pressed=true] { background: var(--panel-2); color: var(--text); }
 @media (max-width: 900px) { .nav-links { display: none; } }
