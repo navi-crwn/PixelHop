@@ -54,7 +54,7 @@
  "<b>Compress, resize, crop, convert</b> to JPG, PNG, WebP or AVIF, with live file size.": "JPG、PNG、WebP、AVIF への<b>圧縮・リサイズ・切り抜き・変換</b>。ファイルサイズをその場で表示。",
  "<b>Adjust &amp; rotate</b>: light, contrast, color, black &amp; white, flip.": "<b>補正と回転</b>：明るさ、コントラスト、色、白黒、反転。",
  "<b>Blur &amp; pixelate</b> faces, plates and names before you share.": "共有する前に、顔やナンバープレート、名前を<b>ぼかし・モザイク</b>。",
- "<b>Image to text</b> (OCR) in six languages, including English, Chinese, Japanese, Korean and Arabic.": "<b>画像からテキスト</b>（OCR）。英語、中国語、日本語、韓国語、アラビア語を含む 6 言語に対応。",
+ "<b>Image to text</b> (OCR) in 30 languages, several at once in the same image.": "<b>画像からテキスト</b>（OCR）。30 言語に対応し、1 枚の画像の中の複数言語をまとめて読み取れます。",
  "<b>Remove background</b> with an AI model that runs in the browser.": "ブラウザ内で動く AI モデルで<b>背景を削除</b>。",
  "<b>Color palette</b> and a <b>QR code generator</b> (PNG or SVG).": "<b>カラーパレット</b>と<b>QR コード生成</b>（PNG または SVG）。",
  "<b>On the server, for members:</b> background removal in a second, automatic face blur, a magic eraser and HD upscale 2×. Processed in memory, never stored.": "<b>サーバー上で、会員向けに：</b>1 秒で背景削除、顔の自動ぼかし、マジック消しゴム、2 倍の HD アップスケール。メモリ上で処理し、保存はしません。",

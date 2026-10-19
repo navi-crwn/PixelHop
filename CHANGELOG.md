@@ -2,6 +2,15 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [3.6.0] - 2026-10-19
+
+### Added
+- **Multi-language OCR.** "Image to text" reads 30 languages and up to five at once, for images that mix languages (for example an English receipt with Japanese or Spanish lines). Pick them as chips; the eight most common show first and "More languages" opens the rest. The choice is remembered, and the first time it starts with English plus your browser's language.
+
+### Changed
+- Chinese and Japanese text from OCR no longer has spaces between every character.
+- The project website is available in English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil) and Español.
+
 ## [3.5.3] - 2026-10-16
 
 ### Changed
