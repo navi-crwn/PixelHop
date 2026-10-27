@@ -26,6 +26,7 @@ const helinkCookie = "ph_helink"
 
 type helinkTicket struct {
 	Sub    string `json:"sub"`
+	Aud    string `json:"aud"` // the app the ticket is for; HEL.ink sends "pixelhop"
 	Email  string `json:"email"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
@@ -104,7 +105,8 @@ func parseTicket(raw, secret string, now time.Time) (*helinkTicket, error) {
 		return nil, errBadTicket
 	}
 	var t helinkTicket
-	if err := json.Unmarshal(js, &t); err != nil || t.Sub == "" || t.Email == "" || t.Jti == "" {
+	// A ticket made for another HEL.ink app (NoteHop…) is never valid here.
+	if err := json.Unmarshal(js, &t); err != nil || t.Sub == "" || t.Email == "" || t.Jti == "" || (t.Aud != "" && t.Aud != "pixelhop") {
 		return nil, errBadTicket
 	}
 	if t.Aud != "" && t.Aud != "pixelhop" { // v2 tickets name the app they are for
@@ -238,11 +240,15 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 
 // ---- Cloudflare Turnstile ----
 
-// turnstileOK checks the widget's answer. Without keys configured it always
-// passes, so development and self-hosting without Cloudflare keep working.
+// turnstileOK checks the widget's answer. Without keys configured it passes,
+// so development and self-hosting without Cloudflare keep working, except
+// when accounts come from HEL.ink: then the password forms check HEL.ink
+// passwords and must not run unprotected ("Continue with HEL.ink" still works).
+var turnstileVerifyURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
 func (a *App) turnstileOK(r *http.Request) bool {
 	if !a.cfg.TurnstileEnabled() {
-		return true
+		return !a.cfg.SSOEnabled()
 	}
 	tok := r.FormValue("cf-turnstile-response")
 	if tok == "" || len(tok) > 2048 {
@@ -251,7 +257,7 @@ func (a *App) turnstileOK(r *http.Request) bool {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 	form := url.Values{"secret": {a.cfg.TurnstileSecret}, "response": {tok}, "remoteip": {clientIP(r)}}
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "https://challenges.cloudflare.com/turnstile/v0/siteverify", strings.NewReader(form.Encode()))
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, turnstileVerifyURL, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
