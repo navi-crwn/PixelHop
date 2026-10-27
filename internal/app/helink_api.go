@@ -23,6 +23,7 @@ import (
 // signed with the shared secret), so one account works in both apps and
 // nobody has to visit HEL.ink first. People with two-factor codes are sent
 // through the normal "Continue with HEL.ink" flow, which asks for the code.
+// Nobody gets in (or can upload) before confirming their email on HEL.ink.
 
 type helinkAccount struct {
 	Sub      string `json:"sub"`
@@ -110,6 +111,10 @@ func (a *App) helinkLogin(r *http.Request, email, password string) (u *db.User, 
 		return nil, "", true
 	case ans.Code == "suspended":
 		return nil, "This account is suspended.", false
+	case ans.Code == "unverified":
+		return nil, confirmEmailMsg(email), false
+	case ans.Code == "banned":
+		return nil, "Sign-in is blocked from your network.", false
 	case ans.Code == "too_many_attempts" || ans.Status == http.StatusTooManyRequests:
 		return nil, "Too many attempts. Please wait a few minutes and try again.", false
 	default:
@@ -118,7 +123,7 @@ func (a *App) helinkLogin(r *http.Request, email, password string) (u *db.User, 
 	u, err = a.accountFromHelink(r.Context(), ans.Account)
 	if err != nil {
 		if errors.Is(err, errNeedsVerifiedEmail) {
-			return nil, "Confirm your email first: open the link HEL.ink sent to " + ans.Account.Email + ", then sign in again.", false
+			return nil, confirmEmailMsg(ans.Account.Email), false
 		}
 		a.log.Error("helink login", "err", err)
 		return nil, "Sign-in failed on our side. Please try again.", false
@@ -128,28 +133,25 @@ func (a *App) helinkLogin(r *http.Request, email, password string) (u *db.User, 
 
 var errNeedsVerifiedEmail = errors.New("email not confirmed")
 
-// accountFromHelink links a HEL.ink account to its PixelHop profile. An
-// unconfirmed address may only reach a profile that is already linked to
-// that HEL.ink account, or start a new one; it never takes over an existing
-// profile with the same email.
-func (a *App) accountFromHelink(ctx context.Context, acc *helinkAccount) (*db.User, error) {
-	t := &helinkTicket{Sub: acc.Sub, Email: acc.Email, Name: acc.Name, Avatar: acc.Avatar, Admin: acc.Admin}
-	if !acc.Verified {
-		if _, err := a.db.UserByHelink(ctx, acc.Sub); errors.Is(err, db.ErrNotFound) {
-			if _, err := a.db.UserByEmail(ctx, acc.Email); err == nil {
-				return nil, errNeedsVerifiedEmail
-			}
-		}
-		t.Admin = false // HEL.ink's owner always has a confirmed address
-	}
-	return a.linkHelinkUser(ctx, t)
+func confirmEmailMsg(email string) string {
+	return "Confirm your email first: open the link HEL.ink sent to " + email + ", then sign in again."
 }
 
-// helinkRegister creates the account on HEL.ink (which emails a
-// confirmation link) and its PixelHop profile, already signed in here.
-func (a *App) helinkRegister(r *http.Request, name, email, password string) (*db.User, string) {
+// accountFromHelink links a confirmed HEL.ink account to its PixelHop
+// profile. HEL.ink already refuses unconfirmed accounts; this is the second lock.
+func (a *App) accountFromHelink(ctx context.Context, acc *helinkAccount) (*db.User, error) {
+	if !acc.Verified {
+		return nil, errNeedsVerifiedEmail
+	}
+	return a.linkHelinkUser(ctx, &helinkTicket{Sub: acc.Sub, Email: acc.Email, Name: acc.Name, Avatar: acc.Avatar, Admin: acc.Admin})
+}
+
+// helinkRegister creates the account on HEL.ink, which emails a
+// confirmation link. The PixelHop profile is made at the first sign-in after
+// the address is confirmed. It returns a notice on success, else an error.
+func (a *App) helinkRegister(r *http.Request, name, email, password string) (notice, errMsg string) {
 	if _, err := a.db.UserByEmail(r.Context(), email); err == nil {
-		return nil, "An account with this email already exists. Sign in instead."
+		return "", "An account with this email already exists. Sign in instead."
 	}
 	if name == "" {
 		name, _, _ = strings.Cut(email, "@")
@@ -157,18 +159,13 @@ func (a *App) helinkRegister(r *http.Request, name, email, password string) (*db
 	ans, err := a.helinkCall(r.Context(), "/api/pixelhop/register", map[string]any{
 		"name": name, "email": email, "password": password, "tos_accepted": true, "ip": clientIP(r)})
 	if err != nil {
-		return nil, "We couldn't reach HEL.ink to create your account. Please try again in a minute."
+		return "", "We couldn't reach HEL.ink to create your account. Please try again in a minute."
 	}
 	if ans.Status != http.StatusCreated {
 		if ans.Message != "" {
-			return nil, ans.Message
+			return "", ans.Message
 		}
-		return nil, "We couldn't create that account. Please check the details and try again."
+		return "", "We couldn't create that account. Please check the details and try again."
 	}
-	u, err := a.accountFromHelink(r.Context(), ans.Account)
-	if err != nil {
-		a.log.Error("helink register", "err", err)
-		return nil, "Your account was made, but signing in failed. Please sign in."
-	}
-	return u, ""
+	return "Account created. Open the link HEL.ink sent to " + email + " to confirm your email, then sign in.", ""
 }

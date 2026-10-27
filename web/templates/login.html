@@ -5,6 +5,7 @@
       <h1>Welcome back</h1>
       <p class="sub">Sign in to see your gallery, albums and API keys.</p>
       {{with $f.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
+      {{with $f.Notice}}<div class="alert ok" role="status">{{.}}</div>{{end}}
       {{if $f.SSO}}<p class="one-account"><svg width="16" height="16"><use href="#i-users"/></svg><span><b>One account, two apps.</b> An account made on {{$.Site}} or on HEL.ink works on both, with the same email and password.</span></p>{{end}}
       <form method="post" action="/login">
         <input type="hidden" name="next" value="{{$f.Next}}">
