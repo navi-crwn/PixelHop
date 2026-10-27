@@ -50,6 +50,9 @@ type Config struct {
 	// HOP App Protocol: which callers may use the signed /hop/* admin API
 	// (slugs sent in X-HOP-App, signed with HelinkSecret).
 	HopAdminClients []string
+	// ControlURL is where the HOP control center lives. When set, /admin
+	// sends admins there; the built-in admin pages are gone.
+	ControlURL string
 
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
@@ -144,6 +147,7 @@ func Load() (*Config, error) {
 			c.HopAdminClients = append(c.HopAdminClients, s)
 		}
 	}
+	c.ControlURL = strings.TrimRight(env("PIXELHOP_CONTROL_URL", ""), "/")
 	c.TurnstileSiteKey = env("TURNSTILE_SITE_KEY", "")
 	c.TurnstileSecret = env("TURNSTILE_SECRET_KEY", "")
 	c.RembgURL = strings.TrimRight(env("PIXELHOP_REMBG_URL", ""), "/")

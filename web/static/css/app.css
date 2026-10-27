@@ -465,10 +465,6 @@ th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: u
 td form { display: inline-flex; gap: 6px; align-items: center; }
 td select, td input { height: 32px; font-size: .85rem; width: auto; }
 .mini-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--panel-2); }
-.admin-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 22px; padding: 4px; border-radius: 13px; background: var(--panel); border: 1px solid var(--line); width: fit-content; }
-.admin-nav a { padding: 7px 14px; border-radius: 9px; color: var(--muted); font-weight: 600; font-size: .9rem; }
-.admin-nav a[aria-current] { background: var(--panel-2); color: var(--text); }
-.admin-nav a:hover { text-decoration: none; color: var(--text); }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
 .kpi b { display: block; font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
