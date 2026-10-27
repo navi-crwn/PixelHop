@@ -226,8 +226,13 @@ func (a *App) adminUserUpdate(w http.ResponseWriter, r *http.Request) {
 			if st != "active" {
 				a.db.DeleteUserSessions(ctx, u.ID)
 			}
-			// Suspended accounts' images go offline; anything else brings them back.
-			a.db.ExecContext(ctx, `UPDATE images SET hidden=? WHERE user_id=?`, st == "suspended", u.ID)
+			// Suspended accounts' images go offline; anything else brings back
+			// the ones the suspension hid (not what moderation removed).
+			if st == "suspended" {
+				a.db.SuspendUserImages(ctx, u.ID)
+			} else {
+				a.db.RestoreUserImages(ctx, u.ID)
+			}
 		}
 	case action == "role":
 		role := r.FormValue("role")
@@ -269,7 +274,7 @@ func (a *App) adminUserUpdate(w http.ResponseWriter, r *http.Request) {
 			a.db.DeleteUserSessions(ctx, u.ID)
 		}
 	case action == "delete":
-		a.purgeUser(r, u)
+		a.purgeUser(ctx, u)
 		done = "delete"
 	default:
 		problem = "bad-value"

@@ -80,6 +80,7 @@
 - **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
 - **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
 - **👤 Own accounts, or HEL.ink sign-in** (optional add-on). PixelHop has its own sign-up, passwords and Google sign-in and needs nothing else. Only if you also run [HEL.ink](https://github.com/navi-crwn/hel.ink) can you set `HELINK_URL` and `HELINK_SSO_SECRET` to let people use one account for both; leave them empty and PixelHop never contacts HEL.ink.
+  - **HOP App Protocol.** With HEL.ink sign-in on, PixelHop also serves the signed admin API under `/hop/*` (health, manifest, stats, user 360 and actions, profile and account events pushed by HEL.ink, content and report moderation, settings, search, metrics, audit trail). Calls are signed with the same `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` (default `imperium,helink`) lists the app slugs allowed to call it. Every change made this way is kept in the `hop_audit` table.
 - **🔌 API & ShareX.**
   - A REST API with `Bearer` keys.
   - The settings page makes a ready-to-use `.sxcu` file for ShareX.
@@ -143,6 +144,7 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
 | `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
 | `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
+| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App slugs allowed to call the signed `/hop/*` admin API (HOP App Protocol) |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
 | `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
 | `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |

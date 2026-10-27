@@ -137,4 +137,3 @@ func TestHelinkRejectsBadTickets(t *testing.T) {
 		t.Errorf("missing cookie: accepted (%d)", rec.Code)
 	}
 }
-
