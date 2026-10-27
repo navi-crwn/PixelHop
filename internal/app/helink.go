@@ -39,7 +39,6 @@ type helinkTicket struct {
 	// Ticket v2 (HOP App Protocol). Roles decide the local role when present
 	// (promotion and demotion); Admin is only a fallback for v1 tickets. The
 	// profile fields are copied when sent, since HOP ID owns the profile.
-	Aud            string   `json:"aud,omitempty"`
 	V              int      `json:"v,omitempty"`
 	Username       string   `json:"username,omitempty"`
 	Roles          []string `json:"roles"` // nil = absent (v1); [] = no roles (demotes)
@@ -107,9 +106,6 @@ func parseTicket(raw, secret string, now time.Time) (*helinkTicket, error) {
 	var t helinkTicket
 	// A ticket made for another HEL.ink app (NoteHop…) is never valid here.
 	if err := json.Unmarshal(js, &t); err != nil || t.Sub == "" || t.Email == "" || t.Jti == "" || (t.Aud != "" && t.Aud != "pixelhop") {
-		return nil, errBadTicket
-	}
-	if t.Aud != "" && t.Aud != "pixelhop" { // v2 tickets name the app they are for
 		return nil, errBadTicket
 	}
 	n := now.Unix()
