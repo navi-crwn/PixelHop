@@ -118,6 +118,8 @@ func TestHelinkRejectsBadTickets(t *testing.T) {
 	expired := ticketFor(state)
 	expired.Iat, expired.Exp = time.Now().Add(-10*time.Minute).Unix(), time.Now().Add(-8*time.Minute).Unix()
 	wrongState := ticketFor("someone-elses-state-value")
+	otherApp := ticketFor(state)
+	otherApp.Aud = "notehop"
 	good := signTicket(ticketFor(state), testSecret)
 	tampered := strings.Replace(good, good[5:9], "AAAA", 1)
 
@@ -125,6 +127,7 @@ func TestHelinkRejectsBadTickets(t *testing.T) {
 		"wrong secret": signTicket(ticketFor(state), "another-secret-that-is-long-enough-000000"),
 		"expired":      signTicket(expired, testSecret),
 		"wrong state":  signTicket(wrongState, testSecret),
+		"other app":    signTicket(otherApp, testSecret),
 		"tampered":     tampered,
 		"garbage":      "not-a-ticket",
 	} {
