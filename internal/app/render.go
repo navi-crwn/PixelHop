@@ -244,6 +244,10 @@ func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
+	a.writeMetrics(w, r)
+}
+
+func (a *App) writeMetrics(w http.ResponseWriter, r *http.Request) {
 	s := a.db.Stats(r.Context())
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 	fmt.Fprintf(w, "pixelhop_images %d\npixelhop_bytes %d\npixelhop_views %d\npixelhop_users %d\npixelhop_albums %d\npixelhop_open_reports %d\n",

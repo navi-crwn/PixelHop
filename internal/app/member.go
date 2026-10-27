@@ -2,6 +2,7 @@ package app
 
 import (
 	"archive/zip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -177,7 +178,7 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, "settings", "Settings", d)
 		return
 	}
-	a.purgeUser(r, u)
+	a.purgeUser(r.Context(), u)
 	a.logout(w, r)
 }
 
@@ -188,20 +189,23 @@ func (a *App) ackWarning(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeNext(r.FormValue("back")), http.StatusSeeOther)
 }
 
-// purgeUser deletes an account and every image it uploaded.
-func (a *App) purgeUser(r *http.Request, u *db.User) {
-	ctx := r.Context()
+// purgeUser deletes an account and every image it uploaded. Albums, API
+// keys, webhooks and sessions go with the account (foreign keys cascade).
+func (a *App) purgeUser(ctx context.Context, u *db.User) (images int) {
 	for {
 		ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Limit: 200})
 		if err != nil || len(ims) == 0 {
 			break
 		}
 		for _, im := range ims {
-			a.removeImage(ctx, im)
+			if a.removeImage(ctx, im) == nil {
+				images++
+			}
 		}
 	}
 	a.db.DeleteUser(ctx, u.ID)
 	a.db.DeleteEmptyAlbums(ctx)
+	return images
 }
 
 // downloadZip streams the chosen images (your own) as one ZIP file.
