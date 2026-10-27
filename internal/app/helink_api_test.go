@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -40,6 +42,11 @@ func fakeHelink(t *testing.T, accounts map[string]map[string]any) *httptest.Serv
 				w.Write([]byte(`{"error":"bad_credentials"}`))
 				return
 			}
+			if acc["verified"] != true {
+				w.WriteHeader(403)
+				w.Write([]byte(`{"error":"unverified"}`))
+				return
+			}
 			if acc["2fa"] == true {
 				w.WriteHeader(409)
 				w.Write([]byte(`{"error":"two_factor"}`))
@@ -65,6 +72,7 @@ func apiSSOApp(t *testing.T, helinkURL string) (*App, http.Handler) {
 	t.Setenv("PIXELHOP_BASE_URL", "https://p.example.com")
 	t.Setenv("HELINK_URL", helinkURL)
 	t.Setenv("HELINK_SSO_SECRET", testSecret)
+	fakeTurnstile(t)
 	cfg, err := config.Load()
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +89,25 @@ func apiSSOApp(t *testing.T, helinkURL string) (*App, http.Handler) {
 	return a, a.Handler()
 }
 
+// fakeTurnstile switches Turnstile on and answers siteverify: tokens other than "pass" fail.
+func fakeTurnstile(t *testing.T) {
+	t.Setenv("TURNSTILE_SITE_KEY", "site")
+	t.Setenv("TURNSTILE_SECRET_KEY", "secret")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		json.NewEncoder(w).Encode(map[string]bool{"success": r.FormValue("response") == "pass"})
+	}))
+	old := turnstileVerifyURL
+	turnstileVerifyURL = srv.URL
+	t.Cleanup(func() { turnstileVerifyURL = old; srv.Close() })
+}
+
+// postForm posts a form that passed the Turnstile check, unless it names its own token.
 func postForm(h http.Handler, path string, v url.Values) *httptest.ResponseRecorder {
+	if !v.Has("cf-turnstile-response") {
+		v = url.Values(maps.Clone(v))
+		v.Set("cf-turnstile-response", "pass")
+	}
 	req := httptest.NewRequest("POST", path, strings.NewReader(v.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
@@ -122,10 +148,32 @@ func TestPasswordLoginWithHelinkAccount(t *testing.T) {
 	if rec := postForm(h, "/login", url.Values{"email": {"tf@example.com"}, "password": {"random123"}}); rec.Code != http.StatusSeeOther || !strings.HasPrefix(rec.Header().Get("Location"), "/auth/helink") {
 		t.Fatalf("two-factor accounts go through HEL.ink: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
-	// An unconfirmed HEL.ink address never takes over an existing profile with that email.
-	a.db.InsertUser(t.Context(), &db.User{Email: "new@example.com", QuotaBytes: 1 << 20})
+	// An unconfirmed HEL.ink address is not signed in until it is confirmed.
 	if rec := postForm(h, "/login", url.Values{"email": {"new@example.com"}, "password": {"random123"}}); hasSession(rec) || !strings.Contains(rec.Body.String(), "Confirm your email") {
-		t.Fatalf("unconfirmed takeover: %d", rec.Code)
+		t.Fatalf("unconfirmed sign-in: %d", rec.Code)
+	}
+	if _, err := a.db.UserByEmail(t.Context(), "new@example.com"); err == nil {
+		t.Fatal("no profile before the email is confirmed")
+	}
+	// The security check is required.
+	if rec := postForm(h, "/login", url.Values{"email": {"tim@example.com"}, "password": {"random123"}, "cf-turnstile-response": {"nope"}}); hasSession(rec) {
+		t.Fatal("login without passing Turnstile")
+	}
+}
+
+func TestUnverifiedAccountNeverSignsIn(t *testing.T) {
+	// Even if HEL.ink answered with an unconfirmed account, PixelHop doesn't use it.
+	a, _ := apiSSOApp(t, "https://hel.example.com")
+	if _, err := a.accountFromHelink(t.Context(), &helinkAccount{Sub: "7", Email: "u@example.com", Verified: false}); !errors.Is(err, errNeedsVerifiedEmail) {
+		t.Fatalf("unverified account accepted: %v", err)
+	}
+}
+
+func TestSSOWithoutTurnstileKeysFailsClosed(t *testing.T) {
+	a, _ := apiSSOApp(t, "https://hel.example.com")
+	a.cfg.TurnstileSiteKey, a.cfg.TurnstileSecret = "", ""
+	if a.turnstileOK(httptest.NewRequest("POST", "/login", nil)) {
+		t.Fatal("password forms must not run unprotected while HEL.ink accounts are on")
 	}
 }
 
@@ -143,17 +191,21 @@ func TestRegisterCreatesHelinkAccount(t *testing.T) {
 	}
 	v.Set("tos", "1")
 	rec := postForm(h, "/register", v)
-	if rec.Code != http.StatusSeeOther || !hasSession(rec) {
-		t.Fatalf("register: %d %s", rec.Code, rec.Body.String())
+	if hasSession(rec) || !strings.Contains(rec.Body.String(), "confirm your email") {
+		t.Fatalf("sign-up must wait for the email to be confirmed: %d %s", rec.Code, rec.Body.String())
 	}
 	if accounts["cs@example.com"] == nil {
 		t.Fatal("the account must be made on HEL.ink")
 	}
+	if rec := postForm(h, "/login", url.Values{"email": {"cs@example.com"}, "password": {"a-strong-pass"}}); hasSession(rec) {
+		t.Fatal("login before confirming the email")
+	}
+	// Once the email is confirmed on HEL.ink, signing in works and links the profile.
+	accounts["cs@example.com"]["verified"] = true
+	if rec := postForm(h, "/login", url.Values{"email": {"cs@example.com"}, "password": {"a-strong-pass"}}); !hasSession(rec) {
+		t.Fatalf("login after confirming: %d", rec.Code)
+	}
 	if u, err := a.db.UserByEmail(t.Context(), "cs@example.com"); err != nil || u.HelinkID.String != "500" {
 		t.Fatalf("profile: %+v %v", u, err)
-	}
-	// and signing in again later with the same password works
-	if rec := postForm(h, "/login", url.Values{"email": {"cs@example.com"}, "password": {"a-strong-pass"}}); !hasSession(rec) {
-		t.Fatalf("login after sign-up: %d", rec.Code)
 	}
 }

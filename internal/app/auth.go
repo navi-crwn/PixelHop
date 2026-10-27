@@ -169,6 +169,7 @@ func safeNext(next string) string {
 
 type authForm struct {
 	Email, Name, Next, Error string
+	Notice                   string
 	Google, Registration     bool
 	SSO                      bool   // accounts come from HEL.ink
 	Helink                   string // HEL.ink base URL
@@ -288,13 +289,10 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 	}
 	if f.Error == "" && a.cfg.SSOEnabled() {
 		// The account lives on HEL.ink, so it works in both apps.
-		u, msg := a.helinkRegister(r, f.Name, strings.ToLower(f.Email), pw)
-		if u != nil {
-			if err := a.startSession(w, r, u); err != nil {
-				a.serverError(w, r, err)
-				return
-			}
-			http.Redirect(w, r, "/dashboard?welcome=1", http.StatusSeeOther)
+		notice, msg := a.helinkRegister(r, f.Name, strings.ToLower(f.Email), pw)
+		if notice != "" {
+			f.Notice = notice
+			a.render(w, r, "login", "Sign in", f)
 			return
 		}
 		f.Error = msg
