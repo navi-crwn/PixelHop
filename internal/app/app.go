@@ -1,5 +1,5 @@
 // Package app is PixelHop's web server: pages, the JSON API, image delivery
-// and the admin panel, all served from one process.
+// and the signed admin API, all served from one process.
 package app
 
 import (
@@ -11,6 +11,7 @@ import (
 
 	"github.com/navi-crwn/pixelhop/internal/config"
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/hop"
 	"github.com/navi-crwn/pixelhop/internal/storage"
 	"github.com/navi-crwn/pixelhop/web"
 )
@@ -31,11 +32,14 @@ type App struct {
 
 	mediaQueue chan string // videos waiting to be optimised
 	chunks     *chunkStore // uploads that arrive in pieces
+
+	hopNonces hop.Nonces // signed admin API: each request works once
+	started   time.Time
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
 	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour),
-		mediaQueue: make(chan string, 256), chunks: newChunkStore()}
+		mediaQueue: make(chan string, 256), chunks: newChunkStore(), started: time.Now()}
 
 	local, err := storage.NewLocal(cfg.DataDir + "/images")
 	if err != nil {
@@ -129,19 +133,14 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /settings/delete-account", a.member(a.deleteAccount))
 	mux.HandleFunc("POST /settings/ack-warning", a.member(a.ackWarning))
 
-	// admin
-	mux.HandleFunc("GET /admin", a.admin(a.adminHome))
-	mux.HandleFunc("GET /admin/images", a.admin(a.adminImages))
-	mux.HandleFunc("GET /admin/users", a.admin(a.adminUsers))
-	mux.HandleFunc("POST /admin/users/{id}", a.admin(a.adminUserUpdate))
-	mux.HandleFunc("GET /admin/reports", a.admin(a.adminReports))
-	mux.HandleFunc("POST /admin/reports/{id}", a.admin(a.adminReportAction))
-	mux.HandleFunc("GET /admin/bans", a.admin(a.adminBans))
-	mux.HandleFunc("POST /admin/bans", a.admin(a.adminBan))
-	mux.HandleFunc("POST /admin/bans/delete", a.admin(a.adminUnban))
-	mux.HandleFunc("GET /admin/settings", a.admin(a.adminSettings))
-	mux.HandleFunc("POST /admin/settings", a.admin(a.adminSaveSettings))
-	mux.HandleFunc("POST /admin/images/{id}", a.admin(a.adminImageAction))
+	// The built-in admin pages are retired: moderation and settings happen
+	// in the HOP control center through /hop/*. Admins who still open /admin
+	// are sent there (or told where to go).
+	mux.HandleFunc("GET /admin", a.admin(a.adminRetired))
+	mux.HandleFunc("GET /admin/{rest...}", a.admin(a.adminRetired))
+
+	// HOP App Protocol: signed calls from the control center and HOP ID
+	a.hopRoutes(mux)
 
 	// JSON API (session cookie or API key)
 	mux.HandleFunc("POST /api/v1/upload", a.apiUpload)

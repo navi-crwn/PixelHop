@@ -39,6 +39,9 @@ type Image struct {
 	Private    bool   // only the owner (and admins) can see it
 	PassHash   string // "" or a password visitors must enter
 	Position   int    // order inside its album
+	// HiddenReason says why Hidden is set: "suspended" (owner's account) or
+	// "moderation" (an admin removed this image). "" when not hidden.
+	HiddenReason string
 }
 
 // Kind is "image", "video" or "pdf".
@@ -61,14 +64,14 @@ func (im *Image) Locked() bool { return im.Private || im.PassHash != "" }
 
 const imageCols = `id,user_id,album_id,owner_token,title,orig_name,mime,ext,size,width,height,sha256,color,
 backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed,
-alt,stripped,private,pass_hash,position`
+alt,stripped,private,pass_hash,position,hidden_reason`
 
 func scanImage(row interface{ Scan(...any) error }) (*Image, error) {
 	var im Image
 	err := row.Scan(&im.ID, &im.UserID, &im.AlbumID, &im.OwnerToken, &im.Title, &im.OrigName, &im.Mime, &im.Ext,
 		&im.Size, &im.Width, &im.Height, &im.SHA256, &im.Color, &im.Backend, &im.KeyFull, &im.KeyThumb,
 		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt, &im.Listed,
-		&im.Alt, &im.Stripped, &im.Private, &im.PassHash, &im.Position)
+		&im.Alt, &im.Stripped, &im.Private, &im.PassHash, &im.Position, &im.HiddenReason)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -79,10 +82,10 @@ func (d *DB) InsertImage(ctx context.Context, im *Image) error {
 	if im.CreatedAt == 0 {
 		im.CreatedAt = now()
 	}
-	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		im.ID, im.UserID, im.AlbumID, im.OwnerToken, im.Title, im.OrigName, im.Mime, im.Ext, im.Size, im.Width, im.Height,
 		im.SHA256, im.Color, im.Backend, im.KeyFull, im.KeyThumb, im.Views, im.LastViewed, im.IP, im.Hidden,
-		im.CreatedAt, im.ExpiresAt, im.Listed, im.Alt, im.Stripped, im.Private, im.PassHash, im.Position)
+		im.CreatedAt, im.ExpiresAt, im.Listed, im.Alt, im.Stripped, im.Private, im.PassHash, im.Position, im.HiddenReason)
 	return err
 }
 
@@ -188,8 +191,42 @@ func (d *DB) DeleteImage(ctx context.Context, id string) error {
 	return err
 }
 
+// SetImageHidden removes an image from view (moderation) or brings it back.
 func (d *DB) SetImageHidden(ctx context.Context, id string, hidden bool) error {
-	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=? WHERE id=?`, hidden, id)
+	reason := ""
+	if hidden {
+		reason = "moderation"
+	}
+	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=?, hidden_reason=? WHERE id=?`, hidden, reason, id)
+	return err
+}
+
+// SuspendUserImages takes a suspended account's images offline. Images
+// moderation already removed keep their reason.
+func (d *DB) SuspendUserImages(ctx context.Context, userID int64) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=1, hidden_reason='suspended' WHERE user_id=? AND hidden=0`, userID)
+	return err
+}
+
+// RestoreUserImages brings back only the images hidden by a suspension;
+// anything moderation removed stays hidden.
+func (d *DB) RestoreUserImages(ctx context.Context, userID int64) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET hidden=0, hidden_reason='' WHERE user_id=? AND hidden=1 AND hidden_reason='suspended'`, userID)
+	return err
+}
+
+// SetImageOwner moves an image to another account.
+func (d *DB) SetImageOwner(ctx context.Context, id string, userID int64) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET user_id=?, album_id=NULL, listed=0 WHERE id=?`, userID, id)
+	return err
+}
+
+// SetAlbumOwner moves an album and everything in it to another account.
+func (d *DB) SetAlbumOwner(ctx context.Context, id string, userID int64) error {
+	if _, err := d.ExecContext(ctx, `UPDATE images SET user_id=?, listed=0 WHERE album_id=?`, userID, id); err != nil {
+		return err
+	}
+	_, err := d.ExecContext(ctx, `UPDATE albums SET user_id=? WHERE id=?`, userID, id)
 	return err
 }
 

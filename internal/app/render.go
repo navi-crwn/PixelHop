@@ -36,6 +36,7 @@ type page struct {
 	Google        bool
 	SSO           bool   // accounts come from HEL.ink
 	Helink        string // HEL.ink base URL
+	Control       string // HOP control center, shown to admins when configured
 	Turnstile     string // Turnstile site key, when forms are protected
 	RembgServer   bool   // background removal can run on the server
 	GuestUploads  bool
@@ -110,6 +111,9 @@ func (a *App) base(r *http.Request, p page) page {
 	p.Google = a.cfg.GoogleEnabled()
 	p.SSO = a.cfg.SSOEnabled()
 	p.Helink = a.cfg.HelinkURL
+	if p.User != nil && p.User.IsAdmin() {
+		p.Control = a.cfg.ControlURL
+	}
 	if a.cfg.TurnstileEnabled() {
 		p.Turnstile = a.cfg.TurnstileSiteKey
 	}
@@ -244,6 +248,10 @@ func (a *App) metrics(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
+	a.writeMetrics(w, r)
+}
+
+func (a *App) writeMetrics(w http.ResponseWriter, r *http.Request) {
 	s := a.db.Stats(r.Context())
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 	fmt.Fprintf(w, "pixelhop_images %d\npixelhop_bytes %d\npixelhop_views %d\npixelhop_users %d\npixelhop_albums %d\npixelhop_open_reports %d\n",
