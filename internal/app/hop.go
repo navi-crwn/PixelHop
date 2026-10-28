@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/netip"
 	"os"
 	"strconv"
 	"strings"
@@ -57,6 +58,8 @@ func (a *App) hopRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /hop/settings", a.hopAuth(a.hopPutSettings))
 	mux.HandleFunc("GET /hop/search", a.hopAuth(a.hopSearch))
 	mux.HandleFunc("GET /hop/metrics", a.hopAuth(a.writeMetrics))
+	mux.HandleFunc("GET /hop/x/ip", a.hopAuth(a.hopIPBans))
+	mux.HandleFunc("POST /hop/x/ip/actions", a.hopAuth(a.hopIPBanAction))
 	mux.HandleFunc("GET /hop/audit", a.hopAuth(a.hopAudit))
 	mux.HandleFunc("/hop/", a.hopAuth(func(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusNotFound, "not_found", "No such endpoint.")
@@ -265,6 +268,7 @@ func (a *App) hopManifest(w http.ResponseWriter, r *http.Request) {
 			{"type": "album", "label": "Albums", "actions": []string{"delete", "transfer"}},
 		},
 		"settings_schema": hopSettingSchema,
+		"extensions":      []string{"ip"},
 		"actions": map[string]any{
 			"user":    []string{"suspend", "lock", "activate", "revoke_sessions", "revoke_keys", "set_quota", "warn", "purge", "export"},
 			"report":  []string{"dismiss", "resolve", "delete"},
@@ -299,13 +303,19 @@ func (a *App) hopStats(w http.ResponseWriter, r *http.Request) {
 	if a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true" {
 		guest = 1
 	}
+	kpi := map[string]any{
+		"users": s.Users, "images": images, "videos": videos, "pdfs": pdfs, "content": s.Images,
+		"albums": s.Albums, "bytes": s.Bytes, "views": s.Views,
+		"uploads_today": byDay[today.Format("2006-01-02")].Count,
+		"open_reports":  s.OpenReports, "bans": s.Bans, "guest_uploads": guest,
+	}
+	if a.store.Name() == "local" {
+		if free, total := diskSpace(a.cfg.DataDir); total > 0 {
+			kpi["disk_free_bytes"], kpi["disk_total_bytes"] = free, total
+		}
+	}
 	hopOK(w, map[string]any{
-		"kpi": map[string]any{
-			"users": s.Users, "images": images, "videos": videos, "pdfs": pdfs, "content": s.Images,
-			"albums": s.Albums, "bytes": s.Bytes, "views": s.Views,
-			"uploads_today": byDay[today.Format("2006-01-02")].Count,
-			"open_reports":  s.OpenReports, "bans": s.Bans, "guest_uploads": guest,
-		},
+		"kpi":    kpi,
 		"series": map[string]any{"uploads": uploads, "bytes": bytes},
 		"step":   "day",
 	})
@@ -841,6 +851,55 @@ func (a *App) hopContentAction(w http.ResponseWriter, r *http.Request) {
 	}
 	a.audit(r, "content."+q.Action, typ+":"+id, detail)
 	hopOK(w, map[string]any{"id": id, "type": typ, "action": q.Action, "done": true})
+}
+
+// ---- IP bans (extension "ip") ----
+
+// GET /hop/x/ip: the banned addresses, newest first.
+func (a *App) hopIPBans(w http.ResponseWriter, r *http.Request) {
+	bans, err := a.db.Bans(r.Context())
+	if err != nil {
+		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
+		return
+	}
+	rows := make([]map[string]any, 0, len(bans))
+	for _, b := range bans {
+		rows = append(rows, map[string]any{"ip": b.IP, "reason": b.Reason, "created_at": isoTime(b.CreatedAt)})
+	}
+	hopOK(w, map[string]any{"bans": rows})
+}
+
+// POST /hop/x/ip/actions {action: ban|unban, reason, params: {ip, reason}}
+func (a *App) hopIPBanAction(w http.ResponseWriter, r *http.Request) {
+	var q hopActionRequest
+	if !hopJSON(w, r, &q) {
+		return
+	}
+	ip, err := netip.ParseAddr(strings.TrimSpace(q.str("ip")))
+	if err != nil {
+		hopFail(w, http.StatusBadRequest, "bad_params", "params.ip must be an IP address.")
+		return
+	}
+	reason := trim(strings.TrimSpace(q.str("reason")), 300)
+	if reason == "" {
+		reason = trim(strings.TrimSpace(q.Reason), 300)
+	}
+	switch q.Action {
+	case "ban":
+		err = a.db.Ban(r.Context(), ip.String(), reason)
+	case "unban":
+		err = a.db.Unban(r.Context(), ip.String())
+	default:
+		hopFail(w, http.StatusBadRequest, "unknown_action", "ban or unban.")
+		return
+	}
+	if err != nil {
+		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
+		return
+	}
+	a.invalidateBans()
+	a.audit(r, "ip."+q.Action, "ip:"+ip.String(), map[string]any{"reason": reason})
+	hopOK(w, map[string]any{"ip": ip.String(), "action": q.Action, "done": true})
 }
 
 // ---- reports ----
