@@ -35,7 +35,7 @@
       <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>Explore</a>
       {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>Dashboard</a>{{end}}
       <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>API</a>
-      {{if and .User .User.IsAdmin}}<a href="/admin" {{if eq .Path "/admin"}}aria-current="page"{{end}}>Admin</a>{{end}}
+      {{with .Control}}<a href="{{.}}">Control center</a>{{end}}
     </nav>
     <div class="nav-r">
       <button class="btn sm install-nav hide" id="install-app" type="button" title="Add {{.Site}} to your home screen"><svg><use href="#i-down"/></svg><span>Install app</span></button>
@@ -50,7 +50,7 @@
           <a href="/dashboard/albums"><svg width="16" height="16"><use href="#i-album"/></svg>My albums</a>
           <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>Settings &amp; API keys</a>
           {{if .SSO}}<a href="{{.Helink}}/dashboard"><svg width="16" height="16"><use href="#i-link"/></svg>HEL.ink dashboard</a>{{end}}
-          {{if .User.IsAdmin}}<a href="/admin"><svg width="16" height="16"><use href="#i-shield"/></svg>Admin</a>{{end}}
+          {{with .Control}}<a href="{{.}}"><svg width="16" height="16"><use href="#i-shield"/></svg>Control center</a>{{end}}
           <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>Sign out</button></form>
         </div>
       </div>

@@ -1039,8 +1039,12 @@ func (a *App) hopSearch(w http.ResponseWriter, r *http.Request) {
 		if u.Username.Valid {
 			label = "@" + u.Username.String + " · " + u.Email
 		}
+		link := ""
+		if u.Username.Valid {
+			link = a.cfg.BaseURL + "/u/" + u.Username.String
+		}
 		out = append(out, map[string]any{"kind": "user", "id": u.HelinkID.String, "local_id": u.ID, "label": label,
-			"url": a.cfg.BaseURL + "/admin/users?q=" + u.Email, "status": u.Status, "linked": u.HelinkID.Valid})
+			"url": link, "status": u.Status, "linked": u.HelinkID.Valid})
 	}
 	ims, _, _ := a.db.HopImages(ctx, db.ContentQuery{Search: q, Limit: 10})
 	for _, im := range ims {
