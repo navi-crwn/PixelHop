@@ -876,3 +876,69 @@ func TestAdminStatusKeepsModerationHidden(t *testing.T) {
 		t.Fatal("nasty should stay hidden")
 	}
 }
+
+// The "ip" extension lists the banned addresses and bans/unbans one, so
+// Imperium can take over the retired admin "IP bans" page.
+func TestHopIPBans(t *testing.T) {
+	a, h := ssoApp(t)
+	ctx := context.Background()
+	var man struct {
+		Extensions []string `json:"extensions"`
+	}
+	decode(t, hopGet(t, h, "/hop/manifest").Data, &man)
+	if len(man.Extensions) != 1 || man.Extensions[0] != "ip" {
+		t.Fatalf("manifest extensions: %v", man.Extensions)
+	}
+	type ban struct {
+		IP, Reason string
+		CreatedAt  string `json:"created_at"`
+	}
+	list := func() []ban {
+		var out struct{ Bans []ban }
+		decode(t, hopGet(t, h, "/hop/x/ip").Data, &out)
+		return out.Bans
+	}
+	if len(list()) != 0 {
+		t.Fatal("bans should start empty")
+	}
+	hopPost(t, h, "/hop/x/ip/actions", map[string]any{"action": "ban", "reason": "spam burst", "params": map[string]any{"ip": " 203.0.113.9 "}})
+	bans := list()
+	if len(bans) != 1 || bans[0].IP != "203.0.113.9" || bans[0].Reason != "spam burst" || bans[0].CreatedAt == "" {
+		t.Fatalf("after ban: %+v", bans)
+	}
+	if all, _ := a.db.Bans(ctx); len(all) != 1 {
+		t.Fatalf("db bans: %+v", all)
+	}
+	if rec, out := hopCall(t, h, "imperium", "POST", "/hop/x/ip/actions", map[string]any{"action": "ban", "params": map[string]any{"ip": "not-an-ip"}}); rec.Code != 400 || out.Error != "bad_params" {
+		t.Fatalf("bad ip: %d %s", rec.Code, out.Error)
+	}
+	if rec, out := hopCall(t, h, "imperium", "POST", "/hop/x/ip/actions", map[string]any{"action": "nuke", "params": map[string]any{"ip": "203.0.113.9"}}); rec.Code != 400 || out.Error != "unknown_action" {
+		t.Fatalf("unknown action: %d %s", rec.Code, out.Error)
+	}
+	hopPost(t, h, "/hop/x/ip/actions", map[string]any{"action": "unban", "params": map[string]any{"ip": "203.0.113.9"}})
+	if len(list()) != 0 {
+		t.Fatal("unban left the address banned")
+	}
+	var audit []struct{ Action, Target string }
+	decode(t, hopGet(t, h, "/hop/audit").Data, &audit)
+	var seen []string
+	for _, e := range audit {
+		seen = append(seen, e.Action+" "+e.Target)
+	}
+	for _, want := range []string{"ip.ban ip:203.0.113.9", "ip.unban ip:203.0.113.9"} {
+		found := false
+		for _, s := range seen {
+			found = found || s == want
+		}
+		if !found {
+			t.Errorf("audit missing %q in %v", want, seen)
+		}
+	}
+	var stats struct {
+		KPI map[string]float64 `json:"kpi"`
+	}
+	decode(t, hopGet(t, h, "/hop/stats").Data, &stats)
+	if _, ok := stats.KPI["disk_total_bytes"]; !ok {
+		t.Errorf("stats should report the disk: %v", stats.KPI)
+	}
+}
