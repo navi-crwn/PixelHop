@@ -2,7 +2,7 @@
 
 All notable changes to PixelHop will be documented in this file.
 
-## [Unreleased]
+## [3.7.0] - 2026-10-28
 
 ### Links on their own host
 - **`PIXELHOP_LINK_URL`: shared links can live on another host than the app.** On p.hel.ink this moves the app to **pixel.hel.ink** (like the other HOP apps) while every link stays `p.hel.ink/slug`. New links (page, direct, thumbnail, album, QR, Markdown/HTML/BBCode, API answers) use the link host.
