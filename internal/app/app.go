@@ -16,7 +16,7 @@ import (
 	"github.com/navi-crwn/pixelhop/web"
 )
 
-var Version = "3.6.0"
+var Version = "3.7.0"
 
 type App struct {
 	cfg      *config.Config
