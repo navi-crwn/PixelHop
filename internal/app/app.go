@@ -109,6 +109,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /logout", a.logout)
 	mux.HandleFunc("GET /auth/helink", a.helinkStart)
 	mux.HandleFunc("GET /auth/helink/callback", a.helinkCallback)
+	mux.HandleFunc("GET /auth/helink/logout", a.helinkLogout)
 	mux.HandleFunc("GET /auth/google", a.googleStart)
 	mux.HandleFunc("GET /auth/google/callback", a.googleCallback)
 	mux.HandleFunc("GET /auth/google-callback", a.googleCallback) // redirect URI used by PixelHop 2

@@ -329,6 +329,42 @@ func (a *App) logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// helinkLogout is a step of HOP ID's chained logout: signing out at the hub (or
+// at any HOP app) sends the browser through every app's logout address in turn,
+// so nobody stays signed in to one app after leaving another. It ends this
+// session and goes on to ?next=, but only to an address on the HOP family's own
+// domain (the parent domain of HELINK_URL), never to an arbitrary site.
+func (a *App) helinkLogout(w http.ResponseWriter, r *http.Request) {
+	if c, err := r.Cookie(sessionCookie); err == nil {
+		a.db.DeleteSession(r.Context(), hashToken(c.Value))
+	}
+	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies()})
+	next := "/"
+	if n := r.URL.Query().Get("next"); hopURL(n, a.cfg.HelinkURL) {
+		next = n
+	}
+	http.Redirect(w, r, next, http.StatusSeeOther)
+}
+
+// hopURL reports whether u is an https address on the domain of the HOP ID
+// at helink (hub.hel.ink -> hel.ink and its subdomains).
+func hopURL(u, helink string) bool {
+	if u == "" || helink == "" {
+		return false
+	}
+	t, err := url.Parse(u)
+	h, err2 := url.Parse(helink)
+	if err != nil || err2 != nil || t.Scheme != "https" || t.Host == "" || t.User != nil {
+		return false
+	}
+	base := h.Hostname()
+	if parts := strings.Split(base, "."); len(parts) > 2 {
+		base = strings.Join(parts[len(parts)-2:], ".")
+	}
+	host := t.Hostname()
+	return host == base || strings.HasSuffix(host, "."+base)
+}
+
 // ---- Sign in with Google (plain OAuth 2.0, no SDK) ----
 
 const googleState = "ph_oauth"

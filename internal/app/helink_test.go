@@ -140,3 +140,36 @@ func TestHelinkRejectsBadTickets(t *testing.T) {
 		t.Errorf("missing cookie: accepted (%d)", rec.Code)
 	}
 }
+
+func TestHelinkChainedLogout(t *testing.T) {
+	a, h := ssoApp(t)
+	c, state := start(t, h)
+	rec := callback(h, c, signTicket(ticketFor(state), testSecret))
+	var session *http.Cookie
+	for _, ck := range rec.Result().Cookies() {
+		if ck.Name == sessionCookie {
+			session = ck
+		}
+	}
+	if session == nil {
+		t.Fatal("no session to log out of")
+	}
+
+	for _, tc := range []struct{ next, want string }{
+		{"https://bio.example.com/auth/sso/logout?next=https%3A%2F%2Fexample.com", "https://bio.example.com/auth/sso/logout?next=https%3A%2F%2Fexample.com"},
+		{"https://evil.test/", "/"},
+		{"http://example.com/", "/"},
+		{"", "/"},
+	} {
+		req := httptest.NewRequest(http.MethodGet, "/auth/helink/logout?next="+url.QueryEscape(tc.next), nil)
+		req.AddCookie(session)
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != tc.want {
+			t.Fatalf("next=%q: %d %q, want %q", tc.next, rec.Code, rec.Header().Get("Location"), tc.want)
+		}
+	}
+	if _, err := a.db.SessionUser(context.Background(), hashToken(session.Value)); err == nil {
+		t.Fatal("session still valid after logout")
+	}
+}
