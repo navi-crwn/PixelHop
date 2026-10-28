@@ -32,7 +32,7 @@ func (a *App) albumJSON(r *http.Request, al *db.Album) map[string]any {
 		list = append(list, a.imageJSON(im))
 	}
 	return map[string]any{"id": al.ID, "title": al.Title, "description": al.Description, "cover_id": al.CoverID,
-		"url": a.cfg.BaseURL + "/a/" + al.ID, "created_at": al.CreatedAt, "images": list}
+		"url": a.albumURL(al.ID), "created_at": al.CreatedAt, "images": list}
 }
 
 func (a *App) apiAlbums(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func (a *App) apiAlbums(w http.ResponseWriter, r *http.Request) {
 	out := make([]map[string]any, 0, len(rows))
 	for _, al := range rows {
 		out = append(out, map[string]any{"id": al.ID, "title": al.Title, "count": al.Count, "cover_id": al.CoverID,
-			"url": a.cfg.BaseURL + "/a/" + al.ID, "created_at": al.CreatedAt})
+			"url": a.albumURL(al.ID), "created_at": al.CreatedAt})
 	}
 	apiOK(w, map[string]any{"albums": out})
 }
@@ -182,7 +182,7 @@ func (a *App) myAlbums(w http.ResponseWriter, r *http.Request) {
 			cover = al.FirstID
 		}
 		if im, err := a.db.Image(r.Context(), cover); err == nil {
-			thumbs[al.ID] = strings.TrimPrefix(a.thumbURL(im), a.cfg.BaseURL)
+			thumbs[al.ID] = strings.TrimPrefix(a.thumbURL(im), a.cfg.LinkURL)
 		}
 	}
 	a.render(w, r, "albums", "My albums", map[string]any{"Albums": rows, "Thumbs": thumbs})

@@ -32,7 +32,7 @@
   <button class="btn sm" type="button" data-copy-all="html">HTML</button>
 </div>
   <div class="masonry">
-    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}" data-link data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}" data-title="{{.Title}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}">{{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}</a>{{end}}
+    {{range $d.Images}}<a href="/{{.ID}}" style="background:{{.Color}}" data-link data-direct="{{$.Link}}{{direct .}}" data-page="{{$.Link}}/{{.ID}}" data-title="{{.Title}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy" width="{{.Width}}" height="{{.Height}}">{{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}</a>{{end}}
   </div>
   </div>
 </div>

@@ -112,7 +112,7 @@ func (a *App) testWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.fireWebhooks(u.ID, "image.uploaded", map[string]any{"test": true, "id": "example-x7Kp2Q",
-		"url": a.cfg.BaseURL + "/i/example-x7Kp2Q.jpg", "view_url": a.cfg.BaseURL + "/example-x7Kp2Q"})
+		"url": a.cfg.LinkURL + "/i/example-x7Kp2Q.jpg", "view_url": a.cfg.LinkURL + "/example-x7Kp2Q"})
 	http.Redirect(w, r, "/settings?ok=webhook-test#webhooks", http.StatusSeeOther)
 }
 

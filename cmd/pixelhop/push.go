@@ -17,7 +17,7 @@ import (
 
 // The same binary is also a small client for any PixelHop server:
 //
-//	pixelhop login --server https://p.hel.ink --key ph_...
+//	pixelhop login --server https://pixel.hel.ink --key ph_...
 //	pixelhop push photo.jpg screenshot.png [--expire 1d] [--format markdown]
 //
 // Settings live in ~/.config/pixelhop/client.json (or PIXELHOP_SERVER /
@@ -48,7 +48,7 @@ func loadClientConfig() clientConfig {
 		c.Key = v
 	}
 	if c.Server == "" {
-		c.Server = "https://p.hel.ink"
+		c.Server = "https://pixel.hel.ink"
 	}
 	c.Server = strings.TrimRight(c.Server, "/")
 	return c
@@ -56,7 +56,7 @@ func loadClientConfig() clientConfig {
 
 func loginCmd(args []string) error {
 	fs := flag.NewFlagSet("login", flag.ContinueOnError)
-	server := fs.String("server", "https://p.hel.ink", "PixelHop server")
+	server := fs.String("server", "https://pixel.hel.ink", "PixelHop server")
 	key := fs.String("key", "", "API key from Settings → API keys (starts with ph_)")
 	if err := fs.Parse(args); err != nil {
 		return err

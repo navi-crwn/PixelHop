@@ -5,6 +5,7 @@ package config
 import (
 	"fmt"
 	"net/netip"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -12,8 +13,12 @@ import (
 )
 
 type Config struct {
-	Addr      string // listen address, e.g. ":8080"
-	BaseURL   string // public URL without trailing slash, e.g. "https://p.hel.ink"
+	Addr    string // listen address, e.g. ":8080"
+	BaseURL string // public URL without trailing slash, e.g. "https://pixel.hel.ink"
+	// LinkURL is where shared links point (image and album pages, files):
+	// another host that also reaches this server, e.g. "https://p.hel.ink"
+	// when the app moved and old links must keep working. Defaults to BaseURL.
+	LinkURL   string
 	DataDir   string // SQLite database + local image storage
 	SiteName  string
 	SecretKey string // signs nothing secret-critical today; reserved for future tokens
@@ -148,6 +153,17 @@ func Load() (*Config, error) {
 		}
 	}
 	c.ControlURL = strings.TrimRight(env("PIXELHOP_CONTROL_URL", ""), "/")
+	c.LinkURL = strings.TrimRight(env("PIXELHOP_LINK_URL", c.BaseURL), "/")
+	if c.LinkURL != c.BaseURL {
+		lu, err := url.Parse(c.LinkURL)
+		bu, _ := url.Parse(c.BaseURL)
+		if err != nil || lu.Host == "" || (lu.Scheme != "http" && lu.Scheme != "https") || lu.Path != "" || lu.RawQuery != "" {
+			return nil, fmt.Errorf("PIXELHOP_LINK_URL: %q must be a site address like https://links.example.com, with no path", c.LinkURL)
+		}
+		if bu != nil && strings.EqualFold(lu.Host, bu.Host) {
+			return nil, fmt.Errorf("PIXELHOP_LINK_URL must be on another host than PIXELHOP_BASE_URL")
+		}
+	}
 	c.TurnstileSiteKey = env("TURNSTILE_SITE_KEY", "")
 	c.TurnstileSecret = env("TURNSTILE_SECRET_KEY", "")
 	c.RembgURL = strings.TrimRight(env("PIXELHOP_REMBG_URL", ""), "/")

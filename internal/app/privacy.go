@@ -146,7 +146,7 @@ func (a *App) countView(r *http.Request, im *db.Image) {
 	host := ""
 	if ref, err := url.Parse(r.Referer()); err == nil && ref.Host != "" {
 		host = strings.TrimPrefix(strings.ToLower(ref.Hostname()), "www.")
-		if base, err := url.Parse(a.cfg.BaseURL); err == nil && strings.EqualFold(base.Hostname(), ref.Hostname()) {
+		if a.isOurHost(ref.Hostname()) {
 			host = "" // our own pages don't count as referrers
 		}
 		host = trim(host, 100)

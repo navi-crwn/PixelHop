@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}{{$al := $d.Album}}
 <div class="wrap" id="album-edit" data-id="{{$al.ID}}">
-  <div class="page-head"><div><h1>Edit album</h1><p class="muted" style="margin:4px 0 0"><a href="/a/{{$al.ID}}">{{.Base}}/a/{{$al.ID}}</a></p></div>
+  <div class="page-head"><div><h1>Edit album</h1><p class="muted" style="margin:4px 0 0"><a href="/a/{{$al.ID}}">{{.Link}}/a/{{$al.ID}}</a></p></div>
     <div class="btn-row"><a class="btn" href="/a/{{$al.ID}}">View album</a><button class="btn primary" type="button" id="ae-save"><svg><use href="#i-check"/></svg>Save</button></div></div>
   <div class="grid-2" style="align-items:start">
     <div class="card">

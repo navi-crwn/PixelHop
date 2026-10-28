@@ -61,7 +61,7 @@ if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
     <div class="nav-r">
       <button type="button" class="theme" id="theme" aria-label="[[Light or dark]]"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
       {{langmenu}}
-      <a class="btn sm main" href="https://p.hel.ink">[[Try it]]</a>
+      <a class="btn sm main" href="https://pixel.hel.ink">[[Try it]]</a>
     </div>
   </div>
 </header>
@@ -77,7 +77,7 @@ if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
     <h1>[[Drop an image.<br><span class="grad">Get a link.</span>]]</h1>
     <p class="lead">[[Open-source image hosting that strips your GPS location before anyone sees it, with albums, ShareX, an API, and a photo studio that never uploads your photo.]]</p>
     <div class="cta">
-      <a class="btn main" href="https://p.hel.ink">[[Upload an image]]</a>
+      <a class="btn main" href="https://pixel.hel.ink">[[Upload an image]]</a>
       <a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>[[Get the code]]</a>
     </div>
     <ul class="facts">
@@ -88,7 +88,7 @@ if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
     </ul>
     <div class="shot">
       <div class="frame">
-        <div class="bar"><i></i><i></i><i></i><span>p.hel.ink</span></div>
+        <div class="bar"><i></i><i></i><i></i><span>pixel.hel.ink</span></div>
         <div class="themed"><img class="dk" src="{{root}}media/app-view-dark.webp" alt="[[An image page on PixelHop: the photo, copy buttons, embed codes and a QR code]]" width="1440" height="900"><img class="lt" src="{{root}}media/app-view-light.webp" alt="" width="1440" height="900"></div>
       </div>
     </div>
@@ -225,12 +225,12 @@ make build && ./pixelhop</pre></div></div>
       <div class="label">API</div>
       <h2>[[Upload from <em class="s grad">anything</em>.]]</h2>
       <p class="lead">[[Create a key in Settings, then send files with any HTTP client. Answers are plain JSON with the direct link, page link, thumbnail and embed codes.]]</p>
-      <p><a class="btn sm" href="https://p.hel.ink/docs">[[Full API docs]]</a></p>
+      <p><a class="btn sm" href="https://pixel.hel.ink/docs">[[Full API docs]]</a></p>
     </div>
     <div class="rv">
       <div class="code"><button class="copy" type="button">[[Copy]]</button><pre>curl -H "Authorization: Bearer ph_yourkey" \
      -F "file=@holiday.jpg" -F "expire=7d" \
-     https://p.hel.ink/api/v1/upload</pre></div>
+     https://pixel.hel.ink/api/v1/upload</pre></div>
       <div class="code"><pre><span class="c">// 200 OK</span>
 { "success": true,
   "data": {
@@ -262,7 +262,7 @@ make build && ./pixelhop</pre></div></div>
   <div class="wrap">
     <img src="{{root}}logo.svg" alt="" width="84" height="84">
     <h2>[[Hop to it.]]</h2>
-    <div class="cta"><a class="btn main" href="https://p.hel.ink">[[Upload an image]]</a><a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>GitHub</a></div>
+    <div class="cta"><a class="btn main" href="https://pixel.hel.ink">[[Upload an image]]</a><a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>GitHub</a></div>
   </div>
 </section>
 </main>

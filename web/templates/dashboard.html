@@ -100,7 +100,7 @@
 
     <div class="gallery" id="my-gallery" {{if not $d.Images}}hidden{{end}}>
       {{range $d.Images}}
-      <div class="tile" style="background:{{.Color}}" data-id="{{.ID}}" data-direct="{{$.Base}}{{direct .}}" data-page="{{$.Base}}/{{.ID}}">
+      <div class="tile" style="background:{{.Color}}" data-id="{{.ID}}" data-direct="{{$.Link}}{{direct .}}" data-page="{{$.Link}}/{{.ID}}">
         <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
         {{if eq .Kind "video"}}<span class="kind-badge">▶ VIDEO</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}
         {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}

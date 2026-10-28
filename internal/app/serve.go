@@ -193,7 +193,7 @@ type links struct {
 }
 
 func (a *App) linksFor(im *db.Image) links {
-	page := a.cfg.BaseURL + "/" + im.ID
+	page := a.pageURL(im.ID)
 	direct := a.directURL(im)
 	alt := im.Alt
 	if alt == "" {
@@ -215,13 +215,13 @@ func (a *App) previewURL(im *db.Image) string {
 	return a.thumbURL(im)
 }
 
-func (a *App) directURL(im *db.Image) string { return a.cfg.BaseURL + "/i/" + im.ID + "." + im.Ext }
+func (a *App) directURL(im *db.Image) string { return a.cfg.LinkURL + "/i/" + im.ID + "." + im.Ext }
 func (a *App) thumbURL(im *db.Image) string {
 	ext := im.KeyThumb[strings.LastIndexByte(im.KeyThumb, '.')+1:]
 	if strings.Contains(ext, "/") || len(ext) > 5 {
 		ext = "jpg"
 	}
-	return a.cfg.BaseURL + "/t/" + im.ID + "." + ext
+	return a.cfg.LinkURL + "/t/" + im.ID + "." + ext
 }
 
 func mdEscape(s string) string { return strings.NewReplacer("[", `\[`, "]", `\]`).Replace(s) }
@@ -237,8 +237,14 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if im == nil {
 		return
 	}
+	if !im.Private && a.toLinkHost(w, r) {
+		return
+	}
 	if !a.canSee(r, im) {
 		if im.Private {
+			if a.toApp(w, r) { // its owner may be signed in there
+				return
+			}
 			a.notFound(w, r)
 		} else {
 			a.renderLocked(w, r, im, "")
@@ -281,7 +287,7 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if im.Locked() {
 		og = "" // previews of locked images show no picture
 	}
-	a.renderPage(w, r, "view", page{Title: title, Data: d, OGImage: og, OGType: "image", Desc: desc, NoIndex: im.Locked()})
+	a.renderPage(w, r, "view", page{Title: title, Canon: a.pageURL(im.ID), Data: d, OGImage: og, OGType: "image", Desc: desc, NoIndex: im.Locked()})
 }
 
 // legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
@@ -338,7 +344,13 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(live) == 0 {
+		if a.toApp(w, r) {
+			return
+		}
 		a.notFound(w, r)
+		return
+	}
+	if a.toLinkHost(w, r) {
 		return
 	}
 	u := currentUser(r)
@@ -353,9 +365,9 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 			cover = im
 		}
 	}
-	a.renderPage(w, r, "album", page{Title: title, OGImage: a.previewURL(cover),
+	a.renderPage(w, r, "album", page{Title: title, Canon: a.albumURL(al.ID), OGImage: a.previewURL(cover),
 		Desc: albumDesc(len(live), by, a.cfg.SiteName),
-		Data: albumData{Album: al, Images: live, Link: a.cfg.BaseURL + "/a/" + al.ID, Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
+		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
 }
 
 // qr draws a QR code that opens the image page; ?a=1 points at an album.
@@ -365,9 +377,9 @@ func (a *App) qr(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
-	target := a.cfg.BaseURL + "/" + id
+	target := a.pageURL(id)
 	if r.URL.Query().Has("a") {
-		target = a.cfg.BaseURL + "/a/" + id
+		target = a.albumURL(id)
 	}
 	code, err := qr.Encode(target, qr.M)
 	if err != nil {
