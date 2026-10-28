@@ -187,6 +187,25 @@ CREATE TABLE variants (
 );`,
 	// 6: video and PDF optimisation that runs after upload
 	`CREATE TABLE media_jobs (image_id TEXT PRIMARY KEY REFERENCES images(id) ON DELETE CASCADE, created_at INTEGER NOT NULL);`,
+	// 7: HOP App Protocol: why an image is hidden ('' | suspended | moderation),
+	// so lifting a suspension never brings back images moderation removed;
+	// the audit trail of admin actions and the webhook ids already handled.
+	`ALTER TABLE images ADD COLUMN hidden_reason TEXT NOT NULL DEFAULT '';
+UPDATE images SET hidden_reason='suspended' WHERE hidden=1 AND user_id IN (SELECT id FROM users WHERE status='suspended');
+UPDATE images SET hidden_reason='moderation' WHERE hidden=1 AND hidden_reason='';
+CREATE TABLE hop_audit (
+  id     INTEGER PRIMARY KEY,
+  at     INTEGER NOT NULL,
+  actor  TEXT NOT NULL DEFAULT '',
+  app    TEXT NOT NULL DEFAULT '',
+  action TEXT NOT NULL,
+  target TEXT NOT NULL DEFAULT '',
+  detail TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE hop_events_seen (
+  id TEXT PRIMARY KEY,
+  at INTEGER NOT NULL
+);`,
 }
 
 func (d *DB) migrate() error {

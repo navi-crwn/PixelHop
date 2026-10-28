@@ -94,6 +94,10 @@ func csrf(next http.Handler) http.Handler {
 	cop := http.NewCrossOriginProtection()
 	protected := cop.Handler(next)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/hop/") { // signed server-to-server calls, no cookies
+			next.ServeHTTP(w, r)
+			return
+		}
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
@@ -145,7 +149,7 @@ func (a *App) invalidateBans() {
 // look at pages and images.
 func (a *App) checkBan(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet && r.Method != http.MethodHead && a.banned(r) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead && !strings.HasPrefix(r.URL.Path, "/hop/") && a.banned(r) {
 			a.fail(w, r, http.StatusForbidden, "This address is blocked. If you think this is a mistake, contact the site owner.")
 			return
 		}

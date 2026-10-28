@@ -92,6 +92,13 @@ func (d *DB) UsernameTaken(ctx context.Context, name string, exceptID int64) boo
 	return n > 0
 }
 
+// EmailTaken reports whether another account already uses email.
+func (d *DB) EmailTaken(ctx context.Context, email string, exceptID int64) bool {
+	var n int
+	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE email=? AND id<>?`, email, exceptID).Scan(&n)
+	return n > 0
+}
+
 // UsersWithoutUsername lists accounts that still need a handle.
 func (d *DB) UsersWithoutUsername(ctx context.Context) ([]*User, error) {
 	rows, err := d.QueryContext(ctx, `SELECT `+userCols+` FROM users WHERE username IS NULL`)

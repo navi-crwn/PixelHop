@@ -2,6 +2,14 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [Unreleased]
+
+### HOP App Protocol
+- **Signed admin API under `/hop/*`.** A control center can read health, manifest, stats, a user's profile and counts, content (images and albums), the report queue, settings, search, metrics and the audit trail, and can act: suspend/lock/activate, revoke sessions or API keys, set quotas, warn, purge; hide/unhide/delete/ban-IP/transfer content; dismiss/resolve/delete reports; change the runtime settings. HEL.ink pushes profile changes and account events (`profile.updated`, `account.status`, `account.deleted`, `session.revoked`) to `/hop/events`, handled once per event id. Requests are signed with `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` names the callers (default `imperium,helink`). Everything that changes something is written to the new `hop_audit` table.
+- **SSO ticket v2.** A ticket's `roles` now decide the local role: `owner`, `admin` or `admin:pixelhop` make an admin, anything else makes a plain user (demotion included); the old `admin` flag only counts when `roles` is absent. A username, bio, website and "show owner" sent in the ticket are copied to the profile. A ticket for another app (`aud`) is refused.
+- Images now remember why they are hidden (`suspended` or `moderation`), so lifting a suspension brings back only the images the suspension hid.
+- **The built-in admin pages are retired.** Moderation (images, users, reports, IP bans) and site settings now live in the HOP control center, which talks to PixelHop through the signed `/hop/*` API; the CLI `user` commands still work. `/admin` sends a signed-in admin to `PIXELHOP_CONTROL_URL` when it is set and otherwise shows a short note saying where things went. The `admin` role keeps its other abilities: seeing hidden images, changing or deleting any image or album through the API, and ZIP downloads. The "Admin" links in the menu are replaced by a "Control center" link when `PIXELHOP_CONTROL_URL` is set.
+
 ## [3.6.0] - 2026-10-19
 
 ### Added

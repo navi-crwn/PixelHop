@@ -35,6 +35,53 @@ type helinkTicket struct {
 	Iat    int64  `json:"iat"`
 	Exp    int64  `json:"exp"`
 	Jti    string `json:"jti"`
+
+	// Ticket v2 (HOP App Protocol). Roles decide the local role when present
+	// (promotion and demotion); Admin is only a fallback for v1 tickets. The
+	// profile fields are copied when sent, since HOP ID owns the profile.
+	V              int      `json:"v,omitempty"`
+	Username       string   `json:"username,omitempty"`
+	Roles          []string `json:"roles"` // nil = absent (v1); [] = no roles (demotes)
+	Bio            *string  `json:"bio,omitempty"`
+	Website        *string  `json:"website,omitempty"`
+	ShowOwner      *bool    `json:"show_owner,omitempty"`
+	ProfileVersion int      `json:"profile_version,omitempty"`
+}
+
+// adminRoles are the HOP ID roles that make someone a PixelHop admin.
+var adminRoles = map[string]bool{"owner": true, "admin": true, "admin:pixelhop": true}
+
+// roleFromHop maps HOP ID roles to the local role; ok is false when the
+// ticket or event carries no roles at all (then nothing should change).
+func roleFromHop(roles []string) (role string, ok bool) {
+	if roles == nil {
+		return "", false
+	}
+	for _, r := range roles {
+		if adminRoles[r] {
+			return "admin", true
+		}
+	}
+	return "user", true
+}
+
+// applyHopProfile copies the profile fields HOP ID owns onto a local user.
+// A username that breaks the local rules or belongs to someone else is left
+// as it is: the person keeps their current handle.
+func (a *App) applyHopProfile(ctx context.Context, u *db.User, username string, bio, website *string, showOwner *bool) {
+	if h := strings.ToLower(strings.TrimSpace(strings.TrimPrefix(username, "@"))); h != "" &&
+		usernameProblem(h) == "" && !a.db.UsernameTaken(ctx, h, u.ID) {
+		u.Username = sql.NullString{String: h, Valid: true}
+	}
+	if bio != nil {
+		u.Bio = trim(strings.TrimSpace(*bio), 300)
+	}
+	if website != nil {
+		u.Website = trim(strings.TrimSpace(*website), 200)
+	}
+	if showOwner != nil {
+		u.ShowOwner = *showOwner
+	}
 }
 
 var errBadTicket = errors.New("this sign-in link is not valid any more")
@@ -149,10 +196,22 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	if errors.Is(err, db.ErrNotFound) {
 		u = &db.User{Email: t.Email, Name: trim(t.Name, 60), AvatarURL: t.Avatar, QuotaBytes: a.cfg.DefaultQuota,
 			HelinkID: sql.NullString{String: t.Sub, Valid: true}}
-		if t.Admin || a.db.CountUsers(ctx) == 0 {
+		if role, ok := roleFromHop(t.Roles); ok {
+			u.Role = role
+		} else if t.Admin {
 			u.Role = "admin"
 		}
-		return u, a.db.InsertUser(ctx, u)
+		if a.db.CountUsers(ctx) == 0 {
+			u.Role = "admin"
+		}
+		if err := a.db.InsertUser(ctx, u); err != nil {
+			return nil, err
+		}
+		if t.Username != "" || t.Bio != nil || t.Website != nil || t.ShowOwner != nil {
+			a.applyHopProfile(ctx, u, t.Username, t.Bio, t.Website, t.ShowOwner)
+			return u, a.db.UpdateUser(ctx, u)
+		}
+		return u, nil
 	}
 	if err != nil {
 		return nil, err
@@ -166,9 +225,12 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	if t.Avatar != "" {
 		u.AvatarURL = t.Avatar // used only while no photo is uploaded here
 	}
-	if t.Admin {
-		u.Role = "admin" // HEL.ink's owner runs PixelHop too; never demoted from here
+	if role, ok := roleFromHop(t.Roles); ok {
+		u.Role = role // HOP ID's roles promote and demote
+	} else if t.Admin {
+		u.Role = "admin" // v1 ticket: HEL.ink's owner runs PixelHop too; never demoted from here
 	}
+	a.applyHopProfile(ctx, u, t.Username, t.Bio, t.Website, t.ShowOwner)
 	return u, a.db.UpdateUser(ctx, u)
 }
 

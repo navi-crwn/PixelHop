@@ -80,13 +80,14 @@
 - **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
 - **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
 - **👤 Own accounts, or HEL.ink sign-in** (optional add-on). PixelHop has its own sign-up, passwords and Google sign-in and needs nothing else. Only if you also run [HEL.ink](https://github.com/navi-crwn/hel.ink) can you set `HELINK_URL` and `HELINK_SSO_SECRET` to let people use one account for both; leave them empty and PixelHop never contacts HEL.ink.
+  - **HOP App Protocol.** With HEL.ink sign-in on, PixelHop also serves the signed admin API under `/hop/*` (health, manifest, stats, user 360 and actions, profile and account events pushed by HEL.ink, content and report moderation, settings, search, metrics, audit trail). Calls are signed with the same `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` (default `imperium,helink`) lists the app slugs allowed to call it. Every change made this way is kept in the `hop_audit` table.
 - **🔌 API & ShareX.**
   - A REST API with `Bearer` keys.
   - The settings page makes a ready-to-use `.sxcu` file for ShareX.
   - ShareX configs made for PixelHop 2 keep working.
   - Signed webhooks when you upload or delete.
   - A command-line uploader in the same binary: `pixelhop push *.png --format markdown`.
-- **🛡️ Moderation.** A report button on every image, a report queue, hide/delete, IP bans, account lock/suspend, warning pop-ups, and an announcement bar.
+- **🛡️ Moderation.** A report button on every image, a report queue, hide/delete, IP bans, account lock/suspend, warning pop-ups, and an announcement bar, all handled through the HOP control center (signed admin API) or the CLI.
 - **🔐 Safe by default.**
   - Argon2id passwords and Google sign-in.
   - CSRF protection and a strict Content Security Policy.
@@ -135,7 +136,7 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 | `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
-| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in Admin) |
+| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in the control center) |
 | `PIXELHOP_TRUSTED_PROXIES` | — | `cloudflare`, or IPs/CIDRs of your reverse proxy |
 | `PIXELHOP_STORAGE` | `local` | `local` or `s3` |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | — | For S3-compatible storage |
@@ -143,6 +144,8 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
 | `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
 | `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
+| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App slugs allowed to call the signed `/hop/*` admin API (HOP App Protocol) |
+| `PIXELHOP_CONTROL_URL` | — | Address of the HOP control center; admins who open `/admin` are sent there |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
 | `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
 | `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
