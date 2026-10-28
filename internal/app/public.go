@@ -59,7 +59,7 @@ func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 	}
 	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{Listed: true, PublicOwner: true, Limit: 5000})
 	for _, im := range ims {
-		urls = append(urls, sitemapURL{Loc: a.cfg.BaseURL + "/" + im.ID, LastMod: time.Unix(im.CreatedAt, 0).UTC().Format("2006-01-02")})
+		urls = append(urls, sitemapURL{Loc: a.pageURL(im.ID), LastMod: time.Unix(im.CreatedAt, 0).UTC().Format("2006-01-02")})
 	}
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.Write([]byte(xml.Header))
@@ -74,8 +74,7 @@ func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 // oembed lets sites like Discourse, WordPress and Notion embed an image page.
 func (a *App) oembed(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(r.URL.Query().Get("url"))
-	base, _ := url.Parse(a.cfg.BaseURL)
-	if err != nil || base == nil || !strings.EqualFold(u.Host, base.Host) {
+	if err != nil || !a.isOurHost(u.Hostname()) {
 		apiError(w, http.StatusNotFound, "not one of our links")
 		return
 	}
@@ -115,7 +114,7 @@ func (a *App) apiPublicGallery(w http.ResponseWriter, r *http.Request) {
 	list := make([]map[string]any, 0, len(ims))
 	for _, im := range ims {
 		list = append(list, map[string]any{"id": im.ID, "title": im.Title, "alt": im.Alt, "width": im.Width, "height": im.Height,
-			"url": a.directURL(im), "thumb_url": a.thumbURL(im), "page_url": a.cfg.BaseURL + "/" + im.ID, "color": im.Color})
+			"url": a.directURL(im), "thumb_url": a.thumbURL(im), "page_url": a.pageURL(im.ID), "color": im.Color})
 	}
 	o := a.ownerOf(r.Context(), sql.NullInt64{Int64: u.ID, Valid: true})
 	w.Header().Set("Cache-Control", "public, max-age=300")

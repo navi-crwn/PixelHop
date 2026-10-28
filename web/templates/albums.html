@@ -9,7 +9,7 @@
     <div class="album-card">
       <a class="tile" href="/a/{{.ID}}">{{with index $.Data.Thumbs .ID}}<img src="{{.}}" alt="" loading="lazy">{{end}}<span class="pill badge">{{.Count}} images</span></a>
       <div class="album-meta"><b>{{if .Title}}{{.Title}}{{else}}Untitled album{{end}}</b><span class="small muted">{{ago .CreatedAt}}</span></div>
-      <div class="btn-row"><a class="btn sm" href="/a/{{.ID}}/edit"><svg><use href="#i-edit"/></svg>Edit</a><button class="btn sm ghost" type="button" data-copy-text="{{$.Base}}/a/{{.ID}}"><svg><use href="#i-copy"/></svg>Link</button></div>
+      <div class="btn-row"><a class="btn sm" href="/a/{{.ID}}/edit"><svg><use href="#i-edit"/></svg>Edit</a><button class="btn sm ghost" type="button" data-copy-text="{{$.Link}}/a/{{.ID}}"><svg><use href="#i-copy"/></svg>Link</button></div>
     </div>
     {{end}}
   </div>

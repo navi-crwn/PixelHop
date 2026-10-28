@@ -29,6 +29,9 @@ type page struct {
 	User          *db.User
 	Site          string
 	Base          string
+	Link          string // where shared links live (PIXELHOP_LINK_URL)
+	Canon         string // the canonical address of a shared page
+	OnLink        bool   // served through the link host
 	Path          string
 	Announcement  string
 	Version       string
@@ -57,8 +60,8 @@ func loadPages(a *App) (*pages, error) {
 		"iso":   func(t int64) string { return time.Unix(t, 0).UTC().Format(time.RFC3339) },
 		// Pages load images by path, so they work under any host name;
 		// the absolute links people copy come from linksFor.
-		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.BaseURL) },
-		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.BaseURL) },
+		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.LinkURL) },
+		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.LinkURL) },
 		"add":    func(x, y int) int { return x + y },
 		"pct": func(n, of int) int {
 			if of == 0 {
@@ -105,6 +108,8 @@ func (a *App) base(r *http.Request, p page) page {
 	p.User = currentUser(r)
 	p.Site = a.cfg.SiteName
 	p.Base = a.cfg.BaseURL
+	p.Link = a.cfg.LinkURL
+	p.OnLink = onLinkHost(r)
 	p.Path = r.URL.Path
 	p.Version = Version
 	p.Asset = Version + "-" + startedAt

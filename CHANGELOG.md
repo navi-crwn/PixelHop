@@ -4,6 +4,14 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Links on their own host
+- **`PIXELHOP_LINK_URL`: shared links can live on another host than the app.** On p.hel.ink this moves the app to **pixel.hel.ink** (like the other HOP apps) while every link stays `p.hel.ink/slug`. New links (page, direct, thumbnail, album, QR, Markdown/HTML/BBCode, API answers) use the link host.
+- On the link host PixelHop serves only what a shared link needs: image and album pages, `/i/` and `/t/` files, QR codes, the password and report forms, static files, the API (so ShareX configs and iPhone Shortcuts keep working) and the signed `/hop/*` calls. Everything else (home, sign-in, dashboard, studio) is sent to the app; forms keep their method (307). Nobody is signed in on the link host.
+- A visitor who opens a shared page at the app's address is sent to the link host. Signed-in people stay on the app, where they see their own private files; a private file's page opened on the link host goes to the app for the same reason.
+- The link host stops offering the app for install and replaces the service worker with one that removes itself, so phones reinstall the app from its new address.
+- Shared pages name the link host as canonical (`<link rel="canonical">`, `og:url`).
+
+
 ### HOP App Protocol
 - **Signed admin API under `/hop/*`.** A control center can read health, manifest, stats, a user's profile and counts, content (images and albums), the report queue, settings, search, metrics and the audit trail, and can act: suspend/lock/activate, revoke sessions or API keys, set quotas, warn, purge; hide/unhide/delete/ban-IP/transfer content; dismiss/resolve/delete reports; change the runtime settings. HEL.ink pushes profile changes and account events (`profile.updated`, `account.status`, `account.deleted`, `session.revoked`) to `/hop/events`, handled once per event id. Requests are signed with `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` names the callers (default `imperium,helink`). Everything that changes something is written to the new `hop_audit` table.
 - **SSO ticket v2.** A ticket's `roles` now decide the local role: `owner`, `admin` or `admin:pixelhop` make an admin, anything else makes a plain user (demotion included); the old `admin` flag only counts when `roles` is absent. A username, bio, website and "show owner" sent in the ticket are copied to the profile. A ticket for another app (`aud`) is refused.

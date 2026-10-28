@@ -39,7 +39,7 @@ func (a *App) imageJSON(im *db.Image) map[string]any {
 		m["expires_at"] = im.ExpiresAt
 	}
 	if im.AlbumID.Valid {
-		m["album_url"] = a.cfg.BaseURL + "/a/" + im.AlbumID.String
+		m["album_url"] = a.albumURL(im.AlbumID.String)
 	}
 	m["listed"] = im.Listed
 	m["alt"] = im.Alt
@@ -107,7 +107,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 		data["errors"] = errs
 	}
 	if albumID != "" {
-		data["album_url"] = a.cfg.BaseURL + "/a/" + albumID
+		data["album_url"] = a.albumURL(albumID)
 	}
 	apiOK(w, data)
 }

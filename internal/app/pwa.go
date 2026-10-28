@@ -90,7 +90,7 @@ func (a *App) share(w http.ResponseWriter, r *http.Request) {
 	}
 	album := ""
 	if albumID != "" {
-		album = a.cfg.BaseURL + "/a/" + albumID
+		album = a.albumURL(albumID)
 	}
 	a.renderPage(w, r, "uploaded", page{Title: "Uploaded", NoIndex: true, Data: map[string]any{"Items": items, "Album": album}})
 }
@@ -104,7 +104,7 @@ func (a *App) resultItem(im *db.Image) resultItem {
 	if name == "" {
 		name = im.ID
 	}
-	return resultItem{ID: im.ID, Page: a.cfg.BaseURL + "/" + im.ID, Direct: a.directURL(im), Thumb: a.thumbURL(im), Name: name, Kind: im.Kind()}
+	return resultItem{ID: im.ID, Page: a.pageURL(im.ID), Direct: a.directURL(im), Thumb: a.thumbURL(im), Name: name, Kind: im.Kind()}
 }
 
 // uploadedPage is the results page phones go to after uploading several
@@ -137,7 +137,7 @@ func (a *App) uploadedPage(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{"Items": items}
 	if same && albumID != "" {
 		if al, err := a.db.Album(r.Context(), albumID); err == nil {
-			data["Album"] = a.cfg.BaseURL + "/a/" + al.ID
+			data["Album"] = a.albumURL(al.ID)
 			data["Title"], data["Note"] = al.Title, al.Description
 		}
 	}

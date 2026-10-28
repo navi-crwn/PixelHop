@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://p.hel.ink"><b>🐰 Try p.hel.ink</b></a> ·
+  <a href="https://pixel.hel.ink"><b>🐰 Try pixel.hel.ink</b></a> ·
   <a href="https://navi-crwn.github.io/pixelhop/">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#api">API</a> ·
@@ -131,7 +131,8 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 
 | Variable | Default | What it does |
 |---|---|---|
-| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address, used in every link |
+| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address of the app (sign-in, upload, dashboard) |
+| `PIXELHOP_LINK_URL` | `PIXELHOP_BASE_URL` | Another host for shared links (image and album pages, direct files). Point it at the old address after a move, so old links keep working while the app lives at the new one. That host must also reach PixelHop |
 | `PIXELHOP_DATA` | `./data` | Database and (local) images |
 | `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
@@ -172,7 +173,7 @@ Everything is in [`.env.example`](.env.example). The ones you're most likely to 
 **Command line:** the same `pixelhop` binary uploads to any PixelHop server.
 
 ```bash
-pixelhop login --server https://p.hel.ink --key ph_yourkey
+pixelhop login --server https://pixel.hel.ink --key ph_yourkey
 pixelhop push screenshot.png photos/*.jpg --expire 7d --format markdown
 ```
 
@@ -181,7 +182,7 @@ pixelhop push screenshot.png photos/*.jpg --expire 7d --format markdown
 ## API
 
 ```bash
-curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://p.hel.ink/api/v1/upload
+curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.hel.ink/api/v1/upload
 ```
 
 | Endpoint | What it does |
@@ -200,7 +201,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://p.hel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |
 | `GET /tools/qr.png` · `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
 
-Every answer looks like `{"success": true, "data": …}` or `{"success": false, "error": "…"}`. The full reference is at [`/docs`](https://p.hel.ink/docs) on any PixelHop server.
+Every answer looks like `{"success": true, "data": …}` or `{"success": false, "error": "…"}`. The full reference is at [`/docs`](https://pixel.hel.ink/docs) on any PixelHop server.
 
 ## Upgrading from PixelHop 2
 

@@ -656,7 +656,7 @@ func (a *App) hopImageRow(ctx context.Context, im *db.Image) map[string]any {
 	return map[string]any{
 		"id": im.ID, "type": "image", "kind": im.Kind(), "title": title, "owner": a.hopOwner(ctx, im.UserID),
 		"status": status, "hidden_reason": im.HiddenReason, "created": isoTime(im.CreatedAt), "size": im.Size,
-		"url": a.cfg.BaseURL + "/" + im.ID, "direct_url": a.directURL(im), "flags": flags, "preview": preview,
+		"url": a.pageURL(im.ID), "direct_url": a.directURL(im), "flags": flags, "preview": preview,
 		"ip": im.IP, "mime": im.Mime, "width": im.Width, "height": im.Height, "views": im.Views,
 		"expires": isoTime(im.ExpiresAt), "album_id": im.AlbumID.String,
 	}
@@ -665,7 +665,7 @@ func (a *App) hopImageRow(ctx context.Context, im *db.Image) map[string]any {
 func (a *App) hopAlbumRow(ctx context.Context, al db.HopAlbum) map[string]any {
 	return map[string]any{
 		"id": al.ID, "type": "album", "title": al.Title, "owner": a.hopOwner(ctx, al.UserID), "status": "visible",
-		"created": isoTime(al.CreatedAt), "size": al.Bytes, "count": al.Count, "url": a.cfg.BaseURL + "/a/" + al.ID,
+		"created": isoTime(al.CreatedAt), "size": al.Bytes, "count": al.Count, "url": a.albumURL(al.ID),
 		"direct_url": "", "flags": []string{}, "preview": "", "ip": "", "description": al.Description,
 	}
 }
@@ -905,7 +905,7 @@ func (a *App) hopIPBanAction(w http.ResponseWriter, r *http.Request) {
 // ---- reports ----
 
 func (a *App) hopReportRow(ctx context.Context, rp db.ReportGroup) map[string]any {
-	content := map[string]any{"type": "image", "id": rp.ImageID, "url": a.cfg.BaseURL + "/" + rp.ImageID, "preview": ""}
+	content := map[string]any{"type": "image", "id": rp.ImageID, "url": a.pageURL(rp.ImageID), "preview": ""}
 	if im, err := a.db.Image(ctx, rp.ImageID); err == nil {
 		content["preview"] = a.thumbURL(im)
 		content["title"] = im.Title
@@ -1111,7 +1111,7 @@ func (a *App) hopSearch(w http.ResponseWriter, r *http.Request) {
 		if im.Title != "" {
 			label = im.Title + " (" + im.ID + ")"
 		}
-		out = append(out, map[string]any{"kind": "content", "type": "image", "id": im.ID, "label": label, "url": a.cfg.BaseURL + "/" + im.ID})
+		out = append(out, map[string]any{"kind": "content", "type": "image", "id": im.ID, "label": label, "url": a.pageURL(im.ID)})
 	}
 	als, _, _ := a.db.HopAlbums(ctx, db.ContentQuery{Search: q, Limit: 10})
 	for _, al := range als {
@@ -1119,7 +1119,7 @@ func (a *App) hopSearch(w http.ResponseWriter, r *http.Request) {
 		if al.Title != "" {
 			label = al.Title + " (" + al.ID + ")"
 		}
-		out = append(out, map[string]any{"kind": "content", "type": "album", "id": al.ID, "label": label, "url": a.cfg.BaseURL + "/a/" + al.ID})
+		out = append(out, map[string]any{"kind": "content", "type": "album", "id": al.ID, "label": label, "url": a.albumURL(al.ID)})
 	}
 	hopOK(w, out)
 }

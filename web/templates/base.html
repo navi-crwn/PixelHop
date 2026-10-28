@@ -11,12 +11,13 @@
 <meta property="og:site_name" content="{{.Site}}">
 <meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}{{.Site}}{{end}}">
 {{with .Desc}}<meta property="og:description" content="{{.}}">{{end}}
-<meta property="og:url" content="{{.Base}}{{.Path}}">
+{{with .Canon}}<meta property="og:url" content="{{.}}">
+<link rel="canonical" href="{{.}}">{{else}}<meta property="og:url" content="{{.Base}}{{.Path}}">{{end}}
 {{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
 <link rel="icon" href="/static/img/logo.svg?v={{.Asset}}" type="image/svg+xml">
-<link rel="manifest" href="/manifest.webmanifest">
+{{if not .OnLink}}<link rel="manifest" href="/manifest.webmanifest">{{end}}
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>

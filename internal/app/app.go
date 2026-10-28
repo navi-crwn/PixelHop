@@ -173,6 +173,7 @@ func (a *App) Handler() http.Handler {
 
 	var h http.Handler = mux
 	h = a.withUser(h)
+	h = a.withLinkHost(mux, h) // before withUser reads the session
 	h = a.checkBan(h)
 	h = csrf(h)
 	h = securityHeaders(h)
