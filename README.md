@@ -250,10 +250,23 @@ Yes, both are switches in **Admin → Settings**.
 PixelHop runs on a 512 MB VPS or a Raspberry Pi. It uses a few tens of MB of memory at rest. Big uploads are decoded a few at a time, so bursts can't exhaust memory.
 </details>
 
+## The Hop family
+
+PixelHop is part of the **HOP** family of privacy-respecting, self-hostable open-source apps.
+
+| App | Live Address | Repository | Purpose |
+| --- | --- | --- | --- |
+| **Hub** | `hel.ink` · `hub.hel.ink` | [navi-crwn/HEL.ink](https://github.com/navi-crwn/HEL.ink) | Account portal, HOP ID, SSO issuer, launcher, admin |
+| **LinkHop** | `link.hel.ink` · `hel.ink/l/{slug}` | [navi-crwn/LinkHop](https://github.com/navi-crwn/LinkHop) | URL shortener, QR codes, click analytics, API |
+| **BioHop** | `bio.hel.ink` · `hel.ink/b/{slug}` | [navi-crwn/BioHop](https://github.com/navi-crwn/BioHop) | Link-in-bio pages with custom blocks, themes, stats |
+| **PixelHop** (this repo) | `p.hel.ink` (soon `pixel.hel.ink`) | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image & media hosting, EXIF/GPS scrubbing, studio |
+| **NoteHop** | `note.hel.ink` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Zero-knowledge client-encrypted live notes & docs |
+| **Imperium** | Internal / Tailscale | Private | Unified admin & operations console across all apps |
+
 ## Credits & license
 
 - [MIT](LICENSE.md) © Ivan Novskies (navi-crwn). Third-party parts are listed in [CREDITS.md](CREDITS.md).
 - Built with [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) and [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
 - The studio loads [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) and [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, unmodified, from jsDelivr) on demand.
 
-More by the same author: [HEL.ink](https://github.com/navi-crwn/hel.ink) (link shortener & link in bio) · [Amnesia](https://github.com/navi-crwn/amnesia) (a Mac that forgets at logout).
+More by the same author: [Amnesia](https://github.com/navi-crwn/amnesia) (a Mac that forgets at logout).
