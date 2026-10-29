@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -17,7 +18,8 @@ type DB struct{ *sql.DB }
 
 // Open opens (or creates) the database in dir and applies pending migrations.
 func Open(dir string) (*DB, error) {
-	dsn := "file:" + filepath.Join(dir, "pixelhop.db") +
+	dbPath := filepath.Join(dir, "pixelhop.db")
+	dsn := "file:" + dbPath +
 		"?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)&_pragma=synchronous(NORMAL)"
 	sqlDB, err := sql.Open("sqlite", dsn)
 	if err != nil {
@@ -28,6 +30,13 @@ func Open(dir string) (*DB, error) {
 	d := &DB{sqlDB}
 	if err := d.migrate(); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
+	}
+	for _, p := range []string{dbPath, dbPath + "-wal", dbPath + "-shm"} {
+		if _, statErr := os.Stat(p); statErr == nil {
+			if chmodErr := os.Chmod(p, 0o600); chmodErr != nil {
+				return nil, fmt.Errorf("chmod %s: %w", p, chmodErr)
+			}
+		}
 	}
 	return d, nil
 }
