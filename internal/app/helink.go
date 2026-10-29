@@ -87,16 +87,26 @@ func (a *App) applyHopProfile(ctx context.Context, u *db.User, username string, 
 var errBadTicket = errors.New("this sign-in link is not valid any more")
 
 // parseTicket checks the signature and lifetime of a HEL.ink ticket.
-func parseTicket(raw, secret string, now time.Time) (*helinkTicket, error) {
+func parseTicket(raw string, secrets []string, now time.Time) (*helinkTicket, error) {
 	body, sig, ok := strings.Cut(raw, ".")
 	if !ok || body == "" || sig == "" {
 		return nil, errBadTicket
 	}
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write([]byte(body))
-	want := mac.Sum(nil)
 	got, err := base64.RawURLEncoding.DecodeString(sig)
-	if err != nil || !hmac.Equal(got, want) {
+	if err != nil {
+		return nil, errBadTicket
+	}
+	var validSig bool
+	for _, secret := range secrets {
+		mac := hmac.New(sha256.New, []byte(secret))
+		mac.Write([]byte(body))
+		want := mac.Sum(nil)
+		if hmac.Equal(got, want) {
+			validSig = true
+			break
+		}
+	}
+	if !validSig {
 		return nil, errBadTicket
 	}
 	js, err := base64.RawURLEncoding.DecodeString(body)
@@ -161,7 +171,7 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	state, next, _ := strings.Cut(c.Value, "|")
-	t, err := parseTicket(r.FormValue("ticket"), a.cfg.HelinkSecret, time.Now())
+	t, err := parseTicket(r.FormValue("ticket"), a.cfg.HelinkSecrets(), time.Now())
 	if err != nil || !hmac.Equal([]byte(t.State), []byte(state)) || !firstUse(t.Jti, t.Exp) {
 		a.fail(w, r, http.StatusBadRequest, "This sign-in link is not valid any more. Please try again.")
 		return
