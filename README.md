@@ -129,27 +129,17 @@ Open `http://localhost:8080` and create an account. **The first account becomes 
 
 Everything is in [`.env.example`](.env.example). The ones you're most likely to change:
 
-| Variable | Default | What it does |
-|---|---|---|
-| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address of the app (sign-in, upload, dashboard) |
-| `PIXELHOP_LINK_URL` | `PIXELHOP_BASE_URL` | Another host for shared links (image and album pages, direct files). Point it at the old address after a move, so old links keep working while the app lives at the new one. That host must also reach PixelHop |
-| `PIXELHOP_DATA` | `./data` | Database and (local) images |
-| `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
-| `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
-| `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
-| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in the control center) |
-| `PIXELHOP_TRUSTED_PROXIES` | — | `cloudflare`, or IPs/CIDRs of your reverse proxy |
-| `PIXELHOP_STORAGE` | `local` | `local` or `s3` |
-| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | — | For S3-compatible storage |
-| `S3_PUBLIC_URL` | — | CDN address of the bucket; image links redirect there |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
-| `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
-| `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
-| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App slugs allowed to call the signed `/hop/*` admin API (HOP App Protocol) |
-| `PIXELHOP_CONTROL_URL` | — | Address of the HOP control center; admins who open `/admin` are sent there |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
-| `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
-| `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
+<!-- hop-family:start -->
+<!-- Generated from HEL.ink resources/hop-assets/apps.source.json; edit there, then run scripts/hop_assets.py build. -->
+| App | Address | Repository | What it does |
+| --- | --- | --- | --- |
+| **HOP ID** | [hel.ink](https://hel.ink) · accounts at `hub.hel.ink` | [navi-crwn/HEL.ink](https://github.com/navi-crwn/HEL.ink) | One account for every HOP app. |
+| **LinkHop** | [link.hel.ink](https://link.hel.ink) · `hel.ink/l/…` | [navi-crwn/LinkHop](https://github.com/navi-crwn/LinkHop) | Short links, QR codes and click analytics. |
+| **BioHop** | [bio.hel.ink](https://bio.hel.ink) · `hel.ink/b/…` | [navi-crwn/BioHop](https://github.com/navi-crwn/BioHop) | One link-in-bio page for everything you do. |
+| **PixelHop** | [p.hel.ink](https://p.hel.ink) | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
+| **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
+| **Imperium** | private (owner only) | private | The HOP control panel. |
+<!-- hop-family:end -->
 
 </details>
 
