@@ -1,0 +1,16 @@
+{{define "content"}}
+<div class="wrap">
+  <div class="prose" style="margin:0 auto">
+    <h1>Status</h1>
+    {{with .Data}}
+    <p class="status-ok"><span class="dot ok" aria-hidden="true"></span><span><b>{{$.Site}} is up.</b> This page was made by the server just now.</span></p>
+    <dl class="status-dl">
+      <dt>Version</dt><dd class="mono">{{.Version}}</dd>
+      <dt>Running since</dt><dd>{{.Since}}</dd>
+      <dt>Database</dt><dd>{{if .DBOK}}OK{{else}}<b>not answering</b>{{end}}</dd>
+    </dl>
+    {{end}}
+    <p>The HOP watchdog checks every app each minute; history and the other apps are on <a href="https://hel.ink/status">hel.ink/status</a>.</p>
+  </div>
+</div>
+{{end}}
