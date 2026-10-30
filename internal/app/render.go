@@ -85,6 +85,7 @@ func loadPages(a *App) (*pages, error) {
 		"initial":   func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
 		"hopFonts":  hopFonts,
 		"hopFamily": func() []hopApp { return hopFamily("pixelhop") },
+		"backable":  func(path string) bool { return backPaths[path] },
 	}
 	p := &pages{t: map[string]*template.Template{}}
 	files, err := fs.Glob(web.Templates, "templates/*.html")
