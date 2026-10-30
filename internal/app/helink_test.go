@@ -173,3 +173,53 @@ func TestHelinkChainedLogout(t *testing.T) {
 		t.Fatal("session still valid after logout")
 	}
 }
+
+func TestHelinkDualSecretRotation(t *testing.T) {
+	currentSecret := "new-primary-secret-that-is-long-enough-123"
+	prevSecret := "old-previous-secret-that-is-long-enough-456"
+
+	t.Setenv("PIXELHOP_DATA", t.TempDir())
+	t.Setenv("PIXELHOP_BASE_URL", "https://p.example.com")
+	t.Setenv("HELINK_URL", "https://hel.example.com")
+	t.Setenv("HELINK_SSO_SECRET", currentSecret)
+	t.Setenv("HELINK_SSO_SECRET_PREV", prevSecret)
+
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err := db.Open(cfg.DataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { d.Close() })
+	a, err := New(cfg, d, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := a.Handler()
+
+	// Ticket signed with current secret works
+	c1, state1 := start(t, h)
+	tk1 := signTicket(ticketFor(state1), currentSecret)
+	rec1 := callback(h, c1, tk1)
+	if rec1.Code != http.StatusSeeOther || rec1.Header().Get("Location") != "/dashboard" {
+		t.Fatalf("current secret ticket failed: %d", rec1.Code)
+	}
+
+	// Ticket signed with previous secret during rotation transition also works
+	c2, state2 := start(t, h)
+	tk2 := signTicket(ticketFor(state2), prevSecret)
+	rec2 := callback(h, c2, tk2)
+	if rec2.Code != http.StatusSeeOther || rec2.Header().Get("Location") != "/dashboard" {
+		t.Fatalf("previous secret ticket failed: %d", rec2.Code)
+	}
+
+	// Ticket signed with an unknown secret is rejected
+	c3, state3 := start(t, h)
+	tk3 := signTicket(ticketFor(state3), "unknown-secret-that-is-long-enough-999")
+	rec3 := callback(h, c3, tk3)
+	if rec3.Code != http.StatusBadRequest {
+		t.Fatalf("unknown secret ticket accepted: %d", rec3.Code)
+	}
+}

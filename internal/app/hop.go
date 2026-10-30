@@ -89,7 +89,7 @@ func (a *App) hopAuth(h http.HandlerFunc) http.HandlerFunc {
 			hopFail(w, http.StatusUnauthorized, "bad_signature", "Unknown calling app.")
 			return
 		}
-		if err := a.hopNonces.Verify(r, body, app, []string{a.cfg.HelinkSecret}, hopMaxAge); err != nil {
+		if err := a.hopNonces.Verify(r, body, app, a.cfg.HelinkSecrets(), hopMaxAge); err != nil {
 			hopFail(w, http.StatusUnauthorized, err.Error(), "The request signature was not accepted.")
 			return
 		}

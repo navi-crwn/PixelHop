@@ -49,9 +49,10 @@ type Config struct {
 	// HEL.ink accounts: when both are set, people sign in with their HEL.ink
 	// account and PixelHop's own sign-up, password reset and Google login
 	// are handed over to HEL.ink.
-	HelinkURL     string
-	HelinkSecret  string
-	HelinkAPIAddr string // optional "127.0.0.1:443": reach HEL.ink on this machine for password checks
+	HelinkURL        string
+	HelinkSecret     string
+	HelinkSecretPrev string
+	HelinkAPIAddr    string // optional "127.0.0.1:443": reach HEL.ink on this machine for password checks
 	// HOP App Protocol: which callers may use the signed /hop/* admin API
 	// (slugs sent in X-HOP-App, signed with HelinkSecret).
 	HopAdminClients []string
@@ -145,7 +146,8 @@ func Load() (*Config, error) {
 
 	c.GoogleRedirect = env("GOOGLE_REDIRECT_URI", c.BaseURL+"/auth/google/callback")
 	c.HelinkURL = strings.TrimRight(env("HELINK_URL", ""), "/")
-	c.HelinkSecret = env("HELINK_SSO_SECRET", "")
+	c.HelinkSecret = env("HELINK_SSO_SECRET", env("HOP_SSO_SECRET_PIXELHOP", env("HOP_SSO_SECRET", "")))
+	c.HelinkSecretPrev = env("HELINK_SSO_SECRET_PREV", env("HOP_SSO_SECRET_PREV", ""))
 	c.HelinkAPIAddr = env("HELINK_API_ADDR", "")
 	for _, s := range strings.Split(env("HOP_ADMIN_CLIENTS", "imperium,helink"), ",") {
 		if s = strings.TrimSpace(s); s != "" {
@@ -186,6 +188,18 @@ func (c *Config) SecureCookies() bool { return strings.HasPrefix(c.BaseURL, "htt
 
 // SSOEnabled reports whether accounts come from HEL.ink.
 func (c *Config) SSOEnabled() bool { return c.HelinkURL != "" && c.HelinkSecret != "" }
+
+// HelinkSecrets returns valid candidate secrets (current and previous) for zero-downtime rotation.
+func (c *Config) HelinkSecrets() []string {
+	var s []string
+	if len(c.HelinkSecret) >= 32 {
+		s = append(s, c.HelinkSecret)
+	}
+	if len(c.HelinkSecretPrev) >= 32 {
+		s = append(s, c.HelinkSecretPrev)
+	}
+	return s
+}
 
 // TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.
 func (c *Config) TurnstileEnabled() bool { return c.TurnstileSiteKey != "" && c.TurnstileSecret != "" }

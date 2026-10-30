@@ -942,3 +942,40 @@ func TestHopIPBans(t *testing.T) {
 		t.Errorf("stats should report the disk: %v", stats.KPI)
 	}
 }
+
+func TestHopDualSecretRotation(t *testing.T) {
+	currentSecret := "new-primary-secret-that-is-long-enough-123"
+	prevSecret := "old-previous-secret-that-is-long-enough-456"
+
+	a, h := ssoApp(t)
+	a.cfg.HelinkSecret = currentSecret
+	a.cfg.HelinkSecretPrev = prevSecret
+
+	callWith := func(sec string) (*httptest.ResponseRecorder, hopResp) {
+		req := httptest.NewRequest("GET", "/hop/health", nil)
+		req.Header.Set("Content-Type", "application/json")
+		for k, v := range hop.Headers("imperium", sec, "admin-1", "GET", "/hop/health", nil) {
+			req.Header[k] = v
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		var out hopResp
+		json.Unmarshal(rec.Body.Bytes(), &out)
+		return rec, out
+	}
+
+	// Request signed with current secret works
+	if rec, out := callWith(currentSecret); rec.Code != 200 || !out.OK {
+		t.Fatalf("current secret failed: %d %+v", rec.Code, out)
+	}
+
+	// Request signed with previous secret during transition works
+	if rec, out := callWith(prevSecret); rec.Code != 200 || !out.OK {
+		t.Fatalf("previous secret failed: %d %+v", rec.Code, out)
+	}
+
+	// Request signed with an unknown secret is rejected
+	if rec, out := callWith("unknown-secret-that-is-long-enough-999"); rec.Code != 401 || out.Error != "bad_signature" {
+		t.Fatalf("unknown secret accepted: %d %+v", rec.Code, out)
+	}
+}
