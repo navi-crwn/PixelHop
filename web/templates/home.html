@@ -82,5 +82,12 @@
       <div class="step"><h3>Share anywhere</h3><p>Copy the link, embed code or QR. Previews look right on Discord, X, WhatsApp and forums.</p></div>
     </div>
   </section>
+  <section class="section" id="family">
+    <div class="section-head"><h2>Part of the HOP family</h2><p>One free HOP ID signs you in to every app.</p></div>
+    <ul class="hop-family" role="list">
+      {{range hopFamily}}<li><a href="{{.URL}}">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="40" height="40" loading="lazy">{{end}}<b>{{.Name}}</b><span>{{.Tagline}}</span></a></li>
+      {{end}}
+    </ul>
+  </section>
 </div>
 {{end}}
