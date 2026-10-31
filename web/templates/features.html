@@ -1,27 +1,49 @@
 {{define "content"}}
 <div class="wrap">
-  <div class="prose" style="margin:0 auto">
+  <div class="prose" style="margin:0 auto; max-width: 960px;">
     <h1>{{.L.T "features.title"}}</h1>
     <p class="lead">{{.L.T "features.lead"}}</p>
-    <h2>{{.L.T "features.sharing_title"}}</h2>
-    <ul>
-      <li>{{.L.H "features.sharing_1" "max_mb" .MaxMB "max_batch" .MaxBatch}}</li>
-      <li>{{.L.H "features.sharing_2"}}</li>
-      <li>{{.L.H "features.sharing_3"}}</li>
-      <li>{{.L.H "features.sharing_4"}}</li>
-    </ul>
-    <h2>{{.L.T "features.privacy_title"}}</h2>
-    <ul>
-      <li>{{.L.H "features.privacy_1"}}</li>
-      <li>{{.L.H "features.privacy_2"}}</li>
-      <li>{{.L.H "features.privacy_3"}}</li>
-    </ul>
-    <h2>{{.L.T "features.studio_title"}}</h2>
-    <p>{{.L.H "features.studio_desc"}}</p>
-    <h2>{{.L.T "features.dev_title"}}</h2>
-    <p>{{.L.H "features.dev_desc"}}</p>
-    <h2>{{.L.T "features.accounts_title"}}</h2>
-    <p>{{.L.H "features.accounts_desc"}}</p>
+
+    <div class="bento-grid">
+      <div class="bento-card">
+        <h2>{{.L.T "features.sharing_title"}}</h2>
+        <ul>
+          <li>{{.L.H "features.sharing_1" "max_mb" .MaxMB "max_batch" .MaxBatch}}</li>
+          <li>{{.L.H "features.sharing_2"}}</li>
+          <li>{{.L.H "features.sharing_3"}}</li>
+          <li>{{.L.H "features.sharing_4"}}</li>
+        </ul>
+      </div>
+
+      <div class="bento-card">
+        <h2>{{.L.T "features.privacy_title"}}</h2>
+        <ul>
+          <li>{{.L.H "features.privacy_1"}}</li>
+          <li>{{.L.H "features.privacy_2"}}</li>
+          <li>{{.L.H "features.privacy_3"}}</li>
+        </ul>
+      </div>
+
+      <div class="bento-card">
+        <h2>{{.L.T "features.studio_title"}}</h2>
+        <p>{{.L.H "features.studio_desc"}}</p>
+      </div>
+
+      <div class="bento-card">
+        <h2>{{.L.T "features.dev_title"}}</h2>
+        <p>{{.L.H "features.dev_desc"}}</p>
+      </div>
+
+      <div class="bento-card">
+        <h2>{{.L.T "features.accounts_title"}}</h2>
+        <p>{{.L.H "features.accounts_desc"}}</p>
+      </div>
+
+      <div class="bento-card">
+        <h2>{{.L.H "footer.family"}}</h2>
+        <p>PixelHop is part of the HOP family. One free HOP ID signs you in across PixelHop, BioHop, LinkHop, and NoteHop with chained single sign-out.</p>
+      </div>
+    </div>
   </div>
 </div>
 {{end}}
