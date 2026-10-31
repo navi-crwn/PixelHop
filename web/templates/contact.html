@@ -1,0 +1,15 @@
+{{define "content"}}
+<div class="wrap">
+  <div class="prose" style="margin:0 auto">
+    <h1>Contact</h1>
+    <p class="lead">{{.Site}} is open source, so most conversations happen on GitHub.</p>
+    <ul class="contact-list">
+      <li><b>Found a bug or have an idea?</b> <a href="https://github.com/navi-crwn/PixelHop/issues/new/choose" rel="noopener">Open an issue</a>.</li>
+      <li><b>Want to fix it yourself?</b> Pull requests are welcome: <a href="https://github.com/navi-crwn/PixelHop/pulls" rel="noopener">see open PRs</a>.</li>
+      <li><b>Security problem?</b> Please report it privately: <a href="https://github.com/navi-crwn/PixelHop/security/advisories/new" rel="noopener">security advisory</a> (see <a href="https://github.com/navi-crwn/PixelHop/blob/main/SECURITY.md" rel="noopener">SECURITY.md</a>).</li>
+      <li><b>An image breaks the rules?</b> Press <b>Report</b> on its page, or follow <a href="/legal#takedown">takedowns</a>.</li>
+      {{with .Data}}<li><b>Anything else:</b> <a href="mailto:{{.}}">{{.}}</a>.</li>{{end}}
+    </ul>
+  </div>
+</div>
+{{end}}

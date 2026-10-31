@@ -72,17 +72,23 @@
   <form method="post" action="/settings/ack-warning"><input type="hidden" name="back" value="{{.Path}}"><button class="btn primary" type="submit">I understand</button></form>
 </dialog>
 {{end}}
+{{if backable .Path}}<div class="wrap back-row"><a class="back" href="/"><span aria-hidden="true">&larr;</span> Back to {{.Site}}</a></div>{{end}}
 {{template "content" .}}
 </main>
 <footer>
   <div class="wrap">
     <span><b>{{.Site}}</b> · open source image hosting</span>
     <nav aria-label="Footer">
+      <a href="/about">About</a>
+      <a href="/features">Features</a>
       <a href="/tools">Studio</a>
       <a href="/help">Help</a>
+      <a href="/faq">FAQ</a>
       <a href="/docs">API &amp; ShareX</a>
       <a href="/legal">Terms &amp; privacy</a>
       <a href="/legal#takedown">Report abuse</a>
+      <a href="/contact">Contact</a>
+      <a href="/status">Status</a>
       <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a>
     </nav>
   </div>
