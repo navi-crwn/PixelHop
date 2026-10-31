@@ -1,16 +1,16 @@
 {{define "content"}}
 <div class="wrap">
   <div class="prose" style="margin:0 auto">
-    <h1>FAQ</h1>
-    <p class="muted">How-to questions are in <a href="/help">Help</a>.</p>
-    <details open><summary><b>Is it really free?</b></summary><p>Yes. There is no paid plan and no locked feature. The code is MIT licensed.</p></details>
-    <details><summary><b>Do I need an account?</b></summary><p>No. Guests can upload and get a private delete link. A free HOP ID adds a gallery, albums and higher limits, and also signs you in to LinkHop, BioHop and NoteHop.</p></details>
-    <details><summary><b>Is my location visible in my photos?</b></summary><p>No. GPS position and camera details are removed from every upload before it is stored.</p></details>
-    <details><summary><b>How long are files kept?</b></summary><p>Forever, unless you choose an expiry when uploading or delete them yourself.</p></details>
-    <details><summary><b>Do you show ads or track me?</b></summary><p>No ads and no third-party trackers. See <a href="/legal#privacy">Privacy</a>.</p></details>
-    <details><summary><b>Can I host my own PixelHop?</b></summary><p>Yes: one Go binary and one SQLite file. See the <a href="https://github.com/navi-crwn/PixelHop" rel="noopener">README on GitHub</a>.</p></details>
-    <details><summary><b>How do I report an image?</b></summary><p>Press <b>Report</b> on the image page. Copyright notices: <a href="/legal#takedown">takedowns</a>.</p></details>
-    <details><summary><b>Is it working right now?</b></summary><p>See the <a href="/status">status page</a>.</p></details>
+    <h1>{{.L.T "faq.title"}}</h1>
+    <p class="muted">{{.L.H "faq.howto"}}</p>
+    <details open><summary><b>{{.L.T "faq.q1"}}</b></summary><p>{{.L.T "faq.a1"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q2"}}</b></summary><p>{{.L.T "faq.a2"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q3"}}</b></summary><p>{{.L.T "faq.a3"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q4"}}</b></summary><p>{{.L.T "faq.a4"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q5"}}</b></summary><p>{{.L.H "faq.a5"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q6"}}</b></summary><p>{{.L.H "faq.a6"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q7"}}</b></summary><p>{{.L.H "faq.a7"}}</p></details>
+    <details><summary><b>{{.L.T "faq.q8"}}</b></summary><p>{{.L.H "faq.a8"}}</p></details>
   </div>
 </div>
 {{end}}

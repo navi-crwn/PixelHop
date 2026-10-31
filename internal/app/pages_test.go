@@ -44,3 +44,72 @@ func TestDedicatedPages(t *testing.T) {
 		}
 	}
 }
+
+func TestPageLanguages(t *testing.T) {
+	h := newTestApp(t)
+
+	// Default is English, Accept-Language is ignored
+	req := httptest.NewRequest("GET", "/about", nil)
+	req.Header.Set("Accept-Language", "id-ID,id;q=0.9")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("/about: status %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, `<html lang="en" dir="ltr">`) {
+		t.Errorf("default html lang tag mismatch: %s", body[:100])
+	}
+	if !strings.Contains(body, "About PixelHop") {
+		t.Errorf("default should be English, got body: %s", body[:200])
+	}
+
+	// ?lang=id switches to Indonesian and sets cookie
+	req = httptest.NewRequest("GET", "/about?lang=id", nil)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("/about?lang=id: status %d", rec.Code)
+	}
+	body = rec.Body.String()
+	if !strings.Contains(body, `<html lang="id" dir="ltr">`) {
+		t.Errorf("expected html lang=id dir=ltr")
+	}
+	if !strings.Contains(body, "Tentang PixelHop") {
+		t.Errorf("expected Indonesian title, got body: %s", body[:200])
+	}
+	cookies := rec.Result().Cookies()
+	var foundCookie bool
+	for _, c := range cookies {
+		if c.Name == "pixel_lang" && c.Value == "id" {
+			foundCookie = true
+			break
+		}
+	}
+	if !foundCookie {
+		t.Errorf("pixel_lang=id cookie was not set")
+	}
+
+	// ?lang=ar sets RTL
+	req = httptest.NewRequest("GET", "/about?lang=ar", nil)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("/about?lang=ar: status %d", rec.Code)
+	}
+	body = rec.Body.String()
+	if !strings.Contains(body, `<html lang="ar" dir="rtl">`) {
+		t.Errorf("expected html lang=ar dir=rtl, got: %s", body[:100])
+	}
+
+	// GET /i18n/{lang} returns JavaScript catalog
+	req = httptest.NewRequest("GET", "/i18n/id", nil)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("/i18n/id: status %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "window.PIXEL_I18N =") {
+		t.Errorf("expected window.PIXEL_I18N in catalog JS")
+	}
+}

@@ -4,14 +4,18 @@ package app
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/config"
 	"github.com/navi-crwn/pixelhop/internal/db"
 	"github.com/navi-crwn/pixelhop/internal/hop"
+	"github.com/navi-crwn/pixelhop/internal/i18n"
 	"github.com/navi-crwn/pixelhop/internal/storage"
 	"github.com/navi-crwn/pixelhop/web"
 )
@@ -100,6 +104,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /favicon.ico", a.favicon)
 	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
 	mux.HandleFunc("GET /sw.js", a.serviceWorker)
+	mux.HandleFunc("GET /i18n/{lang}", a.catalogJS)
 	mux.HandleFunc("POST /share", a.share)
 	mux.HandleFunc("GET /uploaded", a.uploadedPage)
 	mux.HandleFunc("GET /robots.txt", a.robots)
@@ -227,4 +232,42 @@ func cacheForever(h http.Handler) http.Handler {
 		}
 		h.ServeHTTP(w, r)
 	})
+}
+
+const langCookie = "pixel_lang"
+
+// locale determines the visitor's language. Order of precedence:
+// 1. explicit ?lang= query (remembered in cookie),
+// 2. explicit pixel_lang cookie from previous selection,
+// 3. English (default; Accept-Language is not used per owner decision).
+func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
+	if q := r.URL.Query().Get("lang"); i18n.Supported(q) {
+		http.SetCookie(w, &http.Cookie{
+			Name:     langCookie,
+			Value:    q,
+			Path:     "/",
+			MaxAge:   365 * 24 * 3600,
+			Secure:   strings.HasPrefix(a.cfg.BaseURL, "https://"),
+			SameSite: http.SameSiteLaxMode,
+		})
+		return i18n.Locale{Lang: i18n.Get(q)}
+	}
+	code := i18n.Default
+	if c, err := r.Cookie(langCookie); err == nil && i18n.Supported(c.Value) {
+		code = c.Value
+	}
+	w.Header().Add("Vary", "Cookie")
+	return i18n.Locale{Lang: i18n.Get(code)}
+}
+
+func (a *App) catalogJS(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimSuffix(r.PathValue("lang"), ".js")
+	if !i18n.Supported(code) {
+		code = i18n.Default
+	}
+	cat := i18n.Catalog(code)
+	b, _ := json.Marshal(cat)
+	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	fmt.Fprintf(w, "window.PIXEL_I18N = %s;\n", b)
 }
