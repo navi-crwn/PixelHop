@@ -82,9 +82,11 @@ func (a *App) withLinkHost(mux *http.ServeMux, next http.Handler) http.Handler {
 			}
 		}
 		if _, pattern := mux.Handler(r2); !linkPatterns[pattern] {
-			code := http.StatusFound
+			// The app has moved for good (U-02): app pages on the link host are a
+			// permanent redirect, so search engines and bookmarks follow it.
+			code := http.StatusMovedPermanently
 			if r.Method != http.MethodGet && r.Method != http.MethodHead {
-				code = http.StatusTemporaryRedirect // keep the method and body
+				code = http.StatusPermanentRedirect // keep the method and body
 			}
 			http.Redirect(w, r, a.cfg.BaseURL+r.URL.RequestURI(), code)
 			return
