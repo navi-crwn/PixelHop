@@ -44,7 +44,7 @@ type sitemapURL struct {
 
 func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 	urls := []sitemapURL{}
-	for _, p := range []string{"/", "/tools", "/tools/batch", "/explore", "/help", "/docs", "/legal"} {
+	for _, p := range []string{"/", "/tools", "/tools/batch", "/explore", "/help", "/docs", "/legal", "/about", "/features", "/faq", "/contact"} {
 		urls = append(urls, sitemapURL{Loc: a.cfg.BaseURL + p})
 	}
 	rows, err := a.db.QueryContext(r.Context(), `SELECT username FROM users WHERE username IS NOT NULL AND show_owner=1 AND status='active'

@@ -645,5 +645,18 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
 .hop-family a:hover { border-color: var(--muted); }
 .hop-family img { grid-row: span 2; width: 40px; height: 40px; border-radius: 12px; }
 .hop-family span { color: var(--muted); font-size: .88rem; }
-.hop-family-foot { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-top: 10px; font-size: .88rem; color: var(--muted); }
+.hop-family-foot { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 6px 14px; padding-top: 10px; font-size: .88rem; color: var(--muted); }
 .hop-family-foot nav { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+/* Dedicated pages: back link, lead, contact list, status. */
+.back-row { padding-top: 18px; }
+.back { display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; color: var(--muted); text-decoration: none; }
+.back:hover { color: var(--text); }
+.lead { font-size: 1.12rem; color: var(--muted); }
+.contact-list { padding-left: 1.1em; }
+.contact-list li { margin: .5em 0; }
+.status-ok { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; }
+.status-ok .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 4px rgb(34 197 94 / .2); }
+.status-dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; }
+.status-dl dt { color: var(--muted); }
+.status-dl dd { margin: 0; }
