@@ -10,6 +10,9 @@ var Templates embed.FS
 //go:embed static
 var Static embed.FS
 
+//go:embed i18n
+var I18n embed.FS
+
 // HopAssets is a copy of the HOP asset manifest published at
 // https://hel.ink/hop-assets/apps.json (fonts, app marks and their SRI hashes).
 // Refresh it with scripts/sync-hop-assets.sh.
