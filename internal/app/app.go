@@ -94,6 +94,8 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /delete/{id}/{token}", a.deleteWithToken)
 	mux.HandleFunc("POST /report/{id}", a.report)
 	mux.HandleFunc("POST /unlock/{id}", a.unlock)
+	mux.HandleFunc("POST /gate/{id}", a.gateConfirm)
+	mux.HandleFunc("POST /gate/a/{id}", a.albumGateConfirm)
 
 	// image bytes
 	mux.HandleFunc("GET /i/{file}", a.serveFull)

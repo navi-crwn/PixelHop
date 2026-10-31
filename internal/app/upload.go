@@ -30,11 +30,13 @@ var expiries = map[string]time.Duration{
 }
 
 type uploadInput struct {
-	name string
-	data []byte
-	path string // big videos and PDFs wait on disk instead of in memory
-	size int64
-	err  error
+	name           string
+	data           []byte
+	path           string // big videos and PDFs wait on disk instead of in memory
+	size           int64
+	err            error
+	contentWarning string
+	warningReason  string
 }
 
 type uploadResult struct {
@@ -106,6 +108,11 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	useSlug := r.FormValue("slug") != "0" && r.FormValue("slug") != "false"
 	listed := u != nil && (r.FormValue("listed") == "1" || r.FormValue("listed") == "true")
 	alt := trim(strings.TrimSpace(r.FormValue("alt")), 300)
+	contentWarning := strings.ToLower(strings.TrimSpace(r.FormValue("content_warning")))
+	if contentWarning != "sensitive" && contentWarning != "adult" {
+		contentWarning = "none"
+	}
+	warningReason := trim(strings.TrimSpace(r.FormValue("warning_reason")), 255)
 
 	// Several files become an album with its own share link. Signed-in people
 	// can keep adding to one of their albums (batch uploads come in chunks).
@@ -117,7 +124,12 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 	}
 	if albumID == "" && (len(inputs) > 1 || r.FormValue("album") == "force") && r.FormValue("album") != "0" {
-		al := &db.Album{ID: newID(""), Title: trim(r.FormValue("title"), 120)}
+		al := &db.Album{
+			ID:             newID(""),
+			Title:          trim(r.FormValue("title"), 120),
+			ContentWarning: contentWarning,
+			WarningReason:  warningReason,
+		}
 		if u != nil {
 			al.UserID = sql.NullInt64{Int64: u.ID, Valid: true}
 		}
@@ -157,6 +169,8 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		if in.size == 0 {
 			in.size = int64(len(in.data))
 		}
+		in.contentWarning = contentWarning
+		in.warningReason = warningReason
 		if u != nil && used+in.size > u.QuotaBytes {
 			res.Err = userError{fmt.Sprintf("Your storage is full (%s of %s). Delete some images to make room.", humanBytes(used), humanBytes(u.QuotaBytes))}
 			results = append(results, res)
@@ -250,6 +264,9 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 }
 
 func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (*db.Image, string, bool, error) {
+	if in.contentWarning == "" {
+		in.contentWarning = "none"
+	}
 	if in.path == "" {
 		if kind := mediaKind(in.data[:min(len(in.data), 64)]); kind != "" {
 			if in.path, in.err = a.spoolBytes(in.data); in.err != nil {
@@ -270,7 +287,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 			}
 			in.data, in.path = data, ""
 		} else {
-			return a.storeMedia(ctx, in.path, in.name, kind, u, ip, albumID, expiresAt, useSlug, alt)
+			return a.storeMedia(ctx, in.path, in.name, kind, u, ip, albumID, expiresAt, useSlug, alt, in.contentWarning, in.warningReason)
 		}
 	}
 
@@ -279,7 +296,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	var uid sql.NullInt64
 	if u != nil {
 		uid = sql.NullInt64{Int64: u.ID, Valid: true}
-		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil {
+		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil && old.ContentWarning == in.contentWarning && old.WarningReason == in.warningReason {
 			return old, "", true, nil
 		}
 	}
@@ -306,7 +323,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
 		Mime: p.Format.Mime, Ext: p.Format.Ext, Size: int64(len(p.Data)), Width: p.Width, Height: p.Height,
 		SHA256: sha, Color: p.Color, Backend: a.store.Name(), IP: ip, ExpiresAt: expiresAt, Listed: listed,
-		Stripped: strings.Join(stripped, ","), Alt: alt,
+		Stripped: strings.Join(stripped, ","), Alt: alt, ContentWarning: in.contentWarning, WarningReason: in.warningReason,
 	}
 	if albumID != "" {
 		im.AlbumID = sql.NullString{String: albumID, Valid: true}

@@ -6,6 +6,8 @@
     <div class="card">
       <div class="field"><label for="ae-title">Title</label><input type="text" id="ae-title" value="{{$al.Title}}" maxlength="120" placeholder="Trip to Bromo"></div>
       <div class="field"><label for="ae-desc">Description</label><textarea id="ae-desc" maxlength="1000" rows="3">{{$al.Description}}</textarea></div>
+      <div class="field"><label for="ae-warning">{{.L.T "Content warning"}}</label><select id="ae-warning"><option value="none" {{if eq $al.ContentWarning "none"}}selected{{end}}>{{.L.T "None"}}</option><option value="sensitive" {{if eq $al.ContentWarning "sensitive"}}selected{{end}}>{{.L.T "Sensitive content"}}</option><option value="adult" {{if eq $al.ContentWarning "adult"}}selected{{end}}>{{.L.T "Adult 18+"}}</option></select></div>
+      <div class="field"><label for="ae-warning-reason">{{.L.T "Reason (optional)"}}</label><input id="ae-warning-reason" maxlength="255" value="{{$al.WarningReason}}"></div>
       <button class="btn sm danger" type="button" id="ae-delete"><svg><use href="#i-trash"/></svg>Delete album (keeps the images)</button>
     </div>
     <div class="card">
