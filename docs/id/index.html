@@ -8,8 +8,8 @@
   <link rel="canonical" href="https://navi-crwn.github.io/PixelHop/id/">
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/styles.css">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts.css" integrity="sha384-T1Y2aaMQ8CSfi7J2t9d1ZAbVcQ1FcO27Jwn3WtNWB+UVK137YCl3hIPvz0G4K22L" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/hop-float.css" integrity="sha384-sl7D409xEmIT5gkArlQLoQQ4rOkqF7tOGf1VhI/iMb7c2/s9w9NtDEjLbJMU/MQ/" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/product.css">
+  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts-amnesia.css" integrity="sha384-750KEkFNx2ykcIsUyi1pZ0JC/Z6jfrK7OJtntqOzB8HKfEpjeostGTWJGAxh/5Zi" crossorigin="anonymous">
   <link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/PixelHop/">
   <link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/PixelHop/en/">
   <link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/PixelHop/id/">
@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-  <div data-hop-float></div>
+
   <a class="skip" href="#main">Lewati ke konten</a>
 
   <header class="site-header">
@@ -60,25 +60,23 @@
   </header>
 
   <main id="main">
-    <div class="hero">
+    <div class="hero product-hero">
       <div>
         <p class="kicker">HOP &middot; Hosting gambar & studio foto</p>
         <h1>Letakkan gambar, bersihkan metadata, bagikan dalam hitungan detik</h1>
         <p class="lede">PixelHop menghadirkan pengunggahan gambar kilat, galeri album, dan studio foto privat langsung di peramban. Tautan pendek bersih di p.hel.ink dan dashboard Anda di pixel.hel.ink. Satu biner Go, mandiri, open source (MIT).</p>
         <div class="cta-row">
           <a class="btn primary" href="https://pixel.hel.ink">Coba PixelHop</a>
-          <a class="btn" href="https://p.hel.ink">Jelajahi gambar</a>
+          <a class="btn" href="https://pixel.hel.ink/explore">Jelajahi gambar</a>
           <a class="btn" href="https://github.com/navi-crwn/PixelHop">Lihat kode</a>
         </div>
         <p class="note">Alamat aktif di halaman ini menautkan ke situs publik keluarga HOP.</p>
       </div>
-      <div class="tile-wrap" aria-hidden="true">
-        <img class="tile" src="../assets/tile.svg" alt="" width="220" height="260">
-      </div>
+      <div class="product-art media-art" aria-hidden="true"><div class="media-sheet media-back"></div><div class="media-sheet"><span class="media-sun"></span><span class="media-hill"></span><img src="../assets/mark.svg" alt="" width="36" height="36"></div><span class="media-address">p.hel.ink/…</span></div>
     </div>
 
     <section id="features" aria-labelledby="features-h">
-      <h2 id="features-h">Kemampuan PixelHop</h2>
+      <span class="section-number" aria-hidden="true">01</span><h2 id="features-h">Kemampuan PixelHop</h2>
       <ul class="features">
         <li><strong>Unggah kilat & tautan bersih</strong><p>Tarik foto, tangkapan layar, atau karya seni untuk tautan pendek rapi di p.hel.ink/{slug}, tautan langsung, Markdown, dan kode semat.</p></li>
         <li><strong>Pembersihan metadata bawaan</strong><p>Koordinat GPS, nomor seri perangkat, dan tag EXIF dibuang dengan menyusun ulang wadah file tanpa mengompresi ulang piksel asli.</p></li>
@@ -91,22 +89,14 @@
       </ul>
     </section>
 
-    <section id="run" aria-labelledby="run-h">
-      <h2 id="run-h">Pasang mandiri</h2>
-      <div class="panel">
-        <p>PixelHop dapat di-host sendiri. Bangun dan jalankan biner tunggal dalam hitungan detik:</p>
-        <pre><code>git clone https://github.com/navi-crwn/PixelHop.git
-cd PixelHop
-go build -o pixelhop ./cmd/pixelhop
-./pixelhop</code></pre>
-        <h3>Prasyarat</h3>
-        <p>Go 1.22+ dan SQLite. Panduan lengkap, instruksi Docker, dan pengujian tersedia di README GitHub.</p>
-        <h3>Konfigurasi login</h3>
-        <p>Login menggunakan SSO HOP ID. Set HOP_HUB_URL, HOP_APP=pixelhop, dan HOP_SSO_SECRET di lingkungan Anda sebelum masuk, atau jalankan mode mandiri.</p>
-        <h3>Basis Data & Penyimpanan</h3>
-        <p>PixelHop menggunakan basis data SQLite bawaan dengan penyimpanan disk lokal secara default. Atur variabel lingkungan S3 untuk penyimpanan cloud bucket.</p>
-        <p class="note">Mode mandiri dan SSO didukung penuh dalam instalasi mandiri.</p>
-      </div>
+    <section id="run" class="source-card" aria-labelledby="run-h">
+      <div><span class="section-number" aria-hidden="true">02 / OPEN SOURCE</span><h2 id="run-h">Pasang mandiri</h2><p>Alamat aktif di halaman ini menautkan ke situs publik keluarga HOP.</p></div>
+      <div class="cta-row"><a class="btn" href="https://github.com/navi-crwn/PixelHop/blob/main/README.md">Pasang mandiri ↗</a><a class="btn" href="https://github.com/navi-crwn/PixelHop">Lihat kode ↗</a></div>
+    </section>
+
+    <section class="product-preview" aria-labelledby="preview-h">
+      <div class="preview-caption"><div><span class="section-number" aria-hidden="true">03</span><h2 id="preview-h">PixelHop</h2></div><a class="btn primary" href="https://pixel.hel.ink">Coba PixelHop ↗</a></div>
+      <a class="preview-screen" href="https://pixel.hel.ink" aria-label="Coba PixelHop"><img class="preview-light" src="../assets/product-light.webp" alt="PixelHop" width="1280" height="900" loading="lazy"><img class="preview-dark" src="../assets/product-dark.webp" alt="PixelHop" width="1280" height="900" loading="lazy"></a>
     </section>
 
     <section id="faq" aria-labelledby="faq-h">
@@ -150,18 +140,17 @@ go build -o pixelhop ./cmd/pixelhop
 
     <section id="help" aria-labelledby="help-h">
       <h2 id="help-h">Butuh bantuan atau menemukan kendala?</h2>
-      <p>Pertanyaan, saran, dan laporan bug dapat disampaikan di <a href="https://github.com/navi-crwn/PixelHop/issues">pelacak masalah GitHub</a>.</p>
+      <p>Pertanyaan, saran, dan laporan bug dapat disampaikan di <a href="https://github.com/navi-crwn/PixelHop/issues">pelacak masalah GitHub</a> .</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="inner">
       <p><strong>PixelHop</strong> &middot; Hosting gambar cepat dan studio foto privat</p>
-      <p>Open source di bawah lisensi <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a>. Dihost di<a href="https://github.com/navi-crwn/PixelHop">GitHub</a>dan aktif di<a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
+      <p>Open source di bawah lisensi <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a> . Dihost di <a href="https://github.com/navi-crwn/PixelHop">GitHub</a> dan aktif di <a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
     </div>
   </footer>
 
-  <script src="https://hel.ink/hop-assets/v1/hop-float.js" integrity="sha384-kNviPsMEO9lt9+b4n2S5lX6zHRVnePzGuj9VdgCETTsQwzt/5YJRnv842Xg0gRC+" crossorigin="anonymous" defer></script>
   <script src="../assets/theme.js"></script>
 </body>
 </html>

@@ -17,17 +17,17 @@
           <button class="btn" type="submit">Fetch</button>
         </form>
 
-        <div class="field" style="max-width:440px;margin:16px auto;text-align:start">
-          <label for="upload-warning">{{.L.T "Content warning"}}</label>
-          <select id="upload-warning"><option value="none">{{.L.T "None"}}</option><option value="sensitive">{{.L.T "Sensitive content"}}</option><option value="adult">{{.L.T "Adult 18+"}}</option></select>
-          <label for="upload-warning-reason">{{.L.T "Reason (optional)"}}</label>
-          <input type="text" id="upload-warning-reason" maxlength="255">
-        </div>
         <div class="chips" id="chips">
-          <button class="chip" type="button" id="opts-toggle" aria-expanded="false" aria-controls="opts"><svg><use href="#i-gear"/></svg><span id="opts-summary">Keep forever</span></button>
+          <button class="chip" type="button" id="opts-toggle" aria-expanded="false" aria-controls="opts"><svg><use href="#i-gear"/></svg><span>{{.L.T "Advanced"}}</span></button>
           {{if .User}}<button class="chip" type="button" id="ticket-toggle" aria-expanded="false" aria-controls="ticket-box"><svg><use href="#i-album"/></svg>Ticket &amp; note</button>{{end}}
         </div>
         <div class="opts hide" id="opts">
+          <div class="field upload-warning-fields">
+            <label for="upload-warning">{{.L.T "Content warning"}}</label>
+            <select id="upload-warning"><option value="none">{{.L.T "None"}}</option><option value="sensitive">{{.L.T "Sensitive content"}}</option><option value="adult">{{.L.T "Adult 18+"}}</option></select>
+            <label for="upload-warning-reason">{{.L.T "Reason (optional)"}}</label>
+            <input type="text" id="upload-warning-reason" maxlength="255">
+          </div>
           <label>Delete after
             <select id="expire">
               <option value="">Never</option>
