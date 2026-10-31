@@ -10,35 +10,35 @@
               {{if $im.IsAdult}}
               <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(239,68,68,0.15);color:#ef4444;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                18+ Adult Content
+                 {{.L.T "Adult 18+"}}
               </div>
-              <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--text,#f1f5f9)">Age Verification Required</h2>
-              <p style="font-size:14px;color:var(--muted,#94a3b8);margin:0 0 16px;line-height:1.5;">This media contains 18+ adult content. By continuing, you confirm that you are at least 18 years old or the age of legal majority in your jurisdiction.</p>
+              <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--text,#f1f5f9)">{{.L.T "Age Verification Required"}}</h2>
+              <p style="font-size:14px;color:var(--muted,#94a3b8);margin:0 0 16px;line-height:1.5;">{{.L.T "Adult 18+"}}</p>
               {{else}}
               <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(245,158,11,0.15);color:#f59e0b;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Content Warning
+                {{.L.T "Content warning"}}
               </div>
-              <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--text,#f1f5f9)">Sensitive Content Warning</h2>
-              <p style="font-size:14px;color:var(--muted,#94a3b8);margin:0 0 16px;line-height:1.5;">This media contains sensitive material (violence, intense themes, or spoilers).</p>
+              <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--text,#f1f5f9)">{{.L.T "Sensitive Content Warning"}}</h2>
+              <p style="font-size:14px;color:var(--muted,#94a3b8);margin:0 0 16px;line-height:1.5;">{{.L.T "Sensitive content"}}</p>
               {{end}}
 
               {{if $im.WarningReason}}
               <div style="background:var(--bg,#0f1117);border-left:3px solid var(--accent,#a855f7);padding:10px 14px;border-radius:6px;text-align:left;margin-bottom:18px;">
-                <span style="font-size:11px;font-weight:600;color:var(--muted,#94a3b8);text-transform:uppercase;display:block;margin-bottom:2px;">Creator Note</span>
+                <span style="font-size:11px;font-weight:600;color:var(--muted,#94a3b8);text-transform:uppercase;display:block;margin-bottom:2px;">{{.L.T "Note from creator:"}}</span>
                 <span style="font-size:13px;color:var(--text,#f1f5f9);">{{$im.WarningReason}}</span>
               </div>
               {{end}}
 
               <form method="POST" action="/gate/{{$im.ID}}" style="display:flex;flex-direction:column;gap:12px;">
                 <label style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted,#94a3b8);cursor:pointer;justify-content:center;">
-                  <input type="checkbox" name="remember" value="1" checked style="accent-color:var(--accent,#a855f7);">
-                  Remember for 24 hours on this device
+                  <input type="checkbox" name="remember" value="1" style="accent-color:var(--accent,#a855f7);">
+                  {{.L.T "Remember for 24 hours on this device"}}
                 </label>
                 <div style="display:flex;gap:10px;justify-content:center;">
-                  <button type="button" class="btn ghost sm" onclick="if(history.length>1){history.back();}else{location.href='/';}">Go Back</button>
+                  <a href="/" class="btn ghost sm">{{.L.T "Go Back"}}</a>
                   <button type="submit" class="btn primary sm">
-                    {{if $im.IsAdult}}I am 18+ — Continue{{else}}I understand — Continue{{end}}
+                    {{if $im.IsAdult}}{{.L.T "I am 18+ — Continue"}}{{else}}{{.L.T "I understand — Continue"}}{{end}}
                   </button>
                 </div>
               </form>
@@ -46,7 +46,9 @@
           </div>
         {{end}}
 
-        {{if eq $im.Kind "video"}}
+        {{if not $d.GatePassed}}
+        <div aria-hidden="true" style="width:100%;min-height:540px;background:linear-gradient(135deg,#334155,#64748b);filter:blur(28px);"></div>
+        {{else if eq $im.Kind "video"}}
         <video src="{{direct $im}}" poster="{{thumb $im}}" controls playsinline preload="metadata" width="{{$im.Width}}" height="{{$im.Height}}" id="photo" style="{{if and $im.HasWarning (not $d.GatePassed)}}filter:blur(30px);pointer-events:none;{{end}}"></video>
         {{else if eq $im.Kind "pdf"}}
         <a class="pdf-page" href="{{direct $im}}" target="_blank" rel="noopener" style="{{if and $im.HasWarning (not $d.GatePassed)}}filter:blur(30px);pointer-events:none;{{end}}"><img src="{{thumb $im}}" alt="First page of {{$im.Title}}" id="photo"><span class="btn primary"><svg><use href="#i-text"/></svg>Open PDF</span></a>
@@ -65,7 +67,7 @@
       <div class="card">
         <h1 id="title">{{if $im.Title}}{{$im.Title}}{{else}}{{$im.ID}}{{end}}</h1>
         {{if $im.Private}}<span class="pill warn"><svg width="12" height="12"><use href="#i-lock"/></svg>Private: only you can see it</span>{{else if $im.PassHash}}<span class="pill warn"><svg width="12" height="12"><use href="#i-lock"/></svg>Password protected</span>{{end}}
-        {{if $im.IsAdult}}<span class="pill bad"><svg width="12" height="12"><use href="#i-flag"/></svg>18+ Adult</span>{{else if $im.IsSensitive}}<span class="pill warn"><svg width="12" height="12"><use href="#i-flag"/></svg>Content Warning</span>{{end}}
+        {{if $im.IsAdult}}<span class="pill bad"><svg width="12" height="12"><use href="#i-flag"/></svg>{{.L.T "Adult 18+"}}</span>{{else if $im.IsSensitive}}<span class="pill warn"><svg width="12" height="12"><use href="#i-flag"/></svg>{{.L.T "Content warning"}}</span>{{end}}
         {{template "owner" $d.Owner}}
         <div class="muted small">Uploaded <time datetime="{{iso $im.CreatedAt}}">{{ago $im.CreatedAt}}</time>{{if $im.ExpiresAt}} · <span class="pill warn"><svg width="12" height="12"><use href="#i-clock"/></svg>deletes in {{until $im.ExpiresAt}}</span>{{end}}{{if $im.Hidden}} · <span class="pill bad">hidden by moderators</span>{{end}}</div>
         <div class="btn-row" style="margin-top:14px">
@@ -148,14 +150,14 @@
       </div>
     </div>
     <div class="field" id="e-pass-row"><label for="e-pass">Password <span class="hint">{{if $im.PassHash}}leave empty to keep the current one{{else}}4 characters or more{{end}}</span></label><input type="password" id="e-pass" autocomplete="new-password" maxlength="200"></div>
-    <div class="field"><label>Content warning</label>
+    <div class="field"><label>{{.L.T "Content warning"}}</label>
       <div class="radios" style="margin:0">
-        <label><input type="radio" name="content_warning" value="none" {{if eq $im.ContentWarning "none"}}checked{{else if eq $im.ContentWarning ""}}checked{{end}}> None</label>
-        <label><input type="radio" name="content_warning" value="sensitive" {{if eq $im.ContentWarning "sensitive"}}checked{{end}}> Sensitive content (violence, spoilers)</label>
-        <label><input type="radio" name="content_warning" value="adult" {{if eq $im.ContentWarning "adult"}}checked{{end}}> 18+ Adult content</label>
+        <label><input type="radio" name="content_warning" value="none" {{if eq $im.ContentWarning "none"}}checked{{else if eq $im.ContentWarning ""}}checked{{end}}> {{.L.T "None"}}</label>
+        <label><input type="radio" name="content_warning" value="sensitive" {{if eq $im.ContentWarning "sensitive"}}checked{{end}}> {{.L.T "Sensitive content"}}</label>
+        <label><input type="radio" name="content_warning" value="adult" {{if eq $im.ContentWarning "adult"}}checked{{end}}> {{.L.T "Adult 18+"}}</label>
       </div>
     </div>
-    <div class="field"><label for="e-warning-reason">Warning reason / note <span class="hint">optional creator note shown on gate</span></label><input type="text" id="e-warning-reason" value="{{$im.WarningReason}}" maxlength="255"></div>
+    <div class="field"><label for="e-warning-reason">{{.L.T "Reason (optional)"}}</label><input type="text" id="e-warning-reason" value="{{$im.WarningReason}}" maxlength="255"></div>
     {{if $im.UserID.Valid}}<label class="check"><input type="checkbox" id="e-listed" {{if $im.Listed}}checked{{end}}> Show on my public profile <span class="small muted">(only for “anyone with the link”)</span></label>{{end}}
     <div class="btn-row" style="justify-content:flex-end;margin-top:16px">
       <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
