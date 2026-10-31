@@ -15,7 +15,7 @@ func TestHopFamilyTypography(t *testing.T) {
 	}
 	body := rec.Body.String()
 	for _, want := range []string{
-		`href="https://hel.ink/hop-assets/v1/fonts.css" integrity="sha384-`,
+		`href="https://hel.ink/hop-assets/v1/fonts-amnesia.css" integrity="sha384-`,
 		`https://hel.ink/hop-assets/v1/apps/linkhop/mark.svg`,
 		`https://hel.ink/hop-assets/v1/apps/notehop/mark.svg`,
 		`>BioHop<`,
@@ -25,8 +25,12 @@ func TestHopFamilyTypography(t *testing.T) {
 			t.Errorf("home page lacks %q", want)
 		}
 	}
-	if strings.Contains(body, "apps/pixelhop/mark.svg") {
-		t.Error("the family list should not link PixelHop to itself")
+	_, footer, _ := strings.Cut(body, "<footer")
+	if strings.Contains(footer, "apps/pixelhop/mark.svg") {
+		t.Error("the footer family list should not link PixelHop to itself")
+	}
+	if !strings.Contains(body, `href="https://pixel.hel.ink" aria-current="true"`) || len(hopFamily("")) != 5 {
+		t.Error("the switcher must list all five apps and identify PixelHop")
 	}
 	csp := rec.Header().Get("Content-Security-Policy")
 	for _, d := range []string{"style-src 'self' 'unsafe-inline' https://hel.ink", "font-src 'self' https://hel.ink"} {

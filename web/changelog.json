@@ -1,0 +1,1115 @@
+{
+  "schema": 1,
+  "sources": {
+    "PixelHop": "9a0be7d23b4a22f8844dbc779021a204f6759786"
+  },
+  "entries": [
+    {
+      "kind": "commit",
+      "date": "2026-10-31T17:49:55+07:00",
+      "title": "Merge pull request #19: feat(gate): 3-level content warning gate with adult verification and blur",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/9a0be7d23b4a22f8844dbc779021a204f6759786",
+      "id": "9a0be7d2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T10:49:55Z",
+      "title": "feat(gate): 3-level content warning gate with adult verification and blur",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/19",
+      "id": "#19",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T17:47:10+07:00",
+      "title": "Merge pull request #18: feat: bento features grid, uniform 4-column footer, and master terms binding (4.0.9-4.0.12)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/a5b7e95c54a984a17dd97247db5bca509b5f4206",
+      "id": "a5b7e95c",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T10:47:10Z",
+      "title": "feat: bento features grid, uniform 4-column footer, and master terms binding (4.0.9-4.0.12)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/18",
+      "id": "#18",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T17:46:54+07:00",
+      "title": "Merge pull request #17: docs: 8-language Pages site and standard READMEs (Phase 7)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/037710fc3c22900a1349ec826f151e117ca9c401",
+      "id": "037710fc",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T10:46:54Z",
+      "title": "docs: 8-language Pages site and standard READMEs (Phase 7)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/17",
+      "id": "#17",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T17:46:37+07:00",
+      "title": "Merge pull request #16: feat(i18n): add 8-language localization for dedicated pages, base, and home",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/6c3c6423ab3c9b4f0ef69dccfbb67273b3efe8e9",
+      "id": "6c3c6423",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T10:46:37Z",
+      "title": "feat(i18n): add 8-language localization for dedicated pages, base, and home",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/16",
+      "id": "#16",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T08:45:56+01:00",
+      "title": "feat: showcase studio demos and expand the product homepage",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/b91922359a15cbbbdb3fca1acca2b9fa1f9729fe",
+      "id": "b9192235",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T08:45:56+01:00",
+      "title": "fix: protect warned media and preserve upload classification",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/7a63b892ab486ace61563481a3f8d92fe5e0a299",
+      "id": "7a63b892",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T07:43:45+01:00",
+      "title": "feat(gate): 3-level content warning gate with adult verification and blur",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/67d02ec102cce4b76e2929c5608023fd70c8f3a1",
+      "id": "67d02ec1",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T07:04:46+01:00",
+      "title": "feat(pages): bento features grid, uniform 4-column footer, and master terms binding",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/b80fb9851f01ed42746233b2b8f27c0453e27bb1",
+      "id": "b80fb985",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T07:02:02+01:00",
+      "title": "Merge remote-tracking branch 'origin/feat/i18n-pixelhop' into feat/pixelhop-bento-and-footer",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/5d6808a8c728413bc6f9697a50fdbcbd80d0fe4e",
+      "id": "5d6808a8",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T06:03:02+01:00",
+      "title": "docs: 8-language Pages site and standard READMEs (Phase 7)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e2f5c5374f9ee6aa571abf07ca3d56e4c1639b91",
+      "id": "e2f5c537",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T05:01:35+01:00",
+      "title": "feat(i18n): add 8-language localization for dedicated pages, base, and home",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/0c6a3889515c46b86b5c3ba616abdbe8ebee6f68",
+      "id": "0c6a3889",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T10:12:57+07:00",
+      "title": "Merge pull request #15: chore: PixelHop at pixel.hel.ink in the family table",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/cc3a09dfdd35d47ce60cd7e737fa99081eae5f94",
+      "id": "cc3a09df",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T03:12:57Z",
+      "title": "chore: PixelHop at pixel.hel.ink in the family table",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/15",
+      "id": "#15",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T03:55:03+01:00",
+      "title": "chore: PixelHop at pixel.hel.ink in the family table and the embedded asset manifest",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/179b2e2cb3dcff25314aa52193222af608417e41",
+      "id": "179b2e2c",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T02:14:51Z",
+      "title": "docs: canonical HOP family table with a CI check",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/12",
+      "id": "#12",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T09:14:50+07:00",
+      "title": "Merge pull request #12: docs: canonical HOP family table with a CI check",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/5954653393eff153ea38c64416cfe6d20c40b783",
+      "id": "59546533",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T09:14:36+07:00",
+      "title": "Merge pull request #14: feat: app pages on the link host redirect permanently (pixel.hel.ink)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/458ed0d27c90fe3b9b2e4939a5ece80081c4e94a",
+      "id": "458ed0d2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T02:14:36Z",
+      "title": "feat: app pages on the link host redirect permanently (pixel.hel.ink)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/14",
+      "id": "#14",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T09:14:13+07:00",
+      "title": "Merge pull request #13: feat: dedicated pages on PixelHop's own domain",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/7b9f177a86b8a74373c4033e9a6b94c11c97f609",
+      "id": "7b9f177a",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T02:14:13Z",
+      "title": "feat: dedicated pages on PixelHop's own domain",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/13",
+      "id": "#13",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T09:13:58+07:00",
+      "title": "Merge pull request #11: feat: HOP family typography and family section",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/5d1550f2671ef837ddcb1573a428499f97424352",
+      "id": "5d1550f2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T02:13:58Z",
+      "title": "feat: HOP family typography and family section",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/11",
+      "id": "#11",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-31T02:13:36Z",
+      "title": "docs: add SECURITY.md and issue templates",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/10",
+      "id": "#10",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-31T09:13:35+07:00",
+      "title": "Merge pull request #10: docs: add SECURITY.md and issue templates",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/750e5852db2561df86cf34040a4f61cffe5bec84",
+      "id": "750e5852",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T18:46:26+01:00",
+      "title": "feat: app pages on the link host redirect permanently to the app (U-02)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/207cb312af7d3ae7c9880fd56950f43cde168615",
+      "id": "207cb312",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T18:45:21+01:00",
+      "title": "feat: dedicated pages on PixelHop's own domain (U-07, U-06, U-10)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/80b6fb6624c8a93040f477925a7bf11668c94b1f",
+      "id": "80b6fb66",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T18:34:00+01:00",
+      "title": "docs: canonical HOP family table with a CI check (U-08)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/2bf6c1a2d7f198ae7852f68d25e10ea5c0cc0782",
+      "id": "2bf6c1a2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T18:23:30+01:00",
+      "title": "feat: HOP family typography and family section",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/f6f1045953673c4fb9969a6d7a391ed5bc169a95",
+      "id": "f6f10459",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T17:40:17+01:00",
+      "title": "docs: add SECURITY.md and issue templates",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/d920682ef7737d1d49a1c5d38172c2f90ffdf0d2",
+      "id": "d920682e",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-30T04:17:02Z",
+      "title": "docs: add unified HOP family ecosystem reference table",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/9",
+      "id": "#9",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T11:17:01+07:00",
+      "title": "Merge pull request #9: docs: add unified HOP family ecosystem reference table",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/c8a176ffda7171597232d55fa1f8a65376280dc3",
+      "id": "c8a176ff",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-30T04:16:39Z",
+      "title": "feat: dukung rotasi secret sso ganda di verifikasi tiket dan api hop (F-08)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/8",
+      "id": "#8",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T11:16:38+07:00",
+      "title": "Merge pull request #8: feat: dukung rotasi secret sso ganda di verifikasi tiket dan api hop (F-08)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e192350b085db3fbfecedaa4b37f79a8d85e6dbb",
+      "id": "e192350b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-29T20:31:39+01:00",
+      "title": "docs: add unified HOP family ecosystem reference table",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/1ece0e75d8fee103182bb0a6af7e9e2aad20282d",
+      "id": "1ece0e75",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-29T19:57:34+01:00",
+      "title": "feat: dukung rotasi secret sso ganda di verifikasi tiket dan api hop (F-08)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/10f82a01a3fd77c871e72fb24fd93e543195ad24",
+      "id": "10f82a01",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-30T00:11:49+07:00",
+      "title": "Merge pull request #7: fix: pastikan mode 0600 pada file sqlite baru dan perbarui playwright (F-07, F-10)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/8b72a4262f8c57500b34fcb6eea78bca6b2dfbb4",
+      "id": "8b72a426",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-29T17:11:49Z",
+      "title": "fix: pastikan mode 0600 pada file sqlite baru dan perbarui playwright (F-07, F-10)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/7",
+      "id": "#7",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-29T09:15:19+01:00",
+      "title": "fix: pastikan mode 0600 pada file sqlite baru dan perbarui playwright",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/0d30c7b07387b7c198d0f4ba6d292f5a0012fd24",
+      "id": "0d30c7b0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-28T19:11:21Z",
+      "title": "GET /auth/helink/logout: PixelHop joins HOP ID's chained logout",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/6",
+      "id": "#6",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-29T02:11:20+07:00",
+      "title": "Merge pull request #6: GET /auth/helink/logout: PixelHop joins HOP ID's chained logout",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/30c937510144e36545e5a2c761211ec03cdbbea2",
+      "id": "30c93751",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T20:04:40+01:00",
+      "title": "GET /auth/helink/logout: PixelHop joins HOP ID's chained logout",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/3e47beabc1c3661df8645ebcc4d7d27df8807296",
+      "id": "3e47beab",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-28T16:43:47+01:00",
+      "title": "v3.7.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.7.0",
+      "id": "v3.7.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T16:43:47+01:00",
+      "title": "PixelHop 3.7.0: app at pixel.hel.ink, links stay p.hel.ink; HOP control center",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/1a6be095baed0e5bb724ef74939757ca018a2aef",
+      "id": "1a6be095",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T16:39:49+01:00",
+      "title": "Shared links on their own host: app to pixel.hel.ink, links stay p.hel.ink",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/fb4f589be07de72612ee00d60c26b7275079755f",
+      "id": "fb4f589b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T15:16:34+07:00",
+      "title": "Merge pull request #5: HOP admin API: \"ip\" extension (ban list, ban/unban) and disk KPIs",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/1b70a26afff71a761c30037aad09a83acb09e45b",
+      "id": "1b70a26a",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-28T08:16:34Z",
+      "title": "HOP admin API: \"ip\" extension (ban list, ban/unban) and disk KPIs",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/5",
+      "id": "#5",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T08:56:53+01:00",
+      "title": "HOP admin API: \"ip\" extension (ban list, ban/unban) and disk KPIs",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/7bc87217d7f89bace063ab5970bb3b9d3617f876",
+      "id": "7bc87217",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T11:03:03+07:00",
+      "title": "Merge pull request #3: HOP App Protocol: signed admin API under /hop/*, SSO ticket v2 roles",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/a65111f626ff98416ae04e05a9e17a6c44289893",
+      "id": "a65111f6",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-28T04:03:03Z",
+      "title": "HOP App Protocol: signed admin API under /hop/*, SSO ticket v2 roles",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/3",
+      "id": "#3",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-28T10:34:37+07:00",
+      "title": "Merge pull request #4 from navi-crwn/retire-admin-ui",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/6c6209ac4ee54d8441ed1895a02117588df8f361",
+      "id": "6c6209ac",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:46:09+01:00",
+      "title": "Ignore the local workspace folder (worktrees are not part of the repo)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/72fb0674846c3ff239b1840bb793df9e701df4ac",
+      "id": "72fb0674",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:46:05+01:00",
+      "title": "Ignore the local workspace folder (worktrees are not part of the repo)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/75b735ec74f4bd2d34fe40dbc8eede9e3c6924c3",
+      "id": "75b735ec",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:45:08+01:00",
+      "title": "Merge branch 'hop-admin-api' into retire-admin-ui",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/62d1bebd3ef78c80fb55683bf61e1b5dd2ebd28d",
+      "id": "62d1bebd",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:45:05+01:00",
+      "title": "Merge origin/main: one audience check for the ticket",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/ea9579ac94fb5884ecec40d85998354f16b667b6",
+      "id": "ea9579ac",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:44:17+01:00",
+      "title": "Merge remote-tracking branch 'origin/main' into hop-admin-api",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/c22552adf17306e6c6f1e2394bccccd8800b3d27",
+      "id": "c22552ad",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:42:42+01:00",
+      "title": "Retire the built-in admin pages: the HOP control center takes over",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/81090b3608d5ef6814895f6f8bd12da18a9c650a",
+      "id": "81090b36",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T21:37:35+01:00",
+      "title": "HOP App Protocol: signed admin API under /hop/*, SSO ticket v2 roles",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/9d373f752044e04431023a27b7ff65ec085be6cd",
+      "id": "9d373f75",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-10-27T16:34:29Z",
+      "title": "HEL.ink accounts: confirmed emails only, Turnstile required, ticket audience",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/2",
+      "id": "#2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T23:34:28+07:00",
+      "title": "Merge pull request #2: HEL.ink accounts: confirmed emails only, Turnstile required, ticket audience",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/ad8fe2e69dc54655238a87ce912c357848bc2786",
+      "id": "ad8fe2e6",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-27T15:58:52+00:00",
+      "title": "HEL.ink accounts: confirmed emails only, Turnstile required, ticket audience",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/734b0b3ece4ab534413c261aa76588228487071e",
+      "id": "734b0b3e",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-19T10:50:31+02:00",
+      "title": "v3.6.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.6.0",
+      "id": "v3.6.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-19T10:50:31+02:00",
+      "title": "PixelHop 3.6.0: multi-language OCR",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/6f046a1e5a775840d9fb4fd03797d8e60cb00198",
+      "id": "6f046a1e",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-19T07:00:25+02:00",
+      "title": "Website in seven languages, one page each",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/7ced01500397b902c6fcf133d264cff7197998a7",
+      "id": "7ced0150",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T22:50:38+07:00",
+      "title": "v3.5.3",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.5.3",
+      "id": "v3.5.3",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T22:50:38+07:00",
+      "title": "PixelHop 3.5.3: guests up to 20 MB per file, members 100 MB per video or PDF",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/397f00de67773447cf615f7b58a116436b3586b9",
+      "id": "397f00de",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T22:39:03+07:00",
+      "title": "v3.5.2",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.5.2",
+      "id": "v3.5.2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T22:39:03+07:00",
+      "title": "PixelHop 3.5.2: no more silent failures in admin and the dashboard",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/4eb7927041d57d64cc6cc7cae178079e2cbfe98c",
+      "id": "4eb79270",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T16:43:28+07:00",
+      "title": "v3.5.1",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.5.1",
+      "id": "v3.5.1",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T16:43:28+07:00",
+      "title": "Remove the PixelHop 2 PHP code",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/3186951befbc690a1c112828112a3202de1c044c",
+      "id": "3186951b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T16:42:59+07:00",
+      "title": "PixelHop 3.5.1: member dashboard and a full-width upload box",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/56ac9f6a20cb276cec5a84f2db4925b474ad8279",
+      "id": "56ac9f6a",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T16:42:59+07:00",
+      "title": "Show the repository as Go and MIT on GitHub",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/2d2eaff0fb7729061d8ae7a81d0ccd57eea3dd02",
+      "id": "2d2eaff0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T16:42:13+07:00",
+      "title": "Member dashboard with upload, numbers and a menu on every member page",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/c42beb5a40a79fdb34f3ff371268da05582b145b",
+      "id": "c42beb5a",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T08:52:15+02:00",
+      "title": "v3.5.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.5.0",
+      "id": "v3.5.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:52:15+02:00",
+      "title": "PixelHop 3.5.0: own sign-in/sign-up forms that also take HEL.ink accounts",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/4188287ee2284a0204403245bab42783b3295177",
+      "id": "4188287e",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T08:40:19+02:00",
+      "title": "v3.4.2",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.4.2",
+      "id": "v3.4.2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:40:19+02:00",
+      "title": "PixelHop 3.4.2: compact QR row on the image page",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/c8353ad59905cb7a9729676b439c6eeae2d647b5",
+      "id": "c8353ad5",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-16T08:31:50+02:00",
+      "title": "v3.4.1",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.4.1",
+      "id": "v3.4.1",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:31:50+02:00",
+      "title": "Keep PixelHop standalone: HEL.ink only as an opt-in add-on",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/95a056901882e76839c4ed62b726064d3e63aa42",
+      "id": "95a05690",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:30:52+02:00",
+      "title": "PixelHop 3.4.1: readable guest note, no Ctrl+V hint on phones",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/34bdaee101de5f438a52c28ecb72f83a6967a8b9",
+      "id": "34bdaee1",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:28:16+02:00",
+      "title": "PixelHop 3.4.0: cleaner upload page, results beside the upload box",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/7c1f58c4ca80115a486e9d1dfb3c08ea79f400ef",
+      "id": "7c1f58c4",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:15:27+02:00",
+      "title": "Guide: the ticket box's new name",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e7fe9335e2aa243bf721e5e89d721ae2e01949d6",
+      "id": "e7fe9335",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:15:13+02:00",
+      "title": "PixelHop 3.3.2: Paste button for phones",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/257f7ef53956ec5bfe58785060f6f47aff74046f",
+      "id": "257f7ef5",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T08:12:34+02:00",
+      "title": "PixelHop 3.3.1: results page for phones, visible ticket box, Install app",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/8e5e5782d282c4fd57a60ce4cdef05485da362b2",
+      "id": "8e5e5782",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T07:46:33+02:00",
+      "title": "PixelHop 3.3.0: videos, PDFs, auto-compression, tickets, Copy for chat",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/f180bbfa31abf5d9f039c192627cef9b604d0d8f",
+      "id": "f180bbfa",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T06:04:18+02:00",
+      "title": "Project site: 3.2.0 features",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/71150f450d2bf4a77d9aeedfb43bd1e711fca84a",
+      "id": "71150f45",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T06:03:43+02:00",
+      "title": "PixelHop 3.2.0: privacy, albums editor, Explore, webhooks, PWA, watermark",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/03af75f0d9b52f8493e395c953731d09f098d895",
+      "id": "03af75f0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T05:10:33+02:00",
+      "title": "Never derive public usernames from email addresses",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/83c5f876e1d359671cb3d1a802394397f66e4207",
+      "id": "83c5f876",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-16T05:09:08+02:00",
+      "title": "Public profiles and image ownership (3.1.0)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/fa705f5c635e83df168dbbfb368b3c1732bc26a6",
+      "id": "fa705f5c",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-10-15T19:56:06+02:00",
+      "title": "v3.0.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.0.0",
+      "id": "v3.0.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T19:56:06+02:00",
+      "title": "Fix the Windows build; keep screenshots in proportion",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/0b293a778d00e4ceab86bc0b7b632229234abc2e",
+      "id": "0b293a77",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T19:32:34+02:00",
+      "title": "Merge main (PHP security fixes from PR #1) into PixelHop 3; they land in legacy/",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/4d75f5fbfe7d8dd635576dafd7a36c40ccc746b6",
+      "id": "4d75f5fb",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T19:30:19+02:00",
+      "title": "Docs for the full 3.0.0 feature set; Google callback .php path",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/dcdf120b994ecd5805382fa6b413d5feed593baf",
+      "id": "dcdf120b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T19:25:21+02:00",
+      "title": "AI tools, batch mode, copy-all links and the rest of PixelHop 2's features",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/add552abbe7873a4b34f76163ec93caceb1578db",
+      "id": "add552ab",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T14:20:46+02:00",
+      "title": "Sign in with HEL.ink, Turnstile, server background removal",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/f424f15bde25df9078f5d5bf7bf815a9d89cc4b7",
+      "id": "f424f15b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T14:04:00+02:00",
+      "title": "Keep the last PixelHop 2 link shapes working",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/ab587d6b7dfad2f78dd7c59277b50f8899bdb37d",
+      "id": "ab587d6b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-10-15T13:01:57+02:00",
+      "title": "PixelHop 3: rebuild in Go after a full audit",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/3aaf61681af3fcb633a5550474d84ae402f58400",
+      "id": "3aaf6168",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-07-04T09:11:44Z",
+      "title": "Code audit: security patches & bug fixes for core services",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/1",
+      "id": "#1",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-07-04T16:11:43+07:00",
+      "title": "Merge PR #1: Security audit — SSRF, IP-trust, auth & schema fixes",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/b28cae4d991dddb4d3a50374d03ea6fd3764468a",
+      "id": "b28cae4d",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-07-04T09:11:21+00:00",
+      "title": "Close redirect-based SSRF gap in remote image fetch",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/5bc1fa08dcf63efc0c056443673879398893e6d8",
+      "id": "5bc1fa08",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-07-02T15:56:56+00:00",
+      "title": "Google login: stop forcing the consent screen on every sign-in",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/da87bb1097b0087e3254beea17c04605d8a14373",
+      "id": "da87bb10",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-07-02T15:54:15+00:00",
+      "title": "Harden client-IP trust, move Turnstile secret to config, fix email-change lockout",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/2339a1a9208078c37e6fab815b67b2862652b1b9",
+      "id": "2339a1a9",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-07-02T15:40:41+00:00",
+      "title": "Security & bug-fix audit: SSRF guard, auth fixes, schema mismatches",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/383eb6370ad3dfe790e77926c796875291f2b17a",
+      "id": "383eb637",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-01-03T12:01:47+01:00",
+      "title": "v2.3.0-php",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v2.3.0-php",
+      "id": "v2.3.0-php",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-01-03T12:01:47+01:00",
+      "title": "v2.3.0: Descriptive image links (slug+unik), backward compatibility, gallery/result/view support, smart slug truncation",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/3b7119aca40e6ff87efbb0fa14d57922b8f38bec",
+      "id": "3b7119ac",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T07:04:57+01:00",
+      "title": "Update FAQ: API is coming soon, fix /docs/ redirect",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/b88f80f3e5d87c7d55a0ddffb039371537b43d30",
+      "id": "b88f80f3",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:51:57+01:00",
+      "title": "Use clean URLs consistently across all pages",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/495fa4469c688e1bb3650fc7b34c2b184566a167",
+      "id": "495fa446",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:45:20+01:00",
+      "title": "Cleanup and SEO update",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e9e73521052be765c1a8ecd61fe5b01c83d60c87",
+      "id": "e9e73521",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:26:48+01:00",
+      "title": "Add features route to nginx config",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/97f569f8fb6a96476f89a930e8d398a0f278992b",
+      "id": "97f569f8",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:24:27+01:00",
+      "title": "Fix footer pages: add theme toggle, fix icons",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/abb6b57962340eeae262bf748aae064715ce9a51",
+      "id": "abb6b579",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:12:52+01:00",
+      "title": "Add public changelog page and update footer pages",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/4a8f55969ee983cdd19b74c786da49c4415c6a0e",
+      "id": "4a8f5596",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2025-12-19T06:00:53+01:00",
+      "title": "v2.2.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v2.2.0",
+      "id": "v2.2.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-19T06:00:53+01:00",
+      "title": "v2.2.0: View tracking, Report system, User moderation",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/013d33fe127e1e460146f44e7165c51f4d09bac1",
+      "id": "013d33fe",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-18T04:55:07+01:00",
+      "title": "UI: Redesign number inputs and dropdowns",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/a325ce1acb761776b3b1f05249e37cb5e4c3593f",
+      "id": "a325ce1a",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-18T04:44:25+01:00",
+      "title": "v2.1.0: Hybrid R2+Contabo storage, Admin dashboard overhaul, Security improvements",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/a03909b4087ea6f2b2df7cac2ed49593db9a44da",
+      "id": "a03909b4",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-17T23:10:34+01:00",
+      "title": "Add HEL.ink family section in footer and new features page",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/066451d533886e2278f4673872ab172875a811a1",
+      "id": "066451d5",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-17T21:52:01+01:00",
+      "title": "docs: Rewrite README and LICENSE in professional English",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/c0d689475d023db14aa828df56790292bc2c4a5f",
+      "id": "c0d68947",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-17T21:45:26+01:00",
+      "title": "📝 Update README with badges + Add LICENSE.md with credits",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/436af17f513d8dc511e5964a66ec100b2cf80bd0",
+      "id": "436af17f",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2025-12-17T21:02:45+01:00",
+      "title": "v1.0.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v1.0.0",
+      "id": "v1.0.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2025-12-17T21:02:45+01:00",
+      "title": "Initial commit - PixelHop v1.0",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/cc34a4c94f40d114f58882b8c1291b77a500abab",
+      "id": "cc34a4c9",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    }
+  ]
+}

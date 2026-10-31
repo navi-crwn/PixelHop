@@ -47,6 +47,7 @@ func (a *App) status(w http.ResponseWriter, r *http.Request) {
 
 // backPaths are the inner pages that get a "Back to PixelHop" link above their content.
 var backPaths = map[string]bool{
-	"/tools": true, "/explore": true, "/help": true, "/legal": true, "/docs": true,
+	"/changelog": true,
+	"/tools":     true, "/explore": true, "/help": true, "/legal": true, "/docs": true,
 	"/about": true, "/features": true, "/faq": true, "/contact": true, "/status": true,
 }

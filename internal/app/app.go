@@ -79,6 +79,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /help", a.help)
 	mux.HandleFunc("GET /legal", a.legal)
 	mux.HandleFunc("GET /about", a.about)
+	mux.HandleFunc("GET /changelog", a.changelog)
 	mux.HandleFunc("GET /features", a.features)
 	mux.HandleFunc("GET /faq", a.faq)
 	mux.HandleFunc("GET /contact", a.contact)
