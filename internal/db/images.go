@@ -66,7 +66,7 @@ func (im *Image) Locked() bool { return im.Private || im.PassHash != "" }
 
 func (im *Image) IsAdult() bool     { return im.ContentWarning == "adult" }
 func (im *Image) IsSensitive() bool { return im.ContentWarning == "sensitive" }
-func (im *Image) HasWarning() bool   { return im.IsAdult() || im.IsSensitive() }
+func (im *Image) HasWarning() bool  { return im.IsAdult() || im.IsSensitive() }
 
 const imageCols = `id,user_id,album_id,owner_token,title,orig_name,mime,ext,size,width,height,sha256,color,
 backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed,
@@ -146,7 +146,7 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 		args = append(args, q.AlbumID)
 	}
 	if q.Listed {
-		where = append(where, "listed=1 AND hidden=0 AND private=0 AND pass_hash='' AND (expires_at=0 OR expires_at>?) AND content_warning<>'adult'")
+		where = append(where, "listed=1 AND hidden=0 AND private=0 AND pass_hash='' AND (expires_at=0 OR expires_at>?) AND content_warning='none' AND NOT EXISTS (SELECT 1 FROM albums WHERE albums.id=images.album_id AND albums.content_warning<>'none')")
 		args = append(args, now())
 	}
 	if q.PublicOwner {
@@ -347,7 +347,7 @@ type Album struct {
 
 func (a *Album) IsAdult() bool     { return a.ContentWarning == "adult" }
 func (a *Album) IsSensitive() bool { return a.ContentWarning == "sensitive" }
-func (a *Album) HasWarning() bool   { return a.IsAdult() || a.IsSensitive() }
+func (a *Album) HasWarning() bool  { return a.IsAdult() || a.IsSensitive() }
 
 func (d *DB) InsertAlbum(ctx context.Context, a *Album) error {
 	a.CreatedAt = now()

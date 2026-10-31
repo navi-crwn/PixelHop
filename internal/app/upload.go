@@ -264,6 +264,9 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 }
 
 func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (*db.Image, string, bool, error) {
+	if in.contentWarning == "" {
+		in.contentWarning = "none"
+	}
 	if in.path == "" {
 		if kind := mediaKind(in.data[:min(len(in.data), 64)]); kind != "" {
 			if in.path, in.err = a.spoolBytes(in.data); in.err != nil {
@@ -284,13 +287,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 			}
 			in.data, in.path = data, ""
 		} else {
-			im, tok, dup, err := a.storeMedia(ctx, in.path, in.name, kind, u, ip, albumID, expiresAt, useSlug, alt)
-			if err == nil && im != nil && in.contentWarning != "" {
-				im.ContentWarning = in.contentWarning
-				im.WarningReason = in.warningReason
-				a.db.UpdateImageMeta(ctx, im)
-			}
-			return im, tok, dup, err
+			return a.storeMedia(ctx, in.path, in.name, kind, u, ip, albumID, expiresAt, useSlug, alt, in.contentWarning, in.warningReason)
 		}
 	}
 
@@ -299,7 +296,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	var uid sql.NullInt64
 	if u != nil {
 		uid = sql.NullInt64{Int64: u.ID, Valid: true}
-		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil {
+		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil && old.ContentWarning == in.contentWarning && old.WarningReason == in.warningReason {
 			return old, "", true, nil
 		}
 	}
