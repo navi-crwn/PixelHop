@@ -19,3 +19,6 @@ var I18n embed.FS
 //
 //go:embed hopassets/apps.json
 var HopAssets []byte
+
+//go:embed changelog.json
+var Changelog []byte

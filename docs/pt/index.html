@@ -8,8 +8,8 @@
   <link rel="canonical" href="https://navi-crwn.github.io/PixelHop/pt/">
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/styles.css">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts.css" integrity="sha384-T1Y2aaMQ8CSfi7J2t9d1ZAbVcQ1FcO27Jwn3WtNWB+UVK137YCl3hIPvz0G4K22L" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/hop-float.css" integrity="sha384-sl7D409xEmIT5gkArlQLoQQ4rOkqF7tOGf1VhI/iMb7c2/s9w9NtDEjLbJMU/MQ/" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/product.css">
+  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts-amnesia.css" integrity="sha384-750KEkFNx2ykcIsUyi1pZ0JC/Z6jfrK7OJtntqOzB8HKfEpjeostGTWJGAxh/5Zi" crossorigin="anonymous">
   <link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/PixelHop/">
   <link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/PixelHop/en/">
   <link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/PixelHop/id/">
@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-  <div data-hop-float></div>
+
   <a class="skip" href="#main">Ir para o conteúdo</a>
 
   <header class="site-header">
@@ -60,25 +60,23 @@
   </header>
 
   <main id="main">
-    <div class="hero">
+    <div class="hero product-hero">
       <div>
         <p class="kicker">HOP &middot; Hospedagem de imagens e estúdio</p>
         <h1>Solte uma imagem, limpe metadados, compartilhe em segundos</h1>
         <p class="lede">O PixelHop oferece uploads rápidos de imagens, galerias de álbuns e um estúdio fotográfico privado diretamente no seu navegador. Links curtos limpos em p.hel.ink e seu painel em pixel.hel.ink. Binário Go único, auto-hospedável, código aberto (MIT).</p>
         <div class="cta-row">
           <a class="btn primary" href="https://pixel.hel.ink">Experimentar PixelHop</a>
-          <a class="btn" href="https://p.hel.ink">Explorar imagens</a>
+          <a class="btn" href="https://pixel.hel.ink/explore">Explorar imagens</a>
           <a class="btn" href="https://github.com/navi-crwn/PixelHop">Ver o código</a>
         </div>
         <p class="note">Os endereços ativos nesta página apontam para os sites públicos da família HOP.</p>
       </div>
-      <div class="tile-wrap" aria-hidden="true">
-        <img class="tile" src="../assets/tile.svg" alt="" width="220" height="260">
-      </div>
+      <div class="product-art media-art" aria-hidden="true"><div class="media-sheet media-back"></div><div class="media-sheet"><span class="media-sun"></span><span class="media-hill"></span><img src="../assets/mark.svg" alt="" width="36" height="36"></div><span class="media-address">p.hel.ink/…</span></div>
     </div>
 
     <section id="features" aria-labelledby="features-h">
-      <h2 id="features-h">O que o PixelHop faz</h2>
+      <span class="section-number" aria-hidden="true">01</span><h2 id="features-h">O que o PixelHop faz</h2>
       <ul class="features">
         <li><strong>Uploads rápidos e links limpos</strong><p>Arraste fotos, capturas de tela ou ilustrações para gerar links curtos em p.hel.ink/{slug}, links diretos, Markdown e códigos de incorporação.</p></li>
         <li><strong>Metadados removidos por padrão</strong><p>Coordenadas GPS, números de série e dados EXIF são removidos na reescrita do contêiner, sem recomprimir os pixels originais.</p></li>
@@ -91,22 +89,14 @@
       </ul>
     </section>
 
-    <section id="run" aria-labelledby="run-h">
-      <h2 id="run-h">Auto-hospedagem</h2>
-      <div class="panel">
-        <p>O PixelHop pode ser hospedado por você. Compile e execute o binário único em segundos:</p>
-        <pre><code>git clone https://github.com/navi-crwn/PixelHop.git
-cd PixelHop
-go build -o pixelhop ./cmd/pixelhop
-./pixelhop</code></pre>
-        <h3>Requisitos</h3>
-        <p>Go 1.22+ e SQLite. Instruções completas de início rápido, Docker e testes no README do GitHub.</p>
-        <h3>Configuração de login</h3>
-        <p>O login utiliza o SSO HOP ID. Configure HOP_HUB_URL, HOP_APP=pixelhop e HOP_SSO_SECRET no seu ambiente antes de entrar, ou opere em modo independente.</p>
-        <h3>Banco de Dados e Armazenamento</h3>
-        <p>O PixelHop utiliza SQLite integrado com armazenamento em disco local por padrão. Configure variáveis S3 para buckets em nuvem.</p>
-        <p class="note">Os modos independente e SSO são totalmente suportados em instalações próprias.</p>
-      </div>
+    <section id="run" class="source-card" aria-labelledby="run-h">
+      <div><span class="section-number" aria-hidden="true">02 / OPEN SOURCE</span><h2 id="run-h">Auto-hospedagem</h2><p>Os endereços ativos nesta página apontam para os sites públicos da família HOP.</p></div>
+      <div class="cta-row"><a class="btn" href="https://github.com/navi-crwn/PixelHop/blob/main/README.md">Auto-hospedagem ↗</a><a class="btn" href="https://github.com/navi-crwn/PixelHop">Ver o código ↗</a></div>
+    </section>
+
+    <section class="product-preview" aria-labelledby="preview-h">
+      <div class="preview-caption"><div><span class="section-number" aria-hidden="true">03</span><h2 id="preview-h">PixelHop</h2></div><a class="btn primary" href="https://pixel.hel.ink">Experimentar PixelHop ↗</a></div>
+      <a class="preview-screen" href="https://pixel.hel.ink" aria-label="Experimentar PixelHop"><img class="preview-light" src="../assets/product-light.webp" alt="PixelHop" width="1280" height="900" loading="lazy"><img class="preview-dark" src="../assets/product-dark.webp" alt="PixelHop" width="1280" height="900" loading="lazy"></a>
     </section>
 
     <section id="faq" aria-labelledby="faq-h">
@@ -150,18 +140,17 @@ go build -o pixelhop ./cmd/pixelhop
 
     <section id="help" aria-labelledby="help-h">
       <h2 id="help-h">Precisa de ajuda ou encontrou um problema?</h2>
-      <p>Dúvidas, sugestões e relatórios de bugs são bem-vindos em nosso <a href="https://github.com/navi-crwn/PixelHop/issues">rastreador de problemas do GitHub</a>.</p>
+      <p>Dúvidas, sugestões e relatórios de bugs são bem-vindos em nosso <a href="https://github.com/navi-crwn/PixelHop/issues">rastreador de problemas do GitHub</a> .</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="inner">
       <p><strong>PixelHop</strong> &middot; Hospedagem de imagens rápida e privada com estúdio fotográfico</p>
-      <p>Código aberto sob a licença <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a>. Hospedado no<a href="https://github.com/navi-crwn/PixelHop">GitHub</a>e ativo em<a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
+      <p>Código aberto sob a licença <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a> . Hospedado no <a href="https://github.com/navi-crwn/PixelHop">GitHub</a> e ativo em <a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
     </div>
   </footer>
 
-  <script src="https://hel.ink/hop-assets/v1/hop-float.js" integrity="sha384-kNviPsMEO9lt9+b4n2S5lX6zHRVnePzGuj9VdgCETTsQwzt/5YJRnv842Xg0gRC+" crossorigin="anonymous" defer></script>
   <script src="../assets/theme.js"></script>
 </body>
 </html>
