@@ -1,9 +1,13 @@
+{{define "head"}}<link rel="stylesheet" href="/static/css/media-hero.css?v={{.Asset}}">{{end}}
 {{define "content"}}
 <div class="wrap">
   <section class="hero">
     <div class="hero-intro">
+      <div>
       <h1>{{.L.H "home.hero_title"}}</h1>
       <p class="lead">{{.L.T "home.hero_lead"}}</p>
+      </div>
+      <div class="media-sculpture" aria-hidden="true"><i class="media-pixel"></i><div class="media-frame"><i class="media-sun"></i></div><div class="media-frame front"><i class="media-sun"></i></div><i class="media-pixel"></i></div>
     </div>
 
     {{if or .GuestUploads .User}}

@@ -258,16 +258,21 @@
         e.stopPropagation();
         var open = box.classList.toggle('hide') === false;
         b.setAttribute('aria-expanded', String(open));
-        if (open && box.querySelector('input[type=text]')) box.querySelector('input[type=text]').focus();
+        if (open) {
+          var first = box.querySelector('select, input, textarea, button');
+          if (first) first.focus();
+        }
+      });
+      box.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          box.classList.add('hide');
+          b.setAttribute('aria-expanded', 'false');
+          b.focus();
+        }
       });
     }
     fold('#opts-toggle', '#opts'); fold('#ticket-toggle', '#ticket-box');
-    function optsSummary() {
-      var e = $('#expire'), parts = [e.value ? 'Delete after ' + e.options[e.selectedIndex].text : 'Keep forever'];
-      if ($('#listed') && $('#listed').checked) parts.push('on profile');
-      $('#opts-summary').textContent = parts.join(' · ');
-    }
-    $('#opts').addEventListener('change', optsSummary); optsSummary();
     var ticketInput = $('#ticket');
     if (ticketInput) ticketInput.addEventListener('input', function () {
       $('#ticket-toggle').lastChild.textContent = ticketInput.value.trim() ? 'Ticket: ' + ticketInput.value.trim().slice(0, 24) : 'Ticket & note';

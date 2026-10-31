@@ -8,8 +8,8 @@
   <link rel="canonical" href="https://navi-crwn.github.io/PixelHop/ja/">
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/styles.css">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts.css" integrity="sha384-T1Y2aaMQ8CSfi7J2t9d1ZAbVcQ1FcO27Jwn3WtNWB+UVK137YCl3hIPvz0G4K22L" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/hop-float.css" integrity="sha384-sl7D409xEmIT5gkArlQLoQQ4rOkqF7tOGf1VhI/iMb7c2/s9w9NtDEjLbJMU/MQ/" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/product.css">
+  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts-amnesia.css" integrity="sha384-750KEkFNx2ykcIsUyi1pZ0JC/Z6jfrK7OJtntqOzB8HKfEpjeostGTWJGAxh/5Zi" crossorigin="anonymous">
   <link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/PixelHop/">
   <link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/PixelHop/en/">
   <link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/PixelHop/id/">
@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-  <div data-hop-float></div>
+
   <a class="skip" href="#main">コンテンツへスキップ</a>
 
   <header class="site-header">
@@ -60,25 +60,23 @@
   </header>
 
   <main id="main">
-    <div class="hero">
+    <div class="hero product-hero">
       <div>
         <p class="kicker">HOP &middot; 画像ホスティング＆フォトスタジオ</p>
         <h1>画像をドロップ、メタデータを消去、瞬時にシェア</h1>
         <p class="lede">PixelHop は高速な画像アップロード、アルバムギャラリー、ブラウザ完結のフォトスタジオを提供します。p.hel.ink で短いリンクを発行し、pixel.hel.ink で管理。Go言語の単一バイナリ、セルフホスト可能、オープンソース（MIT）。</p>
         <div class="cta-row">
           <a class="btn primary" href="https://pixel.hel.ink">PixelHop を試す</a>
-          <a class="btn" href="https://p.hel.ink">画像を探索</a>
+          <a class="btn" href="https://pixel.hel.ink/explore">画像を探索</a>
           <a class="btn" href="https://github.com/navi-crwn/PixelHop">コードを見る</a>
         </div>
         <p class="note">ページ内のリンクはHOPファミリーの公開サイトへ接続します。</p>
       </div>
-      <div class="tile-wrap" aria-hidden="true">
-        <img class="tile" src="../assets/tile.svg" alt="" width="220" height="260">
-      </div>
+      <div class="product-art media-art" aria-hidden="true"><div class="media-sheet media-back"></div><div class="media-sheet"><span class="media-sun"></span><span class="media-hill"></span><img src="../assets/mark.svg" alt="" width="36" height="36"></div><span class="media-address">p.hel.ink/…</span></div>
     </div>
 
     <section id="features" aria-labelledby="features-h">
-      <h2 id="features-h">PixelHop の機能</h2>
+      <span class="section-number" aria-hidden="true">01</span><h2 id="features-h">PixelHop の機能</h2>
       <ul class="features">
         <li><strong>高速アップロードとクリーンなリンク</strong><p>写真やスクリーンショットをドロップして、p.hel.ink/{slug} の短縮URL、直リンク、Markdown、埋め込みコードを取得。</p></li>
         <li><strong>位置情報・メタデータを自動除去</strong><p>GPS座標や端末シリアル、EXIF情報をコンテナ再構成により除去。元のピクセルを再圧縮しません。</p></li>
@@ -91,22 +89,14 @@
       </ul>
     </section>
 
-    <section id="run" aria-labelledby="run-h">
-      <h2 id="run-h">セルフホスト</h2>
-      <div class="panel">
-        <p>PixelHop はご自身で運用可能です。単一バイナリのビルドと起動手順：</p>
-        <pre><code>git clone https://github.com/navi-crwn/PixelHop.git
-cd PixelHop
-go build -o pixelhop ./cmd/pixelhop
-./pixelhop</code></pre>
-        <h3>動作要件</h3>
-        <p>Go 1.22+ および SQLite。クイックスタート、Dockerコマンド、テスト詳細は GitHub の README をご覧ください。</p>
-        <h3>サインイン設定</h3>
-        <p>サインインは HOP ID SSO を利用します。環境変数 HOP_HUB_URL、HOP_APP=pixelhop、HOP_SSO_SECRET を設定するか、スタンドアロンモードで運用してください。</p>
-        <h3>データベースとストレージ</h3>
-        <p>標準で内蔵SQLiteとローカルディスクストレージを使用します。クラウド利用時はS3環境変数を指定してください。</p>
-        <p class="note">セルフホスト運用においてスタンドアロンモードとSSOモードの両方を完全サポートしています。</p>
-      </div>
+    <section id="run" class="source-card" aria-labelledby="run-h">
+      <div><span class="section-number" aria-hidden="true">02 / OPEN SOURCE</span><h2 id="run-h">セルフホスト</h2><p>ページ内のリンクはHOPファミリーの公開サイトへ接続します。</p></div>
+      <div class="cta-row"><a class="btn" href="https://github.com/navi-crwn/PixelHop/blob/main/README.md">セルフホスト ↗</a><a class="btn" href="https://github.com/navi-crwn/PixelHop">コードを見る ↗</a></div>
+    </section>
+
+    <section class="product-preview" aria-labelledby="preview-h">
+      <div class="preview-caption"><div><span class="section-number" aria-hidden="true">03</span><h2 id="preview-h">PixelHop</h2></div><a class="btn primary" href="https://pixel.hel.ink">PixelHop を試す ↗</a></div>
+      <a class="preview-screen" href="https://pixel.hel.ink" aria-label="PixelHop を試す"><img class="preview-light" src="../assets/product-light.webp" alt="PixelHop" width="1280" height="900" loading="lazy"><img class="preview-dark" src="../assets/product-dark.webp" alt="PixelHop" width="1280" height="900" loading="lazy"></a>
     </section>
 
     <section id="faq" aria-labelledby="faq-h">
@@ -150,18 +140,17 @@ go build -o pixelhop ./cmd/pixelhop
 
     <section id="help" aria-labelledby="help-h">
       <h2 id="help-h">サポート・フィードバック</h2>
-      <p>ご質問や機能提案、不具合報告は <a href="https://github.com/navi-crwn/PixelHop/issues">GitHub Issue トラッカー</a>までお寄せください。</p>
+      <p>ご質問や機能提案、不具合報告は <a href="https://github.com/navi-crwn/PixelHop/issues">GitHub Issue トラッカー</a> までお寄せください。</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="inner">
       <p><strong>PixelHop</strong> &middot; 高速・プライベートな画像ホスティングとフォトスタジオ</p>
-      <p>オープンソース（ <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a>ライセンス）。ホスト：<a href="https://github.com/navi-crwn/PixelHop">GitHub</a>、稼働中：<a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
+      <p>オープンソース（ <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a> ライセンス）。ホスト： <a href="https://github.com/navi-crwn/PixelHop">GitHub</a> 、稼働中： <a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
     </div>
   </footer>
 
-  <script src="https://hel.ink/hop-assets/v1/hop-float.js" integrity="sha384-kNviPsMEO9lt9+b4n2S5lX6zHRVnePzGuj9VdgCETTsQwzt/5YJRnv842Xg0gRC+" crossorigin="anonymous" defer></script>
   <script src="../assets/theme.js"></script>
 </body>
 </html>

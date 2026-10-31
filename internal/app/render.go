@@ -79,16 +79,17 @@ func loadPages(a *App) (*pages, error) {
 			}
 			return s
 		},
-		"until":     func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
-		"usage":     func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
-		"mb":        func(b int64) int64 { return b >> 20 },
-		"gb":        func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
-		"avatar":    avatarURL,
-		"display":   displayName,
-		"initial":   func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
-		"hopFonts":  hopFonts,
-		"hopFamily": func() []hopApp { return hopFamily("pixelhop") },
-		"backable":  func(path string) bool { return backPaths[path] },
+		"until":         func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
+		"usage":         func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
+		"mb":            func(b int64) int64 { return b >> 20 },
+		"gb":            func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
+		"avatar":        avatarURL,
+		"display":       displayName,
+		"initial":       func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
+		"hopFonts":      hopFonts,
+		"hopFamily":     func() []hopApp { return hopFamily("pixelhop") },
+		"hopPublicApps": func() []hopApp { return hopFamily("") },
+		"backable":      func(path string) bool { return backPaths[path] },
 	}
 	p := &pages{t: map[string]*template.Template{}}
 	files, err := fs.Glob(web.Templates, "templates/*.html")
