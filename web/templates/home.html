@@ -2,23 +2,23 @@
 <div class="wrap">
   <section class="hero">
     <div class="hero-intro">
-      <h1>Drop a file. <span class="grad">Get a link.</span></h1>
-      <p class="lead">Images, videos and PDFs, shared in seconds. Your GPS location is removed before anyone sees it.</p>
+      <h1>{{.L.H "home.hero_title"}}</h1>
+      <p class="lead">{{.L.T "home.hero_lead"}}</p>
     </div>
 
     {{if or .GuestUploads .User}}
     {{template "uploader" .}}
-    {{if not .User}}<p class="guest-note">Guest upload: each file gets a private delete link. <a href="/login?next=/">Sign in</a> for a gallery and tickets.</p>{{end}}
+    {{if not .User}}<p class="guest-note">{{.L.H "home.guest_note"}}</p>{{end}}
     {{else}}
     <div class="card" style="max-width:520px;margin:0 auto">
-      <h2>Sign in to upload</h2>
-      <p class="muted">Guest uploads are turned off on this server.</p>
-      <div class="btn-row" style="justify-content:center"><a class="btn primary" href="/login">Sign in</a><a class="btn" href="/register">Create account</a></div>
+      <h2>{{.L.T "home.signin_title"}}</h2>
+      <p class="muted">{{.L.T "home.signin_desc"}}</p>
+      <div class="btn-row" style="justify-content:center"><a class="btn primary" href="/login">{{.L.T "nav.sign_in"}}</a><a class="btn" href="/register">{{.L.T "home.create_account"}}</a></div>
     </div>
     {{end}}
 
     {{with .Data}}{{if gt .Images 0}}
-    <div class="stats"><div><b data-count="{{.Images}}">{{.Images}}</b>files hosted</div><div><b data-count="{{.Views}}">{{.Views}}</b>views served</div></div>
+    <div class="stats"><div><b data-count="{{.Images}}">{{.Images}}</b>{{$.L.T "home.stats_files"}}</div><div><b data-count="{{.Views}}">{{.Views}}</b>{{$.L.T "home.stats_views"}}</div></div>
     {{end}}{{end}}
   </section>
 
@@ -26,64 +26,64 @@
     <details class="history-box" id="history-box">
       <summary>
         <span class="history-peek" id="history-peek" aria-hidden="true"></span>
-        <span class="history-title"><b>Uploaded from this device <span class="pill" id="history-count"></span></b><span class="small muted">Kept only in this browser, with each file's delete link</span></span>
+        <span class="history-title"><b>{{.L.T "home.history_title"}} <span class="pill" id="history-count"></span></b><span class="small muted">{{.L.T "home.history_desc"}}</span></span>
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </summary>
       <div id="device-history"></div>
       <div class="history-foot">
-        <button class="btn sm" type="button" id="history-more">Show more</button>
-        <button class="btn sm ghost" type="button" id="clear-history">Forget this list</button>
+        <button class="btn sm" type="button" id="history-more">{{.L.T "home.history_more"}}</button>
+        <button class="btn sm ghost" type="button" id="clear-history">{{.L.T "home.history_clear"}}</button>
       </div>
     </details>
   </section>
 
   <section class="section" id="features">
     <div class="section-head">
-      <span class="eyebrow"><b>v3</b> Rebuilt in Go: one tiny binary, open source</span>
-      <h2>Everything an image host should do. <span class="grad">Nothing it shouldn't.</span></h2>
-      <p>No ads, no tracking scripts, no premium tier hiding the good parts.</p>
+      <span class="eyebrow">{{.L.H "home.feat_eyebrow"}}</span>
+      <h2>{{.L.H "home.feat_title"}}</h2>
+      <p>{{.L.T "home.feat_desc"}}</p>
     </div>
     <div class="features">
-      <div class="feature" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3>Location removed</h3><p>Photos from phones carry GPS coordinates and camera details. {{.Site}} strips them on upload, without re-compressing your image.</p></div>
-      <div class="feature" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>Fast links</h3><p>A short readable link, a direct link, Markdown, HTML, BBCode and a QR code for every image, ready to copy.</p></div>
-      <div class="feature" style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>Albums</h3><p>Drop a handful of photos and share them as one album link, with a clean gallery page.</p></div>
-      <div class="feature" style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3>Self-destruct</h3><p>Let an image delete itself after 10 minutes, a day or a month. Guests get a private delete link, too.</p></div>
-      <div class="feature" style="--c:var(--amber)"><div class="ico"><svg><use href="#i-terminal"/></svg></div><h3>ShareX &amp; API</h3><p>Screenshot, and the link is on your clipboard. A one-click ShareX config and a simple REST API with keys.</p></div>
-      <div class="feature" style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3>Host it yourself</h3><p>One small Go binary with SQLite inside. Store images on disk or any S3 bucket: R2, MinIO, B2, Contabo.</p></div>
+      <div class="feature" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3>{{.L.T "home.feat_gps_title"}}</h3><p>{{.L.T "home.feat_gps_desc" "site" .Site}}</p></div>
+      <div class="feature" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>{{.L.T "home.feat_links_title"}}</h3><p>{{.L.T "home.feat_links_desc"}}</p></div>
+      <div class="feature" style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>{{.L.T "home.feat_albums_title"}}</h3><p>{{.L.T "home.feat_albums_desc"}}</p></div>
+      <div class="feature" style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3>{{.L.T "home.feat_destruct_title"}}</h3><p>{{.L.T "home.feat_destruct_desc"}}</p></div>
+      <div class="feature" style="--c:var(--amber)"><div class="ico"><svg><use href="#i-terminal"/></svg></div><h3>{{.L.T "home.feat_api_title"}}</h3><p>{{.L.T "home.feat_api_desc"}}</p></div>
+      <div class="feature" style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3>{{.L.T "home.feat_selfhost_title"}}</h3><p>{{.L.T "home.feat_selfhost_desc"}}</p></div>
     </div>
   </section>
 
   <section class="section">
     <div class="studio-teaser">
       <div>
-        <h2>A photo studio that never uploads your photo.</h2>
-        <p class="muted">Compress, resize, crop, convert, read text, remove backgrounds, blur faces and plates, and pull a color palette. It all runs on your own device; the image only leaves it if you choose to upload the result.</p>
-        <a class="btn primary" href="/tools"><svg><use href="#i-adjust"/></svg>Open the studio</a>
+        <h2>{{.L.T "home.studio_title"}}</h2>
+        <p class="muted">{{.L.T "home.studio_desc"}}</p>
+        <a class="btn primary" href="/tools"><svg><use href="#i-adjust"/></svg>{{.L.T "home.studio_open"}}</a>
       </div>
       <div class="tool-chips">
-        <a href="/tools#compress"><svg><use href="#i-compress"/></svg>Compress</a>
-        <a href="/tools#resize"><svg><use href="#i-resize"/></svg>Resize</a>
-        <a href="/tools#crop"><svg><use href="#i-crop"/></svg>Crop</a>
-        <a href="/tools#convert"><svg><use href="#i-convert"/></svg>Convert</a>
-        <a href="/tools#adjust"><svg><use href="#i-adjust"/></svg>Adjust</a>
-        <a href="/tools#redact"><svg><use href="#i-blur"/></svg>Blur &amp; pixelate</a>
-        <a href="/tools#ocr"><svg><use href="#i-text"/></svg>Image to text</a>
-        <a href="/tools#rembg"><svg><use href="#i-eraser"/></svg>Remove background</a>
-        <a href="/tools#palette"><svg><use href="#i-palette"/></svg>Color palette</a>
+        <a href="/tools#compress"><svg><use href="#i-compress"/></svg>{{.L.T "home.tool_compress"}}</a>
+        <a href="/tools#resize"><svg><use href="#i-resize"/></svg>{{.L.T "home.tool_resize"}}</a>
+        <a href="/tools#crop"><svg><use href="#i-crop"/></svg>{{.L.T "home.tool_crop"}}</a>
+        <a href="/tools#convert"><svg><use href="#i-convert"/></svg>{{.L.T "home.tool_convert"}}</a>
+        <a href="/tools#adjust"><svg><use href="#i-adjust"/></svg>{{.L.T "home.tool_adjust"}}</a>
+        <a href="/tools#redact"><svg><use href="#i-blur"/></svg>{{.L.T "home.tool_redact"}}</a>
+        <a href="/tools#ocr"><svg><use href="#i-text"/></svg>{{.L.T "home.tool_ocr"}}</a>
+        <a href="/tools#rembg"><svg><use href="#i-eraser"/></svg>{{.L.T "home.tool_rembg"}}</a>
+        <a href="/tools#palette"><svg><use href="#i-palette"/></svg>{{.L.T "home.tool_palette"}}</a>
       </div>
     </div>
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>Three steps, no account needed</h2></div>
+    <div class="section-head"><h2>{{.L.T "home.steps_title"}}</h2></div>
     <div class="steps">
-      <div class="step"><h3>Drop or paste</h3><p>Drag files in, paste a screenshot, or give a link to an image on the web.</p></div>
-      <div class="step"><h3>We clean it up</h3><p>Hidden location and camera data are removed and a thumbnail is made in a blink.</p></div>
-      <div class="step"><h3>Share anywhere</h3><p>Copy the link, embed code or QR. Previews look right on Discord, X, WhatsApp and forums.</p></div>
+      <div class="step"><h3>{{.L.T "home.step1_title"}}</h3><p>{{.L.T "home.step1_desc"}}</p></div>
+      <div class="step"><h3>{{.L.T "home.step2_title"}}</h3><p>{{.L.T "home.step2_desc"}}</p></div>
+      <div class="step"><h3>{{.L.T "home.step3_title"}}</h3><p>{{.L.T "home.step3_desc"}}</p></div>
     </div>
   </section>
   <section class="section" id="family">
-    <div class="section-head"><h2>Part of the HOP family</h2><p>One free HOP ID signs you in to every app.</p></div>
+    <div class="section-head"><h2>{{.L.T "home.family_title"}}</h2><p>{{.L.T "home.family_desc"}}</p></div>
     <ul class="hop-family" role="list">
       {{range hopFamily}}<li><a href="{{.URL}}">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="40" height="40" loading="lazy">{{end}}<b>{{.Name}}</b><span>{{.Tagline}}</span></a></li>
       {{end}}

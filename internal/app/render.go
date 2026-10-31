@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/i18n"
 	"github.com/navi-crwn/pixelhop/web"
 )
 
@@ -47,6 +48,8 @@ type page struct {
 	MaxMediaMB    int64
 	MemberMediaMB int64 // what signing in would allow, for the guest hint
 	MaxBatch      int
+	L             i18n.Locale
+	Langs         []i18n.Lang
 }
 
 var startedAt = fmt.Sprint(time.Now().Unix())
@@ -145,6 +148,8 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 		a.serverError(w, r, fmt.Errorf("no template %q", name))
 		return
 	}
+	p.L = a.locale(w, r)
+	p.Langs = i18n.Langs
 	p = a.base(r, p)
 	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
 		p.NoIndex = true
