@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 260" role="img" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="tile-face" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="0.55" stop-color="#0891b2"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="tile-side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#164e63"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="tile-top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <radialGradient id="tile-glow" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="110" cy="242" rx="78" ry="14" fill="#000000" opacity="0.28"/>
+
+  <g>
+    <path d="M178 38 L206 60 L206 212 L178 190 Z" fill="url(#tile-side)"/>
+    <path d="M42 190 L70 212 L206 212 L178 190 Z" fill="url(#tile-side)"/>
+    <path d="M42 38 L70 16 L206 60 L178 38 Z" fill="url(#tile-top)"/>
+    <rect x="42" y="38" width="136" height="152" rx="20" fill="url(#tile-face)"/>
+    <rect x="42" y="38" width="136" height="152" rx="20" fill="url(#tile-glow)"/>
+    <!-- pixel camera glyph inside tile -->
+    <g transform="translate(82, 86) scale(1.7)" fill="#ffffff">
+      <path d="M4 0h4v4H4zM24 0h4v4h-4zM4 4h4v4H4zM24 4h4v4h-4zM4 8h8v4H4zM20 8h8v4h-8zM4 12h24v4H4zM0 16h8v4H0zM12 16h8v4h-8zM24 16h8v4h-8zM0 20h32v4H0zM4 24h24v4H4zM8 28h16v4H8z"/>
+    </g>
+  </g>
+</svg>
