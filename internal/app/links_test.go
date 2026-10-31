@@ -101,10 +101,10 @@ func TestSharedLinksStayOnLinkHost(t *testing.T) {
 		// The signed-in owner stays on the app.
 		{"pixel.example", "/struk-AbC123", session, 200, ""},
 		// The app's own pages on the link host go to the app.
-		{"p.example", "/", nil, 302, "https://pixel.example/"},
-		{"p.example", "/login?next=/dashboard", nil, 302, "https://pixel.example/login?next=/dashboard"},
-		{"p.example", "/dashboard", session, 302, "https://pixel.example/dashboard"},
-		{"p.example", "/auth/google-callback.php?code=x&state=y", nil, 302, "https://pixel.example/auth/google-callback.php?code=x&state=y"},
+		{"p.example", "/", nil, 301, "https://pixel.example/"},
+		{"p.example", "/login?next=/dashboard", nil, 301, "https://pixel.example/login?next=/dashboard"},
+		{"p.example", "/dashboard", session, 301, "https://pixel.example/dashboard"},
+		{"p.example", "/auth/google-callback.php?code=x&state=y", nil, 301, "https://pixel.example/auth/google-callback.php?code=x&state=y"},
 		// A private file's page on the link host goes to the app, where its owner is signed in.
 		{"p.example", "/rahasia-XyZ789", nil, 302, "https://pixel.example/rahasia-XyZ789"},
 		{"pixel.example", "/rahasia-XyZ789", nil, 404, ""},
@@ -113,6 +113,9 @@ func TestSharedLinksStayOnLinkHost(t *testing.T) {
 		{"p.example", "/static/css/app.css", nil, 200, ""},
 		{"p.example", "/qr/struk-AbC123.png", nil, 200, ""},
 		{"p.example", "/api/v1/stats", nil, 200, ""},
+		{"pixel.example", "/api/v1/stats", nil, 200, ""},
+		// Dedicated pages live on the app host only.
+		{"p.example", "/about", nil, 301, "https://pixel.example/about"},
 		{"p.example", "/nope-AAAAAA", nil, 404, ""},
 		// The app itself is unchanged.
 		{"pixel.example", "/", nil, 200, ""},
@@ -130,13 +133,13 @@ func TestSharedLinksStayOnLinkHost(t *testing.T) {
 
 	// Forms posted on the link host keep their method when sent on.
 	req := httptest.NewRequest(http.MethodPost, "https://p.example/api/upload.php", nil)
-	if rec := httptest.NewRecorder(); func() bool { h.ServeHTTP(rec, req); return rec.Code == 307 }() {
+	if rec := httptest.NewRecorder(); func() bool { h.ServeHTTP(rec, req); return rec.Code == 307 || rec.Code == 308 }() {
 		t.Error("the API was sent away from the link host")
 	}
 	req = httptest.NewRequest(http.MethodPost, "https://p.example/share", nil)
 	rec = httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
-	if rec.Code != 307 || rec.Header().Get("Location") != "https://pixel.example/share" {
+	if rec.Code != 308 || rec.Header().Get("Location") != "https://pixel.example/share" {
 		t.Errorf("POST /share on the link host: %d → %q", rec.Code, rec.Header().Get("Location"))
 	}
 
