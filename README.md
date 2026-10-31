@@ -1,4 +1,4 @@
-<p align="center">🌐 <b>English</b> · <a href="https://navi-crwn.github.io/pixelhop/zh-cn/">简体中文</a> · <a href="https://navi-crwn.github.io/pixelhop/de/">Deutsch</a> · <a href="https://navi-crwn.github.io/pixelhop/id/">Bahasa Indonesia</a> · <a href="https://navi-crwn.github.io/pixelhop/ja/">日本語</a> · <a href="https://navi-crwn.github.io/pixelhop/pt-br/">Português (Brasil)</a> · <a href="https://navi-crwn.github.io/pixelhop/es/">Español</a></p>
+<p align="center">🌐 <b>English</b> · <a href="README.zh.md">简体中文</a> · <a href="README.es.md">Español</a> · <a href="README.ar.md">العربية</a> · <a href="README.pt.md">Português</a> · <a href="README.fr.md">Français</a> · <a href="README.ja.md">日本語</a> · <a href="README.id.md">Bahasa Indonesia</a></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/readme/hero-en-light.webp"><img src="docs/readme/hero-en-dark.webp" alt="PixelHop: drop an image, get a link" width="100%"></picture></p>
 
@@ -129,17 +129,27 @@ Open `http://localhost:8080` and create an account. **The first account becomes 
 
 Everything is in [`.env.example`](.env.example). The ones you're most likely to change:
 
-<!-- hop-family:start -->
-<!-- Generated from HEL.ink resources/hop-assets/apps.source.json; edit there, then run scripts/hop_assets.py build. -->
-| App | Address | Repository | What it does |
-| --- | --- | --- | --- |
-| **HOP ID** | [hel.ink](https://hel.ink) · accounts at `hub.hel.ink` | [navi-crwn/HEL.ink](https://github.com/navi-crwn/HEL.ink) | One account for every HOP app. |
-| **LinkHop** | [link.hel.ink](https://link.hel.ink) · `hel.ink/l/…` | [navi-crwn/LinkHop](https://github.com/navi-crwn/LinkHop) | Short links, QR codes and click analytics. |
-| **BioHop** | [bio.hel.ink](https://bio.hel.ink) · `hel.ink/b/…` | [navi-crwn/BioHop](https://github.com/navi-crwn/BioHop) | One link-in-bio page for everything you do. |
-| **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
-| **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
-<!-- hop-family:end -->
+| Variable | Default | What it does |
+|---|---|---|
+| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address of the app (sign-in, upload, dashboard) |
+| `PIXELHOP_LINK_URL` | `PIXELHOP_BASE_URL` | Another host for shared links (image and album pages, direct files). Point it at the old address after a move, so old links keep working while the app lives at the new one. That host must also reach PixelHop |
+| `PIXELHOP_DATA` | `./data` | Database and (local) images |
+| `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
+| `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
+| `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
+| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in the control center) |
+| `PIXELHOP_TRUSTED_PROXIES` | — | `cloudflare`, or IPs/CIDRs of your reverse proxy |
+| `PIXELHOP_STORAGE` | `local` | `local` or `s3` |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | — | For S3-compatible storage |
+| `S3_PUBLIC_URL` | — | CDN address of the bucket; image links redirect there |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
+| `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
+| `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
+| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App slugs allowed to call the signed `/hop/*` admin API (HOP App Protocol) |
+| `PIXELHOP_CONTROL_URL` | — | Address of the HOP control center; admins who open `/admin` are sent there |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
+| `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
+| `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
 
 </details>
 
@@ -240,18 +250,21 @@ Yes, both are switches in **Admin → Settings**.
 PixelHop runs on a 512 MB VPS or a Raspberry Pi. It uses a few tens of MB of memory at rest. Big uploads are decoded a few at a time, so bursts can't exhaust memory.
 </details>
 
-## The Hop family
+## The HOP family
 
 PixelHop is part of the **HOP** family of privacy-respecting, self-hostable open-source apps.
 
-| App | Live Address | Repository | Purpose |
+<!-- hop-family:start -->
+<!-- Generated from HEL.ink resources/hop-assets/apps.source.json; edit there, then run scripts/hop_assets.py build. -->
+| App | Address | Repository | What it does |
 | --- | --- | --- | --- |
-| **Hub** | `hel.ink` · `hub.hel.ink` | [navi-crwn/HEL.ink](https://github.com/navi-crwn/HEL.ink) | Account portal, HOP ID, SSO issuer, launcher, admin |
-| **LinkHop** | `link.hel.ink` · `hel.ink/l/{slug}` | [navi-crwn/LinkHop](https://github.com/navi-crwn/LinkHop) | URL shortener, QR codes, click analytics, API |
-| **BioHop** | `bio.hel.ink` · `hel.ink/b/{slug}` | [navi-crwn/BioHop](https://github.com/navi-crwn/BioHop) | Link-in-bio pages with custom blocks, themes, stats |
-| **PixelHop** (this repo) | `p.hel.ink` (soon `pixel.hel.ink`) | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image & media hosting, EXIF/GPS scrubbing, studio |
-| **NoteHop** | `note.hel.ink` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Zero-knowledge client-encrypted live notes & docs |
-| **Imperium** | Internal / Tailscale | Private | Unified admin & operations console across all apps |
+| **HOP ID** | [hel.ink](https://hel.ink) · accounts at `hub.hel.ink` | [navi-crwn/HEL.ink](https://github.com/navi-crwn/HEL.ink) | One account for every HOP app. |
+| **LinkHop** | [link.hel.ink](https://link.hel.ink) · `hel.ink/l/…` | [navi-crwn/LinkHop](https://github.com/navi-crwn/LinkHop) | Short links, QR codes and click analytics. |
+| **BioHop** | [bio.hel.ink](https://bio.hel.ink) · `hel.ink/b/…` | [navi-crwn/BioHop](https://github.com/navi-crwn/BioHop) | One link-in-bio page for everything you do. |
+| **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
+| **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
+| **Imperium** | private (owner only) | private | The HOP control panel. |
+<!-- hop-family:end -->
 
 ## Credits & license
 

@@ -1,292 +1,167 @@
-<!doctype html>
-<html lang="ja" data-copied="コピーしました">
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PixelHop：プライベートなフォトスタジオ付きのオープンソース画像ホスティング</title>
-<meta name="description" content="画像をドロップするだけでリンクに。PixelHop は GPS データを削除し、アルバムを作り、ShareX に対応し、自分でホストできる小さな Go バイナリ 1 つで動きます。">
-<meta name="theme-color" content="#07080b" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
-<meta property="og:type" content="website">
-<meta property="og:title" content="PixelHop">
-<meta property="og:description" content="ブラウザで動くプライベートなフォトスタジオ付きのオープンソース画像ホスティング。Go バイナリ 1 つでセルフホスト可能。">
-<meta property="og:url" content="https://navi-crwn.github.io/pixelhop/ja/">
-<link rel="canonical" href="https://navi-crwn.github.io/pixelhop/ja/">
-<link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/pixelhop/">
-<link rel="alternate" hreflang="zh-CN" href="https://navi-crwn.github.io/pixelhop/zh-cn/">
-<link rel="alternate" hreflang="de" href="https://navi-crwn.github.io/pixelhop/de/">
-<link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/pixelhop/id/">
-<link rel="alternate" hreflang="ja" href="https://navi-crwn.github.io/pixelhop/ja/">
-<link rel="alternate" hreflang="pt-BR" href="https://navi-crwn.github.io/pixelhop/pt-br/">
-<link rel="alternate" hreflang="es" href="https://navi-crwn.github.io/pixelhop/es/">
-<link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/pixelhop/">
-<meta property="og:image" content="https://navi-crwn.github.io/pixelhop/social.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="../logo.svg" type="image/svg+xml">
-<script>
-// Runs before paint: theme and "JS is on". ?theme=light|dark overrides (used to render the README images); ?shot hides the nav.
-(function(){var d=document.documentElement,q=new URLSearchParams(location.search),t=null;d.classList.add('js');
-try{t=localStorage.getItem('theme')}catch(e){}
-t=q.get('theme')||t;if(q.has('shot'))d.classList.add('shot-mode');
-if(t==='light'||t==='dark')d.setAttribute('data-theme',t);})();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@1&display=swap">
-<link rel="stylesheet" href="../assets/css/site.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PixelHop — 高速・プライベートな画像ホスティングとフォトスタジオ</title>
+  <meta name="description" content="画像をアップロードし、GPSやカメラ情報を除去。ブラウザ内で写真編集を行い、p.hel.ink で短縮共有。HOPファミリーの一員。">
+  <link rel="canonical" href="https://navi-crwn.github.io/PixelHop/ja/">
+  <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/styles.css">
+  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/fonts.css" integrity="sha384-T1Y2aaMQ8CSfi7J2t9d1ZAbVcQ1FcO27Jwn3WtNWB+UVK137YCl3hIPvz0G4K22L" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://hel.ink/hop-assets/v1/hop-float.css" integrity="sha384-sl7D409xEmIT5gkArlQLoQQ4rOkqF7tOGf1VhI/iMb7c2/s9w9NtDEjLbJMU/MQ/" crossorigin="anonymous">
+  <link rel="alternate" hreflang="x-default" href="https://navi-crwn.github.io/PixelHop/">
+  <link rel="alternate" hreflang="en" href="https://navi-crwn.github.io/PixelHop/en/">
+  <link rel="alternate" hreflang="id" href="https://navi-crwn.github.io/PixelHop/id/">
+  <link rel="alternate" hreflang="zh" href="https://navi-crwn.github.io/PixelHop/zh/">
+  <link rel="alternate" hreflang="es" href="https://navi-crwn.github.io/PixelHop/es/">
+  <link rel="alternate" hreflang="ar" href="https://navi-crwn.github.io/PixelHop/ar/">
+  <link rel="alternate" hreflang="pt" href="https://navi-crwn.github.io/PixelHop/pt/">
+  <link rel="alternate" hreflang="fr" href="https://navi-crwn.github.io/PixelHop/fr/">
+  <link rel="alternate" hreflang="ja" href="https://navi-crwn.github.io/PixelHop/ja/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PixelHop">
+  <meta property="og:title" content="PixelHop — 高速・プライベートな画像ホスティングとフォトスタジオ">
+  <meta property="og:description" content="画像をアップロードし、GPSやカメラ情報を除去。ブラウザ内で写真編集を行い、p.hel.ink で短縮共有。HOPファミリーの一員。">
+  <meta property="og:url" content="https://navi-crwn.github.io/PixelHop/ja/">
+  <meta property="og:image" content="https://navi-crwn.github.io/PixelHop/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<a class="skip" href="#main">本文へスキップ</a>
+  <div data-hop-float></div>
+  <a class="skip" href="#main">コンテンツへスキップ</a>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="i-gps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/><path d="M4 4l16 16"/></symbol>
-  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13 3 4 14h7l-1 7 9-11h-7z"/></symbol>
-  <symbol id="i-album" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M17 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></symbol>
-  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-  <symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
-  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
-  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
-  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2"/></symbol>
-  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
-  <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
-  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
-  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
-</defs></svg>
-
-<header class="nav">
-  <div class="wrap">
-    <a class="brand" href="#top"><img src="../logo.svg" alt="" width="28" height="28">PixelHop</a>
-    <nav class="nav-links" aria-label="セクション">
+  <header class="site-header">
+    <a class="brand" href="https://navi-crwn.github.io/PixelHop/ja/">
+      <img src="../assets/mark.svg" alt="" width="28" height="28">
+      <span>PixelHop</span>
+    </a>
+    <nav aria-label="ページナビゲーション">
       <a href="#features">機能</a>
-      <a href="#studio">Studio</a>
-      <a href="#privacy">プライバシー</a>
-      <a href="#install">セルフホスト</a>
-      <a href="#api">API</a>
-      <a href="#faq">FAQ</a>
+      <a href="#run">セルフホスト</a>
+      <a href="#faq">よくある質問</a>
+      <a href="#family">HOPファミリー</a>
     </nav>
-    <div class="nav-r">
-      <button type="button" class="theme" id="theme" aria-label="ライトまたはダーク"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
-      <details class="lang-menu"><summary aria-label="言語"><svg><use href="#i-globe"/></svg><span>日本語</span></summary><div class="lang-list"><a href="../" hreflang="en" lang="en">English</a><a href="../zh-cn/" hreflang="zh-CN" lang="zh-CN">简体中文</a><a href="../de/" hreflang="de" lang="de">Deutsch</a><a href="../id/" hreflang="id" lang="id">Bahasa Indonesia</a><a href="../ja/" hreflang="ja" lang="ja" aria-current="page">日本語</a><a href="../pt-br/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a><a href="../es/" hreflang="es" lang="es">Español</a></div></details>
-      <a class="btn sm main" href="https://pixel.hel.ink">試してみる</a>
+    <div class="header-actions">
+      <details class="langmenu"><summary aria-label="Language"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>JA</summary><ul>
+        <li><a href="../" hreflang="en" lang="en">English<small>EN</small></a></li>
+        <li><a href="../id/" hreflang="id" lang="id">Bahasa Indonesia<small>ID</small></a></li>
+        <li><a href="../zh/" hreflang="zh" lang="zh">简体中文<small>ZH</small></a></li>
+        <li><a href="../es/" hreflang="es" lang="es">Español<small>ES</small></a></li>
+        <li><a href="../ar/" hreflang="ar" lang="ar">العربية<small>AR</small></a></li>
+        <li><a href="../pt/" hreflang="pt" lang="pt">Português<small>PT</small></a></li>
+        <li><a href="../fr/" hreflang="fr" lang="fr">Français<small>FR</small></a></li>
+        <li><a href="../ja/" hreflang="ja" lang="ja" aria-current="page">日本語<small>JA</small></a></li>
+      </ul></details>
+      <button id="theme-toggle" type="button" data-action="dark" data-label-light="ライトテーマ" data-label-dark="ダークテーマ">ダークテーマ</button>
     </div>
-  </div>
-</header>
+  </header>
 
-<main id="main">
-
-<!-- HERO -->
-<section class="hero" id="top">
-  <div class="glow" style="width:560px;height:560px;background:var(--violet);right:-160px;top:6%"></div>
-  <div class="glow" style="width:460px;height:460px;background:var(--lime);left:-180px;top:30%;opacity:.16"></div>
-  <div class="wrap">
-    <span class="pill"><b>v3</b>Go で再構築 · バイナリ 1 つ · MIT</span>
-    <h1>画像をドロップ。<br><span class="grad">リンクをゲット。</span></h1>
-    <p class="lead">誰かに見られる前に GPS 位置情報を削除するオープンソースの画像ホスティング。アルバム、ShareX、API、そして写真を一切アップロードしないフォトスタジオを備えています。</p>
-    <div class="cta">
-      <a class="btn main" href="https://pixel.hel.ink">画像をアップロード</a>
-      <a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>コードを入手</a>
-    </div>
-    <ul class="facts">
-      <li>約 16 MB のシングルバイナリ</li>
-      <li>SQLite 内蔵、データベースサーバー不要</li>
-      <li>ディスクまたは任意の S3 バケット</li>
-      <li>広告なし、トラッカーなし</li>
-    </ul>
-    <div class="shot">
-      <div class="frame">
-        <div class="bar"><i></i><i></i><i></i><span>pixel.hel.ink</span></div>
-        <div class="themed"><img class="dk" src="../media/app-view-dark.webp" alt="PixelHop の画像ページ：写真、コピーボタン、埋め込みコード、QR コード" width="1440" height="900"><img class="lt" src="../media/app-view-light.webp" alt="" width="1440" height="900"></div>
+  <main id="main">
+    <div class="hero">
+      <div>
+        <p class="kicker">HOP &middot; 画像ホスティング＆フォトスタジオ</p>
+        <h1>画像をドロップ、メタデータを消去、瞬時にシェア</h1>
+        <p class="lede">PixelHop は高速な画像アップロード、アルバムギャラリー、ブラウザ完結のフォトスタジオを提供します。p.hel.ink で短いリンクを発行し、pixel.hel.ink で管理。Go言語の単一バイナリ、セルフホスト可能、オープンソース（MIT）。</p>
+        <div class="cta-row">
+          <a class="btn primary" href="https://pixel.hel.ink">PixelHop を試す</a>
+          <a class="btn" href="https://p.hel.ink">画像を探索</a>
+          <a class="btn" href="https://github.com/navi-crwn/PixelHop">コードを見る</a>
+        </div>
+        <p class="note">ページ内のリンクはHOPファミリーの公開サイトへ接続します。</p>
+      </div>
+      <div class="tile-wrap" aria-hidden="true">
+        <img class="tile" src="../assets/tile.svg" alt="" width="220" height="260">
       </div>
     </div>
-  </div>
-</section>
 
-<!-- FEATURES -->
-<section id="features">
-  <div class="wrap">
-    <div class="head c rv">
-      <div class="label">機能</div>
-      <h2>画像ホストがすべきことは全部。<em class="s grad">すべきでないことは何も。</em></h2>
-      <p class="lead">良い機能を隠す有料プランはありません。すべてのアカウントですべての機能が使えます。</p>
-    </div>
-    <div class="feats rv">
-      <div class="w3" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-gps"/></svg></div><h3>位置情報は削除、画質はそのまま</h3><p>スマホの写真には GPS 座標やカメラのシリアル番号が含まれます。PixelHop はファイルのコンテナを書き換えて EXIF、XMP、IPTC を削除するため、ピクセルが再圧縮されることはありません。横向きの写真は先に正しい向きに直します。</p></div>
-      <div class="w3" style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>必要なリンクがすべて</h3><p><code>beach-sunset-x7Kp2Q</code> のような読みやすいリンク、直リンク、Markdown、HTML、BBCode、QR コード。Discord、X、WhatsApp、掲示板でもプレビューがきれいに表示されます。</p></div>
-      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>アルバム</h3><p>複数の写真をドロップして、1 つのギャラリーリンクで共有。</p></div>
-      <div style="--c:var(--pink)"><div class="ico"><svg><use href="#i-clock"/></svg></div><h3>自動削除</h3><p>10 分後、1 日後、1 か月後に削除。ゲストには専用の削除リンクが発行されます。</p></div>
-      <div style="--c:var(--amber)"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>ShareX &amp; API</h3><p>ワンクリックで ShareX 設定、キー付きの REST API。旧 PixelHop 2 の設定もそのまま使えます。</p></div>
-      <div style="--c:var(--green)"><div class="ico"><svg><use href="#i-server"/></svg></div><h3>自分でホスト</h3><p>バイナリ 1 つ、Docker イメージ、または systemd。ディスク、R2、MinIO、B2、Contabo に対応。</p></div>
-      <div style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>モデレーション機能内蔵</h3><p>通報、非表示・削除、IP ブロック、アカウントのロック・停止、警告。</p></div>
-      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-qr"/></svg></div><h3>すべてのリンクを一度にコピー</h3><p>一括アップロード後、直リンク、ページ、Markdown、BBCode、HTML のリンクをワンクリックでまとめてコピー。ギャラリーの ZIP ダウンロードにも対応。</p></div>
-      <div style="--c:var(--amber)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>非公開またはパスワード保護</h3><p>画像ごとに設定：リンクを知っている人、自分だけ、またはパスワード付き。ロックしたファイルは直リンクできません。</p></div>
-      <div style="--c:var(--cyan)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>URL でリサイズ、閲覧統計</h3><p><code>?w=800&amp;format=webp</code> で任意のサイズに。所有者は 1 日ごとの閲覧数と、どのサイトからリンクされているかを確認できます。</p></div>
-      <div style="--c:var(--lime)"><div class="ico"><svg><use href="#i-album"/></svg></div><h3>アプリとしてインストール、HEIC、透かし</h3><p>ホーム画面に追加すれば、写真をそのまま共有できます。iPhone の HEIC は自動で変換。1 枚にもまとめてにも透かしを入れられます。</p></div>
-      <div style="--c:var(--violet)"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>Webhook、oEmbed、CLI</h3><p>署名付き Webhook、WordPress や Notion への埋め込み、Explore フィード、そしてターミナルからの <code>pixelhop push</code>。</p></div>
-      <div class="w3" style="--c:var(--pink)"><div class="ico"><svg><use href="#i-shield"/></svg></div><h3>HEL.ink とアカウントを共通化</h3><p>p.hel.ink では HEL.ink のアカウントでサインインします。短縮リンク、プロフィールページ、画像で同じログインを使え、Google ログインと 2 段階認証にも対応。セルフホストではオフにできます。</p></div>
-      <div class="w3" style="--c:var(--lime)"><div class="ico"><svg><use href="#i-zap"/></svg></div><h3>古いリンクもそのまま動作</h3><p>PixelHop 2 のページ、直リンク、サムネイルのリンク、さらに ShareX の設定やアップロード結果ページも、以前とまったく同じように動きます。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- STUDIO -->
-<section id="studio">
-  <div class="wrap split">
-    <div class="rv">
-      <div class="label">Studio</div>
-      <h2>写真を<em class="s grad">一切アップロードしない</em>フォトスタジオ。</h2>
-      <p class="lead">ほとんどのツールは Canvas と WebAssembly であなたの端末上で動くため、「結果をアップロード」を押さない限り画像が端末の外に出ることはありません。重い AI ツールは会員向けにサーバーで動き、何も保存しません。</p>
-      <ul class="ticks">
-        <li>JPG、PNG、WebP、AVIF への<b>圧縮・リサイズ・切り抜き・変換</b>。ファイルサイズをその場で表示。</li>
-        <li><b>補正と回転</b>：明るさ、コントラスト、色、白黒、反転。</li>
-        <li>共有する前に、顔やナンバープレート、名前を<b>ぼかし・モザイク</b>。</li>
-        <li><b>画像からテキスト</b>（OCR）。30 言語に対応し、1 枚の画像の中の複数言語をまとめて読み取れます。</li>
-        <li>ブラウザ内で動く AI モデルで<b>背景を削除</b>。</li>
-        <li><b>カラーパレット</b>と<b>QR コード生成</b>（PNG または SVG）。</li>
-        <li><b>サーバー上で、会員向けに：</b>1 秒で背景削除、顔の自動ぼかし、マジック消しゴム、2 倍の HD アップスケール。メモリ上で処理し、保存はしません。</li>
-        <li><b>一括処理：</b>多数の画像に同じ手順を適用し、ZIP 1 つまたはアルバム 1 つで受け取れます。</li>
+    <section id="features" aria-labelledby="features-h">
+      <h2 id="features-h">PixelHop の機能</h2>
+      <ul class="features">
+        <li><strong>高速アップロードとクリーンなリンク</strong><p>写真やスクリーンショットをドロップして、p.hel.ink/{slug} の短縮URL、直リンク、Markdown、埋め込みコードを取得。</p></li>
+        <li><strong>位置情報・メタデータを自動除去</strong><p>GPS座標や端末シリアル、EXIF情報をコンテナ再構成により除去。元のピクセルを再圧縮しません。</p></li>
+        <li><strong>ブラウザ完結のフォトスタジオ</strong><p>圧縮、リサイズ、切り抜き、WebP/AVIF変換、モザイク処理、OCR文字認識をアップロード前にお使いの端末内で完結。</p></li>
+        <li><strong>全アプリ共通サインイン：HOP ID</strong><p>HOP ID シングルサインオンでHOPファミリー全体をシームレスに利用可能。ゲスト利用もサポート。</p></li>
+        <li><strong>アルバムと一括共有</strong><p>複数画像を一度にアップロードしてレスポンシブなギャラリーを作成。ワンクリックで全リンクをコピー、またはZIP一括保存。</p></li>
+        <li><strong>自動消滅リンクとパスワード保護</strong><p>自動消滅タイマー（10分、24時間、30日）や閲覧パスワードを設定可能。ゲストには専用の削除キーを発行。</p></li>
+        <li><strong>ShareX と REST API 対応</strong><p>ShareX の即時設定ファイル、pixelhop push コマンド、自動化用パーソナルAPIトークンを標準装備。</p></li>
+        <li><strong>Go単一バイナリでのセルフホスト</strong><p>約16MBの軽量Goバイナリ1つと内蔵SQLiteで動作。ローカルディスクおよびS3互換ストレージに対応。</p></li>
       </ul>
-    </div>
-    <div class="mini-shot themed rv"><img class="dk" src="../media/app-studio-dark.webp" alt="カラーパレットツールを開いた PixelHop スタジオ" width="1440" height="900" loading="lazy"><img class="lt" src="../media/app-studio-light.webp" alt="" width="1440" height="900" loading="lazy"></div>
-  </div>
-</section>
+    </section>
 
-<!-- PRIVACY -->
-<section id="privacy">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="label">プライバシー</div>
-      <h2>写真があなたについて語ること、<em class="s grad">ビフォー</em>と<em class="s grad">アフター</em>。</h2>
-    </div>
-    <div class="ba rv">
-      <div class="card"><h3>スマホから直接</h3>
-        <span class="bad">GPS 48°51′N 2°21′E</span><br><span class="bad">メーカー：Pixel 9 · シリアル 3A1F…</span><br><span class="bad">撮影日時：2026-10-14 07:42</span><br><span class="bad">ソフトウェア、レンズ、所有者名…</span><br>向き：6（回転）</div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="card"><h3>PixelHop では</h3>
-        <del>GPS</del> <span class="ok">削除</span><br><del>カメラとシリアル</del> <span class="ok">削除</span><br><del>日付とソフトウェア</del> <span class="ok">削除</span><br><span class="ok">カラープロファイルは保持</span><br><span class="ok">正しい向きに、画質はそのまま</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- INSTALL -->
-<section id="install">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="label">セルフホスト</div>
-      <h2><em class="s grad">1 分</em>で起動。</h2>
-      <p class="lead">PHP も Python も MySQL も cron も不要。最初に作ったアカウントが管理者になります。</p>
-    </div>
-    <div class="rv">
-      <div class="tabs" role="tablist">
-        <button role="tab" aria-selected="true" data-tab="bin">バイナリ</button>
-        <button role="tab" aria-selected="false" data-tab="docker">Docker</button>
-        <button role="tab" aria-selected="false" data-tab="src">ソースから</button>
+    <section id="run" aria-labelledby="run-h">
+      <h2 id="run-h">セルフホスト</h2>
+      <div class="panel">
+        <p>PixelHop はご自身で運用可能です。単一バイナリのビルドと起動手順：</p>
+        <pre><code>git clone https://github.com/navi-crwn/PixelHop.git
+cd PixelHop
+go build -o pixelhop ./cmd/pixelhop
+./pixelhop</code></pre>
+        <h3>動作要件</h3>
+        <p>Go 1.22+ および SQLite。クイックスタート、Dockerコマンド、テスト詳細は GitHub の README をご覧ください。</p>
+        <h3>サインイン設定</h3>
+        <p>サインインは HOP ID SSO を利用します。環境変数 HOP_HUB_URL、HOP_APP=pixelhop、HOP_SSO_SECRET を設定するか、スタンドアロンモードで運用してください。</p>
+        <h3>データベースとストレージ</h3>
+        <p>標準で内蔵SQLiteとローカルディスクストレージを使用します。クラウド利用時はS3環境変数を指定してください。</p>
+        <p class="note">セルフホスト運用においてスタンドアロンモードとSSOモードの両方を完全サポートしています。</p>
       </div>
-      <div class="tabpanel" data-panel="bin"><div class="code"><button class="copy" type="button">コピー</button><pre><span class="c"># Linux（amd64）。arm64、macOS、Windows 版は Releases ページにあります。</span>
-curl -L -o pixelhop https://github.com/navi-crwn/pixelhop/releases/latest/download/pixelhop-linux-amd64
-chmod +x pixelhop
-PIXELHOP_BASE_URL=https://img.example.com ./pixelhop</pre></div></div>
-      <div class="tabpanel" data-panel="docker" hidden><div class="code"><button class="copy" type="button">コピー</button><pre>docker run -d --name pixelhop -p 8080:8080 \
-  -e PIXELHOP_BASE_URL=https://img.example.com \
-  -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest</pre></div></div>
-      <div class="tabpanel" data-panel="src" hidden><div class="code"><button class="copy" type="button">コピー</button><pre><span class="c"># Go 1.27+</span>
-git clone https://github.com/navi-crwn/pixelhop.git && cd pixelhop
-make build && ./pixelhop</pre></div></div>
-      <div class="grid3" style="margin-top:20px">
-        <div class="box"><span class="big grad">~16 MB</span><p>テンプレートとアセットを含む静的バイナリ 1 つ</p></div>
-        <div class="box"><span class="big grad">1</span><p>プロセス：Web サーバー、データベース、クリーンアップ処理</p></div>
-        <div class="box"><span class="big grad">0</span><p>個のストレージ用サードパーティ Go 依存：S3 署名は内蔵</p></div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-h">
+      <h2 id="faq-h">よくある質問</h2>
+      <details>
+        <summary>PixelHop は画像の画質を圧縮・劣化させますか？</summary>
+        <p>いいえ。メタデータの除去はファイル構造の書き換えのみで行われ、画像ピクセルの再エンコードは行われません。</p>
+      </details>
+      <details>
+        <summary>画像のアップロードにアカウントは必須ですか？</summary>
+        <p>いいえ。ゲストアップロードにも対応しており、削除用キーが発行されます。HOP ID でログインするとギャラリー管理や永続APIキーが使えます。</p>
+      </details>
+      <details>
+        <summary>自分のサーバーでホストできますか？</summary>
+        <p>はい。外部ランタイム不要の単一バイナリとしてコンパイルされます。詳細はリポジトリの README をご覧ください。</p>
+      </details>
+      <details>
+        <summary>不具合やセキュリティ報告はどこへ連絡すればよいですか？</summary>
+        <p>GitHub の Issue、または security@hel.ink 宛にご連絡ください。責任ある情報開示に対応しています。</p>
+      </details>
+    </section>
+
+    <section id="family" aria-labelledby="family-h">
+      <h2 id="family-h">HOP ファミリー</h2>
+      <p>PixelHop は、統一サインインで連携する軽量・セルフホスト可能なツール群「HOP」の一員です。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">アプリ</th><th scope="col">概要</th><th scope="col">公開サービス</th><th scope="col">ソースコード</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>HOP ID</strong></td><td>シングルサインオン・アカウント管理・セキュリティハブ</td><td><code>hel.ink</code> <span class="live">&middot; <code>hub.hel.ink</code></span></td><td><a href="https://github.com/navi-crwn/HEL.ink">navi-crwn/HEL.ink</a></td></tr>
+            <tr><td><strong>LinkHop</strong></td><td>プライバシー重視の高速URL短縮サービス・分析機能付き</td><td><code>link.hel.ink</code> <span class="live">&middot; <code>hel.ink/l/{slug}</code></span></td><td><a href="https://github.com/navi-crwn/LinkHop">navi-crwn/LinkHop</a></td></tr>
+            <tr><td><strong>BioHop</strong></td><td>QRコードとテーマ対応の軽量リンクインバイオページ</td><td><code>bio.hel.ink</code> <span class="live">&middot; <code>hel.ink/b/{slug}</code></span></td><td><a href="https://github.com/navi-crwn/BioHop">navi-crwn/BioHop</a></td></tr>
+            <tr><td><strong>PixelHop</strong></td><td>高速・プライベートな画像ホスティングとフォトスタジオ</td><td><code>pixel.hel.ink</code> <span class="live">&middot; <code>p.hel.ink</code></span></td><td>navi-crwn/PixelHop (本リポジトリ)</td></tr>
+            <tr><td><strong>NoteHop</strong></td><td>エンドツーエンド暗号化と自動消滅対応のセキュアノート</td><td><code>note.hel.ink</code> <span class="live">&middot; <code>n.hel.ink</code></span></td><td><a href="https://github.com/navi-crwn/NoteHop">navi-crwn/NoteHop</a></td></tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- MIGRATE -->
-<section id="migrate">
-  <div class="wrap split rev">
-    <div class="tbl rv">
-      <table>
-        <tr><th></th><th>PixelHop 2</th><th>PixelHop 3</th></tr>
-        <tr><td>動作環境</td><td>PHP-FPM, MySQL, Python, cron</td><td class="y">1 binary</td></tr>
-        <tr><td>画像の記録</td><td>images.json</td><td class="y">SQLite (WAL)</td></tr>
-        <tr><td>AI ツール</td><td>サーバー上</td><td class="y">ブラウザ内</td></tr>
-        <tr><td>メタデータ</td><td>再エンコード</td><td class="y">劣化なしで削除</td></tr>
-        <tr><td>古いリンク</td><td>—</td><td class="y">そのまま動作</td></tr>
-      </table>
-    </div>
-    <div class="rv">
-      <div class="label">アップグレード</div>
-      <h2><em class="s grad">PixelHop 2</em> からの移行ですか？</h2>
-      <p class="lead">コマンド 1 つでユーザーと画像を移行できます。パスワード、ページのリンク、<code>/i/…</code> のリンク、ShareX の設定はそのまま使えます。</p>
-      <div class="code"><button class="copy" type="button">コピー</button><pre>pixelhop import --images /var/www/pichost/data/images.json \
-  --mysql "user:pass@tcp(127.0.0.1)/pixelhop" --copy</pre></div>
-      <p class="lead" style="font-size:1rem"><a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md">書き直しのきっかけになった監査を読む →</a></p>
-    </div>
-  </div>
-</section>
+    <section id="help" aria-labelledby="help-h">
+      <h2 id="help-h">サポート・フィードバック</h2>
+      <p>ご質問や機能提案、不具合報告は <a href="https://github.com/navi-crwn/PixelHop/issues">GitHub Issue トラッカー</a>までお寄せください。</p>
+    </section>
+  </main>
 
-<!-- API -->
-<section id="api">
-  <div class="wrap split">
-    <div class="rv">
-      <div class="label">API</div>
-      <h2><em class="s grad">どこからでも</em>アップロード。</h2>
-      <p class="lead">設定でキーを作成し、任意の HTTP クライアントでファイルを送るだけ。応答は直リンク、ページリンク、サムネイル、埋め込みコードを含むシンプルな JSON です。</p>
-      <p><a class="btn sm" href="https://pixel.hel.ink/docs">API ドキュメント</a></p>
+  <footer class="site-footer">
+    <div class="inner">
+      <p><strong>PixelHop</strong> &middot; 高速・プライベートな画像ホスティングとフォトスタジオ</p>
+      <p>オープンソース（ <a href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE">MIT</a>ライセンス）。ホスト：<a href="https://github.com/navi-crwn/PixelHop">GitHub</a>、稼働中：<a href="https://pixel.hel.ink">pixel.hel.ink</a></p>
     </div>
-    <div class="rv">
-      <div class="code"><button class="copy" type="button">コピー</button><pre>curl -H "Authorization: Bearer ph_yourkey" \
-     -F "file=@holiday.jpg" -F "expire=7d" \
-     https://pixel.hel.ink/api/v1/upload</pre></div>
-      <div class="code"><pre><span class="c">// 200 OK</span>
-{ "success": true,
-  "data": {
-    "id": "holiday-x7Kp2Q",
-    "url": "https://p.hel.ink/i/holiday-x7Kp2Q.jpg",
-    "view_url": "https://p.hel.ink/holiday-x7Kp2Q",
-    "thumb_url": "https://p.hel.ink/t/holiday-x7Kp2Q.jpg",
-    "width": 4032, "height": 3024 } }</pre></div>
-    </div>
-  </div>
-</section>
+  </footer>
 
-<!-- FAQ -->
-<section id="faq">
-  <div class="wrap" style="max-width:880px">
-    <div class="head rv"><div class="label">FAQ</div><h2>よくある質問</h2></div>
-    <div class="rv">
-      <details><summary>無料ですか？</summary><p>はい。p.hel.ink は無料で使え、コードは MIT ライセンスなので、商用でも自分のコピーを運用できます。</p></details>
-      <details><summary>アカウントは必要ですか？</summary><p>いいえ。ゲストもアップロードでき、画像ごとに専用の削除リンク（ブラウザにも保存）を受け取れます。アカウントがあれば、ギャラリー、確認できるストレージ容量、API キーが使えます。</p></details>
-      <details><summary>スタジオはプライベートですか？</summary><p>ほとんどのツールはあなたの端末上で動き、画像をどこにも送りません。「サーバー」と表示された AI ツール（高速な背景削除、顔ぼかし、マジック消しゴム、HD アップスケール）は、利用中のサーバーに画像を送り、メモリ上で処理して破棄します。使うかどうかはあなたが選べます。</p></details>
-      <details><summary>どのストレージが使えますか？</summary><p>ローカルディスク、または S3 互換の任意のバケット：AWS S3、Cloudflare R2、MinIO、Backblaze B2、Wasabi、Contabo。<code>S3_PUBLIC_URL</code> を設定すれば CDN から直接配信できます。</p></details>
-      <details><summary>画像を通報するには？</summary><p>すべての画像ページに通報ボタンがあります。通報はモデレーターのキューに直接届き、画像の非表示や削除、アップロードした人のブロックができます。</p></details>
-      <details><summary>なぜ Go なのか？</summary><p>画像ホストはほとんどの時間をバイトの転送に使います。Go は少ないメモリでそれをこなし、すべてを含んだ 1 つのファイルにコンパイルでき、どんなサーバー向けにもクロスコンパイルできます。PixelHop 2 には PHP、MySQL、Python、cron が必要でしたが、PixelHop 3 は自分自身だけで動きます。</p></details>
-    </div>
-  </div>
-</section>
-
-<section class="end">
-  <div class="wrap">
-    <img src="../logo.svg" alt="" width="84" height="84">
-    <h2>さあ、始めよう。</h2>
-    <div class="cta"><a class="btn main" href="https://pixel.hel.ink">画像をアップロード</a><a class="btn" href="https://github.com/navi-crwn/pixelhop"><svg><use href="#i-github"/></svg>GitHub</a></div>
-  </div>
-</section>
-</main>
-
-<footer class="site-foot">
-  <div class="wrap">
-    <span><b>PixelHop</b> · MIT · 作成： <a href="https://github.com/navi-crwn">navi-crwn</a></span>
-    <nav>
-      <a href="https://github.com/navi-crwn/pixelhop">GitHub</a>
-      <a href="https://github.com/navi-crwn/pixelhop/releases">リリース</a>
-      <a href="https://github.com/navi-crwn/pixelhop/blob/main/AUDIT.md">Audit</a>
-      <a href="https://github.com/navi-crwn/pixelhop/blob/main/CHANGELOG.md">Changelog</a>
-      <a href="https://navi-crwn.github.io/hel.ink/">HEL.ink</a>
-      <a href="https://navi-crwn.github.io/amnesia/">Amnesia</a>
-    </nav>
-  </div>
-</footer>
-<script src="../assets/js/site.js"></script>
+  <script src="https://hel.ink/hop-assets/v1/hop-float.js" integrity="sha384-kNviPsMEO9lt9+b4n2S5lX6zHRVnePzGuj9VdgCETTsQwzt/5YJRnv842Xg0gRC+" crossorigin="anonymous" defer></script>
+  <script src="../assets/theme.js"></script>
 </body>
 </html>
