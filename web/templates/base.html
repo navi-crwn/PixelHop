@@ -1,5 +1,5 @@
 {{define "base"}}<!doctype html>
-<html lang="en">
+<html lang="{{.L.Code}}" dir="{{.L.Dir}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,41 +26,47 @@
 {{block "head" .}}{{end}}
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main">{{.L.T "nav.skip"}}</a>
 {{template "icons"}}
 {{with .Announcement}}<div class="announce">{{.}}</div>{{end}}
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
     <nav class="nav-links" aria-label="Main">
-      <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>Upload</a>
-      <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>Studio</a>
-      <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>Explore</a>
-      {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>Dashboard</a>{{end}}
-      <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>API</a>
-      {{with .Control}}<a href="{{.}}">Control center</a>{{end}}
+      <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>{{.L.T "nav.upload"}}</a>
+      <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>{{.L.T "nav.studio"}}</a>
+      <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>{{.L.T "nav.explore"}}</a>
+      {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>{{.L.T "nav.dashboard"}}</a>{{end}}
+      <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>{{.L.T "nav.api"}}</a>
+      {{with .Control}}<a href="{{.}}">{{$.L.T "nav.control"}}</a>{{end}}
     </nav>
     <div class="nav-r">
-      <button class="btn sm install-nav hide" id="install-app" type="button" title="Add {{.Site}} to your home screen"><svg><use href="#i-down"/></svg><span>Install app</span></button>
-      <button class="icon-btn" id="theme" type="button" aria-label="Switch light or dark"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
+      <div class="menu lang-menu" id="lang-menu">
+        <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
+        <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}
+          <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}>{{.Name}}</a>{{end}}
+        </div>
+      </div>
+      <button class="btn sm install-nav hide" id="install-app" type="button" title="Add {{.Site}} to your home screen"><svg><use href="#i-down"/></svg><span>{{.L.T "nav.install"}}</span></button>
+      <button class="icon-btn" id="theme" type="button" aria-label="{{.L.T "nav.theme"}}"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
       {{if .User}}
       <div class="menu" id="menu">
         <button type="button" aria-haspopup="true" aria-label="Account menu"><span class="avatar">{{with avatar .User}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{initial .User}}{{end}}</span></button>
         <div class="menu-list">
           <div class="who"><b>{{display .User}}</b><br>{{with .User.Username.String}}@{{.}}{{end}}</div>
-          {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg width="16" height="16"><use href="#i-users"/></svg>My public profile</a>{{end}}
-          <a href="/dashboard"><svg width="16" height="16"><use href="#i-grid"/></svg>Dashboard</a>
-          <a href="/dashboard/albums"><svg width="16" height="16"><use href="#i-album"/></svg>My albums</a>
-          <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>Settings &amp; API keys</a>
-          {{if .SSO}}<a href="{{.Helink}}/dashboard"><svg width="16" height="16"><use href="#i-link"/></svg>HEL.ink dashboard</a>{{end}}
-          {{with .Control}}<a href="{{.}}"><svg width="16" height="16"><use href="#i-shield"/></svg>Control center</a>{{end}}
-          <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>Sign out</button></form>
+          {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg width="16" height="16"><use href="#i-users"/></svg>{{$.L.T "nav.my_profile"}}</a>{{end}}
+          <a href="/dashboard"><svg width="16" height="16"><use href="#i-grid"/></svg>{{.L.T "nav.dashboard"}}</a>
+          <a href="/dashboard/albums"><svg width="16" height="16"><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
+          <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>{{.L.T "nav.settings"}}</a>
+          {{if .SSO}}<a href="{{.Helink}}/dashboard"><svg width="16" height="16"><use href="#i-link"/></svg>{{$.L.T "nav.helink_dashboard"}}</a>{{end}}
+          {{with .Control}}<a href="{{.}}"><svg width="16" height="16"><use href="#i-shield"/></svg>{{$.L.T "nav.control"}}</a>{{end}}
+          <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>{{.L.T "nav.sign_out"}}</button></form>
         </div>
       </div>
       {{else}}
-      <a class="btn sm ghost" href="/login">Sign in</a>
+      <a class="btn sm ghost" href="/login">{{.L.T "nav.sign_in"}}</a>
       {{end}}
-      <button class="icon-btn burger" id="burger" type="button" aria-label="Menu"><svg><use href="#i-menu"/></svg></button>
+      <button class="icon-btn burger" id="burger" type="button" aria-label="{{.L.T "nav.menu"}}"><svg><use href="#i-menu"/></svg></button>
     </div>
   </div>
 </header>
@@ -72,28 +78,28 @@
   <form method="post" action="/settings/ack-warning"><input type="hidden" name="back" value="{{.Path}}"><button class="btn primary" type="submit">I understand</button></form>
 </dialog>
 {{end}}
-{{if backable .Path}}<div class="wrap back-row"><a class="back" href="/"><span aria-hidden="true">&larr;</span> Back to {{.Site}}</a></div>{{end}}
+{{if backable .Path}}<div class="wrap back-row"><a class="back" href="/"><span aria-hidden="true">&larr;</span> {{.L.T "nav.back" "site" .Site}}</a></div>{{end}}
 {{template "content" .}}
 </main>
 <footer>
   <div class="wrap">
-    <span><b>{{.Site}}</b> · open source image hosting</span>
+    <span><b>{{.Site}}</b> · {{.L.T "footer.tagline"}}</span>
     <nav aria-label="Footer">
-      <a href="/about">About</a>
-      <a href="/features">Features</a>
-      <a href="/tools">Studio</a>
-      <a href="/help">Help</a>
-      <a href="/faq">FAQ</a>
-      <a href="/docs">API &amp; ShareX</a>
-      <a href="/legal">Terms &amp; privacy</a>
-      <a href="/legal#takedown">Report abuse</a>
-      <a href="/contact">Contact</a>
-      <a href="/status">Status</a>
+      <a href="/about">{{.L.T "footer.about"}}</a>
+      <a href="/features">{{.L.T "footer.features"}}</a>
+      <a href="/tools">{{.L.T "footer.studio"}}</a>
+      <a href="/help">{{.L.T "footer.help"}}</a>
+      <a href="/faq">{{.L.T "footer.faq"}}</a>
+      <a href="/docs">{{.L.T "footer.api"}}</a>
+      <a href="/legal">{{.L.T "footer.legal"}}</a>
+      <a href="/legal#takedown">{{.L.T "footer.report"}}</a>
+      <a href="/contact">{{.L.T "footer.contact"}}</a>
+      <a href="/status">{{.L.T "footer.status"}}</a>
       <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a>
     </nav>
   </div>
   <div class="wrap hop-family-foot">
-    <span>Part of the <a href="https://hel.ink">HOP family</a>:</span>
+    <span>{{.L.H "footer.family"}}</span>
     <nav aria-label="HOP family">{{range hopFamily}}<a href="{{.URL}}">{{.Name}}</a>{{end}}</nav>
   </div>
 </footer>

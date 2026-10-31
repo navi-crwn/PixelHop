@@ -1,19 +1,19 @@
 {{define "content"}}
 <div class="wrap">
   <div class="prose" style="margin:0 auto">
-    <h1>About {{.Site}}</h1>
-    <p class="lead">{{.Site}} is free, open-source hosting for images, videos and PDFs. Drop a file, get a link that previews well everywhere, and keep your location to yourself: GPS and camera data are removed before anyone sees the file.</p>
-    <h2>Who runs it</h2>
-    <p>{{.Site}} is part of <a href="https://hel.ink">HOP</a>, a small family of free apps run by one person on one server, with no ads and no trackers. The code is MIT licensed and public on <a href="https://github.com/navi-crwn/PixelHop" rel="noopener">GitHub</a>; you can run your own copy.</p>
-    <h2>How it is built</h2>
-    <p>One Go program and one SQLite file. Thumbnails and the metadata cleanup happen on upload; most studio tools run in your browser, so the image never leaves your device.</p>
-    <h2>The HOP family</h2>
-    <p>One free <a href="https://hel.ink">HOP ID</a> signs you in to every app:</p>
+    <h1>{{.L.T "about.title" "site" .Site}}</h1>
+    <p class="lead">{{.L.T "about.lead" "site" .Site}}</p>
+    <h2>{{.L.T "about.who_title"}}</h2>
+    <p>{{.L.H "about.who_desc" "site" .Site}}</p>
+    <h2>{{.L.T "about.built_title"}}</h2>
+    <p>{{.L.T "about.built_desc"}}</p>
+    <h2>{{.L.T "about.family_title"}}</h2>
+    <p>{{.L.H "about.family_desc"}}</p>
     <ul class="hop-family" role="list">
       {{range hopFamily}}<li><a href="{{.URL}}">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="40" height="40" loading="lazy">{{end}}<b>{{.Name}}</b><span>{{.Tagline}}</span></a></li>
       {{end}}
     </ul>
-    <p class="muted" style="margin-top:24px">Questions? See the <a href="/faq">FAQ</a> or <a href="/contact">get in touch</a>.</p>
+    <p class="muted" style="margin-top:24px">{{.L.H "about.questions"}}</p>
   </div>
 </div>
 {{end}}
