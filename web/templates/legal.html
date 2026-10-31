@@ -1,35 +1,39 @@
 {{define "content"}}
 <div class="wrap">
   <div class="prose" style="margin:0 auto">
-    <h1>Terms, privacy &amp; takedowns</h1>
-    <p class="muted">Short and plain. By uploading to {{.Site}} you agree to the rules below.</p>
+    <h1>{{.L.H "legal.title"}}</h1>
+    <p class="muted">{{.L.T "legal.lead" "site" .Site}}</p>
 
-    <h2 id="terms">The rules</h2>
+    <h2 id="terms">{{.L.T "legal.rules_title"}}</h2>
     <ul>
-      <li>Only upload images you have the right to share.</li>
-      <li>No child sexual abuse material, ever. It is removed, and reported to the authorities.</li>
-      <li>No sexual or graphic images of people who didn't agree to it, no doxxing, no harassment.</li>
-      <li>No malware, phishing, spam or scams.</li>
-      <li>Images that break these rules are removed, and the account or address that uploaded them may be blocked.</li>
-      <li>The service is free and comes with no guarantee. Keep your own copies of anything important.</li>
+      <li>{{.L.T "legal.rule_1"}}</li>
+      <li>{{.L.T "legal.rule_2"}}</li>
+      <li>{{.L.T "legal.rule_3"}}</li>
+      <li>{{.L.T "legal.rule_4"}}</li>
+      <li>{{.L.T "legal.rule_5"}}</li>
+      <li>{{.L.T "legal.rule_6"}}</li>
     </ul>
 
-    <h2 id="privacy">Privacy</h2>
+    <h2 id="privacy">{{.L.T "legal.privacy_title"}}</h2>
     <ul>
-      <li><b>Hidden photo data is removed.</b> GPS location, camera serial numbers and similar EXIF, XMP and IPTC data are stripped from every upload.</li>
-      <li><b>What we keep:</b> the image, its size and shape, the time of upload, a view counter (views per day, and the host name of sites that link to it, like <code>reddit.com</code>, never the full address or who viewed it), and the IP address it came from (to fight abuse).</li>
-      <li><b>Accounts</b> store your email, your name if you give one, and a securely hashed password.</li>
-      <li><b>No trackers.</b> There are no ads, analytics or tracking scripts. The only cookies are the one that keeps you signed in and, when you open a password-protected image, one that remembers you unlocked it.</li>
-      <li><b>Videos and PDFs.</b> Videos have their location and other metadata removed and are re-encoded to a smaller size; PDFs are compressed; when the smaller copy is ready it replaces the original./li>
-      <li><b>Webhooks.</b> If you add a webhook, we send details of your own uploads and deletions to the address you chose, and nowhere else.</li>
-      <li><b>The studio</b> edits images on your own device. It downloads open-source models for text reading and background removal from a public CDN the first time you use them; your image is not sent anywhere. The one exception is “Remove background → On our server”, which you choose yourself: the image is sent to this server, processed in memory and discarded, never stored.</li>
-      <li><b>Deleting</b> an image removes it and its thumbnail from storage straight away. Deleting your account removes all your images.</li>
+      <li>{{.L.H "legal.priv_1"}}</li>
+      <li>{{.L.H "legal.priv_2"}}</li>
+      <li>{{.L.H "legal.priv_3"}}</li>
+      <li>{{.L.H "legal.priv_4"}}</li>
+      <li>{{.L.H "legal.priv_5"}}</li>
+      <li>{{.L.H "legal.priv_6"}}</li>
+      <li>{{.L.H "legal.priv_7"}}</li>
+      <li>{{.L.H "legal.priv_8"}}</li>
     </ul>
 
-    <h2 id="takedown">Reporting an image &amp; copyright takedowns</h2>
-    <p>Every image page has a <b>Report</b> button; reports reach the moderators right away. For copyright (DMCA) notices, send the image link, proof that you own the work, and your contact details{{with .Data}} to <a href="mailto:{{.}}">{{.}}</a>{{else}} using the Report button and choosing “My copyright”{{end}}.</p>
+    <h2 id="takedown">{{.L.H "legal.takedown_title"}}</h2>
+    {{if .Data}}
+    <p>{{.L.H "legal.takedown_desc" "contact_part" (.L.H "legal.takedown_email" "email" .Data)}}</p>
+    {{else}}
+    <p>{{.L.H "legal.takedown_desc" "contact_part" (.L.H "legal.takedown_button")}}</p>
+    {{end}}
 
-    <p class="small faint">{{.Site}} runs <a href="https://github.com/navi-crwn/pixelhop">PixelHop</a>, open-source software under the MIT licence.</p>
+    <p class="small faint">{{.L.H "legal.runs" "site" .Site}}</p>
   </div>
 </div>
 {{end}}

@@ -1,27 +1,27 @@
 {{define "content"}}
 <div class="wrap">
   <div class="prose" style="margin:0 auto">
-    <h1>Features</h1>
-    <p class="lead">Everything is free for everyone. No premium tier.</p>
-    <h2>Sharing</h2>
+    <h1>{{.L.T "features.title"}}</h1>
+    <p class="lead">{{.L.T "features.lead"}}</p>
+    <h2>{{.L.T "features.sharing_title"}}</h2>
     <ul>
-      <li><b>Images, videos and PDFs</b> up to {{.MaxMB}} MB each, {{.MaxBatch}} at a time, by drag and drop, paste, or a link.</li>
-      <li><b>Links that preview well</b> on Discord, X, WhatsApp and forums, plus direct links, embed code and a QR code.</li>
-      <li><b>Albums</b>: upload together and share one link.</li>
-      <li><b>Expiry</b>: keep forever or delete after a time you pick.</li>
+      <li>{{.L.H "features.sharing_1" "max_mb" .MaxMB "max_batch" .MaxBatch}}</li>
+      <li>{{.L.H "features.sharing_2"}}</li>
+      <li>{{.L.H "features.sharing_3"}}</li>
+      <li>{{.L.H "features.sharing_4"}}</li>
     </ul>
-    <h2>Privacy</h2>
+    <h2>{{.L.T "features.privacy_title"}}</h2>
     <ul>
-      <li><b>Location removed</b>: GPS and camera details are stripped from every upload.</li>
-      <li><b>Guest uploads</b> get a private delete link; no account needed.</li>
-      <li><b>No ads, no trackers.</b></li>
+      <li>{{.L.H "features.privacy_1"}}</li>
+      <li>{{.L.H "features.privacy_2"}}</li>
+      <li>{{.L.H "features.privacy_3"}}</li>
     </ul>
-    <h2>Studio</h2>
-    <p>Compress, resize, crop, convert, adjust, blur faces and plates, read text, remove backgrounds and pull a color palette. Most tools run on your device. <a href="/tools">Open the studio</a>.</p>
-    <h2>For developers</h2>
-    <p>A REST API with keys and a ready-made ShareX config. <a href="/docs">Read the API docs</a>.</p>
-    <h2>Accounts</h2>
-    <p>Sign in with your <a href="https://hel.ink">HOP ID</a> for a gallery, albums, a public profile and higher limits.</p>
+    <h2>{{.L.T "features.studio_title"}}</h2>
+    <p>{{.L.H "features.studio_desc"}}</p>
+    <h2>{{.L.T "features.dev_title"}}</h2>
+    <p>{{.L.H "features.dev_desc"}}</p>
+    <h2>{{.L.T "features.accounts_title"}}</h2>
+    <p>{{.L.H "features.accounts_desc"}}</p>
   </div>
 </div>
 {{end}}
