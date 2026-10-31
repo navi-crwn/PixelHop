@@ -76,13 +76,15 @@ func loadPages(a *App) (*pages, error) {
 			}
 			return s
 		},
-		"until":   func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
-		"usage":   func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
-		"mb":      func(b int64) int64 { return b >> 20 },
-		"gb":      func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
-		"avatar":  avatarURL,
-		"display": displayName,
-		"initial": func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
+		"until":     func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
+		"usage":     func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
+		"mb":        func(b int64) int64 { return b >> 20 },
+		"gb":        func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
+		"avatar":    avatarURL,
+		"display":   displayName,
+		"initial":   func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
+		"hopFonts":  hopFonts,
+		"hopFamily": func() []hopApp { return hopFamily("pixelhop") },
 	}
 	p := &pages{t: map[string]*template.Template{}}
 	files, err := fs.Glob(web.Templates, "templates/*.html")
@@ -164,10 +166,11 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	if name == "tools" || name == "batch" {
 		eval = " 'unsafe-eval'"
 	}
-	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; "+
+	// https://hel.ink serves the HOP family fonts (style-src, font-src) and app marks (img-src https:).
+	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://hel.ink; "+
 		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
 		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
-		"font-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
+		"font-src 'self' https://hel.ink; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {
 		h.Set("Cache-Control", "private, no-store")
 	}

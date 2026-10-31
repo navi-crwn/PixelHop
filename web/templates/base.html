@@ -19,6 +19,8 @@
 <link rel="icon" href="/static/img/logo.svg?v={{.Asset}}" type="image/svg+xml">
 {{if not .OnLink}}<link rel="manifest" href="/manifest.webmanifest">{{end}}
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+{{with hopFonts}}<link rel="preconnect" href="https://hel.ink" crossorigin>
+<link rel="stylesheet" href="{{.URL}}" integrity="{{.Integrity}}" crossorigin="anonymous">{{end}}
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 {{block "head" .}}{{end}}
@@ -83,6 +85,10 @@
       <a href="/legal#takedown">Report abuse</a>
       <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a>
     </nav>
+  </div>
+  <div class="wrap hop-family-foot">
+    <span>Part of the <a href="https://hel.ink">HOP family</a>:</span>
+    <nav aria-label="HOP family">{{range hopFamily}}<a href="{{.URL}}">{{.Name}}</a>{{end}}</nav>
   </div>
 </footer>
 <div class="toasts" id="toasts" aria-live="polite"></div>
