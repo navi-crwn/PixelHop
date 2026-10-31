@@ -43,6 +43,8 @@ func (a *App) imageJSON(im *db.Image) map[string]any {
 	}
 	m["listed"] = im.Listed
 	m["alt"] = im.Alt
+	m["content_warning"] = im.ContentWarning
+	m["warning_reason"] = im.WarningReason
 	m["private"] = im.Private
 	m["password"] = im.PassHash != ""
 	m["removed"] = removedList(im.Stripped)

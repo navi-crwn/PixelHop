@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +46,17 @@ func (a *App) serveFull(w http.ResponseWriter, r *http.Request) {
 	im := a.lookup(w, r, id, false)
 	if im == nil || !a.fileAllowed(w, r, im) {
 		return
+	}
+	if im.IsAdult() && !a.hasGatePassed(r, im.ID) {
+		ref := r.Referer()
+		fromOurHost := false
+		if u, err := url.Parse(ref); err == nil && u.Host != "" {
+			fromOurHost = a.isOurHost(u.Hostname())
+		}
+		if !fromOurHost {
+			http.Redirect(w, r, a.pageURL(im.ID), http.StatusSeeOther)
+			return
+		}
 	}
 	if a.transformRequested(r) && im.IsImage() {
 		a.serveTransformed(w, r, im)
@@ -186,6 +198,7 @@ type viewData struct {
 	Mine       bool // the viewer may rename/delete/list it
 	Optimizing bool // a video still being shrunk in the background
 	Links      links
+	GatePassed bool
 }
 
 type links struct {
@@ -253,7 +266,9 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	}
 	a.countView(r, im)
 	u := currentUser(r)
-	d := viewData{Image: im, Links: a.linksFor(im), Mine: u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()),
+	mine := u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin())
+	gatePassed := !im.HasWarning() || a.hasGatePassed(r, im.ID) || mine
+	d := viewData{Image: im, Links: a.linksFor(im), Mine: mine, GatePassed: gatePassed,
 		Owner: a.ownerOf(r.Context(), im.UserID), Optimizing: im.Kind() == "video" && a.db.MediaJobPending(r.Context(), im.ID)}
 	for _, k := range removedList(im.Stripped) {
 		if w := removedWords[k]; w != "" {
@@ -284,10 +299,13 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	if !im.IsImage() {
 		og = a.thumbURL(im)
 	}
-	if im.Locked() {
-		og = "" // previews of locked images show no picture
+	if im.Locked() || im.IsAdult() {
+		og = "" // previews of locked or adult images show no picture
 	}
-	a.renderPage(w, r, "view", page{Title: title, Canon: a.pageURL(im.ID), Data: d, OGImage: og, OGType: "image", Desc: desc, NoIndex: im.Locked()})
+	if im.IsAdult() {
+		desc = "Content warning: 18+ adult material · shared on " + a.cfg.SiteName
+	}
+	a.renderPage(w, r, "view", page{Title: title, Canon: a.pageURL(im.ID), Data: d, OGImage: og, OGType: "image", Desc: desc, NoIndex: im.Locked() || im.IsAdult()})
 }
 
 // legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
@@ -317,11 +335,12 @@ func (a *App) legacyResult(w http.ResponseWriter, r *http.Request) {
 }
 
 type albumData struct {
-	By     *owner
-	Album  *db.Album
-	Images []*db.Image
-	Owner  bool
-	Link   string
+	By         *owner
+	Album      *db.Album
+	Images     []*db.Image
+	Owner      bool
+	Link       string
+	GatePassed bool
 }
 
 func (a *App) album(w http.ResponseWriter, r *http.Request) {
@@ -365,9 +384,17 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 			cover = im
 		}
 	}
-	a.renderPage(w, r, "album", page{Title: title, Canon: a.albumURL(al.ID), OGImage: a.previewURL(cover),
-		Desc: albumDesc(len(live), by, a.cfg.SiteName),
-		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin()), By: by}})
+	mine := u != nil && (al.UserID.Int64 == u.ID || u.IsAdmin())
+	gatePassed := !al.HasWarning() || a.hasAlbumGatePassed(r, al.ID) || mine
+	og := a.previewURL(cover)
+	desc := albumDesc(len(live), by, a.cfg.SiteName)
+	if al.IsAdult() {
+		og = ""
+		desc = "Content warning: 18+ adult material · shared on " + a.cfg.SiteName
+	}
+	a.renderPage(w, r, "album", page{Title: title, Canon: a.albumURL(al.ID), OGImage: og,
+		Desc: desc, NoIndex: al.IsAdult(),
+		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: mine, By: by, GatePassed: gatePassed}})
 }
 
 // qr draws a QR code that opens the image page; ?a=1 points at an album.
@@ -472,4 +499,65 @@ func (a *App) fileAllowed(w http.ResponseWriter, r *http.Request, im *db.Image) 
 		http.Error(w, "this image is password protected", http.StatusForbidden)
 	}
 	return false
+}
+
+func gateCookieName(id string) string {
+	return "hop_gate_ph_" + id
+}
+
+func albumGateCookieName(id string) string {
+	return "hop_gate_pha_" + id
+}
+
+func (a *App) hasGatePassed(r *http.Request, id string) bool {
+	c, err := r.Cookie(gateCookieName(id))
+	return err == nil && c.Value == "1"
+}
+
+func (a *App) hasAlbumGatePassed(r *http.Request, id string) bool {
+	c, err := r.Cookie(albumGateCookieName(id))
+	return err == nil && c.Value == "1"
+}
+
+func (a *App) gateConfirm(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	im := a.lookup(w, r, id, true)
+	if im == nil {
+		return
+	}
+	maxAge := 86400
+	http.SetCookie(w, &http.Cookie{
+		Name:     gateCookieName(im.ID),
+		Value:    "1",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   a.cfg.SecureCookies(),
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
+	})
+	http.Redirect(w, r, a.pageURL(im.ID), http.StatusSeeOther)
+}
+
+func (a *App) albumGateConfirm(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if !validID(id) {
+		a.notFound(w, r)
+		return
+	}
+	al, err := a.db.Album(r.Context(), id)
+	if err != nil {
+		a.notFound(w, r)
+		return
+	}
+	maxAge := 86400
+	http.SetCookie(w, &http.Cookie{
+		Name:     albumGateCookieName(al.ID),
+		Value:    "1",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   a.cfg.SecureCookies(),
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
+	})
+	http.Redirect(w, r, a.albumURL(al.ID), http.StatusSeeOther)
 }

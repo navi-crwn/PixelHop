@@ -541,6 +541,10 @@
       var body = { title: $('#e-title').value, alt: $('#e-alt').value, visibility: vis() };
       if (vis() === 'password' && $('#e-pass').value) body.password = $('#e-pass').value;
       if ($('#e-listed')) body.listed = $('#e-listed').checked;
+      var cwEl = ef.querySelector('[name=content_warning]:checked');
+      if (cwEl) body.content_warning = cwEl.value;
+      var wrEl = $('#e-warning-reason');
+      if (wrEl) body.warning_reason = wrEl.value;
       api('PATCH', '/api/v1/images/' + ef.dataset.id, body).then(function () { location.reload(); }, function (e) { toast(e.message, true); });
     });
   }

@@ -82,15 +82,28 @@ func (a *App) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title      *string `json:"title"`
-		Alt        *string `json:"alt"`
-		Listed     *bool   `json:"listed"`
-		Visibility *string `json:"visibility"`
-		Password   string  `json:"password"`
+		Title          *string `json:"title"`
+		Alt            *string `json:"alt"`
+		Listed         *bool   `json:"listed"`
+		Visibility     *string `json:"visibility"`
+		Password       string  `json:"password"`
+		ContentWarning *string `json:"content_warning"`
+		WarningReason  *string `json:"warning_reason"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8192)).Decode(&body); err != nil {
 		apiError(w, http.StatusBadRequest, `send JSON like {"title": "…"}`)
 		return
+	}
+	if body.ContentWarning != nil {
+		cw := strings.ToLower(strings.TrimSpace(*body.ContentWarning))
+		if cw == "adult" || cw == "sensitive" {
+			im.ContentWarning = cw
+		} else {
+			im.ContentWarning = "none"
+		}
+	}
+	if body.WarningReason != nil {
+		im.WarningReason = trim(strings.TrimSpace(*body.WarningReason), 255)
 	}
 	if body.Title != nil {
 		im.Title = trim(strings.TrimSpace(*body.Title), 120)

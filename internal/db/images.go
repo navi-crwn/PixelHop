@@ -41,7 +41,9 @@ type Image struct {
 	Position   int    // order inside its album
 	// HiddenReason says why Hidden is set: "suspended" (owner's account) or
 	// "moderation" (an admin removed this image). "" when not hidden.
-	HiddenReason string
+	HiddenReason   string
+	ContentWarning string // none | sensitive | adult
+	WarningReason  string
 }
 
 // Kind is "image", "video" or "pdf".
@@ -62,16 +64,21 @@ func (im *Image) IsImage() bool { return im.Kind() == "image" }
 // Locked reports whether visitors need a password (or must be the owner).
 func (im *Image) Locked() bool { return im.Private || im.PassHash != "" }
 
+func (im *Image) IsAdult() bool     { return im.ContentWarning == "adult" }
+func (im *Image) IsSensitive() bool { return im.ContentWarning == "sensitive" }
+func (im *Image) HasWarning() bool   { return im.IsAdult() || im.IsSensitive() }
+
 const imageCols = `id,user_id,album_id,owner_token,title,orig_name,mime,ext,size,width,height,sha256,color,
 backend,key_full,key_thumb,views,last_viewed,ip,hidden,created_at,expires_at,listed,
-alt,stripped,private,pass_hash,position,hidden_reason`
+alt,stripped,private,pass_hash,position,hidden_reason,content_warning,warning_reason`
 
 func scanImage(row interface{ Scan(...any) error }) (*Image, error) {
 	var im Image
 	err := row.Scan(&im.ID, &im.UserID, &im.AlbumID, &im.OwnerToken, &im.Title, &im.OrigName, &im.Mime, &im.Ext,
 		&im.Size, &im.Width, &im.Height, &im.SHA256, &im.Color, &im.Backend, &im.KeyFull, &im.KeyThumb,
 		&im.Views, &im.LastViewed, &im.IP, &im.Hidden, &im.CreatedAt, &im.ExpiresAt, &im.Listed,
-		&im.Alt, &im.Stripped, &im.Private, &im.PassHash, &im.Position, &im.HiddenReason)
+		&im.Alt, &im.Stripped, &im.Private, &im.PassHash, &im.Position, &im.HiddenReason,
+		&im.ContentWarning, &im.WarningReason)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -82,10 +89,14 @@ func (d *DB) InsertImage(ctx context.Context, im *Image) error {
 	if im.CreatedAt == 0 {
 		im.CreatedAt = now()
 	}
-	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+	if im.ContentWarning == "" {
+		im.ContentWarning = "none"
+	}
+	_, err := d.ExecContext(ctx, `INSERT INTO images (`+imageCols+`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		im.ID, im.UserID, im.AlbumID, im.OwnerToken, im.Title, im.OrigName, im.Mime, im.Ext, im.Size, im.Width, im.Height,
 		im.SHA256, im.Color, im.Backend, im.KeyFull, im.KeyThumb, im.Views, im.LastViewed, im.IP, im.Hidden,
-		im.CreatedAt, im.ExpiresAt, im.Listed, im.Alt, im.Stripped, im.Private, im.PassHash, im.Position, im.HiddenReason)
+		im.CreatedAt, im.ExpiresAt, im.Listed, im.Alt, im.Stripped, im.Private, im.PassHash, im.Position, im.HiddenReason,
+		im.ContentWarning, im.WarningReason)
 	return err
 }
 
@@ -135,7 +146,7 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 		args = append(args, q.AlbumID)
 	}
 	if q.Listed {
-		where = append(where, "listed=1 AND hidden=0 AND private=0 AND pass_hash='' AND (expires_at=0 OR expires_at>?)")
+		where = append(where, "listed=1 AND hidden=0 AND private=0 AND pass_hash='' AND (expires_at=0 OR expires_at>?) AND content_warning<>'adult'")
 		args = append(args, now())
 	}
 	if q.PublicOwner {
@@ -201,6 +212,18 @@ func (d *DB) SetImageHidden(ctx context.Context, id string, hidden bool) error {
 	return err
 }
 
+// SetImageWarning updates the content warning classification and optional note.
+func (d *DB) SetImageWarning(ctx context.Context, id, warning, reason string) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET content_warning=?, warning_reason=? WHERE id=?`, warning, reason, id)
+	return err
+}
+
+// SetAlbumWarning updates the content warning classification and optional note for an album.
+func (d *DB) SetAlbumWarning(ctx context.Context, id, warning, reason string) error {
+	_, err := d.ExecContext(ctx, `UPDATE albums SET content_warning=?, warning_reason=? WHERE id=?`, warning, reason, id)
+	return err
+}
+
 // SuspendUserImages takes a suspended account's images offline. Images
 // moderation already removed keep their reason.
 func (d *DB) SuspendUserImages(ctx context.Context, userID int64) error {
@@ -232,8 +255,11 @@ func (d *DB) SetAlbumOwner(ctx context.Context, id string, userID int64) error {
 
 // UpdateImageMeta saves the fields an owner can edit after upload.
 func (d *DB) UpdateImageMeta(ctx context.Context, im *Image) error {
-	_, err := d.ExecContext(ctx, `UPDATE images SET title=?, alt=?, listed=?, private=?, pass_hash=?, album_id=?, position=? WHERE id=?`,
-		im.Title, im.Alt, im.Listed, im.Private, im.PassHash, im.AlbumID, im.Position, im.ID)
+	if im.ContentWarning == "" {
+		im.ContentWarning = "none"
+	}
+	_, err := d.ExecContext(ctx, `UPDATE images SET title=?, alt=?, listed=?, private=?, pass_hash=?, album_id=?, position=?, content_warning=?, warning_reason=? WHERE id=?`,
+		im.Title, im.Alt, im.Listed, im.Private, im.PassHash, im.AlbumID, im.Position, im.ContentWarning, im.WarningReason, im.ID)
 	return err
 }
 
@@ -308,26 +334,35 @@ func (d *DB) UserSummary(ctx context.Context, userID int64) (s UserSummary) {
 // ---- albums ----
 
 type Album struct {
-	ID          string
-	UserID      sql.NullInt64
-	Title       string
-	OwnerToken  string
-	CreatedAt   int64
-	CoverID     string
-	Description string
+	ID             string
+	UserID         sql.NullInt64
+	Title          string
+	OwnerToken     string
+	CreatedAt      int64
+	CoverID        string
+	Description    string
+	ContentWarning string // none | sensitive | adult
+	WarningReason  string
 }
+
+func (a *Album) IsAdult() bool     { return a.ContentWarning == "adult" }
+func (a *Album) IsSensitive() bool { return a.ContentWarning == "sensitive" }
+func (a *Album) HasWarning() bool   { return a.IsAdult() || a.IsSensitive() }
 
 func (d *DB) InsertAlbum(ctx context.Context, a *Album) error {
 	a.CreatedAt = now()
-	_, err := d.ExecContext(ctx, `INSERT INTO albums (id,user_id,title,owner_token,created_at) VALUES (?,?,?,?,?)`,
-		a.ID, a.UserID, a.Title, a.OwnerToken, a.CreatedAt)
+	if a.ContentWarning == "" {
+		a.ContentWarning = "none"
+	}
+	_, err := d.ExecContext(ctx, `INSERT INTO albums (id,user_id,title,owner_token,created_at,cover_id,description,content_warning,warning_reason) VALUES (?,?,?,?,?,?,?,?,?)`,
+		a.ID, a.UserID, a.Title, a.OwnerToken, a.CreatedAt, a.CoverID, a.Description, a.ContentWarning, a.WarningReason)
 	return err
 }
 
 func (d *DB) Album(ctx context.Context, id string) (*Album, error) {
 	var a Album
-	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at,cover_id,description FROM albums WHERE id=?`, id).
-		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description)
+	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at,cover_id,description,content_warning,warning_reason FROM albums WHERE id=?`, id).
+		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description, &a.ContentWarning, &a.WarningReason)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -335,7 +370,11 @@ func (d *DB) Album(ctx context.Context, id string) (*Album, error) {
 }
 
 func (d *DB) UpdateAlbum(ctx context.Context, a *Album) error {
-	_, err := d.ExecContext(ctx, `UPDATE albums SET title=?, cover_id=?, description=? WHERE id=?`, a.Title, a.CoverID, a.Description, a.ID)
+	if a.ContentWarning == "" {
+		a.ContentWarning = "none"
+	}
+	_, err := d.ExecContext(ctx, `UPDATE albums SET title=?, cover_id=?, description=?, content_warning=?, warning_reason=? WHERE id=?`,
+		a.Title, a.CoverID, a.Description, a.ContentWarning, a.WarningReason, a.ID)
 	return err
 }
 
