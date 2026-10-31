@@ -382,7 +382,7 @@
       var batch = { left: count, ids: [] };
       var mediaRows = media.map(function (f) { var r = row(f.name, ''); r.batch = batch; return r; });
       var albumReady = wantAlbum
-        ? api('POST', '/api/v1/albums', { title: ticket, description: note }).then(function (al) {
+        ? api('POST', '/api/v1/albums', { title: ticket, description: note, content_warning: $('#upload-warning').value, warning_reason: $('#upload-warning-reason').value }).then(function (al) {
             $('#album-banner').classList.remove('hide');
             $('#album-link').value = al.url; $('#album-open').href = al.url;
             return al.id;
@@ -402,6 +402,8 @@
       files.forEach(function (f) { fd.append('file', f, f.name); });
       if (url) fd.append('url', url);
       fd.append('expire', $('#expire').value);
+      fd.append('content_warning', $('#upload-warning').value);
+      fd.append('warning_reason', $('#upload-warning-reason').value);
       fd.append('slug', $('#slug').checked ? '1' : '0');
       fd.append('album', $('#album').checked ? '1' : '0');
       if (albumId) fd.append('album_id', albumId);
@@ -476,6 +478,8 @@
           r.name.textContent = f.name + ' · ' + (/pdf$/i.test(f.type + f.name) ? 'compressing…' : 'preparing video…');
           var fd = new FormData();
           fd.append('expire', $('#expire').value);
+          fd.append('content_warning', $('#upload-warning').value);
+          fd.append('warning_reason', $('#upload-warning-reason').value);
           fd.append('slug', $('#slug').checked ? '1' : '0');
           if (albumId) fd.append('album_id', albumId);
           return fetch('/api/v1/uploads/' + start.id + '/finish', { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).then(function (x) { return x.json(); });
@@ -541,6 +545,10 @@
       var body = { title: $('#e-title').value, alt: $('#e-alt').value, visibility: vis() };
       if (vis() === 'password' && $('#e-pass').value) body.password = $('#e-pass').value;
       if ($('#e-listed')) body.listed = $('#e-listed').checked;
+      var cwEl = ef.querySelector('[name=content_warning]:checked');
+      if (cwEl) body.content_warning = cwEl.value;
+      var wrEl = $('#e-warning-reason');
+      if (wrEl) body.warning_reason = wrEl.value;
       api('PATCH', '/api/v1/images/' + ef.dataset.id, body).then(function () { location.reload(); }, function (e) { toast(e.message, true); });
     });
   }
@@ -658,7 +666,7 @@
       grid.insertBefore(dragged, after ? over.nextSibling : over);
     });
     $('#ae-save').addEventListener('click', function () {
-      var body = { title: $('#ae-title').value, description: $('#ae-desc').value, remove: removed,
+      var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, remove: removed,
         order: $$('.order-item', grid).map(function (x) { return x.dataset.id; }) };
       if (cover) body.cover_id = cover;
       sv(body).then(function () { toast('Album saved'); removed = []; }, function (e) { toast(e.message, true); });

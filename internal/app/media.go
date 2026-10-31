@@ -196,7 +196,7 @@ func placeholderThumb(kind string) []byte {
 }
 
 // storeMedia keeps a video or PDF (already on disk at src) and makes its page.
-func (a *App) storeMedia(ctx context.Context, src, name, kind string, u *db.User, ip, albumID string, expiresAt int64, useSlug bool, alt string) (*db.Image, string, bool, error) {
+func (a *App) storeMedia(ctx context.Context, src, name, kind string, u *db.User, ip, albumID string, expiresAt int64, useSlug bool, alt, warning, reason string) (*db.Image, string, bool, error) {
 	sha, _, err := sha256File(src)
 	if err != nil {
 		return nil, "", false, err
@@ -204,7 +204,7 @@ func (a *App) storeMedia(ctx context.Context, src, name, kind string, u *db.User
 	var uid sql.NullInt64
 	if u != nil {
 		uid = sql.NullInt64{Int64: u.ID, Valid: true}
-		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil {
+		if old, err := a.db.ImageBySHA(ctx, sha, uid); err == nil && old.ContentWarning == warning && old.WarningReason == reason {
 			return old, "", true, nil
 		}
 	}
@@ -296,6 +296,7 @@ func (a *App) storeMedia(ctx context.Context, src, name, kind string, u *db.User
 		UserID: uid, Title: trim(strings.TrimSuffix(name, path.Ext(name)), 120), OrigName: trim(name, 200),
 		Mime: mime, Ext: ext, Size: size, Width: w, Height: h, SHA256: sha, Color: color,
 		Backend: a.store.Name(), IP: ip, ExpiresAt: expiresAt, Stripped: strings.Join(stripped, ","), Alt: alt,
+		ContentWarning: warning, WarningReason: reason,
 	}
 	if albumID != "" {
 		im.AlbumID = sql.NullString{String: albumID, Valid: true}

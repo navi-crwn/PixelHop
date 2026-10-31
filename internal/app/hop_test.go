@@ -571,7 +571,7 @@ func TestHopContent(t *testing.T) {
 		Actions []string
 	}
 	decode(t, hopGet(t, h, "/hop/content/image/"+p1.ID).Data, &det)
-	if det.ID != p1.ID || len(det.Reports) != 1 || det.Reports[0].Reason != "spam" || det.Views != 1 || len(det.Actions) != 5 {
+	if det.ID != p1.ID || len(det.Reports) != 1 || det.Reports[0].Reason != "spam" || det.Views != 1 || len(det.Actions) != 8 {
 		t.Fatalf("detail: %+v", det)
 	}
 	var adet struct {

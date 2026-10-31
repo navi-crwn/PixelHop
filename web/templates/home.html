@@ -39,7 +39,7 @@
 
   <section class="section" id="features">
     <div class="section-head">
-      <span class="eyebrow">{{.L.H "home.feat_eyebrow"}}</span>
+      <span class="eyebrow">01 / {{.L.H "home.feat_eyebrow"}}</span>
       <h2>{{.L.H "home.feat_title"}}</h2>
       <p>{{.L.T "home.feat_desc"}}</p>
     </div>
@@ -53,6 +53,13 @@
     </div>
   </section>
 
+  <section class="section" aria-labelledby="studio-tour">
+    <div class="section-head"><span class="eyebrow">02 / {{.L.T "features.title"}}</span><h2 id="studio-tour">{{.L.T "home.studio_title"}}</h2><p>{{.L.T "home.studio_desc"}}</p></div>
+    <div class="bento-grid home-tour-grid">
+      <article class="bento-card"><h3>{{.L.T "features.studio_title"}}</h3><figure class="feature-demo"><img class="demo-light" src="/static/img/demos/studio-light.webp" alt="{{.L.T "features.studio_title"}}" width="1120" height="760" loading="lazy"><img class="demo-dark" src="/static/img/demos/studio-dark.webp" alt="{{.L.T "features.studio_title"}}" width="1120" height="760" loading="lazy"></figure></article>
+      <article class="bento-card"><h3>{{.L.T "features.privacy_title"}}</h3><figure class="feature-demo"><img class="demo-light" src="/static/img/demos/privacy-light.webp" alt="{{.L.T "features.privacy_title"}}" width="1120" height="760" loading="lazy"><img class="demo-dark" src="/static/img/demos/privacy-dark.webp" alt="{{.L.T "features.privacy_title"}}" width="1120" height="760" loading="lazy"></figure><p>{{.L.T "home.feat_destruct_desc"}}</p></article>
+    </div>
+  </section>
   <section class="section">
     <div class="studio-teaser">
       <div>
@@ -75,7 +82,7 @@
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>{{.L.T "home.steps_title"}}</h2></div>
+    <div class="section-head"><span class="eyebrow">03 / {{.L.T "home.steps_title"}}</span><h2>{{.L.T "home.steps_title"}}</h2></div>
     <div class="steps">
       <div class="step"><h3>{{.L.T "home.step1_title"}}</h3><p>{{.L.T "home.step1_desc"}}</p></div>
       <div class="step"><h3>{{.L.T "home.step2_title"}}</h3><p>{{.L.T "home.step2_desc"}}</p></div>
@@ -89,5 +96,13 @@
       {{end}}
     </ul>
   </section>
+  <section class="section prose home-faq" aria-labelledby="home-faq">
+    <span class="eyebrow">04 / {{.L.T "faq.title"}}</span><h2 id="home-faq">{{.L.T "faq.title"}}</h2>
+    <details><summary>{{.L.T "faq.q1"}}</summary><p>{{.L.T "faq.a1"}}</p></details>
+    <details><summary>{{.L.T "faq.q2"}}</summary><p>{{.L.T "faq.a2"}}</p></details>
+    <details><summary>{{.L.T "faq.q3"}}</summary><p>{{.L.T "faq.a3"}}</p></details>
+    <details><summary>{{.L.T "faq.q4"}}</summary><p>{{.L.T "faq.a4"}}</p></details>
+  </section>
+  <section class="section home-finish"><h2>{{.L.H "home.hero_title"}}</h2><p>{{.L.T "home.hero_lead"}}</p><a class="btn primary lg" href="#drop">{{.L.T "nav.upload"}} <span aria-hidden="true">↗</span></a><a class="btn lg" href="/features">{{.L.T "features.title"}}</a></section>
 </div>
 {{end}}

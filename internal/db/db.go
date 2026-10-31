@@ -215,6 +215,11 @@ CREATE TABLE hop_events_seen (
   id TEXT PRIMARY KEY,
   at INTEGER NOT NULL
 );`,
+	// 8: 3-level content warning gate and creator note for images and albums
+	`ALTER TABLE images ADD COLUMN content_warning TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE images ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE albums ADD COLUMN content_warning TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE albums ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';`,
 }
 
 func (d *DB) migrate() error {

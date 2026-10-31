@@ -642,6 +642,11 @@ func (a *App) hopImageRow(ctx context.Context, im *db.Image) map[string]any {
 			flags = append(flags, f)
 		}
 	}
+	if im.IsAdult() {
+		flags = append(flags, "adult", "nsfw")
+	} else if im.IsSensitive() {
+		flags = append(flags, "sensitive")
+	}
 	if flags == nil {
 		flags = []string{}
 	}
@@ -659,14 +664,25 @@ func (a *App) hopImageRow(ctx context.Context, im *db.Image) map[string]any {
 		"url": a.pageURL(im.ID), "direct_url": a.directURL(im), "flags": flags, "preview": preview,
 		"ip": im.IP, "mime": im.Mime, "width": im.Width, "height": im.Height, "views": im.Views,
 		"expires": isoTime(im.ExpiresAt), "album_id": im.AlbumID.String,
+		"content_warning": im.ContentWarning, "warning_reason": im.WarningReason,
 	}
 }
 
 func (a *App) hopAlbumRow(ctx context.Context, al db.HopAlbum) map[string]any {
+	var flags []string
+	if al.IsAdult() {
+		flags = append(flags, "adult", "nsfw")
+	} else if al.IsSensitive() {
+		flags = append(flags, "sensitive")
+	}
+	if flags == nil {
+		flags = []string{}
+	}
 	return map[string]any{
 		"id": al.ID, "type": "album", "title": al.Title, "owner": a.hopOwner(ctx, al.UserID), "status": "visible",
 		"created": isoTime(al.CreatedAt), "size": al.Bytes, "count": al.Count, "url": a.albumURL(al.ID),
-		"direct_url": "", "flags": []string{}, "preview": "", "ip": "", "description": al.Description,
+		"direct_url": "", "flags": flags, "preview": "", "ip": "", "description": al.Description,
+		"content_warning": al.ContentWarning, "warning_reason": al.WarningReason,
 	}
 }
 
@@ -743,7 +759,7 @@ func (a *App) hopContentDetail(w http.ResponseWriter, r *http.Request) {
 		row["backend"] = im.Backend
 		row["stripped"] = im.Stripped
 		row["last_viewed"] = isoTime(im.LastViewed)
-		row["actions"] = []string{"hide", "unhide", "delete", "ban_ip", "transfer"}
+		row["actions"] = []string{"hide", "unhide", "delete", "ban_ip", "transfer", "mark_nsfw", "unmark_nsfw", "mark_sensitive"}
 		hopOK(w, row)
 	case "album":
 		al, err := a.db.Album(ctx, id)
@@ -760,7 +776,7 @@ func (a *App) hopContentDetail(w http.ResponseWriter, r *http.Request) {
 		}
 		row := a.hopAlbumRow(ctx, db.HopAlbum{Album: *al, Count: total, Bytes: bytes})
 		row["images"] = list
-		row["actions"] = []string{"delete", "transfer"}
+		row["actions"] = []string{"delete", "transfer", "mark_nsfw", "unmark_nsfw", "mark_sensitive"}
 		hopOK(w, row)
 	default:
 		hopFail(w, http.StatusBadRequest, "bad_type", "type must be image or album.")
@@ -788,6 +804,12 @@ func (a *App) hopContentAction(w http.ResponseWriter, r *http.Request) {
 			err = a.db.SetImageHidden(ctx, im.ID, true)
 		case "unhide":
 			err = a.db.SetImageHidden(ctx, im.ID, false)
+		case "mark_nsfw":
+			err = a.db.SetImageWarning(ctx, im.ID, "adult", q.Reason)
+		case "unmark_nsfw":
+			err = a.db.SetImageWarning(ctx, im.ID, "none", "")
+		case "mark_sensitive":
+			err = a.db.SetImageWarning(ctx, im.ID, "sensitive", q.Reason)
 		case "delete", "takedown":
 			err = a.removeImage(ctx, im)
 			a.db.DeleteEmptyAlbums(ctx)
@@ -820,6 +842,12 @@ func (a *App) hopContentAction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch q.Action {
+		case "mark_nsfw":
+			err = a.db.SetAlbumWarning(ctx, al.ID, "adult", q.Reason)
+		case "unmark_nsfw":
+			err = a.db.SetAlbumWarning(ctx, al.ID, "none", "")
+		case "mark_sensitive":
+			err = a.db.SetAlbumWarning(ctx, al.ID, "sensitive", q.Reason)
 		case "delete", "takedown":
 			ims, _, _ := a.db.Images(ctx, db.ImageQuery{AlbumID: al.ID, Limit: 200})
 			for _, im := range ims {

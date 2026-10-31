@@ -32,6 +32,7 @@ func (a *App) albumJSON(r *http.Request, al *db.Album) map[string]any {
 		list = append(list, a.imageJSON(im))
 	}
 	return map[string]any{"id": al.ID, "title": al.Title, "description": al.Description, "cover_id": al.CoverID,
+		"content_warning": al.ContentWarning, "warning_reason": al.WarningReason,
 		"url": a.albumURL(al.ID), "created_at": al.CreatedAt, "images": list}
 }
 
@@ -66,15 +67,25 @@ func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title       string   `json:"title"`
-		Description string   `json:"description"`
-		IDs         []string `json:"ids"`
+		ContentWarning string   `json:"content_warning"`
+		WarningReason  string   `json:"warning_reason"`
+		Title          string   `json:"title"`
+		Description    string   `json:"description"`
+		IDs            []string `json:"ids"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10)).Decode(&body); err != nil {
 		apiError(w, http.StatusBadRequest, `send JSON like {"title": "Trip", "ids": ["…"]}`)
 		return
 	}
 	al := &db.Album{ID: newID(""), Title: trim(strings.TrimSpace(body.Title), 120), UserID: sql.NullInt64{Int64: u.ID, Valid: true}}
+	if body.ContentWarning == "" {
+		body.ContentWarning = "none"
+	}
+	if !validWarning(body.ContentWarning) {
+		apiError(w, http.StatusBadRequest, "invalid content warning")
+		return
+	}
+	al.ContentWarning, al.WarningReason = body.ContentWarning, trim(body.WarningReason, 255)
 	if err := a.db.InsertAlbum(r.Context(), al); err != nil {
 		apiError(w, http.StatusInternalServerError, "couldn't create the album")
 		return
@@ -115,12 +126,14 @@ func (a *App) apiUpdateAlbum(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title       *string  `json:"title"`
-		Description *string  `json:"description"`
-		CoverID     *string  `json:"cover_id"`
-		Order       []string `json:"order"`
-		Add         []string `json:"add"`
-		Remove      []string `json:"remove"`
+		ContentWarning *string  `json:"content_warning"`
+		WarningReason  *string  `json:"warning_reason"`
+		Title          *string  `json:"title"`
+		Description    *string  `json:"description"`
+		CoverID        *string  `json:"cover_id"`
+		Order          []string `json:"order"`
+		Add            []string `json:"add"`
+		Remove         []string `json:"remove"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10)).Decode(&body); err != nil {
 		apiError(w, http.StatusBadRequest, "send JSON")
@@ -128,6 +141,16 @@ func (a *App) apiUpdateAlbum(w http.ResponseWriter, r *http.Request) {
 	}
 	if body.Title != nil {
 		al.Title = trim(strings.TrimSpace(*body.Title), 120)
+	}
+	if body.ContentWarning != nil {
+		if !validWarning(*body.ContentWarning) {
+			apiError(w, http.StatusBadRequest, "invalid content warning")
+			return
+		}
+		al.ContentWarning = *body.ContentWarning
+	}
+	if body.WarningReason != nil {
+		al.WarningReason = trim(*body.WarningReason, 255)
 	}
 	if body.Description != nil {
 		al.Description = trim(strings.TrimSpace(*body.Description), 1000)
