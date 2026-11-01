@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/config"
@@ -39,11 +40,14 @@ type App struct {
 
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
+	uploadMu  sync.Mutex
+	space     func(string) (int64, int64)
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
 	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour),
 		mediaQueue: make(chan string, 256), chunks: newChunkStore(), started: time.Now()}
+	a.space = diskSpace
 
 	local, err := storage.NewLocal(cfg.DataDir + "/images")
 	if err != nil {
@@ -163,6 +167,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/uploads/{id}/finish", a.apiFinishUpload)
 	mux.HandleFunc("POST /api/upload.php", a.apiUpload) // ShareX configs made for PixelHop 2
 	mux.HandleFunc("GET /api/v1/images", a.apiImages)
+	mux.HandleFunc("GET /api/v1/upload-status", a.uploadStatus)
 	mux.HandleFunc("GET /api/v1/images/{id}", a.apiImage)
 	mux.HandleFunc("PATCH /api/v1/images/{id}", a.apiUpdateImage)
 	mux.HandleFunc("GET /api/v1/images/{id}/stats", a.apiImageStats)
@@ -186,6 +191,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("/", a.notFound)
 
 	var h http.Handler = mux
+	h = a.storageGate(h)
 	h = a.withUser(h)
 	h = a.withLinkHost(mux, h) // before withUser reads the session
 	h = a.checkBan(h)

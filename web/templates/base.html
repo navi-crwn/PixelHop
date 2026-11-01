@@ -94,7 +94,7 @@
       <p class="muted small">{{.L.T "footer.tagline"}}</p>
     </div>
     <div class="foot-col">
-      <h4 class="foot-heading">{{.Site}}</h4>
+      <h2 class="foot-heading">{{.Site}}</h2>
       <nav aria-label="{{.Site}}">
         <a href="/about">{{.L.T "footer.about"}}</a>
         <a href="/features">{{.L.T "footer.features"}}</a>
@@ -105,8 +105,8 @@
       </nav>
     </div>
     <div class="foot-col">
-      <h4 class="foot-heading">Support</h4>
-      <nav aria-label="Support">
+      <h2 class="foot-heading">{{.L.T "footer.support"}}</h2>
+      <nav aria-label="{{.L.T "footer.support"}}">
         <a href="/help">{{.L.T "footer.help"}}</a>
         <a href="/faq">{{.L.T "footer.faq"}}</a>
         <a href="/contact">{{.L.T "footer.contact"}}</a>
@@ -114,24 +114,24 @@
       </nav>
     </div>
     <div class="foot-col">
-      <h4 class="foot-heading">Policies</h4>
-      <nav aria-label="Policies">
+      <h2 class="foot-heading">{{.L.T "footer.policies"}}</h2>
+      <nav aria-label="{{.L.T "footer.policies"}}">
         <a href="/legal">{{.L.T "footer.legal"}}</a>
-        <a href="/legal#terms">Terms</a>
-        <a href="/legal#privacy">Privacy</a>
+        <a href="/legal#terms">{{.L.T "footer.terms"}}</a>
+        <a href="/legal#privacy">{{.L.T "legal.privacy_title"}}</a>
         <a href="/docs">{{.L.T "footer.api"}}</a>
       </nav>
     </div>
     <div class="foot-col">
-      <h4 class="foot-heading">{{.L.H "footer.family"}}</h4>
-      <nav aria-label="HOP family">
+      <h2 class="foot-heading">{{.L.H "footer.family"}}</h2>
+      <nav aria-label="{{.L.T "family.foot"}}">
         {{range hopFamily}}<a href="{{.URL}}">{{.Name}}</a>{{end}}
       </nav>
     </div>
   </div>
   <div class="wrap foot-bottom">
     <p>© 2026 navi-crwn · MIT License</p>
-    <nav class="foot-langs" aria-label="Languages">
+    <nav class="foot-langs" aria-label="{{.L.T "nav.language"}}">
       <a href="?lang=en" lang="en">English</a>
       <a href="?lang=id" lang="id">Bahasa Indonesia</a>
       <a href="?lang=zh" lang="zh">中文</a>
@@ -145,6 +145,7 @@
 </footer>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <script src="/static/js/app.js?v={{.Asset}}" defer></script>
+<script src="/static/js/storage-status.js?v={{.Asset}}" defer></script>
 {{block "scripts" .}}{{end}}
 </body>
 </html>{{end}}
