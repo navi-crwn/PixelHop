@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 <link rel="stylesheet" href="/static/css/family-switcher.css?v={{.Asset}}">
+{{if .Dash}}<link rel="stylesheet" href="/static/css/shell.css?v={{.Asset}}">{{end}}
 <script src="/static/js/family-switcher.js?v={{.Asset}}" defer></script>
 {{block "head" .}}{{end}}
 </head>
@@ -31,6 +32,62 @@
 <a class="skip" href="#main">{{.L.T "nav.skip"}}</a>
 {{template "icons"}}
 {{with .Announcement}}<div class="announce">{{.}}</div>{{end}}
+{{if .Dash}}
+<div class="shell" id="shell">
+  <div class="shell-scrim" id="shell-scrim" hidden></div>
+  <aside class="shell-side" id="shell-side" aria-label="{{.Site}}">
+    <a class="shell-brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="32" height="32"><span>{{.Site}}</span></a>
+    <nav class="shell-nav" aria-label="{{.Site}}">
+      <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>{{.L.T "nav.dashboard"}}</a>
+      <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
+      {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg><use href="#i-users"/></svg>{{.L.T "nav.my_profile"}}</a>{{end}}
+      <a href="/"><svg><use href="#i-upload"/></svg>{{.L.T "nav.upload"}}</a>
+      <a href="/tools"><svg><use href="#i-adjust"/></svg>{{.L.T "nav.studio"}}</a>
+      <a href="/explore"><svg><use href="#i-link"/></svg>{{.L.T "nav.explore"}}</a>
+      <a href="/docs"><svg><use href="#i-code"/></svg>{{.L.T "nav.api"}}</a>
+      <a href="/settings" {{if eq .Path "/settings"}}aria-current="page"{{end}}><svg><use href="#i-gear"/></svg>{{.L.T "nav.settings"}}</a>
+      {{with .Control}}<a href="{{.}}"><svg><use href="#i-shield"/></svg>{{$.L.T "nav.control"}}</a>{{end}}
+    </nav>
+    <p class="shell-label">{{.L.T "dash.family"}}</p>
+    <nav class="shell-nav shell-family" aria-label="{{.L.T "dash.family"}}">
+      {{range hopFamily}}<a href="{{if eq .Slug "hub"}}{{if $.SSO}}{{$.Helink}}/dashboard{{else}}{{.URL}}{{end}}{{else}}{{.URL}}{{end}}"><img src="{{(index .Icons "mark").URL}}" alt="" width="18" height="18" loading="lazy">{{if eq .Slug "hub"}}HOP ID{{else}}{{.Name}}{{end}}<svg class="out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></svg></a>{{end}}
+    </nav>
+    <p class="shell-side-foot"><a href="/changelog">{{.L.T "changelog.title"}}</a> · <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a></p>
+  </aside>
+  <div class="shell-body">
+    <header class="shell-top">
+      <button class="icon-btn shell-burger" id="shell-burger" type="button" aria-label="{{.L.T "nav.menu"}}" aria-controls="shell-side" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
+      <p class="shell-title">{{if .Title}}{{.Title}}{{else}}{{.L.T "nav.dashboard"}}{{end}}</p>
+      <div class="shell-tools">
+        {{if ne .Path "/dashboard"}}<a class="btn primary sm" href="/"><svg><use href="#i-upload"/></svg><span>{{.L.T "nav.upload"}}</span></a>{{end}}
+        <div class="menu lang-menu" id="lang-menu">
+          <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
+          <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}
+            <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}>{{.Name}}</a>{{end}}
+          </div>
+        </div>
+        <button class="icon-btn" id="theme" type="button" aria-label="{{.L.T "nav.theme"}}"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
+        <div class="menu" id="menu">
+          <button type="button" aria-haspopup="true" aria-label="{{.L.T "dash.account"}}"><span class="avatar">{{with avatar .User}}<img src="{{.}}" alt="" referrerpolicy="no-referrer">{{else}}{{initial .User}}{{end}}</span></button>
+          <div class="menu-list">
+            <div class="who"><b>{{display .User}}</b><br>{{with .User.Username.String}}@{{.}}{{end}}</div>
+            {{if .SSO}}<a href="{{.Helink}}/settings"><svg width="16" height="16"><use href="#i-link"/></svg>{{.L.T "dash.account"}}</a>{{end}}
+            <a href="/settings"><svg width="16" height="16"><use href="#i-gear"/></svg>{{.L.T "nav.settings"}}</a>
+            <form method="post" action="/logout"><button type="submit"><svg width="16" height="16"><use href="#i-out"/></svg>{{.L.T "nav.sign_out"}}</button></form>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main id="main">{{template "mainbody" .}}</main>
+    <footer class="shell-foot">
+      <nav aria-label="{{.Site}}">
+        <a href="/about">{{.L.T "footer.about"}}</a><a href="/help">{{.L.T "footer.help"}}</a><a href="/faq">{{.L.T "footer.faq"}}</a><a href="/status">{{.L.T "footer.status"}}</a><a href="/legal">{{.L.T "footer.legal"}}</a><a href="/docs">{{.L.T "footer.api"}}</a><a href="/contact">{{.L.T "footer.contact"}}</a>
+      </nav>
+      <p>© 2026 navi-crwn · MIT License</p>
+    </footer>
+  </div>
+</div>
+{{else}}
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
@@ -76,17 +133,7 @@
     </div>
   </div>
 </header>
-<main id="main">
-{{if and .User .User.Warning}}
-<dialog id="warning" class="warning" data-open>
-  <h2>A message from the moderators</h2>
-  <p>{{.User.Warning}}</p>
-  <form method="post" action="/settings/ack-warning"><input type="hidden" name="back" value="{{.Path}}"><button class="btn primary" type="submit">I understand</button></form>
-</dialog>
-{{end}}
-{{if backable .Path}}<div class="wrap back-row"><a class="back" href="/"><span aria-hidden="true">&larr;</span> {{.L.T "nav.back" "site" .Site}}</a></div>{{end}}
-{{template "content" .}}
-</main>
+<main id="main">{{template "mainbody" .}}</main>
 <footer class="footer-columns">
   <div class="wrap footer-grid">
     <div class="foot-col foot-brand">
@@ -143,9 +190,23 @@
     </nav>
   </div>
 </footer>
+
+{{end}}
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <script src="/static/js/app.js?v={{.Asset}}" defer></script>
 <script src="/static/js/storage-status.js?v={{.Asset}}" defer></script>
+{{if .Dash}}<script src="/static/js/shell.js?v={{.Asset}}" defer></script>{{end}}
 {{block "scripts" .}}{{end}}
 </body>
 </html>{{end}}
+{{define "mainbody"}}
+{{if and .User .User.Warning}}
+<dialog id="warning" class="warning" data-open>
+  <h2>A message from the moderators</h2>
+  <p>{{.User.Warning}}</p>
+  <form method="post" action="/settings/ack-warning"><input type="hidden" name="back" value="{{.Path}}"><button class="btn primary" type="submit">I understand</button></form>
+</dialog>
+{{end}}
+{{if backable .Path}}<div class="wrap back-row"><a class="back" href="/"><span aria-hidden="true">&larr;</span> {{.L.T "nav.back" "site" .Site}}</a></div>{{end}}
+{{template "content" .}}
+{{end}}

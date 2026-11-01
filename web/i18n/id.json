@@ -270,5 +270,7 @@
   "home.tut_h": "Tiga langkah. <em>Tanpa akun.</em>",
   "home.license": "Lisensi",
   "home.one_file": "satu file",
-  "home.faq_h": "Pertanyaan, <em>terjawab.</em>"
+  "home.faq_h": "Pertanyaan, <em>terjawab.</em>",
+  "dash.family": "Keluarga HOP",
+  "dash.account": "Akun (HOP ID)"
 }
