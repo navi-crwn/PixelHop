@@ -93,8 +93,8 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 .center { text-align: center; }
 .hide { display: none !important; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.skip { position: absolute; left: -999px; top: 8px; z-index: 99; background: var(--panel); padding: 8px 14px; border-radius: 8px; }
-.skip:focus { left: 8px; }
+.skip { position: absolute; inset-inline-start: 8px; top: 8px; z-index: 99; background: var(--panel); padding: 8px 14px; border-radius: 8px; clip-path: inset(50%); }
+.skip:focus { clip-path: none; }
 
 .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 20px; }
 .wrap.narrow { max-width: 760px; }
@@ -228,7 +228,9 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .chip svg { width: 14px; height: 14px; }
 .chip:hover, .chip[aria-expanded="true"] { color: var(--text); border-color: var(--accent); }
 .btn.icon-only { padding: 0; width: 48px; justify-content: center; }
-.guest-note { margin: 12px 4px 0; font-size: .82rem; color: var(--faint, var(--muted)); text-align: center; }
+.guest-note { margin: 12px 4px 0; font-size: .82rem; color: var(--muted); text-align: center; }
+.guest-note a { color: inherit; text-decoration: underline; }
+.foot-heading a { text-decoration: underline; }
 .install-nav span { display: inline; }
 @media (max-width: 420px) { .install-nav span { display: none; } }
 .history-box { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
