@@ -4,6 +4,13 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Media addresses
+- The profile photo from HOP ID or Google is made absolute before it is shown: a bare path (`/storage/...`) was asked of PixelHop and gave a 404, an `http://` address was blocked on the https pages.
+- Photos are also served on the link host (`p.hel.ink/avatar/...`) instead of bouncing to the app, and carry `Cross-Origin-Resource-Policy: cross-origin` so the gallery API's `avatar` can be used on other sites.
+- Someone who hides their profile now sees their own photo in the top bar and settings (it answered 404 for them).
+- A profile's link preview uses a video's or PDF's poster instead of the file, and no picture when the first image has a content warning.
+- A video opened on its own is allowed to play (`media-src 'self'` in its policy); pages allow video from a storage CDN (`media-src ... https:`).
+
 ### Dashboard chrome
 - The signed-in dashboard (dashboard, albums, settings) has the same chrome as the other HOP dashboards: a sidebar with this app's menu and the HOP family (HOP ID, LinkHop, BioHop, NoteHop, with their marks), a top bar of settings-type controls (upload, language, theme and an account menu with your HOP ID, settings and sign out), and a compact footer.
 - The footer on every page spreads its five columns evenly; a flex rule had packed them to the left.
