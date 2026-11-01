@@ -270,5 +270,7 @@
   "home.tut_h": "ثلاث خطوات. <em>بدون حساب.</em>",
   "home.license": "الترخيص",
   "home.one_file": "ملف واحد",
-  "home.faq_h": "أسئلة، <em>وأجوبتها.</em>"
+  "home.faq_h": "أسئلة، <em>وأجوبتها.</em>",
+  "dash.family": "عائلة HOP",
+  "dash.account": "الحساب (HOP ID)"
 }

@@ -690,8 +690,10 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
 .home-finish .btn { margin: 4px; }
 
 /* Modern Columnar Footer */
-.footer-grid { display: grid; grid-template-columns: 1.2fr repeat(auto-fit, minmax(140px, 1fr)); gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
-.foot-col { display: flex; flex-direction: column; gap: 8px; }
+footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr) repeat(4, minmax(0, 1fr)); align-items: start; gap: 28px 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.foot-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+@media (max-width: 960px) { footer .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } footer .foot-brand { grid-column: 1 / -1; } }
+@media (max-width: 520px) { footer .footer-grid { grid-template-columns: minmax(0, 1fr); } }
 .foot-heading { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text); margin: 0 0 4px; font-weight: 700; }
 .foot-col nav { display: flex; flex-direction: column; gap: 8px; margin: 0; }
 .foot-col nav a { color: var(--muted); text-decoration: none; font-size: 0.88rem; transition: color .15s; }
