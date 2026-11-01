@@ -29,7 +29,7 @@ func TestDashboard(t *testing.T) {
 		t.Fatalf("dashboard: %d", rec.Code)
 	}
 	body := rec.Body.String()
-	for _, want := range []string{`id="drop"`, `id="my-gallery"`, `class="member-nav"`, `data-stat="files">2<`, `2 images · 0 videos · 0 PDFs`} {
+	for _, want := range []string{`id="drop"`, `id="my-gallery"`, `class="member-nav"`, `data-stat="files">2<`, `2 images · 0 videos · 0 PDFs`, `class="dash-start"`, `<b>3/4</b>`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("dashboard is missing %s", want)
 		}
@@ -45,5 +45,19 @@ func TestDashboard(t *testing.T) {
 	// The member menu is on settings too, so every member page links back.
 	if body := fetch(h, "/settings", cookie).Body.String(); !strings.Contains(body, `class="member-nav"`) {
 		t.Error("settings has no member menu")
+	}
+}
+
+// A new member sees the getting-started card with nothing done; it names the four steps.
+func TestDashboardGettingStarted(t *testing.T) {
+	a, h := ssoApp(t)
+	u, _ := member(t, a, "fresh@example.com")
+	tok := randomToken(32)
+	a.db.InsertSession(context.Background(), hashToken(tok), u.ID, time.Hour, "", "")
+	body := fetch(h, "/dashboard", &http.Cookie{Name: sessionCookie, Value: tok}).Body.String()
+	for _, want := range []string{`class="dash-start"`, `<b>1/4</b>`, "Upload your first file", "Make an album", "Turn on your public profile", "Create an API key for ShareX"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("getting-started card is missing %q", want)
+		}
 	}
 }

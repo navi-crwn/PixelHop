@@ -44,6 +44,20 @@
     </div>
   </section>
 
+  {{/* getting started: shown until every step is done */}}
+  {{$s1 := gt $files 0}}{{$s2 := gt $d.Sum.Albums 0}}{{$s3 := and .User.ShowOwner .User.Username.Valid}}{{$s4 := gt $d.Keys 0}}
+  {{if not (and $s1 $s2 $s3 $s4)}}{{$n := 0}}{{if $s1}}{{$n = add $n 1}}{{end}}{{if $s2}}{{$n = add $n 1}}{{end}}{{if $s3}}{{$n = add $n 1}}{{end}}{{if $s4}}{{$n = add $n 1}}{{end}}
+  <section class="dash-start" aria-labelledby="start-title">
+    <div class="start-ring" role="img" aria-label="{{$n}} of 4 done"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.9155" class="bg"/><circle cx="18" cy="18" r="15.9155" class="fg" pathLength="100" stroke-dasharray="{{mul $n 25}} 100"/></svg><b>{{$n}}/4</b></div>
+    <div class="start-body"><h2 id="start-title">Get the most out of {{.Site}}</h2><p class="muted">Four small steps. Each one opens the right page.</p></div>
+    <ul class="start-list">
+      <li class="{{if $s1}}done{{end}}"><a href="#upload"><span class="tick" aria-hidden="true"></span>Upload your first file</a></li>
+      <li class="{{if $s2}}done{{end}}"><a href="/dashboard/albums"><span class="tick" aria-hidden="true"></span>Make an album</a></li>
+      <li class="{{if $s3}}done{{end}}"><a href="/settings#profile"><span class="tick" aria-hidden="true"></span>Turn on your public profile</a></li>
+      <li class="{{if $s4}}done{{end}}"><a href="/settings#api"><span class="tick" aria-hidden="true"></span>Create an API key for ShareX</a></li>
+    </ul>
+  </section>{{end}}
+
   <section class="dash-upload" id="upload" aria-label="Upload">
     {{template "uploader" .}}
   </section>
