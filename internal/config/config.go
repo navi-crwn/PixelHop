@@ -28,6 +28,8 @@ type Config struct {
 	GuestMaxBytes  int64 // any one file from someone not signed in
 	MaxPixels      int64 // decompression-bomb guard (width*height)
 	MaxBatch       int   // files per upload request
+	MinFreeMB      int   // disk reserve; nonpositive values use 1024 MB
+	MinFreePercent int   // disk reserve percentage; nonpositive values use 5
 
 	GuestUploads     bool
 	Registration     bool
@@ -101,6 +103,8 @@ func Load() (*Config, error) {
 		GuestMaxBytes:    int64(envInt("PIXELHOP_GUEST_MAX_MB", 20)) << 20,
 		MaxPixels:        int64(envInt("PIXELHOP_MAX_MEGAPIXELS", 80)) * 1_000_000,
 		MaxBatch:         envInt("PIXELHOP_MAX_BATCH", 20),
+		MinFreeMB:        envInt("PIXELHOP_MIN_FREE_MB", 1024),
+		MinFreePercent:   envInt("PIXELHOP_MIN_FREE_PERCENT", 5),
 		GuestUploads:     envBool("PIXELHOP_GUEST_UPLOADS", true),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),
 		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 1024)) << 20,

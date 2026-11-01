@@ -98,3 +98,21 @@ func TestLangs(t *testing.T) {
 		}
 	}
 }
+
+func TestHomepageTemplateKeys(t *testing.T) {
+	keys := regexp.MustCompile(`\.L\.[TH] "([^"]+)"`)
+	for _, path := range []string{"templates/home.html", "templates/base.html", "templates/partials/uploader.html"} {
+		body, err := fs.ReadFile(web.Templates, path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, language := range Langs {
+			catalog := raw(t, language.Code)
+			for _, match := range keys.FindAllSubmatch(body, -1) {
+				if strings.TrimSpace(catalog[string(match[1])]) == "" {
+					t.Errorf("%s: %s missing %q", path, language.Code, match[1])
+				}
+			}
+		}
+	}
+}
