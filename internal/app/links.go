@@ -10,10 +10,10 @@ import (
 // Shared links can live on another host than the app (PIXELHOP_LINK_URL,
 // e.g. links on p.hel.ink while the app moved to pixel.hel.ink). Both hosts
 // reach this server. On the link host only what a shared link needs is
-// served: image and album pages, files, thumbnails, QR codes, the password
-// and report forms, static files and the API (API keys, ShareX). Everything
-// else goes to the app. The link host carries no sign-in, so the owner's own
-// tools and private files stay on the app host.
+// served: image and album pages, files, thumbnails, owner photos, QR codes,
+// the password and report forms, static files and the API (API keys,
+// ShareX). Everything else goes to the app. The link host carries no
+// sign-in, so the owner's own tools and private files stay on the app host.
 
 type linkHostKey struct{}
 
@@ -25,6 +25,7 @@ var linkPatterns = map[string]bool{
 	"GET /i/{y}/{m}/{d}/{file}": true,
 	"GET /t/{file}":             true,
 	"GET /qr/{id}":              true,
+	"GET /avatar/{id}":          true,
 	"POST /unlock/{id}":         true,
 	"POST /report/{id}":         true,
 	"GET /static/":              true,

@@ -103,6 +103,45 @@ func avatarURL(u *db.User) string {
 	return u.AvatarURL
 }
 
+// avatarOf is the photo to show for u, ready to put in an <img src>: the
+// uploaded one (a path on this host) or the HEL.ink/Google picture made
+// absolute. HOP ID sends the picture as a bare path or an http:// address
+// when its storage URL is configured loosely; a bare path would be asked of
+// this host (404) and http:// is blocked as mixed content, so both are fixed here.
+func (a *App) avatarOf(u *db.User) string {
+	if u == nil {
+		return ""
+	}
+	if u.AvatarKey != "" {
+		return avatarURL(u)
+	}
+	return a.externalAvatar(u.AvatarURL)
+}
+
+// externalAvatar turns a picture address received from HOP ID or Google into
+// one the browser can load from any of our pages, or "" when there is none.
+func (a *App) externalAvatar(raw string) string {
+	raw = strings.TrimSpace(raw)
+	switch {
+	case raw == "":
+		return ""
+	case strings.HasPrefix(raw, "https://"):
+		return raw
+	case strings.HasPrefix(raw, "http://"):
+		if a.cfg.SecureCookies() { // an https site cannot show http images
+			return "https://" + strings.TrimPrefix(raw, "http://")
+		}
+		return raw
+	case strings.HasPrefix(raw, "//"):
+		return "https:" + raw
+	case strings.HasPrefix(raw, "/"):
+		if a.cfg.HelinkURL != "" { // a path on the account host
+			return a.cfg.HelinkURL + raw
+		}
+	}
+	return ""
+}
+
 // owner is the "shared by" card on image and album pages.
 type owner struct {
 	Name, Username, Avatar, Initial, ProfileURL string
@@ -116,7 +155,7 @@ func (a *App) ownerOf(ctx context.Context, userID sql.NullInt64) *owner {
 	if err != nil || !u.ShowOwner || u.Status != "active" {
 		return nil
 	}
-	o := &owner{Name: displayName(u), Avatar: avatarURL(u)}
+	o := &owner{Name: displayName(u), Avatar: a.avatarOf(u)}
 	o.Initial = strings.ToUpper(string([]rune(o.Name)[:1]))
 	if u.Username.Valid {
 		o.Username = u.Username.String
@@ -159,8 +198,8 @@ func (a *App) profile(w http.ResponseWriter, r *http.Request) {
 		desc = fmt.Sprintf("%d images shared by %s on %s", total, displayName(u), a.cfg.SiteName)
 	}
 	og := ""
-	if len(ims) > 0 {
-		og = a.directURL(ims[0])
+	if len(ims) > 0 && !a.mediaHasWarning(r, ims[0]) {
+		og = a.previewURL(ims[0]) // a video's or PDF's poster, never the file itself
 	}
 	a.renderPage(w, r, "profile", page{Title: displayName(u) + " (@" + u.Username.String + ")", Desc: desc, OGImage: og, Data: d})
 }
@@ -171,13 +210,17 @@ func (a *App) serveAvatar(w http.ResponseWriter, r *http.Request) {
 	var id int64
 	fmt.Sscan(r.PathValue("id"), &id)
 	u, err := a.db.UserByID(r.Context(), id)
-	if err != nil || !u.ShowOwner {
+	// Someone who hides their profile still sees their own photo in their own
+	// pages (top bar, settings); everybody else gets a 404.
+	me := currentUser(r)
+	self := me != nil && (me.ID == id || me.IsAdmin())
+	if err != nil || (!u.ShowOwner && !self) {
 		a.notFound(w, r)
 		return
 	}
 	if u.AvatarKey == "" {
-		if strings.HasPrefix(u.AvatarURL, "https://") {
-			http.Redirect(w, r, u.AvatarURL, http.StatusFound)
+		if pic := a.externalAvatar(u.AvatarURL); pic != "" {
+			http.Redirect(w, r, pic, http.StatusFound)
 			return
 		}
 		a.notFound(w, r)
@@ -190,7 +233,13 @@ func (a *App) serveAvatar(w http.ResponseWriter, r *http.Request) {
 	}
 	defer obj.Body.Close()
 	w.Header().Set("Content-Type", "image/jpeg")
-	w.Header().Set("Cache-Control", "public, max-age=604800, immutable") // the URL changes with the photo
+	if u.ShowOwner {
+		w.Header().Set("Cache-Control", "public, max-age=604800, immutable") // the URL changes with the photo
+	} else {
+		w.Header().Set("Cache-Control", "private, max-age=3600")
+	}
+	// Public photos are shown on other sites too (the gallery API hands out this address).
+	w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
 	w.Header().Set("Content-Security-Policy", "default-src 'none'; sandbox")
 	io.Copy(w, obj.Body)
 }

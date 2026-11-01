@@ -105,6 +105,10 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 		// Browsers refuse to show PDFs inside a sandbox; their viewer runs apart from the page.
 		h.Set("Content-Security-Policy", "default-src 'none'; object-src 'self'; plugin-types application/pdf")
 		h.Set("X-Content-Type-Options", "nosniff")
+	} else if im.Kind() == "video" && key == im.KeyFull {
+		// Opened on its own, a video is played by the browser's media page, which
+		// obeys this policy: default-src 'none' alone would block the video itself.
+		h.Set("Content-Security-Policy", "default-src 'none'; media-src 'self'; style-src 'unsafe-inline'; sandbox")
 	} else {
 		h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
 	}
