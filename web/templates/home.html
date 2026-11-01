@@ -1,10 +1,11 @@
 {{define "head"}}
 <link rel="stylesheet" href="/static/hop-home/hop-home.css?v={{.Asset}}">
+<link rel="stylesheet" href="/static/hop-home/hop-scenes.css?v={{.Asset}}">
 <link rel="stylesheet" href="/static/css/home.css?v={{.Asset}}">
 <script src="/static/hop-home/hop-hero3d.js?v={{.Asset}}" defer></script>
 <script src="/static/hop-home/hop-motion.js?v={{.Asset}}" defer></script>
 <script src="/static/hop-home/hop-home.js?v={{.Asset}}" defer></script>
-<script src="/static/js/home.js?v={{.Asset}}" defer></script>
+<script src="/static/hop-home/hop-scenes.js?v={{.Asset}}" defer></script>
 {{end}}
 {{define "content"}}
 <div class="hop-home pixel-home">
@@ -26,108 +27,171 @@
       <span class="h-chip">PixelHop · {{.L.T "home.open"}}</span>
       <h1 id="home-title">{{.L.H "home.hero_title"}}</h1>
       <p class="h-lead">{{.L.T "home.hero_lead"}}</p>
-      <div class="h-cta"><a class="h-pill" href="#life">{{.L.T "home.cta_tour"}} ↓</a><a class="h-pill" href="/tools">{{.L.T "home.studio_open"}}</a></div>
+      <div class="h-cta"><a class="h-pill" href="#tour">{{.L.T "home.cta_tour"}} ↓</a><a class="h-pill" href="/tools">{{.L.T "home.studio_open"}}</a></div>
       {{with .Data}}{{if gt .Images 0}}<p class="h-small"><b data-count="{{.Images}}">{{.Images}}</b> {{$.L.T "home.stats_files"}} · <b data-count="{{.Views}}">{{.Views}}</b> {{$.L.T "home.stats_views"}}</p>{{end}}{{end}}
     </div>
     <figure class="h-art"><picture><source srcset="/static/hop-home/home/pixelhop-dark.webp" media="(prefers-color-scheme: dark)"><img src="/static/hop-home/home/pixelhop-light.webp" alt="" width="460" height="460" fetchpriority="high"></picture><canvas data-hop-hero="pixelhop" tabindex="0" aria-label="{{.L.T "home.rotate"}}"></canvas><figcaption class="h-small">{{.L.T "home.rotate"}}</figcaption></figure>
   </section>
 
-  <!-- 2. the rail -->
-  <div class="h-rail" data-rv><span>{{.L.T "home.rail_1"}}</span><span>{{.L.T "home.rail_2"}}</span><span>{{.L.T "home.rail_3"}}</span><span>{{.L.T "home.open"}} · MIT</span><a href="#life">{{.L.T "home.cta_tour"}} ↓</a></div>
+  <!-- 2. the running line and the numbers -->
+  <div class="h-marq" data-marquee aria-label="{{.L.T "home2.s1_label"}}"><div><span>{{.L.T "home2.m_drop"}}</span><span>{{.L.T "home2.m_gps"}}</span><span>{{.L.T "home.tool_compress"}}</span><span>{{.L.T "home.tool_crop"}}</span><span>{{.L.T "home.tool_convert"}}</span><span>{{.L.T "home2.m_exif"}}</span><span>{{.L.T "home.tool_redact"}}</span><span>{{.L.T "home.tool_ocr"}}</span><span>{{.L.T "home.tool_rembg"}}</span><span>{{.L.T "home2.m_albums"}}</span><span>{{.L.T "home2.m_direct"}}</span><span>{{.L.T "home2.m_formats"}}</span><span>{{.L.T "home2.m_gone"}}</span><span>{{.L.T "home2.m_api"}}</span><span>{{.L.T "home2.m_open"}} · MIT</span></div></div>
+  <div class="h-nums">
+    <div><b data-count="0">0</b><span>{{.L.T "home2.n_trackers"}}</span></div>
+    <div><b data-count="8">8</b><span>{{.L.T "home2.n_tools"}}</span></div>
+    <div><b data-count="5">5</b><span>{{.L.T "home2.n_formats"}}</span></div>
+    <div><b data-count="1">1</b><span>{{.L.T "home2.n_binary"}}</span></div>
+  </div>
+  <nav class="h-chapters" data-chapters aria-label="{{.L.T "home.cta_tour"}}"><a href="#tour"><span>{{.L.T "home2.s1_label"}}</span></a><a href="#privacy"><span>{{.L.T "home2.s2_label"}}</span></a><a href="#studio"><span>{{.L.T "home2.s3_label"}}</span></a><a href="#albums"><span>{{.L.T "home2.s4_label"}}</span></a><a href="#selfdestruct"><span>{{.L.T "home2.s5_label"}}</span></a><a href="#api"><span>API</span></a><a href="#faq"><span>FAQ</span></a></nav>
 
-  <!-- 3. a file's life: pinned, the scroll turns the pages -->
-  <section class="h-sec" id="life" aria-labelledby="life-title">
-    <p class="h-label"><span class="n">01</span> · <span>{{.L.T "home.life_label"}}</span></p>
-    <h2 id="life-title" data-split>{{.L.H "home.life_title"}}</h2><p class="h-sub" data-rv>{{.L.T "home.life_lead"}}</p>
-    <div class="h-story" id="life-story" data-scroll-story style="--story-n:4">
-      <div class="h-story-pin">
-        <div class="h-story-nav"><button type="button" data-story-step="0"><span>01</span>{{.L.T "home.step1_title"}}</button><button type="button" data-story-step="1"><span>02</span>{{.L.T "home.step2_title"}}</button><button type="button" data-story-step="2"><span>03</span>{{.L.T "home.feat_links_title"}}</button><button type="button" data-story-step="3"><span>04</span>{{.L.T "home.feat_destruct_title"}}</button></div>
-        <div class="h-story-progress" aria-hidden="true"><span data-story-progress></span></div>
-        <div class="h-story-panel" data-story-panel>
-          <div class="h-story-copy"><p class="h-label"><span class="n">01</span> · <span>{{.L.T "home.step1_title"}}</span></p><h3>{{.L.T "home.life1_t"}}</h3><p>{{.L.T "home.step1_desc"}}</p><a class="h-btn primary" href="#quick">{{.L.T "nav.upload"}} ↑</a></div>
-          <div class="h-window"><div class="h-window-bar"><span>● ● ●</span> PixelHop / {{.L.T "nav.upload"}} <span>{{.L.T "home.demo"}}</span></div>
-            <div class="h-window-body h-demo" data-home-demo="pixelhop" data-prefix="https://p.hel.ink/"><div class="h-drop" data-drop><img src="/static/img/demos/studio-light.webp" alt="{{.L.T "home.sample"}}" draggable="true" width="120" height="80" loading="lazy"><p>{{.L.T "home.drop_sample"}}</p></div><button type="button">{{.L.T "home.tool_compress"}}</button><output aria-live="polite" dir="ltr">p.hel.ink/demo</output><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
+  <!-- 01 drop: the scroll plays an upload -->
+  <section class="sc px-scene" id="tour" data-scene style="--sc-len:300vh" aria-labelledby="tour-title">
+    <div class="sc-stage">
+      <div class="sc-copy">
+        <p class="h-label"><span class="n">01</span> · <span>{{.L.T "home2.s1_label"}}</span></p>
+        <h2 id="tour-title">{{.L.H "home2.s1_h"}}</h2><p class="h-sub">{{.L.T "home2.s1_lead"}}</p>
+        <ol class="sc-steps" data-p-steps data-p-range=".08,.92"><li><b>{{.L.T "home2.s1_t1"}}</b><span>{{.L.T "home2.s1_d1"}}</span></li><li><b>{{.L.T "home2.s1_t2"}}</b><span>{{.L.T "home2.s1_d2"}}</span></li><li><b>{{.L.T "home2.s1_t3"}}</b><span>{{.L.T "home2.s1_d3"}}</span></li><li><b>{{.L.T "home2.s1_t4"}}</b><span>{{.L.T "home2.s1_d4"}}</span></li></ol>
+        <div class="sc-bar" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="sc-visual" aria-hidden="true">
+        <div class="sc-card px-up">
+          <div class="sc-card-bar"><span>● ● ●</span><span dir="ltr">pixel.hel.ink</span><span>{{.L.T "home.demo"}}</span></div>
+          <div class="sc-card-body">
+            <div class="px-zone"><div class="px-zone-in"><div class="px-photo px-fly"><span class="sc-tag" dir="ltr">sunset.jpg</span></div><p>{{.L.T "Drop files here"}}</p></div></div>
+            <div class="px-prog"><div class="sc-meter"><i></i></div><small><span class="px-prog-a">{{.L.T "home2.s1_uploading"}}</span><span class="px-prog-b sc-reveal" data-at=".52">{{.L.T "home2.s1_done"}} ✓</span></small></div>
+            <div class="sc-field caret sc-reveal" data-at=".56" dir="ltr"><span data-p-type="https://p.hel.ink/k7x2m" data-p-range=".56,.7">https://p.hel.ink/k7x2m</span></div>
+            <div class="sc-strip"><span class="sc-pill" data-at=".74">{{.L.T "home2.f_link"}}</span><span class="sc-pill" data-at=".8">{{.L.T "upload.direct_links"}}</span><span class="sc-pill" data-at=".86">Markdown</span><span class="sc-pill" data-at=".92">BBCode</span></div>
+          </div>
         </div>
-        <div class="h-story-panel" data-story-panel hidden>
-          <div class="h-story-copy"><p class="h-label"><span class="n">02</span> · <span>{{.L.T "home.step2_title"}}</span></p><h3>{{.L.T "home.life2_t"}}</h3><p>{{.L.T "home.step2_desc"}}</p></div>
-          <div class="h-window"><div class="h-window-bar"><span>● ● ●</span> IMG_2048.jpg <span>EXIF</span></div>
-            <div class="h-window-body" data-exif-demo><table class="h-exif"><tbody><tr><th>GPS</th><td data-before="-6.2088, 106.8456" data-after="—">-6.2088, 106.8456</td></tr><tr><th>{{.L.T "home.exif_camera"}}</th><td data-before="Pixel 9 Pro · f/1.7 · 1/120 s" data-after="—">Pixel 9 Pro · f/1.7 · 1/120 s</td></tr><tr><th>{{.L.T "home.exif_time"}}</th><td data-before="2026-10-31 16:21:48" data-after="—">2026-10-31 16:21:48</td></tr><tr><th>{{.L.T "home.exif_size"}}</th><td data-before="4032 × 3024 · 3.8 MB" data-after="4032 × 3024 · 1.1 MB">4032 × 3024 · 3.8 MB</td></tr></tbody></table><button type="button" class="primary" aria-pressed="false">{{.L.T "home.exif_clean"}}</button><output aria-live="polite">{{.L.T "home.exif_before"}}</output><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
-        </div>
-        <div class="h-story-panel" data-story-panel hidden>
-          <div class="h-story-copy"><p class="h-label"><span class="n">03</span> · <span>{{.L.T "home.feat_links_title"}}</span></p><h3>{{.L.T "home.life3_t"}}</h3><p>{{.L.T "home.feat_links_desc"}}</p></div>
-          <div class="h-window"><div class="h-window-bar"><span>● ● ●</span> p.hel.ink/demo <span>{{.L.T "home.demo"}}</span></div>
-            <div class="h-window-body" data-share-demo><label for="share-format">{{.L.T "home.link_format"}}<select id="share-format"><option value="link">{{.L.T "home.feat_links_title"}}</option><option value="direct">{{.L.T "upload.direct_links"}}</option><option value="markdown">Markdown</option><option value="html">HTML</option><option value="bbcode">BBCode</option></select></label><output aria-live="polite" dir="ltr">https://p.hel.ink/demo</output><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
-        </div>
-        <div class="h-story-panel" data-story-panel hidden>
-          <div class="h-story-copy"><p class="h-label"><span class="n">04</span> · <span>{{.L.T "home.feat_destruct_title"}}</span></p><h3>{{.L.T "home.life4_t"}}</h3><p>{{.L.T "home.feat_destruct_desc"}}</p></div>
-          <div class="h-window"><div class="h-window-bar"><span>● ● ●</span> {{.L.T "upload.delete_after"}} <span>{{.L.T "home.demo"}}</span></div>
-            <div class="h-window-body" data-expire-demo><label for="expire-demo">{{.L.T "upload.delete_after"}}<select id="expire-demo"><option value="">{{.L.T "upload.never"}}</option><option value="600" selected>{{.L.T "upload.minutes" "n" 10}}</option><option value="3600">{{.L.T "upload.hour"}}</option><option value="86400">{{.L.T "upload.day"}}</option><option value="2592000">{{.L.T "upload.days" "n" 30}}</option></select></label><div class="h-result"><span aria-hidden="true">⏱</span><strong data-expire-out dir="ltr">10:00</strong><small data-expire-note>{{.L.T "home.expire_note"}}</small></div><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
-        </div>
-        <div class="h-story-foot"><span>{{.L.T "home.scroll_hint"}}</span><div><button type="button" data-story-prev aria-label="{{.L.T "home.prev"}}">←</button><button type="button" data-story-next aria-label="{{.L.T "home.next"}}">→</button></div></div>
       </div>
     </div>
   </section>
 
-  <!-- 4. studio -->
-  <section class="h-sec h-stage" id="studio" aria-labelledby="studio-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">02</span> · <span>{{.L.T "features.studio_title"}}</span></p><h2 id="studio-title" data-split>{{.L.H "home.studio_h"}}</h2><p class="h-sub" data-rv>{{.L.T "home.studio_desc"}}</p><div class="h-cta"><a class="h-pill dark" href="/tools">{{.L.T "home.studio_open"}} ↗</a><a class="h-pill" href="/batch">{{.L.T "home.batch_open"}}</a></div></div>
-    <div class="h-stage-visual h-window" data-rv><div class="h-window-bar"><span>● ● ●</span> {{.L.T "features.studio_title"}} / {{.L.T "home.tool_resize"}} <span>{{.L.T "home.demo"}}</span></div>
-      <div class="h-window-body" data-resize-demo><label for="sample-width">{{.L.T "home.tool_resize"}}<input type="range" min="80" max="240" value="240" id="sample-width"></label><img src="/static/img/demos/studio-light.webp" alt="{{.L.T "home.sample"}}" width="240" height="160" loading="lazy"><output aria-live="polite">240 × 160 px</output><div class="h-tools">{{range $t := list "compress" "crop" "convert" "adjust" "redact" "ocr" "rembg" "palette"}}<span class="h-chip">{{$.L.T (printf "home.tool_%s" $t)}}</span>{{end}}</div><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
+  <!-- 02 exif: the scroll removes what a phone writes into a photo -->
+  <section class="sc px-scene" id="privacy" data-scene style="--sc-len:300vh" aria-labelledby="privacy-title">
+    <div class="sc-stage">
+      <div class="sc-copy">
+        <p class="h-label"><span class="n">02</span> · <span>{{.L.T "home2.s2_label"}}</span></p>
+        <h2 id="privacy-title">{{.L.H "home2.s2_h"}}</h2><p class="h-sub">{{.L.T "home2.s2_lead"}}</p>
+        <ol class="sc-steps" data-p-steps data-p-range=".08,.92"><li><b>{{.L.T "home2.s2_t1"}}</b><span>{{.L.T "home2.s2_d1"}}</span></li><li><b>{{.L.T "home2.s2_t2"}}</b><span>{{.L.T "home2.s2_d2"}}</span></li><li><b>{{.L.T "home2.s2_t3"}}</b><span>{{.L.T "home2.s2_d3"}}</span></li><li><b>{{.L.T "home2.s2_t4"}}</b><span>{{.L.T "home2.s2_d4"}}</span></li></ol>
+        <div class="sc-bar" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="sc-visual" aria-hidden="true">
+        <div class="sc-card px-exif">
+          <div class="sc-card-bar"><span>● ● ●</span><span dir="ltr">IMG_2048.jpg</span><span>EXIF</span></div>
+          <div class="px-exif-grid">
+            <div class="px-map"><i class="px-pin"></i><i class="px-ring"></i><span class="px-coords" dir="ltr">-6.2088, 106.8456</span></div>
+            <div class="px-photo px-exif-photo"></div>
+            <table class="px-rows"><tbody>
+              <tr data-at=".28"><th>{{.L.T "home2.s2_loc"}}</th><td><span class="v" dir="ltr">-6.2088, 106.8456</span><span class="x">{{.L.T "home2.s2_removed"}}</span></td></tr>
+              <tr data-at=".42"><th>{{.L.T "home.exif_camera"}}</th><td><span class="v" dir="ltr">Pixel 9 Pro · f/1.7</span><span class="x">{{.L.T "home2.s2_removed"}}</span></td></tr>
+              <tr data-at=".56"><th>{{.L.T "home.exif_time"}}</th><td><span class="v" dir="ltr">2026-10-31 16:21</span><span class="x">{{.L.T "home2.s2_removed"}}</span></td></tr>
+              <tr class="px-size" data-at=".7"><th>{{.L.T "home.exif_size"}}</th><td><span class="v" dir="ltr" data-p-num="3800,1100" data-p-unit="KB" data-p-range=".7,.9">3,800 KB</span></td></tr>
+            </tbody></table>
+            <p class="px-clean sc-reveal" data-at=".92"><span aria-hidden="true">✓</span> {{.L.T "home.feat_gps_title"}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- 5. albums -->
-  <section class="h-sec h-stage" id="albums" aria-labelledby="albums-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">03</span> · <span>{{.L.T "home.feat_albums_title"}}</span></p><h2 id="albums-title" data-split>{{.L.H "home.albums_h"}}</h2><p class="h-sub" data-rv>{{.L.T "home.feat_albums_desc"}}</p></div>
-    <div class="h-stage-visual h-window" data-rv><div class="h-window-bar"><span>● ● ●</span> PixelHop / {{.L.T "upload.album"}} <span>{{.L.T "home.demo"}}</span></div>
-      <div class="h-window-body" data-album-demo><div class="h-album"><img src="/static/img/demos/studio-light.webp" alt="" width="96" height="64" loading="lazy"><img src="/static/img/demos/sharing-light.webp" alt="" width="96" height="64" loading="lazy"><img src="/static/img/demos/privacy-light.webp" alt="" width="96" height="64" loading="lazy"><span class="h-album-more" aria-hidden="true">+</span></div><button type="button" class="primary">{{.L.T "home.album_make"}}</button><div class="h-result"><span aria-hidden="true">▦</span><strong data-album-out dir="ltr">p.hel.ink/a/…</strong><small data-album-note>{{.L.T "home.album_note"}}</small></div><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
+  <!-- 03 studio: a live mini tool in every card -->
+  <section class="px-sec" id="studio" aria-labelledby="studio-title" data-scene>
+    <div class="px-head"><p class="h-label"><span class="n">03</span> · <span>{{.L.T "home2.s3_label"}}</span></p><h2 id="studio-title">{{.L.H "home2.s3_h"}}</h2><p class="h-sub">{{.L.T "home2.s3_lead"}}</p><div class="h-cta"><a class="h-pill dark" href="/tools">{{.L.T "home.studio_open"}} ↗</a><a class="h-pill" href="/batch">{{.L.T "home.batch_open"}}</a></div></div>
+    <div class="h-bento px-bento">
+      <article class="h-cell" data-glow><div class="px-mini px-crop" aria-hidden="true"><div class="px-photo"></div><i class="fr"><b></b><b></b><b></b><b></b></i></div><h3>{{.L.T "home.tool_crop"}}</h3><p>{{.L.T "home2.c_crop_d"}}</p></article>
+      <article class="h-cell" data-glow><div class="px-mini px-comp" aria-hidden="true"><div class="px-bar a"><i></i><span dir="ltr">3.8 MB</span></div><div class="px-bar b"><i></i><span dir="ltr">1.1 MB</span></div></div><h3>{{.L.T "home.tool_compress"}}</h3><p>{{.L.T "home2.c_compress_d"}}</p></article>
+      <article class="h-cell" data-glow><div class="px-mini px-conv" aria-hidden="true"><span class="f1" dir="ltr">PNG</span><span class="ar">→</span><span class="f2" dir="ltr">WebP</span><span class="f3" dir="ltr">AVIF</span></div><h3>{{.L.T "home.tool_convert"}}</h3><p>{{.L.T "home2.c_convert_d"}}</p></article>
+      <article class="h-cell" data-glow><div class="px-mini px-adj" aria-hidden="true"><div class="px-photo"></div><div class="sl"><i></i></div><div class="sl"><i></i></div><div class="sl"><i></i></div></div><h3>{{.L.T "home.tool_adjust"}}</h3><p>{{.L.T "home2.c_adjust_d"}}</p></article>
+      <article class="h-cell" data-glow><div class="px-mini px-red" aria-hidden="true"><div class="px-photo"></div><i class="b1"></i><i class="b2"></i></div><h3>{{.L.T "home.tool_redact"}}</h3><p>{{.L.T "home2.c_redact_d"}}</p></article>
+      <article class="h-cell" data-glow><div class="px-mini px-ocr" aria-hidden="true"><div class="px-shot"><i></i><i></i><i></i></div><span class="px-arrow">→</span><code dir="ltr">Invoice 4821<br>Total 120.00</code></div><h3>{{.L.T "home.tool_ocr"}}</h3><p>{{.L.T "home2.c_ocr_d"}}</p></article>
+      <article class="h-cell wide" data-glow><div class="px-mini px-bg" aria-hidden="true"><div class="px-photo"></div><i class="cut"></i></div><h3>{{.L.T "home.tool_rembg"}}</h3><p>{{.L.T "home2.c_rembg_d"}}</p></article>
+      <article class="h-cell wide" data-glow><div class="px-mini px-pal" aria-hidden="true"><div class="px-photo"></div><div class="sw"><i></i><i></i><i></i><i></i><i></i></div></div><h3>{{.L.T "home.tool_palette"}}</h3><p>{{.L.T "home2.c_palette_d"}}</p></article>
+    </div>
   </section>
 
-  <!-- 6. privacy -->
-  <section class="h-sec h-stage" id="privacy" aria-labelledby="privacy-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">04</span> · <span>{{.L.T "features.privacy_title"}}</span></p><h2 id="privacy-title" data-split>{{.L.H "home.privacy_h"}}</h2><p class="h-sub" data-rv>{{.L.T "home.feat_gps_desc" "site" .Site}}</p><ul class="h-feats" data-rv-group><li><span aria-hidden="true">✓</span><span><b>{{.L.T "home.feat_gps_title"}}</b>{{.L.T "home.priv_1"}}</span></li><li><span aria-hidden="true">✓</span><span><b>{{.L.T "home.priv_2t"}}</b>{{.L.T "home.priv_2"}}</span></li><li><span aria-hidden="true">✓</span><span><b>{{.L.T "home.priv_3t"}}</b>{{.L.T "home.priv_3"}}</span></li></ul></div>
-    <div class="h-stage-visual h-window" data-rv><div class="h-window-bar"><span>● ● ●</span> {{.L.T "features.privacy_title"}} <span>{{.L.T "home.demo"}}</span></div>
-      <div class="h-window-body" data-privacy-demo><div class="h-map" aria-hidden="true"><i class="h-pin"></i></div><button type="button" class="primary" aria-pressed="false" data-before="GPS: -6.2088, 106.8456" data-after="GPS: —">{{.L.T "home.step2_title"}}</button><output aria-live="polite" dir="ltr">GPS: -6.2088, 106.8456</output><p class="h-small">{{.L.T "home.local_demo"}}</p></div></div>
+  <!-- 04 albums and links -->
+  <section class="sc px-scene" id="albums" data-scene style="--sc-len:300vh" aria-labelledby="albums-title">
+    <div class="sc-stage">
+      <div class="sc-copy">
+        <p class="h-label"><span class="n">04</span> · <span>{{.L.T "home2.s4_label"}}</span></p>
+        <h2 id="albums-title">{{.L.H "home2.s4_h"}}</h2><p class="h-sub">{{.L.T "home2.s4_lead"}}</p>
+        <ol class="sc-steps" data-p-steps data-p-range=".08,.92"><li><b>{{.L.T "home2.s4_t1"}}</b><span>{{.L.T "home2.s4_d1"}}</span></li><li><b>{{.L.T "home2.s4_t2"}}</b><span>{{.L.T "home2.s4_d2"}}</span></li><li><b>{{.L.T "home2.s4_t3"}}</b><span>{{.L.T "home2.s4_d3"}}</span></li><li><b>{{.L.T "home2.s4_t4"}}</b><span>{{.L.T "home2.s4_d4"}}</span></li></ol>
+        <div class="sc-bar" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="sc-visual" aria-hidden="true">
+        <div class="sc-card px-alb">
+          <div class="sc-card-bar"><span>● ● ●</span><span dir="ltr">p.hel.ink/a/k7x2m</span><span>{{.L.T "home2.s4_album"}}</span></div>
+          <div class="sc-card-body">
+            <div class="px-fan"><div class="px-photo t1"></div><div class="px-photo t2"></div><div class="px-photo t3"></div></div>
+            <ul class="px-fmts"><li data-at=".5"><small>{{.L.T "home2.f_link"}}</small><code dir="ltr">https://p.hel.ink/k7x2m</code></li><li data-at=".62"><small>{{.L.T "upload.direct_links"}}</small><code dir="ltr">https://p.hel.ink/k7x2m.png</code></li><li data-at=".74"><small>Markdown</small><code dir="ltr">![](https://p.hel.ink/k7x2m.png)</code></li><li data-at=".86"><small>HTML</small><code dir="ltr">&lt;img src="https://p.hel.ink/k7x2m.png"&gt;</code></li><li data-at=".95"><small>BBCode</small><code dir="ltr">[img]https://p.hel.ink/k7x2m.png[/img]</code></li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- 7. ShareX & API -->
-  <section class="h-sec h-stage" id="api" aria-labelledby="api-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">05</span> · <span>{{.L.T "home.feat_api_title"}}</span></p><h2 id="api-title" data-split>{{.L.H "home.api_h"}}</h2><p class="h-sub" data-rv>{{.L.T "home.feat_api_desc"}}</p><div class="h-cta"><a class="h-pill dark" href="/docs">{{.L.T "nav.api"}} ↗</a></div></div>
-    <div class="h-stage-visual h-shell" data-rv><div class="h-shell-bar"><i></i><i></i><i></i><span>curl</span></div><div class="h-term"><code id="api-curl">curl -F "file=@screenshot.png" -H "Authorization: Bearer $PIXELHOP_KEY" https://pixel.hel.ink/api/v1/upload</code><button type="button" data-copy-text data-copy-from="#api-curl">{{.L.T "upload.copy"}}</button></div><pre>{"url": "https://p.hel.ink/k7x2m",
+  <!-- 05 self-destruct: a photo that comes apart when the time runs out -->
+  <section class="sc px-scene" id="selfdestruct" data-scene style="--sc-len:300vh" aria-labelledby="gone-title">
+    <div class="sc-stage">
+      <div class="sc-copy">
+        <p class="h-label"><span class="n">05</span> · <span>{{.L.T "home2.s5_label"}}</span></p>
+        <h2 id="gone-title">{{.L.H "home2.s5_h"}}</h2><p class="h-sub">{{.L.T "home2.s5_lead"}}</p>
+        <ol class="sc-steps" data-p-steps data-p-range=".08,.92"><li><b>{{.L.T "home2.s5_t1"}}</b><span>{{.L.T "home2.s5_d1"}}</span></li><li><b>{{.L.T "home2.s5_t2"}}</b><span>{{.L.T "home2.s5_d2"}}</span></li><li><b>{{.L.T "home2.s5_t3"}}</b><span>{{.L.T "home2.s5_d3"}}</span></li></ol>
+        <div class="sc-bar" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="sc-visual" aria-hidden="true">
+        <div class="sc-card px-gone">
+          <div class="sc-card-bar"><span>● ● ●</span><span>{{.L.T "upload.delete_after"}}</span><span>{{.L.T "upload.minutes" "n" 10}}</span></div>
+          <div class="px-gone-body" data-wall>
+            <div class="px-wall">{{range wall 8 6}}<i style="--c:{{.C}};--r:{{.R}};--d:{{.D}}"></i>{{end}}</div>
+            <div class="px-timer"><svg viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="28"/><circle class="fg" cx="32" cy="32" r="28" pathLength="100"/></svg><b dir="ltr"><span data-p-num="10,0" data-p-range=".1,.75">10</span> <small>min</small></b><small class="lft">{{.L.T "home2.s5_left"}}</small></div>
+            <p class="px-bye sc-reveal" data-at=".9">{{.L.T "home2.s5_gone"}} ✓</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 API and ShareX -->
+  <section class="px-sec" id="api" data-scene aria-labelledby="api-title">
+    <div class="px-two">
+      <div class="px-head"><p class="h-label"><span class="n">06</span> · <span>{{.L.T "home.feat_api_title"}}</span></p><h2 id="api-title">{{.L.H "home.api_h"}}</h2><p class="h-sub">{{.L.T "home.feat_api_desc"}}</p><div class="h-cta"><a class="h-pill dark" href="/docs">{{.L.T "nav.api"}} ↗</a></div></div>
+      <div class="h-shell px-term"><div class="h-shell-bar"><i></i><i></i><i></i><span>curl</span></div><div class="h-term"><code id="api-curl">curl -F "file=@screenshot.png" -H "Authorization: Bearer $PIXELHOP_KEY" https://pixel.hel.ink/api/v1/upload</code><button type="button" data-copy-text data-copy-from="#api-curl">{{.L.T "upload.copy"}}</button></div><pre>{"url": "https://p.hel.ink/k7x2m",
  "direct": "https://p.hel.ink/k7x2m.png",
  "delete": "https://pixel.hel.ink/d/…"}
 <span class="ok">✓ {{.L.T "home.api_done"}}</span></pre></div>
+    </div>
   </section>
 
-  <!-- 8. guest or HOP ID -->
-  <section class="h-sec h-stage" id="account" aria-labelledby="account-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">06</span> · <span>HOP ID</span></p><h2 id="account-title" data-split>{{.L.H "home.account_h"}}</h2><p class="h-sub" data-rv>{{.L.H "features.accounts_desc"}}</p><div class="h-cta"><a class="h-pill dark" href="/register">{{.L.T "home.create_account"}}</a><a class="h-pill" href="/login">{{.L.T "nav.sign_in"}}</a></div></div>
-    <div class="h-stage-visual h-compare" data-rv-group><article class="h-window"><div class="h-window-bar"><span>● ● ●</span> {{.L.T "home.acct_guest"}}</div><ul class="h-feats h-window-body"><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g1"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g2" "size" .MaxMB}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g3"}}</span></li></ul></article><article class="h-window"><div class="h-window-bar"><span>● ● ●</span> HOP ID</div><ul class="h-feats h-window-body"><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m1"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m2"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m3"}}</span></li></ul></article></div>
+  <!-- 07 guest or HOP ID -->
+  <section class="px-sec" id="account" aria-labelledby="account-title">
+    <div class="px-head"><p class="h-label"><span class="n">07</span> · <span>HOP ID</span></p><h2 id="account-title">{{.L.H "home.account_h"}}</h2><p class="h-sub">{{.L.H "features.accounts_desc"}}</p><div class="h-cta"><a class="h-pill dark" href="/register">{{.L.T "home.create_account"}}</a><a class="h-pill" href="/login">{{.L.T "nav.sign_in"}}</a></div></div>
+    <div class="px-cmp">
+      <article class="h-cell"><h3>{{.L.T "home.acct_guest"}}</h3><ul class="h-feats"><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g1"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g2" "size" .MaxMB}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_g3"}}</span></li></ul></article>
+      <article class="h-cell px-hop"><h3>HOP ID</h3><ul class="h-feats"><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m1"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m2"}}</span></li><li><span aria-hidden="true">✓</span><span>{{.L.T "home.acct_m3"}}</span></li></ul></article>
+    </div>
   </section>
 
-  <!-- 9. tutorial -->
-  <section class="h-sec" id="tutorial" aria-labelledby="tutorial-title">
-    <p class="h-label"><span class="n">07</span> · <span>{{.L.T "home.tut_label"}}</span></p><h2 id="tutorial-title" data-split>{{.L.H "home.tut_h"}}</h2><p class="h-sub" data-rv>{{.L.T "home.feat_desc"}}</p>
-    <div class="h-tut" data-rv-group><article><h3>{{.L.T "home.step1_title"}}</h3><p>{{.L.T "home.step1_desc"}}</p><div class="h-tut-art">⌘V · {{.L.T "upload.choose"}} · {{.L.T "upload.from_link"}}</div></article><article><h3>{{.L.T "home.step2_title"}}</h3><p>{{.L.T "home.step2_desc"}}</p><div class="h-tut-art">GPS ✕ · EXIF ✕ · WebP ✓</div></article><article><h3>{{.L.T "home.step3_title"}}</h3><p>{{.L.T "home.step3_desc"}}</p><div class="h-tut-art">p.hel.ink/k7x2m</div></article></div>
-  </section>
-
-  <!-- 10. self-host -->
-  <section class="h-sec h-stage" id="open" aria-labelledby="open-title">
-    <div class="h-stage-copy"><p class="h-label"><span class="n">08</span> · <span>{{.L.T "home.open"}}</span></p><h2 id="open-title" data-split>{{.L.T "about.built_title"}} <em>{{.L.T "home.feat_selfhost_title"}}</em></h2><p class="h-sub" data-rv>{{.L.T "home.feat_selfhost_desc"}}</p><div class="h-badges" data-rv><a class="h-badge" href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE"><span>{{.L.T "home.license"}}</span><b>MIT</b></a><span class="h-badge"><span>Go</span><b>1.27+</b></span><span class="h-badge"><span>SQLite</span><b>{{.L.T "home.one_file"}}</b></span></div><div class="h-cta"><a class="h-pill dark" href="https://github.com/navi-crwn/PixelHop">GitHub ↗</a><a class="h-pill" href="/about">{{.L.T "footer.about"}}</a></div></div>
-    <div class="h-stage-visual h-shell" data-rv><div class="h-shell-bar"><i></i><i></i><i></i><span>docker</span></div><div class="h-term"><code id="install-docker">docker run -d --name pixelhop -p 8080:8080 -e PIXELHOP_BASE_URL=https://img.example.com -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest</code><button type="button" data-copy-text data-copy-from="#install-docker">{{.L.T "upload.copy"}}</button></div><pre>==> Pulling ghcr.io/navi-crwn/pixelhop:latest
+  <!-- 08 self-host -->
+  <section class="px-sec" id="open" data-scene aria-labelledby="open-title">
+    <div class="px-two">
+      <div class="px-head"><p class="h-label"><span class="n">08</span> · <span>{{.L.T "home.open"}}</span></p><h2 id="open-title">{{.L.T "about.built_title"}} <em>{{.L.T "home.feat_selfhost_title"}}</em></h2><p class="h-sub">{{.L.T "home.feat_selfhost_desc"}}</p><div class="h-badges"><a class="h-badge" href="https://github.com/navi-crwn/PixelHop/blob/main/LICENSE"><span>{{.L.T "home.license"}}</span><b>MIT</b></a><span class="h-badge"><span>Go</span><b>1.27+</b></span><span class="h-badge"><span>SQLite</span><b>{{.L.T "home.one_file"}}</b></span></div><div class="h-cta"><a class="h-pill dark" href="https://github.com/navi-crwn/PixelHop">GitHub ↗</a><a class="h-pill" href="/about">{{.L.T "footer.about"}}</a></div></div>
+      <div class="h-shell px-term"><div class="h-shell-bar"><i></i><i></i><i></i><span>docker</span></div><div class="h-term"><code id="install-docker">docker run -d --name pixelhop -p 8080:8080 -e PIXELHOP_BASE_URL=https://img.example.com -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest</code><button type="button" data-copy-text data-copy-from="#install-docker">{{.L.T "upload.copy"}}</button></div><pre>==> Pulling ghcr.io/navi-crwn/pixelhop:latest
 ==> PixelHop is running  addr=:8080  storage=local
 <span class="ok">✓ https://img.example.com</span></pre></div>
+    </div>
   </section>
 
-  <!-- 11. FAQ -->
-  <section class="h-sec" id="faq" aria-labelledby="faq-title">
-    <p class="h-label"><span class="n">09</span> · <span>FAQ</span></p><h2 id="faq-title" data-split>{{.L.H "home.faq_h"}}</h2><p class="h-sub" data-rv>{{.L.H "faq.howto"}}</p>
-    <div class="h-faq-grid">{{range $i := list "1" "2" "3" "4" "5" "6"}}<details><summary>{{$.L.T (printf "faq.q%s" $i)}}</summary><p>{{$.L.H (printf "faq.a%s" $i)}}</p></details>{{end}}</div>
+  <!-- 09 questions: one card each -->
+  <section class="px-sec" id="faq" aria-labelledby="faq-title">
+    <div class="px-head"><p class="h-label"><span class="n">09</span> · <span>{{.L.T "home2.faq_label"}}</span></p><h2 id="faq-title">{{.L.H "home.faq_h"}}</h2><p class="h-sub">{{.L.H "faq.howto"}}</p></div>
+    <div class="px-faq">{{range $i := list "1" "2" "3" "4" "5" "6"}}<article class="h-cell" data-glow><span class="px-q" aria-hidden="true">{{$i}}</span><h3>{{$.L.T (printf "faq.q%s" $i)}}</h3><p>{{$.L.H (printf "faq.a%s" $i)}}</p></article>{{end}}</div>
   </section>
 
-  <!-- 12. family -->
-  <section class="h-sec" id="family" aria-labelledby="family-title"><p class="h-label"><span class="n">10</span> · <span>HOP</span></p><h2 id="family-title" data-split><em>{{.L.T "home.family_title"}}</em></h2><p class="h-sub" data-rv>{{.L.T "home.family_desc"}}</p><div class="h-family" data-rv-group>{{range hopFamily}}<a href="{{.URL}}">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="32" height="32" loading="lazy">{{end}}{{.Name}}</a>{{end}}</div></section>
+  <!-- 10 family -->
+  <section class="px-sec" id="family" aria-labelledby="family-title"><p class="h-label"><span class="n">10</span> · <span>HOP</span></p><h2 id="family-title" class="px-h2"><em>{{.L.T "home.family_title"}}</em></h2><p class="h-sub">{{.L.T "home.family_desc"}}</p><div class="px-fams">{{range hopFamily}}<article class="h-cell px-fam"><figure class="h-art">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="120" height="120" loading="lazy">{{end}}<canvas data-hop-hero="{{.Slug}}" tabindex="0" aria-label="{{$.L.T "home.rotate"}}"></canvas></figure><a href="{{.URL}}">{{if eq .Slug "hub"}}HOP ID{{else}}{{.Name}}{{end}}</a></article>{{end}}</div></section>
 
-  <!-- 13. the last word -->
-  <section class="h-sec h-final" aria-labelledby="final-title"><h2 id="final-title" data-split>{{.L.H "home.hero_title"}}</h2><p class="h-sub">{{.L.T "home.hero_lead"}}</p><div class="h-cta"><a class="h-pill dark" href="#quick">{{.L.T "nav.upload"}} ↑</a><a class="h-pill" href="/features">{{.L.T "features.title"}}</a></div></section>
+  <!-- 11 the last word -->
+  <section class="px-sec h-final" aria-labelledby="final-title"><h2 id="final-title" class="px-h2">{{.L.H "home.hero_title"}}</h2><p class="h-sub">{{.L.T "home.hero_lead"}}</p><div class="h-cta"><a class="h-pill dark" href="#quick">{{.L.T "nav.upload"}} ↑</a><a class="h-pill" href="/features">{{.L.T "features.title"}}</a></div></section>
 </div>
 {{end}}

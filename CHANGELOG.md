@@ -4,6 +4,14 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Home v2
+- The home page below the upload box is rebuilt on the shared HOP scene engine (`hop-scenes`, HOP assets v2): a running line and numbers, then pinned scenes where the scroll plays an upload, the removal of a photo's location and camera data, an album turning into five link formats, and a photo that comes apart when its time runs out; a studio section with a live mini tool in each card; the API and self-host terminals; question cards; and the other HOP apps as four marks you can turn.
+- Everything is complete without script or with "reduce motion"; nothing loads from a CDN.
+- The shared copy of the HOP assets is now v2 (`scripts/sync-hop-assets.sh` follows it); new text is English in all catalogs until translated (`docs/pending-translation-home2.json`).
+
+### Dashboard
+- A "Get the most out of PixelHop" card shows four steps (first upload, an album, a public profile, an API key) with a progress ring, and goes away when all four are done.
+
 ### Media addresses
 - The profile photo from HOP ID or Google is made absolute before it is shown: a bare path (`/storage/...`) was asked of PixelHop and gave a 404, an `http://` address was blocked on the https pages.
 - Photos are also served on the link host (`p.hel.ink/avatar/...`) instead of bouncing to the app, and carry `Cross-Origin-Resource-Policy: cross-origin` so the gallery API's `avatar` can be used on other sites.

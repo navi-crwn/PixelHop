@@ -67,6 +67,7 @@ func loadPages(a *App) (*pages, error) {
 		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.LinkURL) },
 		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.LinkURL) },
 		"add":    func(x, y int) int { return x + y },
+		"mul":    func(x, y int) int { return x * y },
 		"pct": func(n, of int) int {
 			if of == 0 {
 				return 0
@@ -74,6 +75,7 @@ func loadPages(a *App) (*pages, error) {
 			return n * 100 / of
 		},
 		"list": func(items ...string) []string { return items },
+		"wall": wallTiles,
 		"seq": func(n int) []int {
 			s := make([]int, n)
 			for i := range s {
@@ -330,4 +332,23 @@ func plural(n int, w string) string {
 		return "1 " + w
 	}
 	return fmt.Sprintf("%d %ss", n, w)
+}
+
+// wallTile is one square of the picture that comes apart on the home page: its
+// column and row, and d in [0,1) which decides when it falls (a fixed
+// permutation when 37 and cols*rows share no factor, the same on every visit).
+type wallTile struct {
+	C, R int
+	D    float64
+}
+
+func wallTiles(cols, rows int) []wallTile {
+	tiles := make([]wallTile, 0, cols*rows)
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			i := r*cols + c
+			tiles = append(tiles, wallTile{C: c, R: r, D: float64((i*37+11)%(cols*rows)) / float64(cols*rows)})
+		}
+	}
+	return tiles
 }
