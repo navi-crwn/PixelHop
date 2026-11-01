@@ -34,6 +34,7 @@ type page struct {
 	Canon         string // the canonical address of a shared page
 	OnLink        bool   // served through the link host
 	Path          string
+	Dash          bool // the signed-in dashboard shell (sidebar, settings-type top bar)
 	Announcement  string
 	Version       string
 	Asset         string // cache-busting query for /static files
@@ -153,6 +154,7 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	p.L = a.locale(w, r)
 	p.Langs = i18n.Langs
 	p = a.base(r, p)
+	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
 	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
 		p.NoIndex = true
 	}

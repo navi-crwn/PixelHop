@@ -270,5 +270,7 @@
   "home.tut_h": "3 ステップ。<em>アカウント不要。</em>",
   "home.license": "ライセンス",
   "home.one_file": "1 ファイル",
-  "home.faq_h": "よくある質問に<em>お答えします。</em>"
+  "home.faq_h": "よくある質問に<em>お答えします。</em>",
+  "dash.family": "HOP ファミリー",
+  "dash.account": "アカウント（HOP ID）"
 }
