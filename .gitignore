@@ -10,3 +10,12 @@ node_modules/
 .DS_Store
 __pycache__/
 *.pyc
+
+# Written by install.sh / update.sh
+/start.sh
+/backups/
+/.env.backup-*
+/compose.local.yml
+/deploy/generated/
+/bin/
+/data/
