@@ -72,6 +72,7 @@ func loadPages(a *App) (*pages, error) {
 			}
 			return n * 100 / of
 		},
+		"list": func(items ...string) []string { return items },
 		"seq": func(n int) []int {
 			s := make([]int, n)
 			for i := range s {
