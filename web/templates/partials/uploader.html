@@ -1,25 +1,25 @@
 {{define "uploader"}}
     <div class="hero-grid" id="hero-grid">
     <div class="drop" id="drop" data-max-mb="{{.MaxMB}}" data-max-media-mb="{{.MaxMediaMB}}" data-member-media-mb="{{.MemberMediaMB}}" data-signed-in="{{if .User}}1{{end}}" data-max-batch="{{.MaxBatch}}">
-      <div class="drop-in" id="drop-in" role="button" tabindex="0" aria-label="Choose files to upload">
+      <div class="drop-in" id="drop-in" role="button" tabindex="0">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
-        <h2>Drop files here</h2>
-        <p class="sub">{{if eq .MaxMB .MaxMediaMB}}Images, videos &amp; PDFs up to {{.MaxMB}} MB each{{else}}Images up to {{.MaxMB}} MB · videos &amp; PDFs up to {{.MaxMediaMB}} MB{{end}}<span class="nowrap"> · or press <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
+        <h2 id="drop-title">{{.L.T "Drop files here"}}</h2>
+        <p class="sub">{{if eq .MaxMB .MaxMediaMB}}{{.L.T "upload.equal_limits" "size" .MaxMB}}{{else}}{{.L.T "upload.limits" "image" .MaxMB "media" .MaxMediaMB}}{{end}}<span class="nowrap"> · {{.L.T "upload.paste_shortcut"}} <span class="kbd">Ctrl</span>+<span class="kbd">V</span></span></p>
         <div class="btn-row">
-          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>Choose files</button>
-          <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>Paste</button>
-          <button class="btn lg" type="button" id="show-url" aria-label="Upload from a link" title="Upload from a link"><svg><use href="#i-link"/></svg><span class="url-label">From a link</span></button>
+          <button class="btn primary lg" type="button" id="pick"><svg><use href="#i-upload"/></svg>{{.L.T "upload.choose"}}</button>
+          <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>{{.L.T "upload.paste"}}</button>
+          <button class="btn lg" type="button" id="show-url" title="{{.L.T "upload.from_link"}}"><svg><use href="#i-link"/></svg><span class="url-label">{{.L.T "upload.from_link"}}</span></button>
         </div>
         <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
-        <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="Paste here" data-placeholder="Press and hold here, then tap Paste"></div>
+        <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="{{.L.T "upload.paste"}}" data-placeholder="{{.L.T "upload.paste_hint"}}"></div>
         <form class="url-row hide" id="url-form">
-          <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="Image link">
-          <button class="btn" type="submit">Fetch</button>
+          <input type="url" id="url" placeholder="https://example.com/photo.jpg" aria-label="{{.L.T "upload.image_link"}}">
+          <button class="btn" type="submit">{{.L.T "upload.fetch"}}</button>
         </form>
 
         <div class="chips" id="chips">
           <button class="chip" type="button" id="opts-toggle" aria-expanded="false" aria-controls="opts"><svg><use href="#i-gear"/></svg><span>{{.L.T "Advanced"}}</span></button>
-          {{if .User}}<button class="chip" type="button" id="ticket-toggle" aria-expanded="false" aria-controls="ticket-box"><svg><use href="#i-album"/></svg>Ticket &amp; note</button>{{end}}
+          {{if .User}}<button class="chip" type="button" id="ticket-toggle" aria-expanded="false" aria-controls="ticket-box"><svg><use href="#i-album"/></svg>{{.L.T "upload.ticket_note"}}</button>{{end}}
         </div>
         <div class="opts hide" id="opts">
           <div class="field upload-warning-fields">
@@ -28,41 +28,41 @@
             <label for="upload-warning-reason">{{.L.T "Reason (optional)"}}</label>
             <input type="text" id="upload-warning-reason" maxlength="255">
           </div>
-          <label>Delete after
+          <label>{{.L.T "upload.delete_after"}}
             <select id="expire">
-              <option value="">Never</option>
-              <option value="10m">10 minutes</option>
-              <option value="1h">1 hour</option>
-              <option value="1d">1 day</option>
-              <option value="7d">7 days</option>
-              <option value="30d">30 days</option>
-              <option value="90d">90 days</option>
+              <option value="">{{.L.T "upload.never"}}</option>
+              <option value="10m">{{.L.T "upload.minutes" "n" 10}}</option>
+              <option value="1h">{{.L.T "upload.hour"}}</option>
+              <option value="1d">{{.L.T "upload.day"}}</option>
+              <option value="7d">{{.L.T "upload.days" "n" 7}}</option>
+              <option value="30d">{{.L.T "upload.days" "n" 30}}</option>
+              <option value="90d">{{.L.T "upload.days" "n" 90}}</option>
             </select>
           </label>
-          <label><input type="checkbox" id="slug" checked> File name in link</label>
-          <label><input type="checkbox" id="album" checked> Several files = one album</label>
-          {{if .User}}<label><input type="checkbox" id="listed"> Show on my profile</label>{{end}}
+          <label><input type="checkbox" id="slug" checked> {{.L.T "upload.filename"}}</label>
+          <label><input type="checkbox" id="album" checked> {{.L.T "upload.one_album"}}</label>
+          {{if .User}}<label><input type="checkbox" id="listed"> {{.L.T "upload.listed"}}</label>{{end}}
         </div>
         {{if .User}}<div class="ticket hide" id="ticket-box">
-          <input type="text" id="ticket" maxlength="120" placeholder="Ticket or transaction no., e.g. TRX-20261016-0042" aria-label="Ticket or reference">
-          <textarea id="note" maxlength="1000" rows="2" placeholder="Note for the admin (optional)" aria-label="Note"></textarea>
-          <span class="small muted">All files go into one album with this title and note.</span>
+          <input type="text" id="ticket" maxlength="120" placeholder="{{.L.T "upload.ticket_hint"}}" aria-label="{{.L.T "upload.ticket_note"}}">
+          <textarea id="note" maxlength="1000" rows="2" placeholder="{{.L.T "upload.note_hint"}}" aria-label="{{.L.T "upload.note_hint"}}"></textarea>
+          <span class="small muted">{{.L.T "upload.album_hint"}}</span>
         </div>{{end}}
       </div>
     </div>
 
-    <aside class="results hide" id="results" data-copy-all-root aria-label="Your links">
-      <div class="results-head"><h2>Your links</h2><button class="btn sm ghost" type="button" id="results-clear">Clear</button></div>
+    <aside class="results hide" id="results" data-copy-all-root aria-label="{{.L.T "upload.your_links"}}">
+      <div class="results-head"><h2>{{.L.T "upload.your_links"}}</h2><button class="btn sm ghost" type="button" id="results-clear">{{.L.T "upload.clear"}}</button></div>
       <div class="album-banner hide" id="album-banner">
-        <svg width="18" height="18"><use href="#i-album"/></svg><b>Album</b>
-        <input type="text" readonly id="album-link" aria-label="Album link">
-        <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>Copy</button>
-        <a class="btn sm ghost" id="album-open" href="#">Open</a>
+        <svg width="18" height="18"><use href="#i-album"/></svg><b>{{.L.T "upload.album"}}</b>
+        <input type="text" readonly id="album-link" aria-label="{{.L.T "upload.album"}}">
+        <button class="btn sm" type="button" data-copy="#album-link"><svg><use href="#i-copy"/></svg>{{.L.T "upload.copy"}}</button>
+        <a class="btn sm ghost" id="album-open" href="#">{{.L.T "upload.open"}}</a>
       </div>
       <div class="hide" id="copy-all-bar"><div class="copy-all" data-copy-all-scope>
-        <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>Copy for chat</button>
-        <button class="btn sm" type="button" data-copy-all="direct">All direct links</button>
-        <button class="btn sm ghost" type="button" data-copy-all="page">View</button>
+        <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>{{.L.T "upload.copy_chat"}}</button>
+        <button class="btn sm" type="button" data-copy-all="direct">{{.L.T "upload.direct_links"}}</button>
+        <button class="btn sm ghost" type="button" data-copy-all="page">{{.L.T "upload.view"}}</button>
         <button class="btn sm ghost" type="button" data-copy-all="markdown">Markdown</button>
         <button class="btn sm ghost" type="button" data-copy-all="bbcode">BBCode</button>
       </div></div>

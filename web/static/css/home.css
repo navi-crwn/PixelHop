@@ -1,0 +1,13 @@
+.pixel-home .h-tour-panel { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:center; }
+.pixel-home .h-tour-panel[hidden] { display:none; }
+.pixel-home .h-tour-panel h3 { font-size:24px; margin-block:0 12px; }
+.pixel-home .h-tour-panel p { color:var(--home-muted); }
+.pixel-home .h-demo { margin-block:18px; }
+.pixel-home .h-demo img { max-width:100%; object-fit:contain; }
+.pixel-home [data-resize-demo] img { display:block; margin:12px auto; }
+.pixel-home .h-final :is(.h-sub,.h-cta) { margin-inline:auto; justify-content:center; }
+.pixel-home .h-art canvas { touch-action:pan-y; }
+.pixel-home .h-pill svg { width:20px; height:20px; }
+@media(max-width:800px) { .pixel-home .h-tour-panel { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:480px) { .pixel-home .h-hero h1 em { display:block; } }
+@media(prefers-color-scheme:dark) { :root:not([data-theme=light]) .pixel-home { --h-ink:linear-gradient(100deg,#22d3ee 0%,#a78bfa 50%,#f472b6 100%); --home-text:#f1f5f9; --home-muted:#acb6c8; --home-panel:#151c2d; --home-line:#94a3b844; } }
