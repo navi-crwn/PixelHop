@@ -270,5 +270,7 @@
   "home.tut_h": "三步，<em>无需账号。</em>",
   "home.license": "许可证",
   "home.one_file": "一个文件",
-  "home.faq_h": "问题，<em>有答案。</em>"
+  "home.faq_h": "问题，<em>有答案。</em>",
+  "dash.family": "HOP 家族",
+  "dash.account": "账号（HOP ID）"
 }

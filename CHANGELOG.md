@@ -2,6 +2,12 @@
 
 All notable changes to PixelHop will be documented in this file.
 
+## [Unreleased]
+
+### Dashboard chrome
+- The signed-in dashboard (dashboard, albums, settings) has the same chrome as the other HOP dashboards: a sidebar with this app's menu and the HOP family (HOP ID, LinkHop, BioHop, NoteHop, with their marks), a top bar of settings-type controls (upload, language, theme and an account menu with your HOP ID, settings and sign out), and a compact footer.
+- The footer on every page spreads its five columns evenly; a flex rule had packed them to the left.
+
 ## [3.7.0] - 2026-10-28
 
 ### Links on their own host

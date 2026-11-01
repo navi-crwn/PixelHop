@@ -270,5 +270,7 @@
   "home.tut_h": "Tres pasos. <em>Sin cuenta.</em>",
   "home.license": "Licencia",
   "home.one_file": "un archivo",
-  "home.faq_h": "Preguntas, <em>respondidas.</em>"
+  "home.faq_h": "Preguntas, <em>respondidas.</em>",
+  "dash.family": "Familia HOP",
+  "dash.account": "Cuenta (HOP ID)"
 }
