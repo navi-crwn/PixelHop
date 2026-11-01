@@ -18,12 +18,12 @@ func TestDashboardShell(t *testing.T) {
 			t.Fatalf("%s: status %d", path, rec.Code)
 		}
 		body := rec.Body.String()
-		for _, want := range []string{`class="dash"`, `class="dash-side"`, `class="dash-nav dash-family"`, `>HOP ID<`, `>LinkHop`, `>BioHop`, `>NoteHop`, `class="dash-top"`, `class="dash-foot"`} {
+		for _, want := range []string{`class="shell"`, `class="shell-side"`, `class="shell-nav shell-family"`, `>HOP ID<`, `>LinkHop`, `>BioHop`, `>NoteHop`, `class="shell-top"`, `class="shell-foot"`} {
 			if !strings.Contains(body, want) {
 				t.Errorf("%s lacks %s", path, want)
 			}
 		}
-		top, _, _ := strings.Cut(strings.SplitN(body, `class="dash-top"`, 2)[1], "</header>")
+		top, _, _ := strings.Cut(strings.SplitN(body, `class="shell-top"`, 2)[1], "</header>")
 		if strings.Contains(top, "family-switcher") {
 			t.Errorf("%s: the app grid is back in the top bar", path)
 		}
@@ -35,10 +35,10 @@ func TestDashboardShell(t *testing.T) {
 	}
 	// pages for everyone else keep the public header and footer
 	body := fetch(h, "/about", cookie).Body.String()
-	if strings.Contains(body, `class="dash-side"`) || !strings.Contains(body, `class="footer-columns"`) {
+	if strings.Contains(body, `class="shell-side"`) || !strings.Contains(body, `class="footer-columns"`) {
 		t.Error("public pages must keep the public chrome")
 	}
-	if guest := fetch(h, "/").Body.String(); strings.Contains(guest, `class="dash"`) {
+	if guest := fetch(h, "/").Body.String(); strings.Contains(guest, `class="shell"`) {
 		t.Error("a guest never gets the dashboard shell")
 	}
 }
