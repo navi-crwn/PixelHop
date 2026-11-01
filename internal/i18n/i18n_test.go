@@ -82,20 +82,44 @@ func TestT(t *testing.T) {
 	if got := string(l.H("about.title", "site", "<b>x</b>")); !strings.Contains(got, "&lt;b&gt;x&lt;/b&gt;") {
 		t.Fatalf("H must escape values: %q", got)
 	}
-	if (Locale{Get("ar")}).Dir() != "rtl" || (Locale{Get("en")}).Dir() != "ltr" {
-		t.Fatal("dir")
+	for _, code := range []string{"en", "ar", "de", "ru"} {
+		if (Locale{Get(code)}).Dir() != "ltr" {
+			t.Fatalf("%s must be left to right", code)
+		}
 	}
 }
 
 func TestLangs(t *testing.T) {
-	if len(Langs) != 8 {
-		t.Fatalf("expected 8 languages, got %d", len(Langs))
+	expected := []string{"en", "zh-CN", "de", "id", "ja", "pt-BR", "es", "fr", "ru"}
+	if len(Langs) != len(expected) {
+		t.Fatalf("expected %d languages, got %d", len(expected), len(Langs))
 	}
-	expected := []string{"en", "id", "zh", "es", "ar", "pt", "fr", "ja"}
 	for i, code := range expected {
 		if Langs[i].Code != code {
 			t.Errorf("Langs[%d] = %q, want %q", i, Langs[i].Code, code)
 		}
+		if Langs[i].Name == "" || Langs[i].Short == "" {
+			t.Errorf("%s has no menu name or short code", code)
+		}
+	}
+}
+
+func TestResolve(t *testing.T) {
+	for in, want := range map[string]string{"en": "en", "EN": "en", "zh": "zh-CN", "zh-cn": "zh-CN", "pt": "pt-BR", "PT-br": "pt-BR", " de ": "de", "ru": "ru"} {
+		if got, ok := Resolve(in); !ok || got != want {
+			t.Errorf("Resolve(%q) = %q, %v; want %q", in, got, ok, want)
+		}
+	}
+	for _, in := range []string{"", "ar", "xx", "zh-TW", "pt-PT"} {
+		if got, ok := Resolve(in); ok {
+			t.Errorf("Resolve(%q) = %q; a retired or unknown language must not resolve", in, got)
+		}
+	}
+	if Get("ar").Code != "en" || Get("zh").Code != "zh-CN" {
+		t.Error("Get must fall back to English and map the old short codes")
+	}
+	if T("zh", "nav.upload") != T("zh-CN", "nav.upload") {
+		t.Error("T must treat zh as zh-CN")
 	}
 }
 

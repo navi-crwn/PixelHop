@@ -63,7 +63,7 @@
         <div class="menu lang-menu" id="lang-menu">
           <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
           <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}
-            <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}>{{.Name}}</a>{{end}}
+            <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}><span>{{.Name}}</span><small>{{.Short}}</small></a>{{end}}
           </div>
         </div>
         <button class="icon-btn" id="theme" type="button" aria-label="{{.L.T "nav.theme"}}"><svg class="t-moon"><use href="#i-moon"/></svg><svg class="t-sun"><use href="#i-sun"/></svg></button>
@@ -107,7 +107,7 @@
       <div class="menu lang-menu" id="lang-menu">
         <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
         <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}
-          <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}>{{.Name}}</a>{{end}}
+          <a href="?lang={{.Code}}" data-lang="{{.Code}}" lang="{{.Code}}"{{if eq .Code $cur}} aria-current="true"{{end}}><span>{{.Name}}</span><small>{{.Short}}</small></a>{{end}}
         </div>
       </div>
       <button class="btn sm install-nav hide" id="install-app" type="button" title="Add {{.Site}} to your home screen"><svg><use href="#i-down"/></svg><span>{{.L.T "nav.install"}}</span></button>

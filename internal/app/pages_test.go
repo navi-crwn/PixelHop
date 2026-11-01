@@ -1,6 +1,7 @@
 package app
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -90,7 +91,7 @@ func TestPageLanguages(t *testing.T) {
 		t.Errorf("pixel_lang=id cookie was not set")
 	}
 
-	// ?lang=ar sets RTL
+	// A retired language falls back to English and sets no cookie.
 	req = httptest.NewRequest("GET", "/about?lang=ar", nil)
 	rec = httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
@@ -98,8 +99,28 @@ func TestPageLanguages(t *testing.T) {
 		t.Fatalf("/about?lang=ar: status %d", rec.Code)
 	}
 	body = rec.Body.String()
-	if !strings.Contains(body, `<html lang="ar" dir="rtl">`) {
-		t.Errorf("expected html lang=ar dir=rtl, got: %s", body[:100])
+	if !strings.Contains(body, `<html lang="en" dir="ltr">`) {
+		t.Errorf("expected html lang=en dir=ltr, got: %s", body[:100])
+	}
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "pixel_lang" {
+			t.Errorf("a retired language must not set the language cookie, got %q", c.Value)
+		}
+	}
+	// The old short codes mean the new ones, in the query and in a cookie.
+	for q, want := range map[string]string{"zh": "zh-CN", "pt": "pt-BR", "de": "de", "ru": "ru"} {
+		rec = httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest("GET", "/about?lang="+q, nil))
+		if !strings.Contains(rec.Body.String(), `<html lang="`+want+`" dir="ltr">`) {
+			t.Errorf("?lang=%s: expected html lang=%s", q, want)
+		}
+	}
+	req = httptest.NewRequest("GET", "/about", nil)
+	req.AddCookie(&http.Cookie{Name: "pixel_lang", Value: "zh"})
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if !strings.Contains(rec.Body.String(), `<html lang="zh-CN" dir="ltr">`) {
+		t.Error("a stored zh cookie must read as zh-CN")
 	}
 
 	// GET /i18n/{lang} returns JavaScript catalog
