@@ -2,6 +2,7 @@
   <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>{{$.L.T "nav.dashboard"}}</a>
   <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{$.L.T "home.feat_albums_title"}}</a>
   {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}" {{if eq .Path (print "/u/" .User.Username.String)}}aria-current="page"{{end}}><svg><use href="#i-users"/></svg>{{$.L.T "mytabs.profile"}}</a>{{end}}
+  <a href="/dashboard/trash" {{if eq .Path "/dashboard/trash"}}aria-current="page"{{end}}><svg><use href="#i-trash"/></svg>{{$.L.T "mytabs.trash"}}</a>
   <a href="/tools"><svg><use href="#i-adjust"/></svg>{{$.L.T "nav.studio"}}</a>
   <a href="/settings" {{if eq .Path "/settings"}}aria-current="page"{{end}}><svg><use href="#i-gear"/></svg>{{$.L.T "mytabs.settings"}}</a>
 </nav>{{end}}

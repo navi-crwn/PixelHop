@@ -28,6 +28,8 @@ type dashData struct {
 	Kind    string
 	Sum     db.UserSummary
 	Keys    int // API keys made, to nudge people towards ShareX
+	Tag     string
+	Tags    []db.TagCount
 }
 
 func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
@@ -42,14 +44,14 @@ func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
 	if kind != "image" && kind != "video" && kind != "pdf" {
 		kind = ""
 	}
-	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Search: q.Get("q"), Sort: q.Get("sort"), Kind: kind, Limit: per, Offset: (pg - 1) * per})
+	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Search: q.Get("q"), Tag: q.Get("tag"), Sort: q.Get("sort"), Kind: kind, Limit: per, Offset: (pg - 1) * per})
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
 	used, _ := a.db.UserStorage(r.Context(), u.ID)
 	d := dashData{Images: ims, Total: total, Page: pg, Pages: (total + per - 1) / per, Query: q.Get("q"), Sort: q.Get("sort"),
-		Used: used, Quota: u.QuotaBytes, Welcome: q.Has("welcome"), Kind: kind, Sum: a.db.UserSummary(r.Context(), u.ID)}
+		Used: used, Quota: u.QuotaBytes, Welcome: q.Has("welcome"), Kind: kind, Sum: a.db.UserSummary(r.Context(), u.ID), Tag: q.Get("tag"), Tags: a.db.UserTags(r.Context(), u.ID)}
 	if keys, _ := a.db.APIKeys(r.Context(), u.ID); keys != nil {
 		d.Keys = len(keys)
 	}

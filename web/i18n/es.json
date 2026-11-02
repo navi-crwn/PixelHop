@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} mes",
   "time.month.other": "{n} meses",
   "time.year.one": "{n} año",
-  "time.year.other": "{n} años"
+  "time.year.other": "{n} años",
+  "mytabs.trash": "Papelera",
+  "trash.sub": "Los archivos eliminados esperan aquí {days} días. Restáuralos o elimínalos para siempre.",
+  "trash.empty_confirm": "¿Eliminar todo lo de la papelera para siempre?",
+  "trash.empty_btn": "Vaciar la papelera",
+  "trash.note": "Los archivos de la papelera siguen contando en tu almacenamiento.",
+  "trash.left": "Se elimina para siempre en {time}",
+  "trash.restore": "Restaurar",
+  "trash.confirm_one": "¿Eliminar este archivo para siempre?",
+  "trash.none": "La papelera está vacía.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "¿Mover esta imagen a la papelera? El enlace deja de funcionar ahora; puedes restaurarla durante 7 días.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "¿Mover {n} imágenes a la papelera? Puedes restaurarlas durante 7 días.",
+  "{n} moved to the trash": "{n} movidas a la papelera",
+  "view.tags": "Etiquetas",
+  "view.tags_hint": "separa con comas; úsalas para buscar tus archivos"
 }

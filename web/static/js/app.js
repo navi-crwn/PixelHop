@@ -558,7 +558,7 @@
     ef.addEventListener('change', sync); sync();
     $('#edit-image').addEventListener('close', function () {
       if ($('#edit-image').returnValue !== 'save') return;
-      var body = { title: $('#e-title').value, alt: $('#e-alt').value, visibility: vis() };
+      var body = { title: $('#e-title').value, alt: $('#e-alt').value, tags: $('#e-tags').value.split(','), visibility: vis() };
       if (vis() === 'password' && $('#e-pass').value) body.password = $('#e-pass').value;
       if ($('#e-listed')) body.listed = $('#e-listed').checked;
       var cwEl = ef.querySelector('[name=content_warning]:checked');
@@ -592,7 +592,7 @@
   });
   var del = $('#delete');
   if (del) del.addEventListener('click', function () {
-    if (!confirm(T('Delete this image for good? The link stops working right away.'))) return;
+    if (!confirm(T('Move this image to the trash? The link stops working now; you can restore it for 7 days.'))) return;
     api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
   });
 
@@ -636,7 +636,7 @@
     var reloadAfter = function (res, what) {
       var n = function (k) { return res.filter(function (x) { return x === k; }).length; };
       var ok = n('ok'), locked = n('locked'), failed = n('failed'), msg = [];
-      if (ok) msg.push(T({ shown: '{n} shown on your profile', hidden: '{n} hidden from your profile', deleted: '{n} deleted' }[what], { n: ok }));
+      if (ok) msg.push(T({ shown: '{n} shown on your profile', hidden: '{n} hidden from your profile', deleted: '{n} moved to the trash' }[what], { n: ok }));
       if (locked) msg.push(T('{n} skipped: private or password-protected files never appear on profiles', { n: locked }));
       if (failed) msg.push(T('{n} failed; try those again', { n: failed }));
       var bad = locked || failed;
@@ -655,7 +655,7 @@
     $('#delete-selected').addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
-      if (!confirm(T('Delete {n} images for good?', { n: ids.length }))) return;
+      if (!confirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }))) return;
       Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
         .then(function (res) { reloadAfter(res, 'deleted'); });
     });

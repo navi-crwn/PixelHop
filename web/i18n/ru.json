@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} мес.",
   "time.month.other": "{n} мес.",
   "time.year.one": "{n} г.",
-  "time.year.other": "{n} г."
+  "time.year.other": "{n} г.",
+  "mytabs.trash": "Корзина",
+  "trash.sub": "Удалённые файлы хранятся здесь {days} дн. Восстановите их или удалите навсегда.",
+  "trash.empty_confirm": "Удалить всё из корзины навсегда?",
+  "trash.empty_btn": "Очистить корзину",
+  "trash.note": "Файлы в корзине по-прежнему занимают ваше хранилище.",
+  "trash.left": "Будет удалён навсегда через {time}",
+  "trash.restore": "Восстановить",
+  "trash.confirm_one": "Удалить этот файл навсегда?",
+  "trash.none": "Корзина пуста.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Переместить это изображение в корзину? Ссылка перестанет работать сразу; восстановить можно в течение 7 дней.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "Переместить изображений в корзину: {n}? Восстановить можно в течение 7 дней.",
+  "{n} moved to the trash": "В корзину перемещено: {n}",
+  "view.tags": "Теги",
+  "view.tags_hint": "через запятую; по ним можно искать свои файлы"
 }

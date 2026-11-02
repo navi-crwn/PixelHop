@@ -229,6 +229,10 @@ ALTER TABLE albums ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';`,
 	`ALTER TABLE users ADD COLUMN block_hotlinks INTEGER NOT NULL DEFAULT 0;`,
 	// 11: files taken down for breaking the rules cannot be uploaded again
 	`CREATE TABLE blocked_hashes (sha256 TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL);`,
+	// 12: a deleted file waits in the trash for a week (deleted_at > 0; it is also hidden)
+	`ALTER TABLE images ADD COLUMN deleted_at INTEGER NOT NULL DEFAULT 0;`,
+	// 13: tags, kept as ",beach,sunset," so a tag can be matched exactly
+	`ALTER TABLE images ADD COLUMN tags TEXT NOT NULL DEFAULT '';`,
 }
 
 func (d *DB) migrate() error {

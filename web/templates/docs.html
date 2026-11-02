@@ -109,9 +109,12 @@
         <h2>Get, rename or delete one image</h2>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}</div>
         <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/images/{id}</div>
-        <p>Body, any of: <code>{"title": "New name", "alt": "Describe it for screen readers", "listed": true}</code>. <code>listed</code> shows it on your public profile (<code>/u/you</code>) and Explore.</p>
+        <p>Body, any of: <code>{"title": "New name", "alt": "Describe it for screen readers", "tags": ["beach", "2026"], "listed": true}</code>. <code>tags</code> (up to 12) are for finding your own files: the dashboard searches them and filters by them. <code>listed</code> shows it on your public profile (<code>/u/you</code>) and Explore.</p>
         <div class="endpoint"><span class="method del">DELETE</span>/api/v1/images/{id}</div>
 <pre><code>curl -X DELETE -H "Authorization: Bearer ph_yourkey" {{.Base}}/api/v1/images/holiday-x7Kp2Q</code></pre>
+        <p>Deleting moves the file to the <b>trash</b>: its links stop working at once and you can bring it back for 7 days. Delete it again (or add <code>?permanent=1</code>) to remove it for good. Webhooks <code>image.deleted</code> fire when it is removed for good.</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/images/{id}/restore</div>
+        <p>Brings a file back from the trash.</p>
       </section>
 
       <section id="privacy">

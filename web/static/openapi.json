@@ -640,6 +640,13 @@
                   },
                   "password": {
                     "type": "string"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 12
                   }
                 }
               }
@@ -672,7 +679,7 @@
         }
       },
       "delete": {
-        "summary": "Delete a file",
+        "summary": "Move a file to the trash (restorable for 7 days); delete it again or add permanent=1 to remove it for good",
         "parameters": [
           {
             "name": "id",
@@ -680,6 +687,16 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "permanent",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
             }
           }
         ],
@@ -936,6 +953,29 @@
         "responses": {
           "200": {
             "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/v1/images/{id}/restore": {
+      "post": {
+        "summary": "Bring a file back from the trash",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restored"
+          },
+          "404": {
+            "description": "Not found"
           }
         }
       }

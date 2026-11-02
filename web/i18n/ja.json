@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} か月",
   "time.month.other": "{n} か月",
   "time.year.one": "{n} 年",
-  "time.year.other": "{n} 年"
+  "time.year.other": "{n} 年",
+  "mytabs.trash": "ごみ箱",
+  "trash.sub": "削除したファイルはここに {days} 日間保管されます。元に戻すか、完全に削除できます。",
+  "trash.empty_confirm": "ごみ箱の中身をすべて完全に削除しますか？",
+  "trash.empty_btn": "ごみ箱を空にする",
+  "trash.note": "ごみ箱のファイルもストレージ容量に含まれます。",
+  "trash.left": "{time}後に完全削除",
+  "trash.restore": "元に戻す",
+  "trash.confirm_one": "このファイルを完全に削除しますか？",
+  "trash.none": "ごみ箱は空です。",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "この画像をごみ箱に移しますか？リンクはすぐに使えなくなりますが、7日間は元に戻せます。",
+  "Move {n} images to the trash? You can restore them for 7 days.": "{n} 枚の画像をごみ箱に移しますか？7日間は元に戻せます。",
+  "{n} moved to the trash": "{n} 件をごみ箱に移しました",
+  "view.tags": "タグ",
+  "view.tags_hint": "カンマで区切ります。自分のファイルの検索に使えます"
 }

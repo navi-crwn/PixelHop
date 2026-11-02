@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} bulan",
   "time.month.other": "{n} bulan",
   "time.year.one": "{n} tahun",
-  "time.year.other": "{n} tahun"
+  "time.year.other": "{n} tahun",
+  "mytabs.trash": "Sampah",
+  "trash.sub": "File yang dihapus menunggu di sini selama {days} hari. Pulihkan, atau hapus permanen.",
+  "trash.empty_confirm": "Hapus semua isi sampah secara permanen?",
+  "trash.empty_btn": "Kosongkan sampah",
+  "trash.note": "File di sampah tetap dihitung dalam penyimpanan Anda.",
+  "trash.left": "Dihapus permanen dalam {time}",
+  "trash.restore": "Pulihkan",
+  "trash.confirm_one": "Hapus file ini secara permanen?",
+  "trash.none": "Sampah kosong.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Pindahkan gambar ini ke sampah? Tautannya langsung berhenti berfungsi; Anda dapat memulihkannya selama 7 hari.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "Pindahkan {n} gambar ke sampah? Anda dapat memulihkannya selama 7 hari.",
+  "{n} moved to the trash": "{n} dipindahkan ke sampah",
+  "view.tags": "Tag",
+  "view.tags_hint": "pisahkan dengan koma; dipakai untuk mencari file Anda"
 }
