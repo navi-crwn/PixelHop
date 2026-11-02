@@ -199,13 +199,21 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusBadRequest, fmt.Sprintf("only %d of %d bytes arrived", c.got, c.size))
 		return
 	}
+	// The check at the start only looked at what was stored back then; other
+	// uploads may have finished since. Count this file in when it lands.
+	ctx, u := r.Context(), currentUser(r)
+	done, used, fits := a.reserveQuota(ctx, u, c.size)
+	if !fits {
+		apiError(w, http.StatusBadRequest, a.tr(r, "Your storage is full ({used} of {quota}). Delete some files to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes)))
+		return
+	}
+	defer done()
 	id := r.PathValue("id")
 	a.chunks.mu.Lock()
 	delete(a.chunks.m, id) // storeImage removes the file when done
 	a.chunks.mu.Unlock()
 
 	r.ParseMultipartForm(1 << 20)
-	ctx, u := r.Context(), currentUser(r)
 	var expiresAt int64
 	if d, ok := expiries[r.FormValue("expire")]; ok {
 		expiresAt = time.Now().Add(d).Unix()

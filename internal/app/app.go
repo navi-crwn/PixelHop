@@ -43,6 +43,7 @@ type App struct {
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
 	uploadMu  sync.Mutex
+	quota     quotaLocks
 	space     func(string) (int64, int64)
 }
 
