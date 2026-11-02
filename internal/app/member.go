@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/storage"
 )
 
 type dashData struct {
@@ -184,7 +186,10 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		a.render(w, r, "settings", "Settings", d)
 		return
 	}
-	a.purgeUser(r.Context(), u)
+	if _, err := a.purgeUser(r.Context(), u); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
 	a.logout(w, r)
 }
 
@@ -195,9 +200,12 @@ func (a *App) ackWarning(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeNext(r.FormValue("back")), http.StatusSeeOther)
 }
 
-// purgeUser deletes an account and every image it uploaded. Albums, API
-// keys, webhooks and sessions go with the account (foreign keys cascade).
-func (a *App) purgeUser(ctx context.Context, u *db.User) (images int) {
+// purgeUser deletes an account and every image it uploaded, and its profile
+// photo. Albums, API keys, webhooks and sessions go with the account (foreign
+// keys cascade). The account row is the only place that knows the photo's
+// storage key, so it goes last: when the photo cannot be removed the account
+// stays and an error comes back, and running the purge again finishes the job.
+func (a *App) purgeUser(ctx context.Context, u *db.User) (images int, err error) {
 	for {
 		ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Limit: 200})
 		if err != nil || len(ims) == 0 {
@@ -209,9 +217,16 @@ func (a *App) purgeUser(ctx context.Context, u *db.User) (images int) {
 			}
 		}
 	}
-	a.db.DeleteUser(ctx, u.ID)
+	if u.AvatarKey != "" {
+		if err := a.store.Delete(ctx, u.AvatarKey); err != nil && !errors.Is(err, storage.ErrNotFound) {
+			return images, fmt.Errorf("delete profile photo: %w", err)
+		}
+	}
+	if err := a.db.DeleteUser(ctx, u.ID); err != nil {
+		return images, err
+	}
 	a.db.DeleteEmptyAlbums(ctx)
-	return images
+	return images, nil
 }
 
 // downloadZip streams the chosen images (your own) as one ZIP file.
