@@ -66,7 +66,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.log.Error("upload", "err", err)
-		apiError(w, http.StatusInternalServerError, "Upload failed on our side. Please try again.")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "Upload failed on our side. Please try again."))
 		return
 	}
 
@@ -91,7 +91,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 		images = append(images, m)
 	}
 	if len(images) == 0 {
-		msg := "Upload failed."
+		msg := a.tr(r, "Upload failed.")
 		if len(errs) > 0 {
 			msg = errs[0]["error"]
 		}
@@ -164,7 +164,9 @@ func (a *App) ownImage(w http.ResponseWriter, r *http.Request) *db.Image {
 
 func (a *App) apiImage(w http.ResponseWriter, r *http.Request) {
 	if im := a.ownImage(w, r); im != nil {
-		apiOK(w, a.imageJSON(im))
+		out := a.imageJSON(im)
+		out["tags"] = a.db.ImageTags(r.Context(), im.ID)
+		apiOK(w, out)
 	}
 }
 
@@ -173,12 +175,34 @@ func (a *App) apiDeleteImage(w http.ResponseWriter, r *http.Request) {
 	if im == nil {
 		return
 	}
+	// Your own files go to the trash first (restorable for a week); ?permanent=1, or an admin, removes for good.
+	if u := currentUser(r); u != nil && im.UserID.Int64 == u.ID && r.URL.Query().Get("permanent") != "1" && !a.db.Trashed(r.Context(), im.ID) {
+		if err := a.db.TrashImage(r.Context(), im.ID); err != nil {
+			apiError(w, http.StatusInternalServerError, "couldn't delete")
+			return
+		}
+		apiOK(w, map[string]any{"deleted": im.ID, "trashed": true})
+		return
+	}
 	if err := a.removeImage(r.Context(), im); err != nil {
 		apiError(w, http.StatusInternalServerError, "couldn't delete")
 		return
 	}
 	a.db.DeleteEmptyAlbums(r.Context())
 	apiOK(w, map[string]any{"deleted": im.ID})
+}
+
+// apiRestoreImage brings a file back from the trash.
+func (a *App) apiRestoreImage(w http.ResponseWriter, r *http.Request) {
+	im := a.ownImage(w, r)
+	if im == nil {
+		return
+	}
+	if err := a.db.RestoreImage(r.Context(), im.ID); err != nil {
+		apiError(w, http.StatusInternalServerError, "couldn't restore")
+		return
+	}
+	apiOK(w, map[string]any{"restored": im.ID})
 }
 
 func (a *App) apiMe(w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,8 @@
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
   var toast = function (m, e) { window.phToast && window.phToast(m, e); };
+  var T = window.phT || function (k, v) { return v ? k.replace(/\{(\w+)\}/g, function (m, n) { return n in v ? v[n] : m; }) : k; };
+  var tx = function (v) { return typeof v === 'string' ? T(v) : v; };
 
   var TESSERACT = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
   var REMBG = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
@@ -85,7 +87,7 @@
 
   function busy(text) {
     busyEl.classList.toggle('hide', !text);
-    if (text) $('#st-busy-text').textContent = text;
+    if (text) $('#st-busy-text').textContent = T(text);
   }
 
   // ---------- export ----------
@@ -114,7 +116,7 @@
   function info() {
     clearTimeout(infoTimer);
     var el = $('#st-info');
-    el.innerHTML = '<span>' + cur.width + ' × ' + cur.height + '</span><span>measuring…</span>';
+    el.innerHTML = '<span>' + cur.width + ' × ' + cur.height + '</span><span>' + T('measuring…') + '</span>';
     infoTimer = setTimeout(function () {
       exportBlob().then(function (b) {
         var diff = srcSize ? Math.round((1 - b.size / srcSize) * 100) : 0;
@@ -145,7 +147,7 @@
         h.unshift({ id: j.data.id, page: j.data.view_url, thumb: j.data.thumb_url, del: j.data.delete_url || '', t: Date.now(), title: j.data.title });
         localStorage.setItem('ph_history', JSON.stringify(h.slice(0, 200)));
       } catch (e) {}
-    }).catch(function (e) { toast(e.message || 'Upload failed', true); })
+    }).catch(function (e) { toast(e.message || T('Upload failed'), true); })
       .then(function () { btn.disabled = false; });
   });
 
@@ -161,9 +163,9 @@
     $$('.tool-list [data-tool]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tool === id); });
     if (location.hash.slice(1) !== id) window.history.replaceState(null, '', '#' + id);
     toolBox.innerHTML = '';
-    var h = document.createElement('h2'); h.textContent = tool.title; toolBox.appendChild(h);
-    var p = document.createElement('p'); p.className = 'desc'; p.textContent = tool.desc; toolBox.appendChild(p);
-    if (!cur && !tool.noImage) { var e = document.createElement('p'); e.className = 'small muted'; e.textContent = 'Open an image to start.'; toolBox.appendChild(e); return; }
+    var h = document.createElement('h2'); h.textContent = T(tool.title); toolBox.appendChild(h);
+    var p = document.createElement('p'); p.className = 'desc'; p.textContent = T(tool.desc); toolBox.appendChild(p);
+    if (!cur && !tool.noImage) { var e = document.createElement('p'); e.className = 'small muted'; e.textContent = T('Open an image to start.'); toolBox.appendChild(e); return; }
     tool.ui(toolBox);
   }
   $$('.tool-list [data-tool]').forEach(function (b) { b.addEventListener('click', function () { pick(b.dataset.tool); }); });
@@ -173,7 +175,8 @@
   function el(tag, attrs, kids) {
     var e = document.createElement(tag);
     for (var k in attrs || {}) {
-      if (k === 'text') e.textContent = attrs[k];
+      if (k === 'text') e.textContent = tx(attrs[k]);
+      else if (k === 'placeholder') e.setAttribute(k, tx(attrs[k]));
       else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), attrs[k]);
       else e.setAttribute(k, attrs[k]);
     }
@@ -181,7 +184,7 @@
     return e;
   }
   function field(label, input, hint) {
-    return el('div', { class: 'field' }, [el('label', {}, [label, hint ? el('span', { class: 'hint', text: ' ' + hint }) : null]), input]);
+    return el('div', { class: 'field' }, [el('label', {}, [T(label), hint ? el('span', { class: 'hint', text: ' ' + T(hint) }) : null]), input]);
   }
   function range(min, max, val, step, onInput, fmt) {
     var r = el('input', { type: 'range', min: min, max: max, value: val, step: step || 1 });
@@ -485,7 +488,7 @@
       var logoBtn = btn('Use a logo instead', function () { logoIn.click(); }, 'sm');
       logoIn.addEventListener('change', function () {
         var f = logoIn.files[0]; if (!f) return;
-        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = 'Logo: ' + f.name; draw(); }, function () { toast('That logo could not be opened', true); });
+        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); draw(); }, function () { toast('That logo could not be opened', true); });
       });
       function render(c) {
         var x = c.getContext('2d'), W = c.width, H = c.height, m = Math.round(Math.min(W, H) * 0.03);
@@ -545,7 +548,7 @@
         grid.innerHTML = '';
         cols.forEach(function (c) {
           var hex = '#' + c.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('');
-          var b = el('button', { type: 'button', title: 'Copy ' + hex }, [el('span', { style: 'background:' + hex }), el('code', { text: hex })]);
+          var b = el('button', { type: 'button', title: T('Copy {color}', { color: hex }) }, [el('span', { style: 'background:' + hex }), el('code', { text: hex })]);
           b.addEventListener('click', function () { window.phCopy(hex); });
           grid.appendChild(b);
         });
@@ -635,14 +638,14 @@
         b.addEventListener('click', function () {
           var i = ocrLangs.indexOf(l[0]);
           if (i >= 0) { if (ocrLangs.length === 1) return toast('Pick at least one language', true); ocrLangs.splice(i, 1); }
-          else { if (ocrLangs.length >= OCR_MAX) return toast('Up to ' + OCR_MAX + ' languages at once', true); ocrLangs.push(l[0]); }
+          else { if (ocrLangs.length >= OCR_MAX) return toast(T('Up to {n} languages at once', { n: OCR_MAX }), true); ocrLangs.push(l[0]); }
           save(); draw();
         });
         grid.appendChild(b);
       });
-      more.textContent = showAll ? 'Fewer languages' : 'More languages (' + OCR_LANGS.length + ')';
-      summary.textContent = 'Reading: ' + ocrLangs.map(function (c) { var l = OCR_LANGS.filter(function (x) { return x[0] === c; })[0]; return l[2] || l[1]; }).join(' + ') +
-        (ocrLangs.length > 2 ? ' · more languages read a little slower' : '');
+      more.textContent = showAll ? T('Fewer languages') : T('More languages ({n})', { n: OCR_LANGS.length });
+      summary.textContent = T('Reading:') + ' ' + ocrLangs.map(function (c) { var l = OCR_LANGS.filter(function (x) { return x[0] === c; })[0]; return l[2] || l[1]; }).join(' + ') +
+        (ocrLangs.length > 2 ? ' · ' + T('more languages read a little slower') : '');
     }
     var more = btn('', function () { showAll = !showAll; draw(); }, 'sm ghost');
     wrap.appendChild(grid); wrap.appendChild(el('div', { style: 'margin-top:6px' }, [more])); wrap.appendChild(summary);
@@ -653,7 +656,7 @@
   tools.ocr = {
     title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.',
     ui: function (p) {
-      p.appendChild(field('Languages in the image', ocrLangPicker(), 'pick up to ' + OCR_MAX));
+      p.appendChild(field('Languages in the image', ocrLangPicker(), T('pick up to {n}', { n: OCR_MAX })));
       var outBox = el('textarea', { class: 'ocr-out', placeholder: 'The text will appear here.' });
       p.appendChild(btn('Read text', function () {
         busy('Loading the reader…');
@@ -664,8 +667,8 @@
         }).then(function (r) {
           // Tesseract spaces out Chinese and Japanese characters; join them again.
           var text = r.data.text.replace(/([\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])[ \t]+(?=[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])/g, '$1');
-          outBox.value = text.trim() || '(no text found)'; busy(false);
-        }).catch(function (e) { busy(false); toast(e.message || 'Reading failed', true); });
+          outBox.value = text.trim() || T('(no text found)'); busy(false);
+        }).catch(function (e) { busy(false); toast(e.message || T('Reading failed'), true); });
       }, 'primary'));
       p.appendChild(el('div', { style: 'margin-top:14px' }, [outBox]));
       p.appendChild(el('div', { class: 'btn-row', style: 'margin-top:8px' }, [
@@ -724,13 +727,13 @@
           .then(function (m) {
             return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
               return m.removeBackground(blob, { progress: function (key, done, total) {
-                busy((/fetch/.test(key) ? 'Downloading model ' : 'Working ') + (total ? Math.round(done / total * 100) + '%' : '…'));
+                busy((/fetch/.test(key) ? T('Downloading model') : T('Working')) + ' ' + (total ? Math.round(done / total * 100) + '%' : '…'));
               } });
             });
           })
           .then(function (b) { return createImageBitmap(b); })
           .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
-          .catch(function (e) { busy(false); toast((e && e.message) || 'Background removal failed', true); });
+          .catch(function (e) { busy(false); toast((e && e.message) || T('Background removal failed'), true); });
       }, 'primary'));
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Saved as PNG to keep the transparency. Works best on people, products and animals.' }));
       p.appendChild(el('p', { class: 'small faint', text: 'On this device: @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr. On the server: rembg (MIT).' }));
@@ -787,7 +790,7 @@
             obscure(o, cur, Math.round(x), Math.round(y), Math.round(w), Math.round(h), mode, strength);
           });
           commit(o);
-          found.textContent = list.length === 1 ? '1 face hidden.' : list.length + ' faces hidden.';
+          found.textContent = list.length === 1 ? T('1 face hidden.') : T('{n} faces hidden.', { n: list.length });
         }).catch(function (e) { busy(false); toast(e.message, true); });
       }, 'primary'));
       p.appendChild(el('div', { style: 'margin-top:12px' }, [found]));
@@ -850,7 +853,7 @@
     ui: function (p) {
       if (!needServer(p)) return;
       var mp = cur.width * cur.height / 1e6;
-      p.appendChild(el('p', { class: 'small', text: 'Now ' + cur.width + ' × ' + cur.height + ' → ' + cur.width * 2 + ' × ' + cur.height * 2 }));
+      p.appendChild(el('p', { class: 'small', text: T('Now {from} → {to}', { from: cur.width + ' × ' + cur.height, to: cur.width * 2 + ' × ' + cur.height * 2 }) }));
       if (mp > 1) p.appendChild(el('p', { class: 'small muted', text: 'Larger than 1 megapixel: it will be shrunk to 1 MP first, then doubled.' }));
       p.appendChild(btn('Upscale 2×', function () {
         if (mp > 1) {

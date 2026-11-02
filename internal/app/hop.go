@@ -254,6 +254,7 @@ func (a *App) hopHealth(w http.ResponseWriter, r *http.Request) {
 var hopSettingSchema = []map[string]any{
 	{"key": "guest_uploads", "type": "bool", "description": "Let visitors upload without an account", "restart_required": false},
 	{"key": "registration", "type": "bool", "description": "Let people create accounts", "restart_required": false},
+	{"key": "read_only", "type": "bool", "description": "Maintenance: pause uploads; everything already online keeps working", "restart_required": false},
 	{"key": "announcement", "type": "string", "description": "Banner shown on every page (empty = none)", "restart_required": false},
 	{"key": "seo_title", "type": "string", "description": "Title of the home page", "restart_required": false},
 	{"key": "seo_description", "type": "string", "description": "Description of the home page for search engines", "restart_required": false},
@@ -811,6 +812,9 @@ func (a *App) hopContentAction(w http.ResponseWriter, r *http.Request) {
 		case "mark_sensitive":
 			err = a.db.SetImageWarning(ctx, im.ID, "sensitive", q.Reason)
 		case "delete", "takedown":
+			if q.Action == "takedown" {
+				a.db.BlockHash(ctx, im.SHA256, detail["reason"].(string))
+			}
 			err = a.removeImage(ctx, im)
 			a.db.DeleteEmptyAlbums(ctx)
 		case "ban_ip":
@@ -819,6 +823,7 @@ func (a *App) hopContentAction(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if err = a.db.Ban(ctx, im.IP, "uploaded "+im.ID); err == nil {
+				a.db.BlockHash(ctx, im.SHA256, "banned uploader "+im.ID)
 				a.invalidateBans()
 				detail["ip"] = im.IP
 				err = a.removeImage(ctx, im)
@@ -1005,7 +1010,7 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 // ---- settings ----
 
 func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
-	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration,
+	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration, "read_only": a.cfg.ReadOnly,
 		"announcement": "", "seo_title": "", "seo_description": ""}
 	var out []map[string]any
 	for _, s := range hopSettingSchema {

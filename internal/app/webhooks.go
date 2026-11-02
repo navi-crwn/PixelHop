@@ -77,7 +77,7 @@ func (a *App) createWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if hooks, _ := a.db.Webhooks(r.Context(), u.ID); len(hooks) >= 5 {
-		a.settingsError(w, r, "You can have up to 5 webhooks.")
+		a.settingsError(w, r, a.tr(r, "You can have up to 5 webhooks."))
 		return
 	}
 	var events []string
@@ -108,7 +108,7 @@ func (a *App) deleteWebhook(w http.ResponseWriter, r *http.Request) {
 func (a *App) testWebhook(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	if hooks, _ := a.db.Webhooks(r.Context(), u.ID); len(hooks) == 0 {
-		a.settingsError(w, r, "Add a webhook first; there is nothing to send a test to yet.")
+		a.settingsError(w, r, a.tr(r, "Add a webhook first; there is nothing to send a test to yet."))
 		return
 	}
 	a.fireWebhooks(u.ID, "image.uploaded", map[string]any{"test": true, "id": "example-x7Kp2Q",

@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -24,6 +25,7 @@ import (
 var Version = "3.7.0"
 
 type App struct {
+	hotlinks hotlinkCache
 	cfg      *config.Config
 	db       *db.DB
 	store    storage.Backend // where new uploads go
@@ -89,6 +91,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /contact", a.contact)
 	mux.HandleFunc("GET /status", a.status)
 	mux.HandleFunc("GET /a/{id}", a.album)
+	mux.HandleFunc("GET /a/{id}/embed", a.albumEmbed)
 	mux.HandleFunc("GET /u/{username}", a.profile)
 	mux.HandleFunc("GET /explore", a.explore)
 	mux.HandleFunc("GET /sitemap.xml", a.sitemap)
@@ -136,15 +139,22 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
 	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
 	mux.HandleFunc("GET /dashboard/albums", a.member(a.myAlbums))
+	mux.HandleFunc("GET /dashboard/trash", a.member(a.trashPage))
+	mux.HandleFunc("POST /dashboard/trash/{id}/restore", a.member(a.trashRestore))
+	mux.HandleFunc("POST /dashboard/trash/{id}/delete", a.member(a.trashDelete))
+	mux.HandleFunc("POST /dashboard/trash/empty", a.member(a.trashEmpty))
 	mux.HandleFunc("GET /a/{id}/edit", a.member(a.editAlbum))
 	mux.HandleFunc("POST /settings/webhooks", a.member(a.createWebhook))
 	mux.HandleFunc("POST /settings/webhooks/{id}/delete", a.member(a.deleteWebhook))
 	mux.HandleFunc("POST /settings/webhooks/test", a.member(a.testWebhook))
 	mux.HandleFunc("GET /settings", a.member(a.settingsPage))
 	mux.HandleFunc("POST /settings/profile", a.member(a.saveProfile))
+	mux.HandleFunc("POST /settings/hotlinks", a.member(a.saveHotlinks))
 	mux.HandleFunc("POST /settings/avatar", a.member(a.saveAvatar))
 	mux.HandleFunc("POST /settings/avatar/delete", a.member(a.deleteAvatar))
 	mux.HandleFunc("POST /settings/password", a.member(a.savePassword))
+	mux.HandleFunc("POST /settings/sessions/revoke", a.member(a.revokeSessions))
+	mux.HandleFunc("POST /settings/export", a.member(a.exportData))
 	mux.HandleFunc("POST /settings/keys", a.member(a.createKey))
 	mux.HandleFunc("POST /settings/keys/{id}/delete", a.member(a.deleteKey))
 	mux.HandleFunc("GET /settings/sharex/{prefix}", a.member(a.sharexConfig))
@@ -172,6 +182,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("PATCH /api/v1/images/{id}", a.apiUpdateImage)
 	mux.HandleFunc("GET /api/v1/images/{id}/stats", a.apiImageStats)
 	mux.HandleFunc("DELETE /api/v1/images/{id}", a.apiDeleteImage)
+	mux.HandleFunc("POST /api/v1/images/{id}/restore", a.apiRestoreImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
 	mux.HandleFunc("GET /api/v1/albums", a.apiAlbums)
@@ -217,6 +228,7 @@ func (a *App) Run(ctx context.Context) error {
 		MaxHeaderBytes:    64 << 10,
 	}
 	go a.janitor(ctx)
+	go a.flushViews(ctx)
 	go a.mediaWorker(ctx)
 	go a.chunks.sweep(ctx)
 	errc := make(chan error, 1)
@@ -228,7 +240,9 @@ func (a *App) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		shut, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
-		return srv.Shutdown(shut)
+		err := srv.Shutdown(shut)
+		a.db.FlushViews(shut)
+		return err
 	}
 }
 
@@ -250,7 +264,7 @@ const langCookie = "pixel_lang"
 // 2. explicit pixel_lang cookie from previous selection,
 // 3. English (default; Accept-Language is not used per owner decision).
 func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
-	if q := r.URL.Query().Get("lang"); i18n.Supported(q) {
+	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
 		http.SetCookie(w, &http.Cookie{
 			Name:     langCookie,
 			Value:    q,
@@ -262,19 +276,63 @@ func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
 		return i18n.Locale{Lang: i18n.Get(q)}
 	}
 	code := i18n.Default
-	if c, err := r.Cookie(langCookie); err == nil && i18n.Supported(c.Value) {
-		code = c.Value
+	if c, err := r.Cookie(langCookie); err == nil {
+		if resolved, ok := i18n.Resolve(c.Value); ok {
+			code = resolved
+		}
 	}
 	w.Header().Add("Vary", "Cookie")
 	return i18n.Locale{Lang: i18n.Get(code)}
 }
 
+// tr translates a message for the language of this request. The English text
+// is its own key, so a message nobody translated yet still reads in English.
+// It only reads the cookie and the ?lang= choice; render writes them.
+func (a *App) tr(r *http.Request, key string, kv ...any) string {
+	code := i18n.Default
+	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
+		code = q
+	} else if c, err := r.Cookie(langCookie); err == nil {
+		if resolved, ok := i18n.Resolve(c.Value); ok {
+			code = resolved
+		}
+	}
+	return i18n.T(code, key, kv...)
+}
+
+// browserKeys are the catalog keys the browser scripts use: every quoted
+// string in web/static/js that is also a key of the English catalog. The
+// pages send only these, not the whole catalog.
+var browserKeys = sync.OnceValue(func() map[string]bool {
+	lit := regexp.MustCompile(`'((?:[^'\\\n]|\\.)*)'`)
+	keys := map[string]bool{}
+	files, _ := fs.Glob(web.Static, "static/js/*.js")
+	for _, f := range files {
+		src, err := fs.ReadFile(web.Static, f)
+		if err != nil {
+			continue
+		}
+		for _, m := range lit.FindAllSubmatch(src, -1) {
+			k := strings.NewReplacer(`\'`, `'`, `\\`, `\`).Replace(string(m[1]))
+			if i18n.Known(k) {
+				keys[k] = true
+			}
+		}
+	}
+	return keys
+})
+
 func (a *App) catalogJS(w http.ResponseWriter, r *http.Request) {
-	code := strings.TrimSuffix(r.PathValue("lang"), ".js")
-	if !i18n.Supported(code) {
+	code, ok := i18n.Resolve(strings.TrimSuffix(r.PathValue("lang"), ".js"))
+	if !ok {
 		code = i18n.Default
 	}
-	cat := i18n.Catalog(code)
+	cat := map[string]string{}
+	for k, v := range i18n.Catalog(code) {
+		if browserKeys()[k] {
+			cat[k] = v
+		}
+	}
 	b, _ := json.Marshal(cat)
 	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")

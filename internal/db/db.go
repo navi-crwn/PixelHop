@@ -14,7 +14,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type DB struct{ *sql.DB }
+type DB struct {
+	*sql.DB
+	views *viewBuffer
+}
 
 // Open opens (or creates) the database in dir and applies pending migrations.
 func Open(dir string) (*DB, error) {
@@ -27,7 +30,7 @@ func Open(dir string) (*DB, error) {
 	}
 	// One writer at a time is what SQLite wants; WAL lets readers run alongside.
 	sqlDB.SetMaxOpenConns(8)
-	d := &DB{sqlDB}
+	d := &DB{DB: sqlDB, views: &viewBuffer{}}
 	if err := d.migrate(); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
@@ -220,6 +223,16 @@ CREATE TABLE hop_events_seen (
 ALTER TABLE images ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';
 ALTER TABLE albums ADD COLUMN content_warning TEXT NOT NULL DEFAULT 'none';
 ALTER TABLE albums ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';`,
+	// 9: API keys can be limited to uploading
+	`ALTER TABLE api_keys ADD COLUMN scope TEXT NOT NULL DEFAULT 'full';`,
+	// 10: owners can stop other websites from embedding their images
+	`ALTER TABLE users ADD COLUMN block_hotlinks INTEGER NOT NULL DEFAULT 0;`,
+	// 11: files taken down for breaking the rules cannot be uploaded again
+	`CREATE TABLE blocked_hashes (sha256 TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL);`,
+	// 12: a deleted file waits in the trash for a week (deleted_at > 0; it is also hidden)
+	`ALTER TABLE images ADD COLUMN deleted_at INTEGER NOT NULL DEFAULT 0;`,
+	// 13: tags, kept as ",beach,sunset," so a tag can be matched exactly
+	`ALTER TABLE images ADD COLUMN tags TEXT NOT NULL DEFAULT '';`,
 }
 
 func (d *DB) migrate() error {
@@ -272,18 +285,6 @@ func (d *DB) Secret(ctx context.Context, name string, make func() string) string
 	d.ExecContext(ctx, `INSERT OR IGNORE INTO secrets (name,value) VALUES (?,?)`, name, v)
 	d.QueryRowContext(ctx, `SELECT value FROM secrets WHERE name=?`, name).Scan(&v)
 	return v
-}
-
-// CountView records one view of an image for today, and where it came from.
-func (d *DB) CountView(ctx context.Context, id, refHost string) {
-	day := time.Now().UTC().Format("2006-01-02")
-	d.ExecContext(ctx, `UPDATE images SET views=views+1, last_viewed=? WHERE id=?`, now(), id)
-	d.ExecContext(ctx, `INSERT INTO image_views (image_id,day,views) VALUES (?,?,1)
-		ON CONFLICT(image_id,day) DO UPDATE SET views=views+1`, id, day)
-	if refHost != "" {
-		d.ExecContext(ctx, `INSERT INTO image_referrers (image_id,host,views) VALUES (?,?,1)
-			ON CONFLICT(image_id,host) DO UPDATE SET views=views+1`, id, refHost)
-	}
 }
 
 type DayViews struct {

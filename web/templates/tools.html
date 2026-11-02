@@ -1,56 +1,56 @@
 {{define "content"}}
 <div class="wrap" style="max-width:1400px">
   <div class="page-head">
-    <div><h1>Photo studio</h1><p class="muted" style="margin:4px 0 0">Everything happens on your device. Your image isn't uploaded unless you press “Upload result”.</p></div>
+    <div><h1>{{$.L.T "tools.title"}}</h1><p class="muted" style="margin:4px 0 0">{{$.L.T "tools.sub"}}</p></div>
     <div class="btn-row">
-      <button class="btn" type="button" id="st-open"><svg><use href="#i-image"/></svg>Open image</button>
-      <button class="btn ghost" type="button" id="st-undo" disabled><svg><use href="#i-rotate"/></svg>Undo</button>
-      <button class="btn ghost" type="button" id="st-reset" disabled>Start over</button>
-      <button class="btn ghost" type="button" id="st-compare" disabled aria-pressed="false" title="Hold to see the original"><svg><use href="#i-eye"/></svg>Hold to compare</button>
+      <button class="btn" type="button" id="st-open"><svg><use href="#i-image"/></svg>{{$.L.T "tools.open"}}</button>
+      <button class="btn ghost" type="button" id="st-undo" disabled><svg><use href="#i-rotate"/></svg>{{$.L.T "tools.undo"}}</button>
+      <button class="btn ghost" type="button" id="st-reset" disabled>{{$.L.T "tools.reset"}}</button>
+      <button class="btn ghost" type="button" id="st-compare" disabled aria-pressed="false" title="{{$.L.T "tools.compare_title"}}"><svg><use href="#i-eye"/></svg>{{$.L.T "tools.compare"}}</button>
     </div>
   </div>
   <input type="file" id="st-file" accept="image/*" hidden>
 
   <div class="studio" id="studio" data-rembg-server="{{if .RembgServer}}1{{end}}" data-signed-in="{{if .User}}1{{end}}">
-    <div class="tool-list" role="tablist" aria-label="Tools">
-      <button role="tab" data-tool="compress"><svg><use href="#i-compress"/></svg>Compress</button>
-      <button role="tab" data-tool="resize"><svg><use href="#i-resize"/></svg>Resize</button>
-      <button role="tab" data-tool="crop"><svg><use href="#i-crop"/></svg>Crop</button>
-      <button role="tab" data-tool="convert"><svg><use href="#i-convert"/></svg>Convert</button>
-      <button role="tab" data-tool="adjust"><svg><use href="#i-adjust"/></svg>Adjust &amp; rotate</button>
-      <button role="tab" data-tool="redact"><svg><use href="#i-blur"/></svg>Blur &amp; pixelate</button>
-      <button role="tab" data-tool="watermark"><svg><use href="#i-flag"/></svg>Watermark</button>
-      <button role="tab" data-tool="palette"><svg><use href="#i-palette"/></svg>Color palette</button>
-      <button role="tab" data-tool="ocr"><svg><use href="#i-text"/></svg>Image to text<small>AI</small></button>
-      <button role="tab" data-tool="rembg"><svg><use href="#i-eraser"/></svg>Remove background<small>AI</small></button>
-      <button role="tab" data-tool="faces"><svg><use href="#i-eye"/></svg>Blur faces<small>AI</small></button>
-      <button role="tab" data-tool="erase"><svg><use href="#i-edit"/></svg>Magic eraser<small>AI</small></button>
-      <button role="tab" data-tool="upscale"><svg><use href="#i-resize"/></svg>HD upscale<small>AI</small></button>
-      <button role="tab" data-tool="qr"><svg><use href="#i-qr"/></svg>QR code</button>
-      <a class="tool-batch" href="/tools/batch"><svg><use href="#i-album"/></svg>Batch: many at once</a>
+    <div class="tool-list" role="tablist" aria-label="{{$.L.T "tools.label"}}">
+      <button role="tab" data-tool="compress"><svg><use href="#i-compress"/></svg>{{$.L.T "home.tool_compress"}}</button>
+      <button role="tab" data-tool="resize"><svg><use href="#i-resize"/></svg>{{$.L.T "home.tool_resize"}}</button>
+      <button role="tab" data-tool="crop"><svg><use href="#i-crop"/></svg>{{$.L.T "home.tool_crop"}}</button>
+      <button role="tab" data-tool="convert"><svg><use href="#i-convert"/></svg>{{$.L.T "home.tool_convert"}}</button>
+      <button role="tab" data-tool="adjust"><svg><use href="#i-adjust"/></svg>{{$.L.T "tools.adjust"}}</button>
+      <button role="tab" data-tool="redact"><svg><use href="#i-blur"/></svg>{{$.L.T "home.tool_redact"}}</button>
+      <button role="tab" data-tool="watermark"><svg><use href="#i-flag"/></svg>{{$.L.T "batch.watermark"}}</button>
+      <button role="tab" data-tool="palette"><svg><use href="#i-palette"/></svg>{{$.L.T "home.tool_palette"}}</button>
+      <button role="tab" data-tool="ocr"><svg><use href="#i-text"/></svg>{{$.L.T "home.tool_ocr"}}<small>AI</small></button>
+      <button role="tab" data-tool="rembg"><svg><use href="#i-eraser"/></svg>{{$.L.T "home.tool_rembg"}}<small>AI</small></button>
+      <button role="tab" data-tool="faces"><svg><use href="#i-eye"/></svg>{{$.L.T "tools.faces"}}<small>AI</small></button>
+      <button role="tab" data-tool="erase"><svg><use href="#i-edit"/></svg>{{$.L.T "tools.erase"}}<small>AI</small></button>
+      <button role="tab" data-tool="upscale"><svg><use href="#i-resize"/></svg>{{$.L.T "tools.upscale"}}<small>AI</small></button>
+      <button role="tab" data-tool="qr"><svg><use href="#i-qr"/></svg>{{$.L.T "tools.qr"}}</button>
+      <a class="tool-batch" href="/tools/batch"><svg><use href="#i-album"/></svg>{{$.L.T "tools.batch"}}</a>
     </div>
 
     <div class="canvas-box" id="st-box">
       <div class="placeholder" id="st-empty" role="button" tabindex="0">
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
-        <h2 style="font-size:1.2rem">Drop, paste or open an image</h2>
-        <p class="muted small">It stays on this device.</p>
+        <h2 style="font-size:1.2rem">{{$.L.T "tools.drop"}}</h2>
+        <p class="muted small">{{$.L.T "tools.stays"}}</p>
       </div>
       <canvas id="st-canvas" class="hide"></canvas>
       <div class="crop-box hide" id="st-crop"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div>
-      <div class="busy hide" id="st-busy"><div><div class="spinner"><i></i><i></i><i></i><i></i></div><div id="st-busy-text">Working…</div></div></div>
+      <div class="busy hide" id="st-busy"><div><div class="spinner"><i></i><i></i><i></i><i></i></div><div id="st-busy-text">{{$.L.T "tools.working"}}</div></div></div>
     </div>
 
     <div class="panel" id="st-panel">
-      <div id="st-tool"><h2>Pick a tool</h2><p class="desc">Open an image, then choose what to do with it on the left.</p></div>
+      <div id="st-tool"><h2>{{$.L.T "tools.pick"}}</h2><p class="desc">{{$.L.T "tools.pick_desc"}}</p></div>
       <div id="st-export" class="hide">
         <hr style="margin:18px 0">
         <div class="out-info" id="st-info"></div>
         <div class="btn-row">
-          <button class="btn primary" type="button" id="st-download"><svg><use href="#i-down"/></svg>Download</button>
-          <button class="btn" type="button" id="st-upload"><svg><use href="#i-upload"/></svg>Upload result</button>
+          <button class="btn primary" type="button" id="st-download"><svg><use href="#i-down"/></svg>{{$.L.T "tools.download"}}</button>
+          <button class="btn" type="button" id="st-upload"><svg><use href="#i-upload"/></svg>{{$.L.T "tools.upload_result"}}</button>
         </div>
-        <div id="st-uploaded" class="hide" style="margin-top:12px"><div class="copy"><input type="text" readonly id="st-link" aria-label="Link"><button class="btn sm" type="button" data-copy="#st-link"><svg><use href="#i-copy"/></svg></button></div></div>
+        <div id="st-uploaded" class="hide" style="margin-top:12px"><div class="copy"><input type="text" readonly id="st-link" aria-label="{{$.L.T "home2.f_link"}}"><button class="btn sm" type="button" data-copy="#st-link"><svg><use href="#i-copy"/></svg></button></div></div>
       </div>
     </div>
   </div>

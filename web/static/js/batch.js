@@ -6,6 +6,7 @@
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
   var toast = function (m, e) { window.phToast && window.phToast(m, e); };
+  var T = window.phT || function (k, v) { return v ? k.replace(/\{(\w+)\}/g, function (m, n) { return n in v ? v[n] : m; }) : k; };
   var root = $('#batch');
   var signedIn = root.dataset.signedIn === '1', server = root.dataset.server === '1';
   var maxBatch = +root.dataset.maxBatch || 20;
@@ -30,9 +31,10 @@
       var row = document.createElement('div'); row.className = 'up';
       var img = document.createElement('img'); img.className = 'thumb'; img.alt = ''; img.src = URL.createObjectURL(f);
       var meta = document.createElement('div'); meta.className = 'meta';
-      meta.innerHTML = '<div class="name"></div><div class="small muted state">Ready</div>';
+      meta.innerHTML = '<div class="name"></div><div class="small muted state"></div>';
+      meta.lastChild.textContent = T('Ready');
       meta.firstChild.textContent = f.name;
-      var rm = document.createElement('button'); rm.className = 'btn sm ghost'; rm.type = 'button'; rm.textContent = 'Remove';
+      var rm = document.createElement('button'); rm.className = 'btn sm ghost'; rm.type = 'button'; rm.textContent = T('Remove');
       row.appendChild(img); row.appendChild(meta); row.appendChild(rm);
       var it = { file: f, row: row };
       rm.addEventListener('click', function () { items.splice(items.indexOf(it), 1); row.remove(); refresh(); });
@@ -43,7 +45,7 @@
 
   // Any change to the steps means results must be made again.
   ['#b-size', '#b-format', '#b-quality', '#b-rembg', '#b-faces', '#b-upscale', '#b-wm', '#b-wm-pos'].forEach(function (s) {
-    $(s).addEventListener('change', function () { items.forEach(function (it) { it.out = null; state(it, 'Ready'); }); refresh(); });
+    $(s).addEventListener('change', function () { items.forEach(function (it) { it.out = null; state(it, T('Ready')); }); refresh(); });
   });
   $('#b-quality').addEventListener('input', function () { $('#b-qout').textContent = this.value; });
 
@@ -52,9 +54,9 @@
     $('#b-zip').disabled = $('#b-upload').disabled = n === 0;
     var ai = ['#b-rembg', '#b-faces', '#b-upscale'];
     ai.forEach(function (s) { $(s).disabled = !server || !signedIn; });
-    $('#b-ai-note').textContent = !server ? 'AI steps are not available on this server.'
-      : !signedIn ? 'Sign in (free) to use the AI steps.' : 'AI steps run on our server, one image at a time.';
-    if (!signedIn && n > maxBatch) $('#b-ai-note').textContent += ' Albums from guests hold up to ' + maxBatch + ' images; sign in for bigger ones.';
+    $('#b-ai-note').textContent = !server ? T('AI steps are not available on this server.')
+      : !signedIn ? T('Sign in (free) to use the AI steps.') : T('AI steps run on our server, one image at a time.');
+    if (!signedIn && n > maxBatch) $('#b-ai-note').textContent += ' ' + T('Albums from guests hold up to {n} images; sign in for bigger ones.', { n: maxBatch });
   }
   refresh();
 
@@ -121,12 +123,12 @@
   function process(it) {
     if (it.out) return Promise.resolve(it);
     var size = +$('#b-size').value, fmt = $('#b-format').value, q = +$('#b-quality').value / 100;
-    state(it, 'Working…');
+    state(it, T('Working…'));
     return createImageBitmap(it.file, { imageOrientation: 'from-image' }).then(function (bmp) {
       var c = toCanvas(bmp), step = Promise.resolve(c);
-      if ($('#b-upscale').checked) step = step.then(function (c) { var mp = c.width * c.height / 1e6; state(it, 'Upscaling…'); return ai('upscale', mp > 1 ? shrink(c, Math.floor(Math.max(c.width, c.height) / Math.sqrt(mp))) : c); });
-      if ($('#b-rembg').checked) step = step.then(function (c) { state(it, 'Removing background…'); return ai('remove-background', c); });
-      if ($('#b-faces').checked) step = step.then(function (c) { state(it, 'Blurring faces…'); return blurFaces(c); });
+      if ($('#b-upscale').checked) step = step.then(function (c) { var mp = c.width * c.height / 1e6; state(it, T('Upscaling…')); return ai('upscale', mp > 1 ? shrink(c, Math.floor(Math.max(c.width, c.height) / Math.sqrt(mp))) : c); });
+      if ($('#b-rembg').checked) step = step.then(function (c) { state(it, T('Removing background…')); return ai('remove-background', c); });
+      if ($('#b-faces').checked) step = step.then(function (c) { state(it, T('Blurring faces…')); return blurFaces(c); });
       if (size) step = step.then(function (c) { return shrink(c, size); });
       if ($('#b-wm').value.trim()) step = step.then(function (c) { return watermark(c, $('#b-wm').value.trim(), $('#b-wm-pos').value); });
       return step.then(function (c) {
@@ -135,11 +137,11 @@
         if (!EXT[type] || !canEncode(type) || type === 'image/gif') type = 'image/png';
         return blob(c, type, q).then(function (b) {
           it.out = b; it.name = it.file.name.replace(/\.[^.]+$/, '') + '.' + EXT[type];
-          state(it, 'Done · ' + kb(it.file.size) + ' → ' + kb(b.size));
+          state(it, T('Done · {from} → {to}', { from: kb(it.file.size), to: kb(b.size) }));
           return it;
         });
       });
-    }).catch(function (e) { state(it, e.message || 'Failed', true); it.out = null; return it; });
+    }).catch(function (e) { state(it, e.message || T('Failed'), true); it.out = null; return it; });
   }
   function kb(n) { return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(1) + ' MB'; }
 
@@ -148,7 +150,7 @@
     var i = 0;
     return (function next() {
       if (i >= items.length) return Promise.resolve();
-      status('Working on ' + (i + 1) + ' of ' + items.length + '…');
+      status(T('Working on {i} of {n}…', { i: i + 1, n: items.length }));
       return process(items[i++]).then(next);
     })().then(function () { status(''); return items.filter(function (it) { return it.out; }); });
   }
@@ -187,9 +189,9 @@
   $('#b-zip').addEventListener('click', function () {
     var b = this; b.disabled = true;
     processAll().then(function (done) {
-      if (!done.length) throw new Error('Nothing to download');
+      if (!done.length) throw new Error(T('Nothing to download'));
       return Promise.all(done.map(function (it) { return it.out.arrayBuffer().then(function (a) { return { name: it.name, data: new Uint8Array(a) }; }); }));
-    }).then(function (files) { window.phSave(zip(files), 'pixelhop-batch.zip'); toast(files.length + ' images in the ZIP'); })
+    }).then(function (files) { window.phSave(zip(files), 'pixelhop-batch.zip'); toast(T('{n} images in the ZIP', { n: files.length })); })
       .catch(function (e) { toast(e.message, true); }).then(function () { b.disabled = false; });
   });
 
@@ -197,23 +199,23 @@
   $('#b-upload').addEventListener('click', function () {
     var b = this; b.disabled = true;
     processAll().then(function (done) {
-      if (!done.length) throw new Error('Nothing to upload');
-      if (!signedIn && done.length > maxBatch) { done = done.slice(0, maxBatch); toast('Guests can upload ' + maxBatch + ' at once; uploading the first ' + maxBatch, true); }
+      if (!done.length) throw new Error(T('Nothing to upload'));
+      if (!signedIn && done.length > maxBatch) { done = done.slice(0, maxBatch); toast(T('Guests can upload {n} at once; uploading the first {n}', { n: maxBatch }), true); }
       var albumID = '', albumURL = '', sent = 0;
       var chunks = []; for (var i = 0; i < done.length; i += maxBatch) chunks.push(done.slice(i, i + maxBatch));
       return chunks.reduce(function (p, chunk) {
         return p.then(function () {
-          status('Uploading ' + (sent + 1) + '–' + (sent + chunk.length) + ' of ' + done.length + '…');
+          status(T('Uploading {from}–{to} of {n}…', { from: sent + 1, to: sent + chunk.length, n: done.length }));
           var fd = new FormData();
           chunk.forEach(function (it) { fd.append('file', it.out, it.name); });
-          fd.append('title', 'Batch of ' + done.length);
+          fd.append('title', T('Batch of {n}', { n: done.length }));
           if (albumID) fd.append('album_id', albumID); else fd.append('album', 'force');
           return fetch('/api/v1/upload', { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
-            if (!j.success) throw new Error(j.error || 'Upload failed');
+            if (!j.success) throw new Error(j.error || T('Upload failed'));
             var url = j.data.album_url || (j.data.images && j.data.images[0] && j.data.images[0].album_url);
             if (url && !albumURL) { albumURL = url; albumID = url.split('/a/')[1]; }
             sent += chunk.length;
-            chunk.forEach(function (it) { state(it, 'Uploaded'); });
+            chunk.forEach(function (it) { state(it, T('Uploaded')); });
           });
         });
       }, Promise.resolve()).then(function () {

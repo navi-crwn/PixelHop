@@ -150,7 +150,7 @@ func (a *App) invalidateBans() {
 func (a *App) checkBan(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead && !strings.HasPrefix(r.URL.Path, "/hop/") && a.banned(r) {
-			a.fail(w, r, http.StatusForbidden, "This address is blocked. If you think this is a mistake, contact the site owner.")
+			a.fail(w, r, http.StatusForbidden, a.tr(r, "This address is blocked. If you think this is a mistake, contact the site owner."))
 			return
 		}
 		next.ServeHTTP(w, r)

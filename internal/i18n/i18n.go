@@ -18,20 +18,42 @@ const Default = "en"
 
 // Lang is one supported language, in the order the picker shows them.
 type Lang struct {
-	Code string // BCP 47 tag, also the catalog file name
-	Name string // in its own language
-	RTL  bool
+	Code  string // BCP 47 tag, also the catalog file name
+	Name  string // in its own language (menu, left)
+	Short string // short label (menu, right)
 }
 
+// The nine languages every HOP app ships, in the order the menu shows them.
+// Right-to-left languages are not part of the set.
 var Langs = []Lang{
-	{"en", "English", false},
-	{"id", "Bahasa Indonesia", false},
-	{"zh", "中文", false},
-	{"es", "Español", false},
-	{"ar", "العربية", true},
-	{"pt", "Português", false},
-	{"fr", "Français", false},
-	{"ja", "日本語", false},
+	{"en", "English", "EN"},
+	{"zh-CN", "简体中文", "中文"},
+	{"de", "Deutsch", "DE"},
+	{"id", "Bahasa Indonesia", "ID"},
+	{"ja", "日本語", "日本語"},
+	{"pt-BR", "Português (Brasil)", "PT"},
+	{"es", "Español", "ES"},
+	{"fr", "Français", "FR"},
+	{"ru", "Русский", "RU"},
+}
+
+// legacy are the codes stored before the set was fixed (cookies) and what they mean now.
+var legacy = map[string]string{"zh": "zh-CN", "pt": "pt-BR"}
+
+// Resolve maps a requested or stored code to a supported one: "zh" and "pt"
+// mean "zh-CN" and "pt-BR", case does not matter, and anything else (such as
+// the retired "ar") is not supported.
+func Resolve(code string) (string, bool) {
+	code = strings.TrimSpace(code)
+	if l, ok := legacy[strings.ToLower(code)]; ok {
+		code = l
+	}
+	for _, l := range Langs {
+		if strings.EqualFold(l.Code, code) {
+			return l.Code, true
+		}
+	}
+	return "", false
 }
 
 // catalogs are complete per language: English first, the translation on
@@ -68,14 +90,17 @@ func load(code string) map[string]string {
 	return m
 }
 
-// Supported reports whether code is one of Langs.
+// Supported reports whether code is one of Langs (or an old code for one).
 func Supported(code string) bool {
-	_, ok := catalogs[code]
+	_, ok := Resolve(code)
 	return ok
 }
 
 // Get returns the language for code, or the default.
 func Get(code string) Lang {
+	if c, ok := Resolve(code); ok {
+		code = c
+	}
 	for _, l := range Langs {
 		if l.Code == code {
 			return l
@@ -86,6 +111,9 @@ func Get(code string) Lang {
 
 // Catalog returns the raw catalog (for the browser scripts).
 func Catalog(code string) map[string]string {
+	if r, ok := Resolve(code); ok {
+		code = r
+	}
 	if c, ok := catalogs[code]; ok {
 		return c
 	}
@@ -96,13 +124,19 @@ func Catalog(code string) map[string]string {
 // fills "{name}" placeholders from name/value pairs. A value that is a
 // time.Time is written as a UTC date.
 func T(lang, key string, kv ...any) string {
+	if r, ok := Resolve(lang); ok {
+		lang = r
+	}
 	c, ok := catalogs[lang]
 	if !ok {
 		c = catalogs[Default]
 	}
 	s, ok := c[key]
 	if !ok {
-		s = key
+		// A language that lacks this key reads in English, never as the key.
+		if s, ok = catalogs[Default][key]; !ok {
+			s = key
+		}
 	}
 	for i := 0; i+1 < len(kv); i += 2 {
 		name, _ := kv[i].(string)
@@ -144,10 +178,12 @@ func (l Locale) H(key string, kv ...any) template.HTML {
 	return template.HTML(T(l.Code, key, esc...))
 }
 
-// Dir is the text direction for <html dir>.
-func (l Locale) Dir() string {
-	if l.RTL {
-		return "rtl"
-	}
-	return "ltr"
+// Dir is the text direction for <html dir>: always left to right, the set has no right-to-left language.
+func (l Locale) Dir() string { return "ltr" }
+
+// Known reports whether the English catalog has this key, so callers can
+// translate fixed page titles and descriptions without touching user text.
+func Known(key string) bool {
+	_, ok := catalogs[Default][key]
+	return ok
 }

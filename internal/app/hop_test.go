@@ -202,7 +202,7 @@ func TestHopHealthManifestStats(t *testing.T) {
 		SettingsSchema []struct{ Key string }  `json:"settings_schema"`
 	}
 	decode(t, hopGet(t, h, "/hop/manifest").Data, &man)
-	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 5 {
+	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 6 {
 		t.Fatalf("manifest: %+v", man)
 	}
 
@@ -564,6 +564,7 @@ func TestHopContent(t *testing.T) {
 	// Detail.
 	a.db.InsertReport(ctx, &db.Report{ImageID: p1.ID, Reason: "spam", IP: "198.51.100.1"})
 	a.db.CountView(ctx, p1.ID, "example.org")
+	a.db.FlushViews(ctx)
 	var det struct {
 		ID      string
 		Reports []struct{ Reason string }

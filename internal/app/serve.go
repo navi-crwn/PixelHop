@@ -30,7 +30,7 @@ func (a *App) lookup(w http.ResponseWriter, r *http.Request, id string, page boo
 		return nil
 	case im.Hidden && !(currentUser(r) != nil && currentUser(r).IsAdmin()):
 		if page {
-			a.fail(w, r, http.StatusUnavailableForLegalReasons, "This image was removed by the moderators.")
+			a.fail(w, r, http.StatusUnavailableForLegalReasons, a.tr(r, "This image was removed by the moderators."))
 		} else {
 			http.Error(w, "removed", http.StatusUnavailableForLegalReasons)
 		}
@@ -187,8 +187,9 @@ type viewData struct {
 	Image      *db.Image
 	Album      *db.Album
 	Siblings   []*db.Image
-	Mine       bool // the viewer may rename/delete/list it
-	Optimizing bool // a video still being shrunk in the background
+	Mine       bool   // the viewer may rename/delete/list it
+	Tags       string // the file's tags, for the edit form
+	Optimizing bool   // a video still being shrunk in the background
 	Links      links
 	GatePassed bool
 }
@@ -268,6 +269,9 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	gatePassed := !im.HasWarning() || a.hasGatePassed(r, im.ID) || mine
 	d := viewData{Image: im, Links: a.linksFor(im), Mine: mine, GatePassed: gatePassed,
 		Owner: a.ownerOf(r.Context(), im.UserID), Optimizing: im.Kind() == "video" && a.db.MediaJobPending(r.Context(), im.ID)}
+	if mine {
+		d.Tags = strings.Join(a.db.ImageTags(r.Context(), im.ID), ", ")
+	}
 	for _, k := range removedList(im.Stripped) {
 		if w := removedWords[k]; w != "" {
 			d.Removed = append(d.Removed, w)
@@ -430,7 +434,7 @@ func (a *App) tokenImage(w http.ResponseWriter, r *http.Request) *db.Image {
 		return nil
 	}
 	if im.OwnerToken == "" || hashToken(r.PathValue("token")) != im.OwnerToken {
-		a.fail(w, r, http.StatusForbidden, "This delete link isn't valid.")
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "This delete link isn't valid."))
 		return nil
 	}
 	return im
@@ -492,6 +496,10 @@ func albumDesc(n int, by *owner, site string) string {
 // fileAllowed stops private and password-protected files for visitors who
 // may not see them (404 for private, 403 for "needs a password").
 func (a *App) fileAllowed(w http.ResponseWriter, r *http.Request, im *db.Image) bool {
+	if im.UserID.Valid && a.hotlinkRefused(w, r, im.UserID.Int64) {
+		http.Error(w, a.tr(r, "The owner does not allow this image to be shown on other websites."), http.StatusForbidden)
+		return false
+	}
 	if a.canSee(r, im) {
 		if u := currentUser(r); u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()) {
 			return true

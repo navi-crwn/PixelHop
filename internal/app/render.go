@@ -59,7 +59,6 @@ func loadPages(a *App) (*pages, error) {
 	funcs := template.FuncMap{
 		"bytes": humanBytes,
 		"dims":  humanDims,
-		"ago":   ago,
 		"date":  func(t int64) string { return time.Unix(t, 0).UTC().Format("2 Jan 2006") },
 		"iso":   func(t int64) string { return time.Unix(t, 0).UTC().Format(time.RFC3339) },
 		// Pages load images by path, so they work under any host name;
@@ -67,7 +66,9 @@ func loadPages(a *App) (*pages, error) {
 		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.LinkURL) },
 		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.LinkURL) },
 		"add":    func(x, y int) int { return x + y },
-		"mul":    func(x, y int) int { return x * y },
+		// withL hands a partial both the page's language and its own data.
+		"withL": func(l i18n.Locale, v any) map[string]any { return map[string]any{"L": l, "O": v} },
+		"mul":   func(x, y int) int { return x * y },
 		"pct": func(n, of int) int {
 			if of == 0 {
 				return 0
@@ -83,7 +84,6 @@ func loadPages(a *App) (*pages, error) {
 			}
 			return s
 		},
-		"until":         func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
 		"usage":         func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
 		"mb":            func(b int64) int64 { return b >> 20 },
 		"gb":            func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
@@ -155,9 +155,15 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	p.L = a.locale(w, r)
 	p.Langs = i18n.Langs
+	if i18n.Known(p.Title) {
+		p.Title = p.L.T(p.Title)
+	}
+	if i18n.Known(p.Desc) {
+		p.Desc = p.L.T(p.Desc)
+	}
 	p = a.base(r, p)
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
-	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
+	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" || name == "trash" {
 		p.NoIndex = true
 	}
 	var buf bytes.Buffer
@@ -215,11 +221,11 @@ func (a *App) batch(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) help(w http.ResponseWriter, r *http.Request) {
 	a.renderPage(w, r, "help", page{Title: "Help", Data: a.cfg.AdminEmail,
-		Desc: "Answers about uploading, links, albums, the studio, accounts and privacy on " + a.cfg.SiteName + "."})
+		Desc: a.tr(r, "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) docs(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "docs", page{Title: "API & ShareX", Desc: "Upload from scripts, apps and ShareX with the " + a.cfg.SiteName + " API."})
+	a.renderPage(w, r, "docs", page{Title: "API & ShareX", Desc: a.tr(r, "Upload from scripts, apps and ShareX with the {site} API.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) legal(w http.ResponseWriter, r *http.Request) {
@@ -306,33 +312,6 @@ func humanBytes(b int64) string {
 }
 
 func humanDims(w, h int) string { return fmt.Sprintf("%d × %d", w, h) }
-
-func ago(t int64) string {
-	if t == 0 {
-		return "never"
-	}
-	d := time.Since(time.Unix(t, 0))
-	switch {
-	case d < time.Minute:
-		return "just now"
-	case d < time.Hour:
-		return plural(int(d.Minutes()), "minute") + " ago"
-	case d < 48*time.Hour:
-		return plural(int(d.Hours()), "hour") + " ago"
-	case d < 60*24*time.Hour:
-		return plural(int(d.Hours()/24), "day") + " ago"
-	case d < 730*24*time.Hour:
-		return plural(int(d.Hours()/24/30), "month") + " ago"
-	}
-	return plural(int(d.Hours()/24/365), "year") + " ago"
-}
-
-func plural(n int, w string) string {
-	if n == 1 {
-		return "1 " + w
-	}
-	return fmt.Sprintf("%d %ss", n, w)
-}
 
 // wallTile is one square of the picture that comes apart on the home page: its
 // column and row, and d in [0,1) which decides when it falls (a fixed

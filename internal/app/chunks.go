@@ -89,7 +89,7 @@ func uploaderKey(r *http.Request) string {
 func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	if u == nil && a.db.Setting(r.Context(), "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) != "true" {
-		apiError(w, http.StatusUnauthorized, "Please sign in to upload on this server.")
+		apiError(w, http.StatusUnauthorized, a.tr(r, "Please sign in to upload on this server."))
 		return
 	}
 	var body struct {
@@ -106,12 +106,12 @@ func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	if u != nil {
 		if used, _ := a.db.UserStorage(r.Context(), u.ID); used+body.Size > u.QuotaBytes {
-			apiError(w, http.StatusBadRequest, fmt.Sprintf("Your storage is full (%s of %s). Delete some files to make room.", humanBytes(used), humanBytes(u.QuotaBytes)))
+			apiError(w, http.StatusBadRequest, a.tr(r, "Your storage is full ({used} of {quota}). Delete some files to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes)))
 			return
 		}
 	}
 	if !a.limits.allow("bigup:"+clientIP(r), 60, time.Hour) {
-		apiError(w, http.StatusTooManyRequests, "You're uploading very fast. Please wait a little.")
+		apiError(w, http.StatusTooManyRequests, a.tr(r, "You're uploading very fast. Please wait a little."))
 		return
 	}
 	a.chunks.mu.Lock()
@@ -124,7 +124,7 @@ func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	a.chunks.mu.Unlock()
 	if open >= 10 {
-		apiError(w, http.StatusTooManyRequests, "Finish your other uploads first.")
+		apiError(w, http.StatusTooManyRequests, a.tr(r, "Finish your other uploads first."))
 		return
 	}
 	f, err := os.CreateTemp(a.tmpDir(), "chunk-")
@@ -230,7 +230,7 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.log.Error("finish upload", "err", err)
-		apiError(w, http.StatusInternalServerError, "Upload failed on our side. Please try again.")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "Upload failed on our side. Please try again."))
 		return
 	}
 	if dup && albumID != "" && im.AlbumID.String != albumID {
