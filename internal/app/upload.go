@@ -145,11 +145,6 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 	}
 
-	var used int64
-	if u != nil {
-		used, _ = a.db.UserStorage(ctx, u.ID)
-	}
-
 	results := make([]uploadResult, 0, len(inputs))
 	for _, in := range inputs {
 		res := uploadResult{Name: in.name}
@@ -174,18 +169,19 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 		in.contentWarning = contentWarning
 		in.warningReason = warningReason
-		if u != nil && used+in.size > u.QuotaBytes {
+		done, used, fits := a.reserveQuota(ctx, u, in.size)
+		if !fits {
 			res.Err = userError{a.tr(r, "Your storage is full ({used} of {quota}). Delete some images to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes))}
 			results = append(results, res)
 			continue
 		}
-		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed, alt)
+		im, tok, dup, err := func() (*db.Image, string, bool, error) {
+			defer done() // also when storing panics: the member's lock must not stay taken
+			return a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed, alt)
+		}()
 		res.Image, res.DeleteToken, res.Duplicate, res.Err = im, tok, dup, err
 		if errors.Is(err, errBlockedFile) {
 			res.Err = userError{a.tr(r, "This file is not allowed on this server.")}
-		}
-		if err == nil && !dup {
-			used += im.Size
 		}
 		results = append(results, res)
 	}

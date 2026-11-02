@@ -401,7 +401,12 @@ func (a *App) hopUserAction(w http.ResponseWriter, r *http.Request) {
 		detail["text"] = u.Warning
 		err = a.db.UpdateUser(ctx, u)
 	case "purge":
-		counts := map[string]any{"images": a.purgeUser(ctx, u)}
+		images, perr := a.purgeUser(ctx, u)
+		if perr != nil {
+			hopFail(w, http.StatusInternalServerError, "purge_failed", perr.Error())
+			return
+		}
+		counts := map[string]any{"images": images}
 		detail["counts"] = counts
 		a.audit(r, "user.purge", u.HelinkID.String, detail)
 		hopOK(w, map[string]any{"purged": true, "counts": counts, "local_id": u.ID})
@@ -597,7 +602,12 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	case "account.deleted":
 		if u, err := a.db.UserByHelink(ctx, id); err == nil {
-			counts := map[string]any{"images": a.purgeUser(ctx, u)}
+			images, perr := a.purgeUser(ctx, u)
+			if perr != nil {
+				hopFail(w, http.StatusInternalServerError, "purge_failed", perr.Error())
+				return
+			}
+			counts := map[string]any{"images": images}
 			handled = true
 			a.audit(r, "event.account.deleted", id, map[string]any{"event": ev.ID, "counts": counts})
 			hopOK(w, map[string]any{"handled": true, "purged": true, "counts": counts})

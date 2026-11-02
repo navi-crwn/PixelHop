@@ -268,7 +268,6 @@ if [ "$KEEP_ENV" = 0 ] && [ "$DRY" = 0 ]; then
   set_env .env PIXELHOP_DATA "$DATAV"
   set_env .env PIXELHOP_BASE_URL "$URL"
   set_env .env PIXELHOP_SITE_NAME "$NAME"
-  set_env .env PIXELHOP_SECRET "$(rand_hex 32)"
   case "$URL" in https://*) set_env .env PIXELHOP_TRUSTED_PROXIES 127.0.0.1 ;; esac
 
   chmod 600 .env

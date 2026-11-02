@@ -4,6 +4,11 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Hardening
+- A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
+- Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
+- Removed the unused `PIXELHOP_SECRET` setting; `install.sh` no longer writes it to `.env`. An existing value in `.env` is simply ignored.
+
 ### Safety, speed and ownership
 - Views are counted in memory and written every ten seconds in one transaction, so a viral image no longer means three database writes per visitor.
 - API keys can be limited to **Upload only** (they cannot list, rename or delete).
