@@ -453,6 +453,7 @@
           $('#album-open').href = res.data.album_url;
         }
         if (used === 1 && rows.length === 1 && !ticket) copy(imgs[0].view_url);
+        else if (res.data.album_url && imgs.length > 1 && !ticket) copy(res.data.album_url); // several files: the album link is the one to paste
         renderHistory();
       };
       xhr.onerror = function () { rows.forEach(function (r) { fail(r, T('Network error. Check your connection and try again.')); }); };
@@ -719,6 +720,43 @@
     });
     if (/iPhone|iPad/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !navigator.standalone) ib.classList.remove('hide');
   }
+
+  // ---------- keyboard shortcuts ("?" lists them) ----------
+  (function () {
+    var typing = function (t) { return t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable); };
+    var keys = [
+      ['?', 'Show this list'], ['u', 'Upload files'], ['s', 'Open the studio'], ['d', 'Open the dashboard'],
+      ['/', 'Search my files'], ['c', 'Copy this link']
+    ];
+    function help() {
+      var dlg = $('#shortcuts');
+      if (!dlg) {
+        dlg = document.createElement('dialog'); dlg.id = 'shortcuts';
+        var h = document.createElement('h2'); h.textContent = T('Keyboard shortcuts'); dlg.appendChild(h);
+        var dl = document.createElement('dl'); dl.className = 'facts';
+        keys.forEach(function (k) {
+          var dt = document.createElement('dt'), dd = document.createElement('dd'), kb = document.createElement('span');
+          kb.className = 'kbd'; kb.textContent = k[0]; dt.appendChild(kb); dd.textContent = T(k[1]); dl.appendChild(dt); dl.appendChild(dd);
+        });
+        dlg.appendChild(dl);
+        var f = document.createElement('form'); f.method = 'dialog'; f.className = 'btn-row'; f.style.justifyContent = 'flex-end';
+        var b = document.createElement('button'); b.className = 'btn'; b.textContent = T('Close'); f.appendChild(b); dlg.appendChild(f);
+        document.body.appendChild(dlg);
+      }
+      if (dlg.showModal && !dlg.open) dlg.showModal();
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]') && e.key !== '?') return;
+      switch (e.key) {
+        case '?': e.preventDefault(); help(); break;
+        case 'u': var pick = $('[data-pick-files]') || $('#drop-in'); if (pick) { e.preventDefault(); if (pick.click) pick.click(); } else location.href = '/'; break;
+        case 's': location.href = '/tools'; break;
+        case 'd': location.href = '/dashboard'; break;
+        case '/': var q = $('input[type=search]'); if (q) { e.preventDefault(); q.focus(); } break;
+        case 'c': var cb = $('[data-copy-text].primary') || $('[data-copy-text]'); if (cb) { e.preventDefault(); copy(cb.dataset.copyText); } break;
+      }
+    });
+  })();
 
   var warn = $('dialog[data-open]');
   if (warn && warn.showModal) { warn.showModal(); warn.addEventListener('cancel', function (e) { e.preventDefault(); }); }

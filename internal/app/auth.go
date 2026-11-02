@@ -93,6 +93,23 @@ func currentUser(r *http.Request) *db.User {
 	return u
 }
 
+// uploadOnlyAllowed lists what a key limited to uploading may call: the
+// upload endpoints and the upload-status check, nothing else.
+func uploadOnlyAllowed(r *http.Request) bool {
+	p := r.URL.Path
+	switch {
+	case r.Method == http.MethodPost && (p == "/api/v1/upload" || p == "/api/upload.php" || p == "/api/v1/uploads"):
+		return true
+	case r.Method == http.MethodGet && p == "/api/v1/upload-status":
+		return true
+	case r.Method == http.MethodPut && strings.HasPrefix(p, "/api/v1/uploads/"):
+		return true
+	case r.Method == http.MethodPost && strings.HasPrefix(p, "/api/v1/uploads/") && strings.HasSuffix(p, "/finish"):
+		return true
+	}
+	return false
+}
+
 func viaAPIKey(r *http.Request) bool {
 	v, _ := r.Context().Value(keyViaAPIKey).(bool)
 	return v
@@ -108,6 +125,10 @@ func (a *App) withUser(next http.Handler) http.Handler {
 			u, err := a.db.APIKeyUser(ctx, hashToken(key))
 			if err != nil || u.Status != "active" {
 				apiError(w, http.StatusUnauthorized, "invalid API key")
+				return
+			}
+			if a.db.APIKeyScope(ctx, hashToken(key)) == "upload" && !uploadOnlyAllowed(r) {
+				apiError(w, http.StatusForbidden, a.tr(r, "This key can only upload."))
 				return
 			}
 			ctx = context.WithValue(ctx, keyUser, u)

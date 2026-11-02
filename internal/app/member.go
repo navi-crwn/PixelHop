@@ -69,6 +69,8 @@ var settingsNotices = map[string]string{
 	"key-deleted":     "API key deleted.",
 	"webhook-deleted": "Webhook deleted.",
 	"webhook-test":    "Test sent; refresh in a few seconds to see the result.",
+	"hotlinks":        "Embedding setting saved.",
+	"sessions":        "Signed out on all your other devices.",
 }
 
 type settingsData struct {
@@ -79,6 +81,8 @@ type settingsData struct {
 	Notice           string
 	Error            string
 	HasPass          bool
+	BlockHotlinks    bool
+	Sessions         []sessionView
 	Google           bool
 }
 
@@ -86,7 +90,7 @@ func (a *App) settingsData(r *http.Request) settingsData {
 	u := currentUser(r)
 	keys, _ := a.db.APIKeys(r.Context(), u.ID)
 	hooks, _ := a.db.Webhooks(r.Context(), u.ID)
-	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: a.tr(r, settingsNotices[r.URL.Query().Get("ok")])}
+	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", BlockHotlinks: a.db.BlockHotlinks(r.Context(), u.ID), Sessions: a.sessionViews(r), Google: u.GoogleID.Valid, Notice: a.tr(r, settingsNotices[r.URL.Query().Get("ok")])}
 }
 
 func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +133,7 @@ func (a *App) createKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key := "ph_" + randomToken(24)
-	if err := a.db.InsertAPIKey(r.Context(), u.ID, name, key[:9], hashToken(key)); err != nil {
+	if err := a.db.InsertAPIKeyScoped(r.Context(), u.ID, name, key[:9], hashToken(key), r.FormValue("scope")); err != nil {
 		a.serverError(w, r, err)
 		return
 	}
@@ -249,5 +253,152 @@ func (a *App) downloadZip(w http.ResponseWriter, r *http.Request) {
 			io.Copy(f, obj.Body)
 		}
 		obj.Body.Close()
+	}
+}
+
+func (a *App) saveHotlinks(w http.ResponseWriter, r *http.Request) {
+	u := currentUser(r)
+	on := r.FormValue("block_hotlinks") != ""
+	if err := a.db.SetBlockHotlinks(r.Context(), u.ID, on); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	a.hotlinks.set(u.ID, on)
+	http.Redirect(w, r, "/settings?ok=hotlinks#profile", http.StatusSeeOther)
+}
+
+type sessionView struct {
+	Device  string
+	IP      string
+	Since   int64
+	Current bool
+}
+
+// sessionViews lists the browsers this account is signed in on; the one in use is marked.
+func (a *App) sessionViews(r *http.Request) []sessionView {
+	u := currentUser(r)
+	cur := ""
+	if c, err := r.Cookie(sessionCookie); err == nil {
+		cur = hashToken(c.Value)
+	}
+	var out []sessionView
+	for _, s := range a.db.UserSessions(r.Context(), u.ID) {
+		out = append(out, sessionView{Device: deviceName(s.UserAgent), IP: s.IP, Since: s.CreatedAt, Current: s.TokenHash == cur})
+	}
+	return out
+}
+
+// deviceName turns a User-Agent into something a person recognises: "Chrome on macOS".
+func deviceName(ua string) string {
+	browser := "Browser"
+	for _, b := range [][2]string{{"Edg/", "Edge"}, {"OPR/", "Opera"}, {"Firefox/", "Firefox"}, {"Chrome/", "Chrome"}, {"Safari/", "Safari"}} {
+		if strings.Contains(ua, b[0]) {
+			browser = b[1]
+			break
+		}
+	}
+	system := ""
+	for _, s := range [][2]string{{"iPhone", "iPhone"}, {"iPad", "iPad"}, {"Android", "Android"}, {"Windows", "Windows"}, {"Mac OS X", "macOS"}, {"Linux", "Linux"}} {
+		if strings.Contains(ua, s[0]) {
+			system = s[1]
+			break
+		}
+	}
+	if system == "" {
+		return browser
+	}
+	return browser + " · " + system
+}
+
+// revokeSessions signs the account out everywhere except this browser.
+func (a *App) revokeSessions(w http.ResponseWriter, r *http.Request) {
+	u := currentUser(r)
+	if c, err := r.Cookie(sessionCookie); err == nil {
+		a.db.DeleteOtherSessions(r.Context(), u.ID, hashToken(c.Value))
+	}
+	http.Redirect(w, r, "/settings?ok=sessions#sessions", http.StatusSeeOther)
+}
+
+// exportData sends everything the account holds: the original files, and a
+// JSON file with the profile, the details of each file and the albums.
+func (a *App) exportData(w http.ResponseWriter, r *http.Request) {
+	u := currentUser(r)
+	ctx := r.Context()
+	type fileInfo struct {
+		ID        string `json:"id"`
+		File      string `json:"file"`
+		Title     string `json:"title,omitempty"`
+		Alt       string `json:"alt,omitempty"`
+		Mime      string `json:"mime"`
+		Bytes     int64  `json:"bytes"`
+		Width     int    `json:"width,omitempty"`
+		Height    int    `json:"height,omitempty"`
+		Views     int64  `json:"views"`
+		Album     string `json:"album,omitempty"`
+		Private   bool   `json:"private,omitempty"`
+		Protected bool   `json:"password_protected,omitempty"`
+		Page      string `json:"page"`
+		Uploaded  string `json:"uploaded"`
+	}
+	var files []fileInfo
+	albums, _ := a.db.Albums(ctx, u.ID)
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", `attachment; filename="pixelhop-export.zip"`)
+	zw := zip.NewWriter(w)
+	defer zw.Close()
+	used := map[string]bool{}
+	for off := 0; ; off += 200 {
+		ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Limit: 200, Offset: off})
+		if err != nil || len(ims) == 0 {
+			break
+		}
+		for _, im := range ims {
+			b := a.backends[im.Backend]
+			if b == nil {
+				continue
+			}
+			obj, err := b.Get(ctx, im.KeyFull, "")
+			if err != nil {
+				continue
+			}
+			name := slugify(im.Title)
+			if name == "" {
+				name = im.ID
+			}
+			for n, base := 2, name; used[name+"."+im.Ext]; n++ {
+				name = fmt.Sprintf("%s-%d", base, n)
+			}
+			used[name+"."+im.Ext] = true
+			path := "files/" + name + "." + im.Ext
+			if f, err := zw.CreateHeader(&zip.FileHeader{Name: path, Method: zip.Store, Modified: time.Unix(im.CreatedAt, 0)}); err == nil {
+				io.Copy(f, obj.Body)
+			}
+			obj.Body.Close()
+			files = append(files, fileInfo{ID: im.ID, File: path, Title: im.Title, Alt: im.Alt, Mime: im.Mime, Bytes: im.Size, Width: im.Width, Height: im.Height,
+				Views: int64(im.Views), Album: im.AlbumID.String, Private: im.Private, Protected: im.PassHash != "", Page: a.pageURL(im.ID),
+				Uploaded: time.Unix(im.CreatedAt, 0).UTC().Format(time.RFC3339)})
+		}
+	}
+	type albumInfo struct {
+		ID      string `json:"id"`
+		Title   string `json:"title"`
+		Images  int    `json:"images"`
+		Page    string `json:"page"`
+		Created string `json:"created"`
+	}
+	var al []albumInfo
+	for _, x := range albums {
+		al = append(al, albumInfo{ID: x.ID, Title: x.Title, Images: x.Count, Page: a.albumURL(x.ID), Created: time.Unix(x.CreatedAt, 0).UTC().Format(time.RFC3339)})
+	}
+	account := map[string]any{
+		"exported": time.Now().UTC().Format(time.RFC3339), "site": a.cfg.SiteName,
+		"account": map[string]any{"email": u.Email, "name": u.Name, "username": u.Username.String, "bio": u.Bio, "website": u.Website,
+			"member_since": time.Unix(u.CreatedAt, 0).UTC().Format(time.RFC3339)},
+		"files": files, "albums": al,
+	}
+	if f, err := zw.Create("account.json"); err == nil {
+		enc := json.NewEncoder(f)
+		enc.SetIndent("", "  ")
+		enc.Encode(account)
 	}
 }

@@ -25,6 +25,7 @@ import (
 var Version = "3.7.0"
 
 type App struct {
+	hotlinks hotlinkCache
 	cfg      *config.Config
 	db       *db.DB
 	store    storage.Backend // where new uploads go
@@ -90,6 +91,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /contact", a.contact)
 	mux.HandleFunc("GET /status", a.status)
 	mux.HandleFunc("GET /a/{id}", a.album)
+	mux.HandleFunc("GET /a/{id}/embed", a.albumEmbed)
 	mux.HandleFunc("GET /u/{username}", a.profile)
 	mux.HandleFunc("GET /explore", a.explore)
 	mux.HandleFunc("GET /sitemap.xml", a.sitemap)
@@ -143,9 +145,12 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /settings/webhooks/test", a.member(a.testWebhook))
 	mux.HandleFunc("GET /settings", a.member(a.settingsPage))
 	mux.HandleFunc("POST /settings/profile", a.member(a.saveProfile))
+	mux.HandleFunc("POST /settings/hotlinks", a.member(a.saveHotlinks))
 	mux.HandleFunc("POST /settings/avatar", a.member(a.saveAvatar))
 	mux.HandleFunc("POST /settings/avatar/delete", a.member(a.deleteAvatar))
 	mux.HandleFunc("POST /settings/password", a.member(a.savePassword))
+	mux.HandleFunc("POST /settings/sessions/revoke", a.member(a.revokeSessions))
+	mux.HandleFunc("POST /settings/export", a.member(a.exportData))
 	mux.HandleFunc("POST /settings/keys", a.member(a.createKey))
 	mux.HandleFunc("POST /settings/keys/{id}/delete", a.member(a.deleteKey))
 	mux.HandleFunc("GET /settings/sharex/{prefix}", a.member(a.sharexConfig))
@@ -218,6 +223,7 @@ func (a *App) Run(ctx context.Context) error {
 		MaxHeaderBytes:    64 << 10,
 	}
 	go a.janitor(ctx)
+	go a.flushViews(ctx)
 	go a.mediaWorker(ctx)
 	go a.chunks.sweep(ctx)
 	errc := make(chan error, 1)
@@ -229,7 +235,9 @@ func (a *App) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		shut, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
-		return srv.Shutdown(shut)
+		err := srv.Shutdown(shut)
+		a.db.FlushViews(shut)
+		return err
 	}
 }
 

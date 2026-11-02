@@ -1,10 +1,13 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
 )
+
+const maintenancePaused = "Uploads are paused for maintenance. Everything already online keeps working."
 
 const storagePaused = "Uploads are temporarily paused because server storage is low or unavailable. Please try again later."
 
@@ -28,11 +31,18 @@ func (a *App) storageAvailable(incoming int64) bool {
 	return true
 }
 
+// readOnly tells whether the site is in maintenance: set PIXELHOP_READ_ONLY=true, or switch it in the control center.
+func (a *App) readOnly(r *http.Request) bool {
+	return a.db.Setting(r.Context(), "read_only", fmt.Sprint(a.cfg.ReadOnly)) == "true"
+}
+
 func (a *App) uploadStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	available := a.storageAvailable(0)
 	message := ""
-	if !available {
+	if a.readOnly(r) {
+		available, message = false, a.tr(r, maintenancePaused)
+	} else if !available {
 		message = a.tr(r, storagePaused)
 	}
 	apiOK(w, map[string]any{"available": available, "message": message})
@@ -46,6 +56,11 @@ func (a *App) storageGate(next http.Handler) http.Handler {
 				p == "/settings/avatar" || p == "/api/v1/uploads" || strings.HasPrefix(p, "/api/v1/uploads/") || strings.HasPrefix(p, "/api/v1/tools/"))
 		if !upload {
 			next.ServeHTTP(w, r)
+			return
+		}
+		if a.readOnly(r) {
+			w.Header().Set("Retry-After", "300")
+			apiError(w, http.StatusServiceUnavailable, a.tr(r, maintenancePaused))
 			return
 		}
 		// Serial admission covers parsing, temporary files and final writes, so

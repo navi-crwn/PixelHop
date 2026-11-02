@@ -220,16 +220,25 @@ type APIKey struct {
 	Prefix    string
 	CreatedAt int64
 	LastUsed  int64
+	Scope     string // "full" or "upload" (can only upload)
 }
 
 func (d *DB) InsertAPIKey(ctx context.Context, userID int64, name, prefix, keyHash string) error {
-	_, err := d.ExecContext(ctx, `INSERT INTO api_keys (user_id,name,prefix,key_hash,created_at) VALUES (?,?,?,?,?)`,
-		userID, name, prefix, keyHash, now())
+	return d.InsertAPIKeyScoped(ctx, userID, name, prefix, keyHash, "full")
+}
+
+// InsertAPIKeyScoped stores a key limited to scope ("full" or "upload").
+func (d *DB) InsertAPIKeyScoped(ctx context.Context, userID int64, name, prefix, keyHash, scope string) error {
+	if scope != "upload" {
+		scope = "full"
+	}
+	_, err := d.ExecContext(ctx, `INSERT INTO api_keys (user_id,name,prefix,key_hash,created_at,scope) VALUES (?,?,?,?,?,?)`,
+		userID, name, prefix, keyHash, now(), scope)
 	return err
 }
 
 func (d *DB) APIKeys(ctx context.Context, userID int64) ([]APIKey, error) {
-	rows, err := d.QueryContext(ctx, `SELECT id,user_id,name,prefix,created_at,last_used FROM api_keys WHERE user_id=? ORDER BY id DESC`, userID)
+	rows, err := d.QueryContext(ctx, `SELECT id,user_id,name,prefix,created_at,last_used,scope FROM api_keys WHERE user_id=? ORDER BY id DESC`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +246,7 @@ func (d *DB) APIKeys(ctx context.Context, userID int64) ([]APIKey, error) {
 	var out []APIKey
 	for rows.Next() {
 		var k APIKey
-		if err := rows.Scan(&k.ID, &k.UserID, &k.Name, &k.Prefix, &k.CreatedAt, &k.LastUsed); err != nil {
+		if err := rows.Scan(&k.ID, &k.UserID, &k.Name, &k.Prefix, &k.CreatedAt, &k.LastUsed, &k.Scope); err != nil {
 			return nil, err
 		}
 		out = append(out, k)
@@ -248,6 +257,15 @@ func (d *DB) APIKeys(ctx context.Context, userID int64) ([]APIKey, error) {
 func (d *DB) DeleteAPIKey(ctx context.Context, userID, id int64) error {
 	_, err := d.ExecContext(ctx, `DELETE FROM api_keys WHERE id=? AND user_id=?`, id, userID)
 	return err
+}
+
+// APIKeyScope returns the scope of the key with this hash ("full" when unknown).
+func (d *DB) APIKeyScope(ctx context.Context, keyHash string) string {
+	var s string
+	if d.QueryRowContext(ctx, `SELECT scope FROM api_keys WHERE key_hash=?`, keyHash).Scan(&s) != nil || s == "" {
+		return "full"
+	}
+	return s
 }
 
 func (d *DB) APIKeyUser(ctx context.Context, keyHash string) (*User, error) {
@@ -268,4 +286,49 @@ func prefixed(p, cols string) string {
 		}
 	}
 	return out
+}
+
+// BlockHotlinks reports whether this user has turned off embedding of their images on other websites.
+func (d *DB) BlockHotlinks(ctx context.Context, userID int64) bool {
+	var v int
+	d.QueryRowContext(ctx, `SELECT block_hotlinks FROM users WHERE id=?`, userID).Scan(&v)
+	return v == 1
+}
+
+func (d *DB) SetBlockHotlinks(ctx context.Context, userID int64, on bool) error {
+	v := 0
+	if on {
+		v = 1
+	}
+	_, err := d.ExecContext(ctx, `UPDATE users SET block_hotlinks=? WHERE id=?`, v, userID)
+	return err
+}
+
+// SessionRow is one signed-in browser, for the "where am I signed in" list.
+type SessionRow struct {
+	TokenHash string
+	CreatedAt int64
+	IP        string
+	UserAgent string
+}
+
+func (d *DB) UserSessions(ctx context.Context, userID int64) []SessionRow {
+	rows, err := d.QueryContext(ctx, `SELECT token_hash,created_at,ip,user_agent FROM sessions WHERE user_id=? AND expires_at>? ORDER BY created_at DESC LIMIT 50`, userID, now())
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+	var out []SessionRow
+	for rows.Next() {
+		var s SessionRow
+		if rows.Scan(&s.TokenHash, &s.CreatedAt, &s.IP, &s.UserAgent) == nil {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// DeleteOtherSessions signs a user out everywhere except the browser holding keepHash.
+func (d *DB) DeleteOtherSessions(ctx context.Context, userID int64, keepHash string) {
+	d.ExecContext(ctx, `DELETE FROM sessions WHERE user_id=? AND token_hash<>?`, userID, keepHash)
 }
