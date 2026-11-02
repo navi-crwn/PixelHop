@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} Monat",
   "time.month.other": "{n} Monate",
   "time.year.one": "{n} Jahr",
-  "time.year.other": "{n} Jahre"
+  "time.year.other": "{n} Jahre",
+  "mytabs.trash": "Papierkorb",
+  "trash.sub": "Gelöschte Dateien warten hier {days} Tage. Stelle sie wieder her oder lösche sie endgültig.",
+  "trash.empty_confirm": "Alles im Papierkorb endgültig löschen?",
+  "trash.empty_btn": "Papierkorb leeren",
+  "trash.note": "Dateien im Papierkorb zählen weiter zu deinem Speicher.",
+  "trash.left": "Endgültig entfernt in {time}",
+  "trash.restore": "Wiederherstellen",
+  "trash.confirm_one": "Diese Datei endgültig löschen?",
+  "trash.none": "Der Papierkorb ist leer.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Dieses Bild in den Papierkorb legen? Der Link funktioniert sofort nicht mehr; 7 Tage lang kannst du es wiederherstellen.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "{n} Bilder in den Papierkorb legen? 7 Tage lang kannst du sie wiederherstellen.",
+  "{n} moved to the trash": "{n} in den Papierkorb gelegt",
+  "view.tags_hint": "mit Kommas trennen; damit findest du deine Dateien",
+  "view.tags": "Tags"
 }

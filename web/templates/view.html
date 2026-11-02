@@ -141,6 +141,7 @@
   <form method="dialog" id="edit-form" data-id="{{$im.ID}}">
     <h2>{{$.L.T "view.edit_details"}}</h2>
     <div class="field"><label for="e-title">{{$.L.T "albumedit.title"}}</label><input type="text" id="e-title" value="{{$im.Title}}" maxlength="120"></div>
+    <div class="field"><label for="e-tags">{{$.L.T "view.tags"}} <span class="hint">{{$.L.T "view.tags_hint"}}</span></label><input type="text" id="e-tags" value="{{$d.Tags}}" maxlength="200"></div>
     <div class="field"><label for="e-alt">{{$.L.T "view.alt"}} <span class="hint">{{$.L.T "view.alt_hint"}}</span></label><textarea id="e-alt" maxlength="300" rows="2">{{$im.Alt}}</textarea></div>
     <div class="field"><label>{{$.L.T "view.who"}}</label>
       <div class="radios" style="margin:0">

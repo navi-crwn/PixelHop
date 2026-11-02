@@ -14,6 +14,7 @@ All notable changes to PixelHop will be documented in this file.
 - An album can be embedded on another website with an iframe (`/a/{id}/embed`); the album page copies the code.
 - Keyboard shortcuts (press `?`): upload, studio, dashboard, search, copy link. After a multi-file upload the album link is copied for you.
 - An OpenAPI 3 description of the API (`/static/openapi.json`) and an architecture page (`docs/ARCHITECTURE.md`).
+- Deleted files go to a **trash** for 7 days (restore them, delete for good, or empty it); the API follows (`DELETE` trashes, `POST /api/v1/images/{id}/restore`, `?permanent=1`). Files can have **tags** (search and a tag filter on the dashboard; `tags` in the API).
 - The terminal boxes on the home page keep their dark panel in light mode (the site-wide `code` and `pre` styles painted them pale).
 
 ### Home v2

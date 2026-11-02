@@ -130,6 +130,8 @@ type ImageQuery struct {
 	PublicOwner bool   // only images whose owner shows their profile
 	Sort        string // new | old | views | size
 	Kind        string // "" = any | image | video | pdf
+	Trash       bool   // only files in the trash (default: none of them)
+	Tag         string // only files with this tag
 	Limit       int
 	Offset      int
 }
@@ -137,6 +139,11 @@ type ImageQuery struct {
 func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	var where []string
 	var args []any
+	if q.Trash {
+		where = append(where, "deleted_at>0")
+	} else {
+		where = append(where, "deleted_at=0")
+	}
 	if q.UserID > 0 {
 		where = append(where, "user_id=?")
 		args = append(args, q.UserID)
@@ -160,10 +167,14 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	case "image":
 		where = append(where, "mime NOT LIKE 'video/%' AND mime<>'application/pdf'")
 	}
+	if t := CleanTags([]string{q.Tag}); len(t) == 1 {
+		where = append(where, "tags LIKE ?")
+		args = append(args, "%,"+t[0]+",%")
+	}
 	if s := strings.TrimSpace(q.Search); s != "" {
-		where = append(where, "(id LIKE ? OR title LIKE ? OR orig_name LIKE ?)")
+		where = append(where, "(id LIKE ? OR title LIKE ? OR orig_name LIKE ? OR tags LIKE ?)")
 		like := "%" + strings.NewReplacer("%", `\%`, "_", `\_`).Replace(s) + "%"
-		args = append(args, like, like, like)
+		args = append(args, like, like, like, like)
 	}
 	w := ""
 	if len(where) > 0 {
@@ -326,7 +337,7 @@ func (d *DB) UserSummary(ctx context.Context, userID int64) (s UserSummary) {
 		COALESCE(SUM(views),0),
 		COALESCE(SUM(listed),0),
 		COALESCE(SUM(created_at>?),0)
-		FROM images WHERE user_id=?`, now()-7*86400, userID).Scan(&s.Images, &s.Videos, &s.PDFs, &s.Views, &s.Listed, &s.Week)
+		FROM images WHERE user_id=? AND deleted_at=0`, now()-7*86400, userID).Scan(&s.Images, &s.Videos, &s.PDFs, &s.Views, &s.Listed, &s.Week)
 	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM albums WHERE user_id=?`, userID).Scan(&s.Albums)
 	return
 }
@@ -453,3 +464,48 @@ func (d *DB) ReplaceFile(ctx context.Context, id, key, mime, ext string, size in
 	_, err := d.ExecContext(ctx, `UPDATE images SET key_full=?, mime=?, ext=?, size=?, width=?, height=? WHERE id=?`, key, mime, ext, size, w, h, id)
 	return err
 }
+
+// TrashImage moves a file to the trash: it is hidden everywhere at once and
+// can be restored until PurgeableTrash picks it up a week later.
+func (d *DB) TrashImage(ctx context.Context, id string) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET deleted_at=?, hidden=1, hidden_reason='trash' WHERE id=? AND deleted_at=0`, now(), id)
+	return err
+}
+
+func (d *DB) RestoreImage(ctx context.Context, id string) error {
+	_, err := d.ExecContext(ctx, `UPDATE images SET deleted_at=0, hidden=0, hidden_reason='' WHERE id=? AND deleted_at>0`, id)
+	return err
+}
+
+// DeletedAt is when a file went to the trash (0 = not in the trash).
+func (d *DB) DeletedAt(ctx context.Context, id string) int64 {
+	var t int64
+	d.QueryRowContext(ctx, `SELECT deleted_at FROM images WHERE id=?`, id).Scan(&t)
+	return t
+}
+
+func (d *DB) CountTrash(ctx context.Context, userID int64) (n int) {
+	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM images WHERE user_id=? AND deleted_at>0`, userID).Scan(&n)
+	return
+}
+
+// PurgeableTrash lists files that have been in the trash since before the cutoff.
+func (d *DB) PurgeableTrash(ctx context.Context, before int64, limit int) ([]*Image, error) {
+	rows, err := d.QueryContext(ctx, `SELECT `+imageCols+` FROM images WHERE deleted_at>0 AND deleted_at<=? LIMIT ?`, before, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*Image
+	for rows.Next() {
+		im, err := scanImage(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, im)
+	}
+	return out, rows.Err()
+}
+
+// Trashed reports whether the file is in the trash.
+func (d *DB) Trashed(ctx context.Context, id string) bool { return d.DeletedAt(ctx, id) > 0 }

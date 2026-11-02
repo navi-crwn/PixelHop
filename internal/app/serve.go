@@ -187,8 +187,9 @@ type viewData struct {
 	Image      *db.Image
 	Album      *db.Album
 	Siblings   []*db.Image
-	Mine       bool // the viewer may rename/delete/list it
-	Optimizing bool // a video still being shrunk in the background
+	Mine       bool   // the viewer may rename/delete/list it
+	Tags       string // the file's tags, for the edit form
+	Optimizing bool   // a video still being shrunk in the background
 	Links      links
 	GatePassed bool
 }
@@ -268,6 +269,9 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 	gatePassed := !im.HasWarning() || a.hasGatePassed(r, im.ID) || mine
 	d := viewData{Image: im, Links: a.linksFor(im), Mine: mine, GatePassed: gatePassed,
 		Owner: a.ownerOf(r.Context(), im.UserID), Optimizing: im.Kind() == "video" && a.db.MediaJobPending(r.Context(), im.ID)}
+	if mine {
+		d.Tags = strings.Join(a.db.ImageTags(r.Context(), im.ID), ", ")
+	}
 	for _, k := range removedList(im.Stripped) {
 		if w := removedWords[k]; w != "" {
 			d.Removed = append(d.Removed, w)

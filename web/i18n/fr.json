@@ -1059,5 +1059,19 @@
   "time.month.other": "{n} mois",
   "time.year.one": "{n} an",
   "time.year.other": "{n} ans",
-  "time.minute.other": "{n} minutes"
+  "time.minute.other": "{n} minutes",
+  "mytabs.trash": "Corbeille",
+  "trash.sub": "Les fichiers supprimés attendent ici {days} jours. Restaurez-les ou supprimez-les définitivement.",
+  "trash.empty_confirm": "Supprimer définitivement tout le contenu de la corbeille ?",
+  "trash.empty_btn": "Vider la corbeille",
+  "trash.note": "Les fichiers de la corbeille comptent toujours dans votre stockage.",
+  "trash.left": "Supprimé définitivement dans {time}",
+  "trash.restore": "Restaurer",
+  "trash.confirm_one": "Supprimer définitivement ce fichier ?",
+  "trash.none": "La corbeille est vide.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Déplacer cette image dans la corbeille ? Le lien cesse de fonctionner maintenant ; vous pouvez la restaurer pendant 7 jours.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "Déplacer {n} images dans la corbeille ? Vous pouvez les restaurer pendant 7 jours.",
+  "{n} moved to the trash": "{n} déplacées dans la corbeille",
+  "view.tags": "Étiquettes",
+  "view.tags_hint": "séparez par des virgules ; servez-vous-en pour retrouver vos fichiers"
 }

@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} 个月",
   "time.month.other": "{n} 个月",
   "time.year.one": "{n} 年",
-  "time.year.other": "{n} 年"
+  "time.year.other": "{n} 年",
+  "mytabs.trash": "回收站",
+  "trash.sub": "已删除的文件会在这里保留 {days} 天。可以恢复，也可以彻底删除。",
+  "trash.empty_confirm": "永久删除回收站里的所有内容？",
+  "trash.empty_btn": "清空回收站",
+  "trash.note": "回收站里的文件仍计入您的存储空间。",
+  "trash.left": "{time}后彻底删除",
+  "trash.restore": "恢复",
+  "trash.confirm_one": "永久删除这个文件？",
+  "trash.none": "回收站是空的。",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "把这张图片移到回收站？链接会立即失效；7 天内可以恢复。",
+  "Move {n} images to the trash? You can restore them for 7 days.": "把 {n} 张图片移到回收站？7 天内可以恢复。",
+  "{n} moved to the trash": "{n} 个已移到回收站",
+  "view.tags": "标签",
+  "view.tags_hint": "用逗号分隔；可用来搜索您的文件"
 }

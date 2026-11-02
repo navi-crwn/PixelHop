@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} mês",
   "time.month.other": "{n} meses",
   "time.year.one": "{n} ano",
-  "time.year.other": "{n} anos"
+  "time.year.other": "{n} anos",
+  "mytabs.trash": "Lixeira",
+  "trash.sub": "Arquivos excluídos ficam aqui por {days} dias. Restaure-os ou exclua para sempre.",
+  "trash.empty_confirm": "Excluir tudo da lixeira para sempre?",
+  "trash.empty_btn": "Esvaziar a lixeira",
+  "trash.note": "Arquivos na lixeira continuam contando no seu armazenamento.",
+  "trash.left": "Removido para sempre em {time}",
+  "trash.restore": "Restaurar",
+  "trash.confirm_one": "Excluir este arquivo para sempre?",
+  "trash.none": "A lixeira está vazia.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Mover esta imagem para a lixeira? O link deixa de funcionar agora; você pode restaurá-la por 7 dias.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "Mover {n} imagens para a lixeira? Você pode restaurá-las por 7 dias.",
+  "{n} moved to the trash": "{n} movidas para a lixeira",
+  "view.tags_hint": "separe com vírgulas; use para pesquisar seus arquivos",
+  "view.tags": "Tags"
 }

@@ -82,13 +82,14 @@ func (a *App) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Title          *string `json:"title"`
-		Alt            *string `json:"alt"`
-		Listed         *bool   `json:"listed"`
-		Visibility     *string `json:"visibility"`
-		Password       string  `json:"password"`
-		ContentWarning *string `json:"content_warning"`
-		WarningReason  *string `json:"warning_reason"`
+		Title          *string   `json:"title"`
+		Alt            *string   `json:"alt"`
+		Listed         *bool     `json:"listed"`
+		Visibility     *string   `json:"visibility"`
+		Password       string    `json:"password"`
+		ContentWarning *string   `json:"content_warning"`
+		WarningReason  *string   `json:"warning_reason"`
+		Tags           *[]string `json:"tags"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8192)).Decode(&body); err != nil {
 		apiError(w, http.StatusBadRequest, `send JSON like {"title": "…"}`)
@@ -145,7 +146,12 @@ func (a *App) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusInternalServerError, "couldn't save")
 		return
 	}
-	apiOK(w, a.imageJSON(im))
+	if body.Tags != nil {
+		a.db.SetImageTags(r.Context(), im.ID, *body.Tags)
+	}
+	out := a.imageJSON(im)
+	out["tags"] = a.db.ImageTags(r.Context(), im.ID)
+	apiOK(w, out)
 }
 
 // ---- views and where they came from ----

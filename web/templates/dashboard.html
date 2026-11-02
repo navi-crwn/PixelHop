@@ -112,6 +112,7 @@
       </form>
     </div>
 
+    {{if $d.Tags}}<nav class="kind-tabs tag-tabs" aria-label="{{$.L.T "view.tags"}}">{{range $d.Tags}}<a href="?tag={{.Tag}}#files" {{if eq $d.Tag .Tag}}aria-current="page"{{end}}>{{.Tag}} <span>{{.Count}}</span></a>{{end}}</nav>{{end}}
     <div class="gallery" id="my-gallery" {{if not $d.Images}}hidden{{end}}>
       {{range $d.Images}}
       <div class="tile" style="background:{{.Color}}" data-id="{{.ID}}" data-direct="{{$.Link}}{{direct .}}" data-page="{{$.Link}}/{{.ID}}">

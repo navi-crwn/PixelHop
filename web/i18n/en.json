@@ -1059,5 +1059,19 @@
   "time.month.one": "{n} month",
   "time.month.other": "{n} months",
   "time.year.one": "{n} year",
-  "time.year.other": "{n} years"
+  "time.year.other": "{n} years",
+  "mytabs.trash": "Trash",
+  "trash.sub": "Deleted files wait here for {days} days. Restore them, or delete them for good.",
+  "trash.empty_confirm": "Delete everything in the trash for good?",
+  "trash.empty_btn": "Empty the trash",
+  "trash.note": "Files in the trash still count towards your storage.",
+  "trash.left": "Removed for good in {time}",
+  "trash.restore": "Restore",
+  "trash.confirm_one": "Delete this file for good?",
+  "trash.none": "The trash is empty.",
+  "Move this image to the trash? The link stops working now; you can restore it for 7 days.": "Move this image to the trash? The link stops working now; you can restore it for 7 days.",
+  "Move {n} images to the trash? You can restore them for 7 days.": "Move {n} images to the trash? You can restore them for 7 days.",
+  "{n} moved to the trash": "{n} moved to the trash",
+  "view.tags": "Tags",
+  "view.tags_hint": "separate with commas; use them to search your files"
 }

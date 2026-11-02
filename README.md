@@ -64,6 +64,7 @@
 - **🧾 Reports / tickets.** Give an upload a ticket number and a note, and get one link for everything plus a ready-to-paste list for WhatsApp or LINE.
 - **🗂️ Albums.** Upload several images and share one gallery link. Edit the title, description, cover and order afterwards, or make an album from any selection.
 - **🔒 Private or password-protected.** Per image: unlisted (default), only you, or behind a password. Locked files can't be hotlinked.
+- **🗑️ Trash & tags.** A deleted file waits in the trash for a week; tag your files and filter by tag.
 - **📈 View stats.** Views per day and the sites that link to your image, without tracking visitors.
 - **📐 Resize on the fly.** `/i/photo.jpg?w=800&format=webp` makes and caches any size.
 - **📱 Installable app.** Add PixelHop to your home screen and share photos to it from any app. iPhone HEIC photos are converted automatically.

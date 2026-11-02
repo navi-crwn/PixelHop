@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 )
@@ -454,5 +455,70 @@ func TestAlbumEmbed(t *testing.T) {
 	}
 	if fetch(h, "/a/nonexistent1/embed").Code != 404 {
 		t.Fatal("unknown album")
+	}
+}
+
+func TestDeletedFilesWaitInTheTrash(t *testing.T) {
+	a, h := ssoApp(t)
+	u, key := member(t, a, "trash@example.com")
+	id := upload(t, h, key, 1)[0]
+	cookie := signedIn(t, a, u)
+
+	if rec, r := call(t, h, "DELETE", "/api/v1/images/"+id, key, nil); !r.Success || !strings.Contains(string(r.Data), "trashed") {
+		t.Fatalf("delete: %d %s", rec.Code, rec.Body.String())
+	}
+	if fetch(h, "/i/"+id+".png").Code == 200 || fetch(h, "/"+id).Code == 200 {
+		t.Fatal("a trashed file must stop working at once")
+	}
+	if page := fetch(h, "/dashboard", cookie).Body.String(); strings.Contains(page, `data-id="`+id+`"`) {
+		t.Fatal("the dashboard lists only files that are not in the trash")
+	}
+	if page := fetch(h, "/dashboard/trash", cookie).Body.String(); !strings.Contains(page, "/dashboard/trash/"+id+"/restore") {
+		t.Fatal("the trash lists it with a restore button")
+	}
+	if rec := post(h, "/dashboard/trash/"+id+"/restore", url.Values{}, cookie); rec.Code != http.StatusSeeOther {
+		t.Fatalf("restore: %d", rec.Code)
+	}
+	if fetch(h, "/i/"+id+".png").Code != 200 {
+		t.Fatal("a restored file works again")
+	}
+	call(t, h, "DELETE", "/api/v1/images/"+id, key, nil)
+	if rec, _ := call(t, h, "DELETE", "/api/v1/images/"+id, key, nil); rec.Code != 200 { // a second delete removes for good
+		t.Fatalf("permanent delete: %d", rec.Code)
+	}
+	if _, err := a.db.Image(context.Background(), id); err == nil {
+		t.Fatal("deleting from the trash removes the file for good")
+	}
+	// A file left in the trash for more than a week is removed by the janitor.
+	id2 := upload(t, h, key, 2)[1]
+	call(t, h, "DELETE", "/api/v1/images/"+id2, key, nil)
+	a.db.ExecContext(context.Background(), `UPDATE images SET deleted_at=? WHERE id=?`, time.Now().Unix()-8*86400, id2)
+	a.purgeTrash(context.Background())
+	if _, err := a.db.Image(context.Background(), id2); err == nil {
+		t.Fatal("the janitor removes files after a week in the trash")
+	}
+}
+
+func TestTagsSearchAndFilter(t *testing.T) {
+	a, h := ssoApp(t)
+	u, key := member(t, a, "tags@example.com")
+	ids := upload(t, h, key, 2)
+	cookie := signedIn(t, a, u)
+	rec, r := call(t, h, "PATCH", "/api/v1/images/"+ids[0], key, map[string]any{"tags": []string{"Beach", " Sun set ", "beach", "../x"}})
+	if !r.Success || !strings.Contains(string(r.Data), `"beach"`) || !strings.Contains(string(r.Data), `"sun-set"`) {
+		t.Fatalf("tags: %d %s", rec.Code, rec.Body.String())
+	}
+	page := fetch(h, "/dashboard?tag=beach", cookie).Body.String()
+	if !strings.Contains(page, `data-id="`+ids[0]+`"`) || strings.Contains(page, `data-id="`+ids[1]+`"`) {
+		t.Fatal("the tag filter shows only files with that tag")
+	}
+	if page := fetch(h, "/dashboard?q=sun", cookie).Body.String(); !strings.Contains(page, `data-id="`+ids[0]+`"`) {
+		t.Fatal("search also looks in tags")
+	}
+	if page := fetch(h, "/dashboard", cookie).Body.String(); !strings.Contains(page, "?tag=sun-set") {
+		t.Fatal("the dashboard lists the user's tags")
+	}
+	if _, r := call(t, h, "GET", "/api/v1/images/"+ids[0], key, nil); !strings.Contains(string(r.Data), `"tags"`) {
+		t.Fatal("the image JSON carries its tags")
 	}
 }

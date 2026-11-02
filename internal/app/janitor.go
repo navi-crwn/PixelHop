@@ -35,6 +35,7 @@ func (a *App) flushViews(ctx context.Context) {
 }
 
 func (a *App) sweep(ctx context.Context) {
+	a.purgeTrash(ctx)
 	removed := 0
 	for {
 		ims, err := a.db.ExpiredImages(ctx, a.cfg.InactiveDays, 100)

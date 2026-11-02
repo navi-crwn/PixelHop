@@ -163,7 +163,7 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	p = a.base(r, p)
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
-	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
+	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" || name == "trash" {
 		p.NoIndex = true
 	}
 	var buf bytes.Buffer
