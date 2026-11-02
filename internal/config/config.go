@@ -18,10 +18,9 @@ type Config struct {
 	// LinkURL is where shared links point (image and album pages, files):
 	// another host that also reaches this server, e.g. "https://p.hel.ink"
 	// when the app moved and old links must keep working. Defaults to BaseURL.
-	LinkURL   string
-	DataDir   string // SQLite database + local image storage
-	SiteName  string
-	SecretKey string // signs nothing secret-critical today; reserved for future tokens
+	LinkURL  string
+	DataDir  string // SQLite database + local image storage
+	SiteName string
 
 	MaxUploadBytes int64
 	MaxMediaBytes  int64 // videos and PDFs (uploaded in pieces, then compressed)
@@ -98,7 +97,6 @@ func Load() (*Config, error) {
 		BaseURL:          strings.TrimRight(env("PIXELHOP_BASE_URL", "http://localhost:8080"), "/"),
 		DataDir:          env("PIXELHOP_DATA", "./data"),
 		SiteName:         env("PIXELHOP_SITE_NAME", "PixelHop"),
-		SecretKey:        env("PIXELHOP_SECRET", ""),
 		MaxUploadBytes:   int64(envInt("PIXELHOP_MAX_UPLOAD_MB", 20)) << 20,
 		MaxMediaBytes:    int64(envInt("PIXELHOP_MAX_MEDIA_MB", 100)) << 20,
 		GuestMaxBytes:    int64(envInt("PIXELHOP_GUEST_MAX_MB", 20)) << 20,
