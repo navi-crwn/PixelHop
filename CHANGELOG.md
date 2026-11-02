@@ -4,10 +4,24 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+- README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).
+- Fresh screenshots of the home page, image page, dashboard, album page and studio, in dark and light. `scripts/readme-images.mjs` now renders them from a running instance with generated demo pictures (`scripts/demo-images`); the old hero, features and studio pictures, and the unused `docs/media` screenshots (one showed the retired admin pages), are gone.
+- `docs/ARCHITECTURE.md` no longer says that sideways photos keep their pixels: a photo with an EXIF rotation is saved again as JPEG at quality 92.
+- `web/changelog.json`, the data behind the `/changelog` page, was regenerated with `scripts/build-changelog.py`; it had stopped at the content warning pull request.
+
 ### Hardening
 - A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
 - Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
 - Removed the unused `PIXELHOP_SECRET` setting; `install.sh` no longer writes it to `.env`. An existing value in `.env` is simply ignored.
+
+### Translations
+- The interface, the sign-in and member pages, the home page, the documentation site and the READMEs come in nine languages: English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil), Español, Français and Русский. German and Russian are new; Arabic and right-to-left layout are gone. The old codes `zh` and `pt` still work in `?lang=` and in the cookie, and a retired language falls back to English. The browser's language setting is not used.
+- Copy edits in Chinese and German: dash connectors removed from the text.
+
+### Installers
+- `install.sh` checks the computer (Go 1.27 or newer, or Docker, git, curl, disk space), asks a few questions and builds PixelHop. It can run it in the foreground (`start.sh`), write a systemd unit or a Docker Compose file, connect to an existing HOP ID hub or install one next to it, and ends with a self-test against `/healthz`. It works from a clone or through `curl | bash`.
+- `update.sh` copies the database to `backups/` (with `sqlite3 .backup` when available), pulls and rebuilds (it restarts the Docker container, and tells you how to restart anything else); `uninstall.sh` removes the program and keeps your data unless you pass `--purge`. All three take `--yes` and `--dry-run`.
 
 ### Safety, speed and ownership
 - Views are counted in memory and written every ten seconds in one transaction, so a viral image no longer means three database writes per visitor.
@@ -40,6 +54,23 @@ All notable changes to PixelHop will be documented in this file.
 ### Dashboard chrome
 - The signed-in dashboard (dashboard, albums, settings) has the same chrome as the other HOP dashboards: a sidebar with this app's menu and the HOP family (HOP ID, LinkHop, BioHop, NoteHop, with their marks), a top bar of settings-type controls (upload, language, theme and an account menu with your HOP ID, settings and sign out), and a compact footer.
 - The footer on every page spreads its five columns evenly; a flex rule had packed them to the left.
+
+### Home page and storage guard
+- The home page was rebuilt as one long page: the uploader first, then what happens to a file during its life, on the shared HOP home frame with the 3D pixel logo.
+- Uploads pause with HTTP 507 and `Retry-After` while the data or temporary folder is below the free-space reserve (`PIXELHOP_MIN_FREE_MB`, default 1024, and `PIXELHOP_MIN_FREE_PERCENT`, default 5). Upload pages show the state and check again every 30 seconds; `GET /api/v1/upload-status` reports it. See `docs/UPLOAD-STORAGE.md`.
+
+### Content warnings
+- An upload or an album can carry a content warning: sensitive or adult. Visitors see the file blurred and confirm before it opens (adult files ask them to confirm they are 18 or older). Set it when uploading (`content_warning`, `warning_reason`) or afterwards through the API.
+
+### Pages on PixelHop's own domain
+- New `/about`, `/features`, `/faq`, `/contact` and a live `/status` page, all in the sitemap. `/contact` links to GitHub issues and private security advisories. `SECURITY.md` and issue templates were added to the repository.
+- On a link host (`PIXELHOP_LINK_URL`), app pages now answer with a permanent redirect (301, or 308 for other methods) to the app. Shared links, files, thumbnails, QR codes, the API and `/hop/` are served on both hosts.
+- The HOP family table in the README is checked against the one in HEL.ink by a CI job (`scripts/check-hop-family.sh`), and the app has a family section with the shared typography.
+
+### Sign-in and storage security
+- `GET /auth/helink/logout` ends the PixelHop session when someone signs out at HOP ID, LinkHop or BioHop. Before, only `POST /logout` existed, the session survived and the next visit signed the person straight back in. The `?next=` address is followed only when it is an https address on the HOP family's domain.
+- The SQLite database file is created with mode 0600, and a test checks it.
+- Two SSO secrets can be valid at once so the shared secret can be rotated without downtime: `HELINK_SSO_SECRET_PREV` (also `HOP_SSO_SECRET_PREV`) is accepted for tickets and signed `/hop/*` calls next to the current one. `HOP_SSO_SECRET_PIXELHOP` and `HOP_SSO_SECRET` work as names for the current secret.
 
 ## [3.7.0] - 2026-10-28
 
