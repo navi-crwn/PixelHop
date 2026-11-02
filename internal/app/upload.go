@@ -59,7 +59,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	ip := clientIP(r)
 
 	if u == nil && a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) != "true" {
-		return nil, "", userError{"Please sign in to upload on this server."}
+		return nil, "", userError{a.tr(r, "Please sign in to upload on this server.")}
 	}
 
 	maxBatch := a.cfg.MaxBatch
@@ -67,10 +67,10 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil && !errors.Is(err, http.ErrNotMultipart) {
 		var mbe *http.MaxBytesError
 		if errors.As(err, &mbe) {
-			return nil, "", userError{fmt.Sprintf("That's too much at once: the limit is %d files of %d MB each.", maxBatch, a.cfg.MaxUploadBytes>>20)}
+			return nil, "", userError{a.tr(r, "That's too much at once: the limit is {n} files of {mb} MB each.", "n", maxBatch, "mb", a.cfg.MaxUploadBytes>>20)}
 		}
 		if err := r.ParseForm(); err != nil {
-			return nil, "", userError{"The upload didn't arrive in one piece. Please try again."}
+			return nil, "", userError{a.tr(r, "The upload didn't arrive in one piece. Please try again.")}
 		}
 	}
 
@@ -86,10 +86,10 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		inputs = append(inputs, uploadInput{name: raw})
 	}
 	if len(inputs) == 0 {
-		return nil, "", userError{"Choose a file to upload."}
+		return nil, "", userError{a.tr(r, "Choose a file to upload.")}
 	}
 	if len(inputs) > maxBatch {
-		return nil, "", userError{fmt.Sprintf("You can upload up to %d images at once.", maxBatch)}
+		return nil, "", userError{a.tr(r, "You can upload up to {n} images at once.", "n", maxBatch)}
 	}
 	perMinute := a.cfg.UploadsPerMinute
 	if u != nil {
@@ -97,7 +97,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	}
 	for range inputs {
 		if !a.limits.allow("upload:"+ip, perMinute, time.Minute) {
-			return nil, "", userError{"You're uploading very fast. Please wait a minute."}
+			return nil, "", userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}
 		}
 	}
 
@@ -172,7 +172,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		in.contentWarning = contentWarning
 		in.warningReason = warningReason
 		if u != nil && used+in.size > u.QuotaBytes {
-			res.Err = userError{fmt.Sprintf("Your storage is full (%s of %s). Delete some images to make room.", humanBytes(used), humanBytes(u.QuotaBytes))}
+			res.Err = userError{a.tr(r, "Your storage is full ({used} of {quota}). Delete some images to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes))}
 			results = append(results, res)
 			continue
 		}

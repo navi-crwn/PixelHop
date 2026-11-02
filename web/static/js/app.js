@@ -5,19 +5,28 @@
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
 
+  // Interface text: the English sentence is its own key; {name} marks a value.
+  // The catalog (/i18n/<lang>.js) is loaded before this file.
+  var I18N = window.PIXEL_I18N || {};
+  function T(key, vars) {
+    var s = Object.prototype.hasOwnProperty.call(I18N, key) ? I18N[key] : key;
+    return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : m; }) : s;
+  }
+  window.phT = T;
+
   // ---------- toasts ----------
   function toast(msg, err) {
     var box = $('#toasts'); if (!box) return;
     var t = document.createElement('div');
     t.className = 'toast' + (err ? ' err' : '');
-    t.textContent = msg;
+    t.textContent = T(msg);
     box.appendChild(t);
     setTimeout(function () { t.remove(); }, err ? 5000 : 2600);
   }
   window.phToast = toast;
 
   function copy(text) {
-    var done = function () { toast('Copied'); };
+    var done = function () { toast(T('Copied')); };
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
     } else { fallback(text); done(); }
@@ -87,10 +96,10 @@
       if (title) head.push(title);
       if (note) head.push(note);
       var link = root.dataset.reportLink || ($('#album-link') && !$('#album-banner').classList.contains('hide') && $('#album-link').value);
-      if (link && items.length > 1) head.push('All files: ' + link);
-      var list = items.map(function (x, i) { return (i + 1) + '. ' + (x.dataset.title || 'file') + ': ' + x.dataset.page; });
+      if (link && items.length > 1) head.push(T('All files: {link}', { link: link }));
+      var list = items.map(function (x, i) { return (i + 1) + '. ' + (x.dataset.title || T('file')) + ': ' + x.dataset.page; });
       copy((head.length ? head.join('\n') + '\n\n' : '') + list.join('\n'));
-      return toast(items.length + ' links copied, ready to paste in chat');
+      return toast(T('{n} links copied, ready to paste in chat', { n: items.length }));
     }
     var fmt = b.dataset.copyAll, lines = $$('[data-link]', scope).map(function (x) {
       var d = x.dataset.direct, p = x.dataset.page, t = (x.dataset.title || 'image').replace(/[\[\]]/g, '');
@@ -99,7 +108,7 @@
     });
     if (!lines.length) return;
     copy(lines.join('\n'));
-    toast(lines.length + ' ' + b.textContent.trim() + ' links copied');
+    toast(T('{n} links copied', { n: lines.length }));
   });
 
   // Confirmations and prompts without inline scripts (the CSP forbids them).
@@ -139,7 +148,7 @@
     var label = function (t) {
       var d = new Date(t), today = new Date(); today.setHours(0, 0, 0, 0);
       var diff = Math.round((today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
-      return diff === 0 ? 'Today' : diff === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric' });
+      return diff === 0 ? T('Today') : diff === 1 ? T('Yesterday') : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric' });
     };
     $('#history-more').hidden = h.length <= shown;
     h.slice(0, shown).forEach(function (x) {
@@ -155,7 +164,7 @@
       a.appendChild(img); tile.appendChild(a);
       var cap = document.createElement('div'); cap.className = 'cap';
       var s = document.createElement('span'); s.textContent = x.title; cap.appendChild(s);
-      if (x.del) { var d = document.createElement('a'); d.href = x.del; d.textContent = 'delete'; d.style.color = '#fff'; cap.appendChild(d); }
+      if (x.del) { var d = document.createElement('a'); d.href = x.del; d.textContent = T('delete'); d.style.color = '#fff'; cap.appendChild(d); }
       tile.appendChild(cap); grid.appendChild(tile);
     });
   }
@@ -169,7 +178,7 @@
   }
   var clearBtn = $('#clear-history');
   if (clearBtn) clearBtn.addEventListener('click', function () {
-    if (!confirm('Forget this list? The images stay online; you lose the delete links saved here.')) return;
+    if (!confirm(T('Forget this list? The images stay online; you lose the delete links saved here.'))) return;
     try { localStorage.removeItem(HKEY); } catch (e) {}
     renderHistory();
   });
@@ -217,7 +226,7 @@
       if (files.length) { e.preventDefault(); send(files); return; }
       var text = e.clipboardData.getData('text');
       if (/^https?:\/\/\S+$/i.test(text.trim())) { e.preventDefault(); send([], text.trim()); return; }
-      if (e.target.id === 'paste-box') { e.preventDefault(); toast('There is no image in the clipboard. Copy an image first.', true); }
+      if (e.target.id === 'paste-box') { e.preventDefault(); toast(T('There is no image in the clipboard. Copy an image first.'), true); }
     });
 
     // Phones have no Ctrl+V: the Paste button reads the clipboard directly
@@ -242,7 +251,7 @@
         return navigator.clipboard.readText().then(function (txt) {
           txt = (txt || '').trim();
           if (/^https?:\/\/\S+$/i.test(txt)) return send([], txt);
-          toast('There is no image in the clipboard. Copy an image first.', true);
+          toast(T('There is no image in the clipboard. Copy an image first.'), true);
         });
       }).catch(function () { showPasteBox(); });
     });
@@ -321,9 +330,10 @@
       var inp = document.createElement('input'); inp.type = 'text'; inp.readOnly = true; inp.value = im.view_url;
       inp.addEventListener('focus', function () { inp.select(); });
       link.appendChild(inp); r.meta.appendChild(link);
-      if (im.removed && im.removed.length) { var rm = document.createElement('div'); rm.className = 'small muted'; rm.textContent = 'Removed hidden data: ' + im.removed.join(', '); r.meta.appendChild(rm); }
-      if (im.duplicate) { var s = document.createElement('div'); s.className = 'small muted'; s.textContent = 'You uploaded this before, here is the same link.'; r.meta.appendChild(s); }
-      r.act.innerHTML = '<button class="btn sm primary" type="button">Copy</button><button class="btn sm" type="button">Direct</button><a class="btn sm" href="' + im.view_url + '">Open</a>';
+      if (im.removed && im.removed.length) { var rm = document.createElement('div'); rm.className = 'small muted'; rm.textContent = T('Removed hidden data: {list}', { list: im.removed.join(', ') }); r.meta.appendChild(rm); }
+      if (im.duplicate) { var s = document.createElement('div'); s.className = 'small muted'; s.textContent = T('You uploaded this before, here is the same link.'); r.meta.appendChild(s); }
+      r.act.innerHTML = '<button class="btn sm primary" type="button"></button><button class="btn sm" type="button"></button><a class="btn sm" href="' + im.view_url + '"></a>';
+      r.act.children[0].textContent = T('Copy'); r.act.children[1].textContent = T('Direct'); r.act.children[2].textContent = T('Open');
       r.act.children[0].addEventListener('click', function () { copy(im.view_url); });
       r.act.children[1].addEventListener('click', function () { copy(im.url); });
       // remembered for "Copy all links"
@@ -344,11 +354,11 @@
       var a = document.createElement('a'); a.href = im.view_url;
       var img = document.createElement('img'); img.src = im.thumb_url; img.alt = im.title || ''; img.loading = 'lazy';
       a.appendChild(img); tile.appendChild(a);
-      var tick = document.createElement('input'); tick.type = 'checkbox'; tick.className = 'tick'; tick.value = im.id; tick.setAttribute('aria-label', 'Select ' + (im.title || im.id));
+      var tick = document.createElement('input'); tick.type = 'checkbox'; tick.className = 'tick'; tick.value = im.id; tick.setAttribute('aria-label', T('Select {title}', { title: im.title || im.id }));
       tile.appendChild(tick);
       var cap = document.createElement('div'); cap.className = 'cap';
       var t = document.createElement('span'); t.textContent = im.title || im.id; cap.appendChild(t);
-      var nb = document.createElement('span'); nb.className = 'pill acc'; nb.textContent = 'new'; cap.appendChild(nb);
+      var nb = document.createElement('span'); nb.className = 'pill acc'; nb.textContent = T('new'); cap.appendChild(nb);
       tile.appendChild(cap);
       g.prepend(tile);
       var c = $('[data-stat="files"]'); if (c) c.textContent = +c.textContent + 1;
@@ -369,15 +379,15 @@
     function send(files, url) {
       files = files.filter(function (f) {
         if (isMedia(f)) {
-          if (f.size > maxMediaMB * 1048576) { toast(f.name + ' is larger than ' + maxMediaMB + ' MB.' + (!signedIn && memberMediaMB > maxMediaMB ? ' Sign in to upload videos and PDFs up to ' + memberMediaMB + ' MB.' : ''), true); return false; }
+          if (f.size > maxMediaMB * 1048576) { toast(T('{name} is larger than {mb} MB.', { name: f.name, mb: maxMediaMB }) + (!signedIn && memberMediaMB > maxMediaMB ? ' ' + T('Sign in to upload videos and PDFs up to {mb} MB.', { mb: memberMediaMB }) : ''), true); return false; }
           return true;
         }
-        if (!okTypes.test(f.type) && !(f.type === '' && okExt.test(f.name))) { toast(f.name + ': not a supported file', true); return false; }
-        if (f.size > maxMB * 1048576) { toast(f.name + ' is larger than ' + maxMB + ' MB', true); return false; }
+        if (!okTypes.test(f.type) && !(f.type === '' && okExt.test(f.name))) { toast(T('{name}: not a supported file', { name: f.name }), true); return false; }
+        if (f.size > maxMB * 1048576) { toast(T('{name} is larger than {mb} MB', { name: f.name, mb: maxMB }), true); return false; }
         return true;
       });
       if (!files.length && !url) return;
-      if (files.length > maxBatch) { toast('Up to ' + maxBatch + ' files at once; uploading the first ' + maxBatch, true); files = files.slice(0, maxBatch); }
+      if (files.length > maxBatch) { toast(T('Up to {n} files at once; uploading the first {n}', { n: maxBatch }), true); files = files.slice(0, maxBatch); }
 
       var media = files.filter(isMedia), images = files.filter(function (f) { return !isMedia(f); });
       var ticket = $('#ticket') ? $('#ticket').value.trim() : '', note = $('#note') ? $('#note').value.trim() : '';
@@ -391,7 +401,7 @@
             $('#album-banner').classList.remove('hide');
             $('#album-link').value = al.url; $('#album-open').href = al.url;
             return al.id;
-          }, function (e) { toast('Could not make the album: ' + e.message, true); return ''; })
+          }, function (e) { toast(T('Could not make the album: {error}', { error: e.message }), true); return ''; })
         : Promise.resolve('');
 
       albumReady.then(function (albumId) {
@@ -428,8 +438,8 @@
         rows.forEach(function (r) { r.bar.style.width = p; });
       };
       xhr.onload = function () {
-        var res; try { res = JSON.parse(xhr.responseText); } catch (e) { res = { success: false, error: 'Unexpected answer from the server (' + xhr.status + ')' }; }
-        if (!res.success) { rows.forEach(function (r) { fail(r, res.error || 'Upload failed'); }); return; }
+        var res; try { res = JSON.parse(xhr.responseText); } catch (e) { res = { success: false, error: T('Unexpected answer from the server ({status})', { status: xhr.status }) }; }
+        if (!res.success) { rows.forEach(function (r) { fail(r, res.error || T('Upload failed')); }); return; }
         var imgs = res.data.images || [res.data], errs = res.data.errors || [];
         var used = 0;
         rows.forEach(function (r, i) {
@@ -445,7 +455,7 @@
         if (used === 1 && rows.length === 1 && !ticket) copy(imgs[0].view_url);
         renderHistory();
       };
-      xhr.onerror = function () { rows.forEach(function (r) { fail(r, 'Network error. Check your connection and try again.'); }); };
+      xhr.onerror = function () { rows.forEach(function (r) { fail(r, T('Network error. Check your connection and try again.')); }); };
       xhr.send(fd);
     }
 
@@ -459,9 +469,9 @@
           var j; try { j = JSON.parse(x.responseText); } catch (e) { j = {}; }
           if (x.status === 200 && j.success) return res(j.data.received);
           if (x.status === 409 && typeof j.received === 'number') return res(j.received); // carry on from where the server is
-          var err = new Error(j.error || 'Upload failed (' + x.status + ')'); err.fatal = x.status === 404 || x.status === 400; rej(err);
+          var err = new Error(j.error || T('Upload failed ({status})', { status: x.status })); err.fatal = x.status === 404 || x.status === 400; rej(err);
         };
-        x.onerror = function () { rej(new Error('Network error')); };
+        x.onerror = function () { rej(new Error(T('Network error'))); };
         x.send(blob);
       });
     }
@@ -475,12 +485,12 @@
           return putChunk(start.id, off, f.slice(off, off + cs), function (n) { r.bar.style.width = Math.min(97, (off + n) / size * 100) + '%'; })
             .then(function (got) { tries = 0; return from(got); }, function (e) {
               if (e.fatal || ++tries > 6) throw e;
-              r.name.textContent = f.name + ' · connection lost, retrying…';
+              r.name.textContent = f.name + ' · ' + T('connection lost, retrying…');
               return new Promise(function (ok) { setTimeout(ok, 1500 * tries); }).then(function () { r.name.textContent = f.name; return from(off); });
             });
         }
         return from(0).then(function () {
-          r.name.textContent = f.name + ' · ' + (/pdf$/i.test(f.type + f.name) ? 'compressing…' : 'preparing video…');
+          r.name.textContent = f.name + ' · ' + (/pdf$/i.test(f.type + f.name) ? T('compressing…') : T('preparing video…'));
           var fd = new FormData();
           fd.append('expire', $('#expire').value);
           fd.append('content_warning', $('#upload-warning').value);
@@ -490,9 +500,9 @@
           return fetch('/api/v1/uploads/' + start.id + '/finish', { method: 'POST', body: fd, headers: { Accept: 'application/json' } }).then(function (x) { return x.json(); });
         });
       }).then(function (j) {
-        if (!j.success) throw new Error(j.error || 'Upload failed');
+        if (!j.success) throw new Error(j.error || T('Upload failed'));
         done(r, j.data);
-      }).catch(function (e) { fail(r, e.message || 'Upload failed'); });
+      }).catch(function (e) { fail(r, e.message || T('Upload failed')); });
     }
   }
 
@@ -516,8 +526,8 @@
       if (!fd.get('reason')) return;
       fetch('/report/' + f.dataset.id, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
         .then(function (r) { return r.json(); })
-        .then(function (j) { toast(j.success ? 'Thanks, the moderators will take a look.' : (j.error || 'Could not send the report'), !j.success); })
-        .catch(function () { toast('Could not send the report', true); });
+        .then(function (j) { toast(j.success ? T('Thanks, the moderators will take a look.') : (j.error || T('Could not send the report')), !j.success); })
+        .catch(function () { toast(T('Could not send the report'), true); });
       f.reset();
     });
   }
@@ -526,15 +536,15 @@
     return fetch(path, { method: method, headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: body ? JSON.stringify(body) : undefined })
       .then(function (r) {
         // nginx or Cloudflare can answer with an HTML page (file too large, timeout): say what happened.
-        return r.json().catch(function () { throw new Error(r.status === 413 ? 'That is too large for the server' : 'The server answered ' + r.status + '. Try again in a moment.'); });
+        return r.json().catch(function () { throw new Error(r.status === 413 ? T('That is too large for the server') : T('The server answered {status}. Try again in a moment.', { status: r.status })); });
       })
-      .then(function (j) { if (!j.success) throw new Error(j.error || 'Failed'); return j.data; });
+      .then(function (j) { if (!j.success) throw new Error(j.error || T('Failed')); return j.data; });
   }
   var ren = $('#rename');
   if (ren) ren.addEventListener('click', function () {
-    var t = prompt('New name for this image:', $('#title').textContent.trim());
+    var t = prompt(T('New name for this image:'), $('#title').textContent.trim());
     if (t === null) return;
-    api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast('Renamed'); }, function (e) { toast(e.message, true); });
+    api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast(T('Renamed')); }, function (e) { toast(e.message, true); });
   });
   // dialogs opened by buttons
   document.addEventListener('click', function (e) {
@@ -564,24 +574,24 @@
     var bars = $('#stats-bars');
     for (var i = 29; i >= 0; i--) {
       var day = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10), v = byDay[day] || 0;
-      var el = document.createElement('i'); el.style.height = Math.max(2, v / max * 100) + '%'; el.title = day + ': ' + v + ' views'; bars.appendChild(el);
+      var el = document.createElement('i'); el.style.height = Math.max(2, v / max * 100) + '%'; el.title = T('{day}: {n} views', { day: day, n: v }); bars.appendChild(el);
     }
-    $('#stats-total').textContent = '· ' + total + ' in 30 days, ' + d.views + ' all time';
+    $('#stats-total').textContent = '· ' + T('{n} in 30 days, {all} all time', { n: total, all: d.views });
     var ref = $('#stats-ref'); ref.textContent = '';
-    if (!(d.referrers || []).length) { ref.textContent = 'No other sites yet: views came from direct links, chats or apps.'; return; }
+    if (!(d.referrers || []).length) { ref.textContent = T('No other sites yet: views came from direct links, chats or apps.'); return; }
     d.referrers.forEach(function (x) { var row = document.createElement('div'); row.className = 'ref-row'; row.innerHTML = '<span></span><b></b>'; row.firstChild.textContent = x.host; row.lastChild.textContent = x.views; ref.appendChild(row); });
   });
   var lt = $('#list-toggle');
   if (lt) lt.addEventListener('click', function () {
     var on = lt.dataset.listed !== '1';
     api('PATCH', '/api/v1/images/' + lt.dataset.id, { listed: on }).then(function () {
-      lt.dataset.listed = on ? '1' : ''; lt.querySelector('span').textContent = on ? 'On my profile' : 'Show on my profile';
-      toast(on ? 'Now shown on your public profile' : 'Removed from your profile');
+      lt.dataset.listed = on ? '1' : ''; lt.querySelector('span').textContent = on ? T('On my profile') : T('Show on my profile');
+      toast(on ? T('Now shown on your public profile') : T('Removed from your profile'));
     }, function (e) { toast(e.message, true); });
   });
   var del = $('#delete');
   if (del) del.addEventListener('click', function () {
-    if (!confirm('Delete this image for good? The link stops working right away.')) return;
+    if (!confirm(T('Delete this image for good? The link stops working right away.'))) return;
     api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
   });
 
@@ -593,7 +603,7 @@
     selBtn.addEventListener('click', function () {
       var on = gal.classList.toggle('selecting');
       $('#sel-actions').classList.toggle('hide', !on);
-      selBtn.textContent = on ? 'Done' : 'Select';
+      selBtn.textContent = on ? T('Done') : T('Select');
     });
     gal.addEventListener('change', count);
     $('#select-all').addEventListener('click', function () {
@@ -602,32 +612,32 @@
     });
     $('#copy-selected').addEventListener('click', function () {
       var links = picked().map(function (c) { return c.closest('.tile').dataset.direct; });
-      if (!links.length) return toast('Select some images first', true);
-      copy(links.join('\n')); toast(links.length + ' direct links copied');
+      if (!links.length) return toast(T('Select some images first'), true);
+      copy(links.join('\n')); toast(T('{n} direct links copied', { n: links.length }));
     });
     $('#zip-selected').addEventListener('click', function () {
       var f = $('#zip-form'); f.innerHTML = '';
       picked().forEach(function (c) { var i = document.createElement('input'); i.type = 'hidden'; i.name = 'id'; i.value = c.value; f.appendChild(i); });
-      if (!f.children.length) return toast('Select some images first', true);
+      if (!f.children.length) return toast(T('Select some images first'), true);
       f.submit();
     });
     [['#list-selected', true], ['#unlist-selected', false]].forEach(function (p) {
       var b = $(p[0]); if (!b) return;
       b.addEventListener('click', function () {
         var ids = picked().map(function (c) { return c.value; });
-        if (!ids.length) return toast('Select some images first', true);
+        if (!ids.length) return toast(T('Select some images first'), true);
         Promise.all(ids.map(function (id) {
           return api('PATCH', '/api/v1/images/' + id, { listed: p[1] }).then(function (d) { return d.listed === p[1] ? 'ok' : 'locked'; }, function () { return 'failed'; });
-        })).then(function (res) { reloadAfter(res, p[1] ? 'shown on your profile' : 'hidden from your profile'); });
+        })).then(function (res) { reloadAfter(res, p[1] ? 'shown' : 'hidden'); });
       });
     });
     // Many files at once: say how many worked and which didn't, then show the new state.
     var reloadAfter = function (res, what) {
       var n = function (k) { return res.filter(function (x) { return x === k; }).length; };
       var ok = n('ok'), locked = n('locked'), failed = n('failed'), msg = [];
-      if (ok) msg.push(ok + ' ' + what);
-      if (locked) msg.push(locked + ' skipped: private or password-protected files never appear on profiles');
-      if (failed) msg.push(failed + ' failed; try those again');
+      if (ok) msg.push(T({ shown: '{n} shown on your profile', hidden: '{n} hidden from your profile', deleted: '{n} deleted' }[what], { n: ok }));
+      if (locked) msg.push(T('{n} skipped: private or password-protected files never appear on profiles', { n: locked }));
+      if (failed) msg.push(T('{n} failed; try those again', { n: failed }));
       var bad = locked || failed;
       toast(msg.join(' · '), bad);
       setTimeout(function () { location.reload(); }, bad ? 3500 : 700);
@@ -635,16 +645,16 @@
     var mk = $('#album-selected');
     if (mk) mk.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
-      if (!ids.length) return toast('Select some images first', true);
-      var t = prompt('Name for the new album (' + ids.length + ' images):', '');
+      if (!ids.length) return toast(T('Select some images first'), true);
+      var t = prompt(T('Name for the new album ({n} images):', { n: ids.length }), '');
       if (t === null) return;
       api('POST', '/api/v1/albums', { title: t, ids: ids }).then(function (d) { location.href = '/a/' + d.id + '/edit'; }, function (e) { toast(e.message, true); });
     });
     if (/[?&]select=1/.test(location.search)) selBtn.click();
     $('#delete-selected').addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
-      if (!ids.length) return toast('Select some images first', true);
-      if (!confirm('Delete ' + ids.length + ' images for good?')) return;
+      if (!ids.length) return toast(T('Select some images first'), true);
+      if (!confirm(T('Delete {n} images for good?', { n: ids.length }))) return;
       Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
         .then(function (res) { reloadAfter(res, 'deleted'); });
     });
@@ -674,16 +684,16 @@
       var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, remove: removed,
         order: $$('.order-item', grid).map(function (x) { return x.dataset.id; }) };
       if (cover) body.cover_id = cover;
-      sv(body).then(function () { toast('Album saved'); removed = []; }, function (e) { toast(e.message, true); });
+      sv(body).then(function () { toast(T('Album saved')); removed = []; }, function (e) { toast(e.message, true); });
     });
     var add = $('#ae-add');
     if (add) add.addEventListener('click', function () {
       var ids = $$('#ae-others input:checked').map(function (c) { return c.value; });
-      if (!ids.length) return toast('Pick some images first', true);
+      if (!ids.length) return toast(T('Pick some images first'), true);
       sv({ add: ids }).then(function () { location.reload(); }, function (e) { toast(e.message, true); });
     });
     $('#ae-delete').addEventListener('click', function () {
-      if (!confirm('Delete this album? The images themselves stay.')) return;
+      if (!confirm(T('Delete this album? The images themselves stay.'))) return;
       api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
     });
   }
@@ -705,7 +715,7 @@
     window.addEventListener('appinstalled', function () { ib.classList.add('hide'); });
     ib.addEventListener('click', function () {
       if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; ib.classList.add('hide'); }); return; }
-      toast('On iPhone: tap Share, then “Add to Home Screen”.');
+      toast(T('On iPhone: tap Share, then “Add to Home Screen”.'));
     });
     if (/iPhone|iPad/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent) && !navigator.standalone) ib.classList.remove('hide');
   }

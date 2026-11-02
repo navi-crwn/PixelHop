@@ -133,7 +133,10 @@ func T(lang, key string, kv ...any) string {
 	}
 	s, ok := c[key]
 	if !ok {
-		s = key
+		// A language that lacks this key reads in English, never as the key.
+		if s, ok = catalogs[Default][key]; !ok {
+			s = key
+		}
 	}
 	for i := 0; i+1 < len(kv); i += 2 {
 		name, _ := kv[i].(string)
@@ -177,3 +180,10 @@ func (l Locale) H(key string, kv ...any) template.HTML {
 
 // Dir is the text direction for <html dir>: always left to right, the set has no right-to-left language.
 func (l Locale) Dir() string { return "ltr" }
+
+// Known reports whether the English catalog has this key, so callers can
+// translate fixed page titles and descriptions without touching user text.
+func Known(key string) bool {
+	_, ok := catalogs[Default][key]
+	return ok
+}

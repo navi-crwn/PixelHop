@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -271,12 +272,54 @@ func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
 	return i18n.Locale{Lang: i18n.Get(code)}
 }
 
+// tr translates a message for the language of this request. The English text
+// is its own key, so a message nobody translated yet still reads in English.
+// It only reads the cookie and the ?lang= choice; render writes them.
+func (a *App) tr(r *http.Request, key string, kv ...any) string {
+	code := i18n.Default
+	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
+		code = q
+	} else if c, err := r.Cookie(langCookie); err == nil {
+		if resolved, ok := i18n.Resolve(c.Value); ok {
+			code = resolved
+		}
+	}
+	return i18n.T(code, key, kv...)
+}
+
+// browserKeys are the catalog keys the browser scripts use: every quoted
+// string in web/static/js that is also a key of the English catalog. The
+// pages send only these, not the whole catalog.
+var browserKeys = sync.OnceValue(func() map[string]bool {
+	lit := regexp.MustCompile(`'((?:[^'\\\n]|\\.)*)'`)
+	keys := map[string]bool{}
+	files, _ := fs.Glob(web.Static, "static/js/*.js")
+	for _, f := range files {
+		src, err := fs.ReadFile(web.Static, f)
+		if err != nil {
+			continue
+		}
+		for _, m := range lit.FindAllSubmatch(src, -1) {
+			k := strings.NewReplacer(`\'`, `'`, `\\`, `\`).Replace(string(m[1]))
+			if i18n.Known(k) {
+				keys[k] = true
+			}
+		}
+	}
+	return keys
+})
+
 func (a *App) catalogJS(w http.ResponseWriter, r *http.Request) {
 	code, ok := i18n.Resolve(strings.TrimSuffix(r.PathValue("lang"), ".js"))
 	if !ok {
 		code = i18n.Default
 	}
-	cat := i18n.Catalog(code)
+	cat := map[string]string{}
+	for k, v := range i18n.Catalog(code) {
+		if browserKeys()[k] {
+			cat[k] = v
+		}
+	}
 	b, _ := json.Marshal(cat)
 	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")

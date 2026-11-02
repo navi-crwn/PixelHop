@@ -67,7 +67,7 @@ func (a *App) share(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if !errors.As(err, &ue) {
 			a.log.Error("share upload", "err", err)
-			ue.msg = "Upload failed on our side. Please try again."
+			ue.msg = a.tr(r, "Upload failed on our side. Please try again.")
 		}
 		a.renderPage(w, r, "uploaded", page{Title: "Upload failed", NoIndex: true, Data: map[string]any{"Error": ue.msg}})
 		return

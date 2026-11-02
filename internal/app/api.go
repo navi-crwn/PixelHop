@@ -66,7 +66,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.log.Error("upload", "err", err)
-		apiError(w, http.StatusInternalServerError, "Upload failed on our side. Please try again.")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "Upload failed on our side. Please try again."))
 		return
 	}
 
@@ -91,7 +91,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 		images = append(images, m)
 	}
 	if len(images) == 0 {
-		msg := "Upload failed."
+		msg := a.tr(r, "Upload failed.")
 		if len(errs) > 0 {
 			msg = errs[0]["error"]
 		}

@@ -252,7 +252,7 @@ func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
 		data, err = imaging.Avatar(data, 40_000_000, 400)
 	}
 	if err != nil {
-		a.settingsError(w, r, "Profile photo: "+err.Error())
+		a.settingsError(w, r, a.tr(r, "Profile photo: {err}", "err", err.Error()))
 		return
 	}
 	key := fmt.Sprintf("avatars/%d-%s.jpg", u.ID, randomToken(6))
@@ -293,17 +293,18 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 		site = "https://" + site
 	}
 	if p := usernameProblem(handle); p != "" {
+		p = a.tr(r, p)
 		a.settingsError(w, r, p)
 		return
 	}
 	if a.db.UsernameTaken(r.Context(), handle, u.ID) {
-		a.settingsError(w, r, "Someone already has the username @"+handle+".")
+		a.settingsError(w, r, a.tr(r, "Someone already has the username @{name}.", "name", handle))
 		return
 	}
 	if site != "" {
 		pu, err := url.Parse(site)
 		if err != nil || (pu.Scheme != "https" && pu.Scheme != "http") || !strings.Contains(pu.Host, ".") || len(site) > 200 {
-			a.settingsError(w, r, "That website address doesn't look right.")
+			a.settingsError(w, r, a.tr(r, "That website address doesn't look right."))
 			return
 		}
 	}
@@ -312,7 +313,7 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 	u.ShowOwner = r.FormValue("show_owner") == "on"
 	if err := a.db.UpdateUser(r.Context(), u); err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") {
-			a.settingsError(w, r, "Someone already has the username @"+handle+".")
+			a.settingsError(w, r, a.tr(r, "Someone already has the username @{name}.", "name", handle))
 			return
 		}
 		a.serverError(w, r, err)
