@@ -53,11 +53,11 @@ func (a *App) unlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.limits.allow("unlock:"+clientIP(r), 10, 10*time.Minute) {
-		a.renderLocked(w, r, im, "Too many tries. Please wait a few minutes.")
+		a.renderLocked(w, r, im, a.tr(r, "Too many tries. Please wait a few minutes."))
 		return
 	}
 	if !CheckPassword(im.PassHash, r.FormValue("password")) {
-		a.renderLocked(w, r, im, "That password isn't right.")
+		a.renderLocked(w, r, im, a.tr(r, "That password isn't right."))
 		return
 	}
 	http.SetCookie(w, &http.Cookie{Name: unlockCookieName(im.ID), Value: a.unlockToken(im), Path: "/", HttpOnly: true,

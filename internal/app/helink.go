@@ -167,13 +167,13 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	c, err := r.Cookie(helinkCookie)
 	if err != nil {
-		a.fail(w, r, http.StatusBadRequest, "That sign-in took too long or came from another browser. Please try again.")
+		a.fail(w, r, http.StatusBadRequest, a.tr(r, "That sign-in took too long or came from another browser. Please try again."))
 		return
 	}
 	state, next, _ := strings.Cut(c.Value, "|")
 	t, err := parseTicket(r.FormValue("ticket"), a.cfg.HelinkSecrets(), time.Now())
 	if err != nil || !hmac.Equal([]byte(t.State), []byte(state)) || !firstUse(t.Jti, t.Exp) {
-		a.fail(w, r, http.StatusBadRequest, "This sign-in link is not valid any more. Please try again.")
+		a.fail(w, r, http.StatusBadRequest, a.tr(r, "This sign-in link is not valid any more. Please try again."))
 		return
 	}
 	u, err := a.linkHelinkUser(r.Context(), t)
@@ -181,7 +181,7 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	if msg := statusMessage(u); msg != "" {
+	if msg := a.statusMessage(r, u); msg != "" {
 		a.fail(w, r, http.StatusForbidden, msg)
 		return
 	}

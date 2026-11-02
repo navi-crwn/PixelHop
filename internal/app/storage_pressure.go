@@ -33,7 +33,7 @@ func (a *App) uploadStatus(w http.ResponseWriter, r *http.Request) {
 	available := a.storageAvailable(0)
 	message := ""
 	if !available {
-		message = storagePaused
+		message = a.tr(r, storagePaused)
 	}
 	apiOK(w, map[string]any{"available": available, "message": message})
 }
@@ -62,7 +62,7 @@ func (a *App) storageGate(next http.Handler) http.Handler {
 		}
 		if !a.storageAvailable(incoming) {
 			w.Header().Set("Retry-After", "60")
-			apiError(w, http.StatusInsufficientStorage, storagePaused)
+			apiError(w, http.StatusInsufficientStorage, a.tr(r, storagePaused))
 			return
 		}
 		next.ServeHTTP(w, r)

@@ -1,108 +1,108 @@
 {{define "content"}}{{$d := .Data}}{{$u := .User}}
 <div class="wrap narrow">
-  <div class="page-head"><h1>Settings</h1></div>
+  <div class="page-head"><h1>{{$.L.T "mytabs.settings"}}</h1></div>
   {{template "mytabs" .}}
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
 
   <div class="card" id="profile">
-    <h2>Public profile</h2>
-    <p class="muted small">How others see you on images you share{{if $u.Username.Valid}} and at <a href="/u/{{$u.Username.String}}">{{.Base}}/u/{{$u.Username.String}}</a>{{end}}. Your email is never shown.</p>
+    <h2>{{$.L.T "mytabs.profile"}}</h2>
+    <p class="muted small">{{$.L.T "settings.profile_intro"}}{{if $u.Username.Valid}} {{$.L.H "settings.profile_page" "name" $u.Username.String "base" .Base}}{{end}}</p>
     <div class="profile-photo">
-      <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="Your profile photo" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
+      <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="{{$.L.T "settings.photo_alt"}}" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
       <div>
         <form method="post" action="/settings/avatar" enctype="multipart/form-data" class="btn-row" id="avatar-form">
-          <label class="btn sm" for="avatar-file"><svg><use href="#i-image"/></svg>{{if $u.AvatarKey}}Change photo{{else}}Upload photo{{end}}</label>
+          <label class="btn sm" for="avatar-file"><svg><use href="#i-image"/></svg>{{if $u.AvatarKey}}{{$.L.T "settings.change_photo"}}{{else}}{{$.L.T "settings.upload_photo"}}{{end}}</label>
           <input type="file" id="avatar-file" name="avatar" accept="image/*" hidden data-autosubmit>
         </form>
-        {{if $u.AvatarKey}}<form method="post" action="/settings/avatar/delete" style="margin-top:6px"><button class="btn sm ghost" type="submit">Remove photo</button></form>{{end}}
-        <p class="small faint" style="margin:6px 0 0">Square crop, JPG/PNG/WebP up to 8 MB.{{if and (not $u.AvatarKey) $u.AvatarURL}} Until you upload one, your {{if $u.HelinkID.Valid}}HEL.ink{{else}}Google{{end}} picture is used.{{end}}</p>
+        {{if $u.AvatarKey}}<form method="post" action="/settings/avatar/delete" style="margin-top:6px"><button class="btn sm ghost" type="submit">{{$.L.T "settings.remove_photo"}}</button></form>{{end}}
+        <p class="small faint" style="margin:6px 0 0">{{$.L.T "settings.photo_hint"}}{{if and (not $u.AvatarKey) $u.AvatarURL}} {{if $u.HelinkID.Valid}}{{$.L.T "settings.until_helink"}}{{else}}{{$.L.T "settings.until_google"}}{{end}}{{end}}</p>
       </div>
     </div>
     <form method="post" action="/settings/profile">
       <div class="grid-2" style="gap:12px">
-        <div class="field"><label for="name">Display name</label><input type="text" id="name" name="name" value="{{$u.Name}}" maxlength="60" placeholder="Your name"></div>
-        <div class="field"><label for="username">Username</label><div class="input-prefix"><span>@</span><input type="text" id="username" name="username" value="{{$u.Username.String}}" maxlength="30" pattern="[a-z0-9][a-z0-9._\-]{2,29}" required autocapitalize="none" spellcheck="false"></div></div>
+        <div class="field"><label for="name">{{$.L.T "settings.display_name"}}</label><input type="text" id="name" name="name" value="{{$u.Name}}" maxlength="60" placeholder="{{$.L.T "settings.name_ph"}}"></div>
+        <div class="field"><label for="username">{{$.L.T "settings.username"}}</label><div class="input-prefix"><span>@</span><input type="text" id="username" name="username" value="{{$u.Username.String}}" maxlength="30" pattern="[a-z0-9][a-z0-9._\-]{2,29}" required autocapitalize="none" spellcheck="false"></div></div>
       </div>
-      <div class="field"><label for="bio">Bio <span class="hint">up to 300 characters</span></label><textarea id="bio" name="bio" maxlength="300" rows="3" placeholder="Photographer from Bandung. Mostly street & coffee.">{{$u.Bio}}</textarea></div>
-      <div class="field"><label for="website">Website</label><input type="text" inputmode="url" autocapitalize="none" spellcheck="false" id="website" name="website" value="{{$u.Website}}" placeholder="hel.ink/b/you" maxlength="200"></div>
-      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="show_owner" {{if $u.ShowOwner}}checked{{end}}><span>Show my name and photo on images I share, and turn on my profile page<br><span class="small muted">Off: your images show no owner and your profile page is hidden.</span></span></label>
-      <button class="btn primary" type="submit">Save profile</button>
+      <div class="field"><label for="bio">{{$.L.T "settings.bio"}} <span class="hint">{{$.L.T "settings.bio_hint"}}</span></label><textarea id="bio" name="bio" maxlength="300" rows="3" placeholder="{{$.L.T "settings.bio_ph"}}">{{$u.Bio}}</textarea></div>
+      <div class="field"><label for="website">{{$.L.T "settings.website"}}</label><input type="text" inputmode="url" autocapitalize="none" spellcheck="false" id="website" name="website" value="{{$u.Website}}" placeholder="hel.ink/b/you" maxlength="200"></div>
+      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="show_owner" {{if $u.ShowOwner}}checked{{end}}><span>{{$.L.T "settings.show_owner"}}<br><span class="small muted">{{$.L.T "settings.show_owner_off"}}</span></span></label>
+      <button class="btn primary" type="submit">{{$.L.T "settings.save_profile"}}</button>
     </form>
   </div>
 
   <div class="card" id="api">
-    <h2>API keys &amp; ShareX</h2>
-    <p class="muted small">Keys let ShareX, scripts and apps upload to your account. Treat them like passwords. See the <a href="/docs">API docs</a>.</p>
+    <h2>{{$.L.T "settings.api_h"}}</h2>
+    <p class="muted small">{{$.L.H "settings.api_sub"}}</p>
     {{with $d.NewKey}}
     <div class="key-once">
-      <b>Your new key. Copy it now: it won't be shown again.</b>
-      <div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="new-key" aria-label="New API key"><button class="btn sm" type="button" data-copy="#new-key"><svg><use href="#i-copy"/></svg>Copy</button></div>
-      <button class="btn sm primary" style="margin-top:10px" type="button" data-sharex="{{.}}" data-sharex-url="{{$.Base}}/api/v1/upload" data-sharex-name="{{$.Site}}"><svg><use href="#i-down"/></svg>Download ShareX config with this key</button>
+      <b>{{$.L.T "settings.new_key"}}</b>
+      <div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="new-key" aria-label="{{$.L.T "settings.new_key_label"}}"><button class="btn sm" type="button" data-copy="#new-key"><svg><use href="#i-copy"/></svg>{{$.L.T "upload.copy"}}</button></div>
+      <button class="btn sm primary" style="margin-top:10px" type="button" data-sharex="{{.}}" data-sharex-url="{{$.Base}}/api/v1/upload" data-sharex-name="{{$.Site}}"><svg><use href="#i-down"/></svg>{{$.L.T "settings.sharex_dl"}}</button>
     </div>
     {{end}}
     <form method="post" action="/settings/keys" class="copy" style="margin-bottom:14px">
-      <input type="text" name="name" placeholder="Key name, e.g. ShareX on laptop" maxlength="40" aria-label="Key name">
-      <button class="btn" type="submit"><svg><use href="#i-key"/></svg>Create key</button>
+      <input type="text" name="name" placeholder="{{$.L.T "settings.key_ph"}}" maxlength="40" aria-label="{{$.L.T "settings.key_name"}}">
+      <button class="btn" type="submit"><svg><use href="#i-key"/></svg>{{$.L.T "settings.create_key"}}</button>
     </form>
     {{if $d.Keys}}
     <div class="table-wrap"><table>
-      <tr><th>Name</th><th>Key</th><th>Last used</th><th></th></tr>
+      <tr><th>{{$.L.T "form.name"}}</th><th>{{$.L.T "settings.th_key"}}</th><th>{{$.L.T "settings.th_last"}}</th><th></th></tr>
       {{range $d.Keys}}
       <tr><td>{{.Name}}</td><td class="mono small">{{.Prefix}}…</td><td class="small muted">{{ago .LastUsed}}</td>
-        <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="Delete the key “{{.Name}}”? Apps using it will stop working."><button class="btn sm ghost danger" type="submit">Delete</button></form></td></tr>
+        <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="{{$.L.T "settings.key_confirm" "name" .Name}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></td></tr>
       {{end}}
     </table></div>
-    {{else}}<p class="small faint">No keys yet.</p>{{end}}
-    <p class="small muted" style="margin:12px 0 0">Lost a key's ShareX file? <a href="/settings/sharex/ph">Download a blank config</a> and paste your key into it, or create a new key.</p>
+    {{else}}<p class="small faint">{{$.L.T "settings.no_keys"}}</p>{{end}}
+    <p class="small muted" style="margin:12px 0 0">{{$.L.H "settings.lost_key"}}</p>
   </div>
 
   {{if and .SSO $u.HelinkID.Valid}}
   <div class="card">
-    <h2>Your HEL.ink account</h2>
-    <p class="muted small">You sign in with HEL.ink, so your email, password, Google sign-in and two-factor codes are managed there, together with your short links and bio pages. Your public profile above belongs to {{.Site}}.</p>
-    <a class="btn" href="{{.Helink}}/settings">Open HEL.ink settings</a>
+    <h2>{{$.L.T "settings.helink_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.helink_text" "site" .Site}}</p>
+    <a class="btn" href="{{.Helink}}/settings">{{$.L.T "settings.helink_open"}}</a>
   </div>
   {{end}}
   {{if not (and .SSO $u.HelinkID.Valid)}}
 
   <div class="card" id="webhooks">
-    <h2>Webhooks</h2>
-    <p class="muted small">We POST JSON to your URL when you upload or delete an image, signed with <code>X-PixelHop-Signature: sha256=…</code> (HMAC of the body with your secret). See the <a href="/docs#webhooks">docs</a>.</p>
-    {{with $d.NewWebhookSecret}}<div class="key-once"><b>Your webhook secret. Copy it now: it won't be shown again.</b><div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="wh-secret"><button class="btn sm" type="button" data-copy="#wh-secret"><svg><use href="#i-copy"/></svg>Copy</button></div></div>{{end}}
+    <h2>{{$.L.T "settings.webhooks"}}</h2>
+    <p class="muted small">{{$.L.H "settings.wh_sub"}}</p>
+    {{with $d.NewWebhookSecret}}<div class="key-once"><b>{{$.L.T "settings.wh_secret"}}</b><div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="wh-secret"><button class="btn sm" type="button" data-copy="#wh-secret"><svg><use href="#i-copy"/></svg>{{$.L.T "upload.copy"}}</button></div></div>{{end}}
     {{range $d.Webhooks}}
-    <div class="out-info" style="align-items:center"><span class="mono small" style="overflow:hidden;text-overflow:ellipsis">{{.URL}}<br><span class="faint">{{.Events}}{{with .LastStatus}} · last: {{.}}{{end}}</span></span>
-      <form method="post" action="/settings/webhooks/{{.ID}}/delete" data-confirm="Delete this webhook?"><button class="btn sm ghost danger" type="submit">Delete</button></form></div>
+    <div class="out-info" style="align-items:center"><span class="mono small" style="overflow:hidden;text-overflow:ellipsis">{{.URL}}<br><span class="faint">{{.Events}}{{with .LastStatus}} · {{$.L.T "settings.wh_last" "status" .}}{{end}}</span></span>
+      <form method="post" action="/settings/webhooks/{{.ID}}/delete" data-confirm="{{$.L.T "settings.wh_confirm"}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></div>
     {{end}}
     <form method="post" action="/settings/webhooks" class="copy" style="margin-top:8px">
-      <input type="url" name="url" placeholder="https://example.com/pixelhop-hook" required aria-label="Webhook URL">
-      <button class="btn" type="submit">Add webhook</button>
+      <input type="url" name="url" placeholder="https://example.com/pixelhop-hook" required aria-label="{{$.L.T "settings.wh_url"}}">
+      <button class="btn" type="submit">{{$.L.T "settings.wh_add"}}</button>
     </form>
-    {{if $d.Webhooks}}<form method="post" action="/settings/webhooks/test" style="margin-top:8px"><button class="btn sm ghost" type="submit">Send a test event</button></form>{{end}}
+    {{if $d.Webhooks}}<form method="post" action="/settings/webhooks/test" style="margin-top:8px"><button class="btn sm ghost" type="submit">{{$.L.T "settings.wh_test"}}</button></form>{{end}}
   </div>
 
   <div class="card">
-    <h2>{{if $d.HasPass}}Change password{{else}}Set a password{{end}}</h2>
-    {{if not $d.HasPass}}<p class="muted small">You sign in with Google. Add a password to also sign in with your email.</p>{{end}}
+    <h2>{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set_h"}}{{end}}</h2>
+    {{if not $d.HasPass}}<p class="muted small">{{$.L.T "settings.pw_google"}}</p>{{end}}
     <form method="post" action="/settings/password">
-      {{if $d.HasPass}}<div class="field"><label for="current">Current password</label><input type="password" id="current" name="current" autocomplete="current-password" required></div>{{end}}
-      <div class="field"><label for="password">New password</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required></div>
-      <button class="btn" type="submit">{{if $d.HasPass}}Change password{{else}}Set password{{end}}</button>
-      <p class="small faint" style="margin:10px 0 0">Changing your password signs you out on your other devices.</p>
+      {{if $d.HasPass}}<div class="field"><label for="current">{{$.L.T "settings.pw_current"}}</label><input type="password" id="current" name="current" autocomplete="current-password" required></div>{{end}}
+      <div class="field"><label for="password">{{$.L.T "settings.pw_new"}}</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn" type="submit">{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set"}}{{end}}</button>
+      <p class="small faint" style="margin:10px 0 0">{{$.L.T "settings.pw_note"}}</p>
     </form>
   </div>
 
   {{end}}
   <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
-    <h2>{{if $u.HelinkID.Valid}}Delete my images{{else}}Delete account{{end}}</h2>
-    <p class="muted small">{{if $u.HelinkID.Valid}}Deletes every image you uploaded here and your PixelHop profile. Your HEL.ink account, links and bio pages stay.{{else}}Deletes your account and every image you uploaded.{{end}} Links stop working right away.</p>
-    <form method="post" action="/settings/delete-account" data-confirm="Delete your account and all your images? This can't be undone.">
+    <h2>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_images_h"}}{{else}}{{$.L.T "settings.del_account_h"}}{{end}}</h2>
+    <p class="muted small">{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_text_helink"}}{{else}}{{$.L.T "settings.del_text"}}{{end}} {{$.L.T "settings.del_links"}}</p>
+    <form method="post" action="/settings/delete-account" data-confirm="{{$.L.T "settings.del_confirm"}}">
       {{if $d.HasPass}}
-      <div class="field"><label for="del-pw">Your password</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="del-pw">{{$.L.T "settings.del_pw"}}</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
       {{else}}
-      <div class="field"><label for="del-confirm">Type your email to confirm</label><input type="text" id="del-confirm" name="confirm" required></div>
+      <div class="field"><label for="del-confirm">{{$.L.T "settings.del_email"}}</label><input type="text" id="del-confirm" name="confirm" required></div>
       {{end}}
-      <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>Delete my account</button>
+      <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{$.L.T "settings.del_btn"}}</button>
     </form>
   </div>
 </div>

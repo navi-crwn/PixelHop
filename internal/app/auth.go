@@ -134,7 +134,7 @@ func (a *App) member(h http.HandlerFunc) http.HandlerFunc {
 func (a *App) admin(h http.HandlerFunc) http.HandlerFunc {
 	return a.member(func(w http.ResponseWriter, r *http.Request) {
 		if !currentUser(r).IsAdmin() {
-			a.fail(w, r, http.StatusForbidden, "This page is for admins.")
+			a.fail(w, r, http.StatusForbidden, a.tr(r, "This page is for admins."))
 			return
 		}
 		h(w, r)
@@ -192,13 +192,13 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	if !a.limits.allow("login:"+clientIP(r), 10, 15*time.Minute) {
-		f.Error = "Too many attempts. Please wait a few minutes and try again."
+		f.Error = a.tr(r, "Too many attempts. Please wait a few minutes and try again.")
 		w.WriteHeader(http.StatusTooManyRequests)
 		a.render(w, r, "login", "Sign in", f)
 		return
 	}
 	if !a.turnstileOK(r) {
-		f.Error = "The security check didn't pass. Please try again."
+		f.Error = a.tr(r, "The security check didn't pass. Please try again.")
 		w.WriteHeader(http.StatusBadRequest)
 		a.render(w, r, "login", "Sign in", f)
 		return
@@ -225,12 +225,12 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		u, local = hu, true
 	}
 	if !local {
-		f.Error = "That email and password don't match."
+		f.Error = a.tr(r, "That email and password don't match.")
 		w.WriteHeader(http.StatusUnauthorized)
 		a.render(w, r, "login", "Sign in", f)
 		return
 	}
-	if msg := statusMessage(u); msg != "" {
+	if msg := a.statusMessage(r, u); msg != "" {
 		f.Error = msg
 		w.WriteHeader(http.StatusForbidden)
 		a.render(w, r, "login", "Sign in", f)
@@ -247,12 +247,12 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeNext(f.Next), http.StatusSeeOther)
 }
 
-func statusMessage(u *db.User) string {
+func (a *App) statusMessage(r *http.Request, u *db.User) string {
 	switch u.Status {
 	case "locked":
-		return "This account is locked. Your images are still online; contact the site owner to unlock it."
+		return a.tr(r, "This account is locked. Your images are still online; contact the site owner to unlock it.")
 	case "suspended":
-		return "This account is suspended."
+		return a.tr(r, "This account is suspended.")
 	}
 	return ""
 }
@@ -273,19 +273,19 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 	first := a.db.CountUsers(r.Context()) == 0
 	switch {
 	case !f.Registration && !first:
-		f.Error = "Sign-ups are closed on this server."
+		f.Error = a.tr(r, "Sign-ups are closed on this server.")
 	case !a.limits.allow("register:"+clientIP(r), 5, time.Hour):
-		f.Error = "Too many sign-ups from your network. Try again later."
+		f.Error = a.tr(r, "Too many sign-ups from your network. Try again later.")
 	case !a.turnstileOK(r):
-		f.Error = "The security check didn't pass. Please try again."
+		f.Error = a.tr(r, "The security check didn't pass. Please try again.")
 	case !validEmail(f.Email):
-		f.Error = "Please enter a valid email address."
+		f.Error = a.tr(r, "Please enter a valid email address.")
 	case len(pw) < 8:
-		f.Error = "Use at least 8 characters for your password."
+		f.Error = a.tr(r, "Use at least 8 characters for your password.")
 	case len(pw) > 200:
-		f.Error = "That password is too long."
+		f.Error = a.tr(r, "That password is too long.")
 	case a.cfg.SSOEnabled() && r.FormValue("tos") == "":
-		f.Error = "Please accept the terms."
+		f.Error = a.tr(r, "Please accept the terms.")
 	}
 	if f.Error == "" && a.cfg.SSOEnabled() {
 		// The account lives on HEL.ink, so it works in both apps.
@@ -303,7 +303,7 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 			u.Role = "admin" // the first account runs the server
 		}
 		if err := a.db.InsertUser(r.Context(), u); err != nil {
-			f.Error = "An account with this email already exists."
+			f.Error = a.tr(r, "An account with this email already exists.")
 		} else if err := a.startSession(w, r, u); err != nil {
 			a.serverError(w, r, err)
 			return
@@ -393,13 +393,13 @@ func (a *App) googleCallback(w http.ResponseWriter, r *http.Request) {
 		return c.Value
 	}(), "|")
 	if !a.cfg.GoogleEnabled() || state == "" || subtle.ConstantTimeCompare([]byte(state), []byte(r.FormValue("state"))) != 1 {
-		a.fail(w, r, http.StatusBadRequest, "That sign-in link expired. Please try again.")
+		a.fail(w, r, http.StatusBadRequest, a.tr(r, "That sign-in link expired. Please try again."))
 		return
 	}
 	info, err := a.googleExchange(r, r.FormValue("code"))
 	if err != nil {
 		a.log.Warn("google sign-in", "err", err)
-		a.fail(w, r, http.StatusBadGateway, "Google sign-in didn't work. Please try again.")
+		a.fail(w, r, http.StatusBadGateway, a.tr(r, "Google sign-in didn't work. Please try again."))
 		return
 	}
 	ctx := r.Context()
@@ -413,7 +413,7 @@ func (a *App) googleCallback(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, db.ErrNotFound) {
 		first := a.db.CountUsers(ctx) == 0
 		if !a.registrationOpen(ctx) && !first {
-			a.fail(w, r, http.StatusForbidden, "Sign-ups are closed on this server.")
+			a.fail(w, r, http.StatusForbidden, a.tr(r, "Sign-ups are closed on this server."))
 			return
 		}
 		u = &db.User{Email: info.Email, Name: info.Name, AvatarURL: info.Picture, QuotaBytes: a.cfg.DefaultQuota,
@@ -427,7 +427,7 @@ func (a *App) googleCallback(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	if msg := statusMessage(u); msg != "" {
+	if msg := a.statusMessage(r, u); msg != "" {
 		a.fail(w, r, http.StatusForbidden, msg)
 		return
 	}

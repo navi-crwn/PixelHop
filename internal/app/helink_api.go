@@ -103,38 +103,38 @@ func (a *App) helinkCall(ctx context.Context, path string, body any) (*helinkAns
 func (a *App) helinkLogin(r *http.Request, email, password string) (u *db.User, msg string, redirect bool) {
 	ans, err := a.helinkCall(r.Context(), "/api/pixelhop/login", map[string]string{"email": email, "password": password, "ip": clientIP(r)})
 	if err != nil {
-		return nil, "We couldn't reach HEL.ink to check your password. Try “Continue with HEL.ink”, or again in a minute.", false
+		return nil, a.tr(r, "We couldn't reach HEL.ink to check your password. Try “Continue with HEL.ink”, or again in a minute."), false
 	}
 	switch {
 	case ans.Status == http.StatusOK:
 	case ans.Code == "two_factor":
 		return nil, "", true
 	case ans.Code == "suspended":
-		return nil, "This account is suspended.", false
+		return nil, a.tr(r, "This account is suspended."), false
 	case ans.Code == "unverified":
-		return nil, confirmEmailMsg(email), false
+		return nil, a.confirmEmailMsg(r, email), false
 	case ans.Code == "banned":
-		return nil, "Sign-in is blocked from your network.", false
+		return nil, a.tr(r, "Sign-in is blocked from your network."), false
 	case ans.Code == "too_many_attempts" || ans.Status == http.StatusTooManyRequests:
-		return nil, "Too many attempts. Please wait a few minutes and try again.", false
+		return nil, a.tr(r, "Too many attempts. Please wait a few minutes and try again."), false
 	default:
-		return nil, "That email and password don't match.", false
+		return nil, a.tr(r, "That email and password don't match."), false
 	}
 	u, err = a.accountFromHelink(r.Context(), ans.Account)
 	if err != nil {
 		if errors.Is(err, errNeedsVerifiedEmail) {
-			return nil, confirmEmailMsg(ans.Account.Email), false
+			return nil, a.confirmEmailMsg(r, ans.Account.Email), false
 		}
 		a.log.Error("helink login", "err", err)
-		return nil, "Sign-in failed on our side. Please try again.", false
+		return nil, a.tr(r, "Sign-in failed on our side. Please try again."), false
 	}
 	return u, "", false
 }
 
 var errNeedsVerifiedEmail = errors.New("email not confirmed")
 
-func confirmEmailMsg(email string) string {
-	return "Confirm your email first: open the link HEL.ink sent to " + email + ", then sign in again."
+func (a *App) confirmEmailMsg(r *http.Request, email string) string {
+	return a.tr(r, "Confirm your email first: open the link HEL.ink sent to {email}, then sign in again.", "email", email)
 }
 
 // accountFromHelink links a confirmed HEL.ink account to its PixelHop
@@ -151,7 +151,7 @@ func (a *App) accountFromHelink(ctx context.Context, acc *helinkAccount) (*db.Us
 // the address is confirmed. It returns a notice on success, else an error.
 func (a *App) helinkRegister(r *http.Request, name, email, password string) (notice, errMsg string) {
 	if _, err := a.db.UserByEmail(r.Context(), email); err == nil {
-		return "", "An account with this email already exists. Sign in instead."
+		return "", a.tr(r, "An account with this email already exists. Sign in instead.")
 	}
 	if name == "" {
 		name, _, _ = strings.Cut(email, "@")
@@ -159,13 +159,13 @@ func (a *App) helinkRegister(r *http.Request, name, email, password string) (not
 	ans, err := a.helinkCall(r.Context(), "/api/pixelhop/register", map[string]any{
 		"name": name, "email": email, "password": password, "tos_accepted": true, "ip": clientIP(r)})
 	if err != nil {
-		return "", "We couldn't reach HEL.ink to create your account. Please try again in a minute."
+		return "", a.tr(r, "We couldn't reach HEL.ink to create your account. Please try again in a minute.")
 	}
 	if ans.Status != http.StatusCreated {
 		if ans.Message != "" {
 			return "", ans.Message
 		}
-		return "", "We couldn't create that account. Please check the details and try again."
+		return "", a.tr(r, "We couldn't create that account. Please check the details and try again.")
 	}
-	return "Account created. Open the link HEL.ink sent to " + email + " to confirm your email, then sign in.", ""
+	return a.tr(r, "Account created. Open the link HEL.ink sent to {email} to confirm your email, then sign in.", "email", email), ""
 }

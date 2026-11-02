@@ -86,7 +86,7 @@ func (a *App) settingsData(r *http.Request) settingsData {
 	u := currentUser(r)
 	keys, _ := a.db.APIKeys(r.Context(), u.ID)
 	hooks, _ := a.db.Webhooks(r.Context(), u.ID)
-	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: settingsNotices[r.URL.Query().Get("ok")]}
+	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", Google: u.GoogleID.Valid, Notice: a.tr(r, settingsNotices[r.URL.Query().Get("ok")])}
 }
 
 func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {
@@ -99,9 +99,9 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	cur, pw := r.FormValue("current"), r.FormValue("password")
 	switch {
 	case u.PassHash != "" && !CheckPassword(u.PassHash, cur):
-		d.Error = "Your current password isn't right."
+		d.Error = a.tr(r, "Your current password isn't right.")
 	case len(pw) < 8 || len(pw) > 200:
-		d.Error = "Use 8 to 200 characters for your new password."
+		d.Error = a.tr(r, "Use 8 to 200 characters for your new password.")
 	}
 	if d.Error != "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -124,7 +124,7 @@ func (a *App) createKey(w http.ResponseWriter, r *http.Request) {
 	}
 	if keys, _ := a.db.APIKeys(r.Context(), u.ID); len(keys) >= 20 {
 		d := a.settingsData(r)
-		d.Error = "You have 20 keys already; delete one first."
+		d.Error = a.tr(r, "You have 20 keys already; delete one first.")
 		a.render(w, r, "settings", "Settings", d)
 		return
 	}
@@ -166,14 +166,14 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	if u.PassHash != "" && !CheckPassword(u.PassHash, r.FormValue("password")) {
 		d := a.settingsData(r)
-		d.Error = "Type your password to confirm deleting your account."
+		d.Error = a.tr(r, "Type your password to confirm deleting your account.")
 		w.WriteHeader(http.StatusBadRequest)
 		a.render(w, r, "settings", "Settings", d)
 		return
 	}
 	if u.PassHash == "" && r.FormValue("confirm") != u.Email {
 		d := a.settingsData(r)
-		d.Error = "Type your email address to confirm deleting your account."
+		d.Error = a.tr(r, "Type your email address to confirm deleting your account.")
 		w.WriteHeader(http.StatusBadRequest)
 		a.render(w, r, "settings", "Settings", d)
 		return
@@ -214,7 +214,7 @@ func (a *App) downloadZip(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	ids := r.Form["id"]
 	if len(ids) == 0 || len(ids) > 500 {
-		a.fail(w, r, http.StatusBadRequest, "Choose between 1 and 500 images.")
+		a.fail(w, r, http.StatusBadRequest, a.tr(r, "Choose between 1 and 500 images."))
 		return
 	}
 	w.Header().Set("Content-Type", "application/zip")

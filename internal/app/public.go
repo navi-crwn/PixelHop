@@ -33,7 +33,7 @@ func (a *App) explore(w http.ResponseWriter, r *http.Request) {
 			owners[im.UserID.Int64] = a.ownerOf(r.Context(), im.UserID)
 		}
 	}
-	a.renderPage(w, r, "explore", page{Title: "Explore", Desc: "Images people chose to share publicly on " + a.cfg.SiteName + ".",
+	a.renderPage(w, r, "explore", page{Title: "Explore", Desc: a.tr(r, "Images people chose to share publicly on {site}.", "site", a.cfg.SiteName),
 		Data: map[string]any{"Images": ims, "Owners": owners, "Page": pg, "Pages": (total + per - 1) / per, "Total": total}})
 }
 

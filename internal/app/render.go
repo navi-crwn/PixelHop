@@ -67,7 +67,9 @@ func loadPages(a *App) (*pages, error) {
 		"direct": func(im *db.Image) string { return strings.TrimPrefix(a.directURL(im), a.cfg.LinkURL) },
 		"thumb":  func(im *db.Image) string { return strings.TrimPrefix(a.thumbURL(im), a.cfg.LinkURL) },
 		"add":    func(x, y int) int { return x + y },
-		"mul":    func(x, y int) int { return x * y },
+		// withL hands a partial both the page's language and its own data.
+		"withL": func(l i18n.Locale, v any) map[string]any { return map[string]any{"L": l, "O": v} },
+		"mul":   func(x, y int) int { return x * y },
 		"pct": func(n, of int) int {
 			if of == 0 {
 				return 0
@@ -155,6 +157,12 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	p.L = a.locale(w, r)
 	p.Langs = i18n.Langs
+	if i18n.Known(p.Title) {
+		p.Title = p.L.T(p.Title)
+	}
+	if i18n.Known(p.Desc) {
+		p.Desc = p.L.T(p.Desc)
+	}
 	p = a.base(r, p)
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
 	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" {
@@ -215,11 +223,11 @@ func (a *App) batch(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) help(w http.ResponseWriter, r *http.Request) {
 	a.renderPage(w, r, "help", page{Title: "Help", Data: a.cfg.AdminEmail,
-		Desc: "Answers about uploading, links, albums, the studio, accounts and privacy on " + a.cfg.SiteName + "."})
+		Desc: a.tr(r, "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) docs(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "docs", page{Title: "API & ShareX", Desc: "Upload from scripts, apps and ShareX with the " + a.cfg.SiteName + " API."})
+	a.renderPage(w, r, "docs", page{Title: "API & ShareX", Desc: a.tr(r, "Upload from scripts, apps and ShareX with the {site} API.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) legal(w http.ResponseWriter, r *http.Request) {

@@ -30,7 +30,7 @@ func (a *App) lookup(w http.ResponseWriter, r *http.Request, id string, page boo
 		return nil
 	case im.Hidden && !(currentUser(r) != nil && currentUser(r).IsAdmin()):
 		if page {
-			a.fail(w, r, http.StatusUnavailableForLegalReasons, "This image was removed by the moderators.")
+			a.fail(w, r, http.StatusUnavailableForLegalReasons, a.tr(r, "This image was removed by the moderators."))
 		} else {
 			http.Error(w, "removed", http.StatusUnavailableForLegalReasons)
 		}
@@ -430,7 +430,7 @@ func (a *App) tokenImage(w http.ResponseWriter, r *http.Request) *db.Image {
 		return nil
 	}
 	if im.OwnerToken == "" || hashToken(r.PathValue("token")) != im.OwnerToken {
-		a.fail(w, r, http.StatusForbidden, "This delete link isn't valid.")
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "This delete link isn't valid."))
 		return nil
 	}
 	return im

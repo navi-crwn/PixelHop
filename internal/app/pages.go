@@ -11,19 +11,19 @@ import (
 // contact and a live status page. Terms and privacy stay on /legal.
 
 func (a *App) about(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "about", page{Title: "About", Desc: a.cfg.SiteName + " is free, open-source image hosting from the HOP family: no ads, no trackers, location data removed."})
+	a.renderPage(w, r, "about", page{Title: "About", Desc: a.tr(r, "{site} is free, open-source image hosting from the HOP family: no ads, no trackers, location data removed.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) features(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "features", page{Title: "Features", Desc: "Image, video and PDF hosting, albums, a photo studio and an API, all free on " + a.cfg.SiteName + "."})
+	a.renderPage(w, r, "features", page{Title: "Features", Desc: a.tr(r, "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) faq(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "faq", page{Title: "FAQ", Desc: "Common questions about " + a.cfg.SiteName + ": cost, accounts, privacy and self-hosting."})
+	a.renderPage(w, r, "faq", page{Title: "FAQ", Desc: a.tr(r, "Common questions about {site}: cost, accounts, privacy and self-hosting.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) contact(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "contact", page{Title: "Contact", Data: a.cfg.AdminEmail, Desc: "Report a bug, suggest an idea or send a security report to " + a.cfg.SiteName + "."})
+	a.renderPage(w, r, "contact", page{Title: "Contact", Data: a.cfg.AdminEmail, Desc: a.tr(r, "Report a bug, suggest an idea or send a security report to {site}.", "site", a.cfg.SiteName)})
 }
 
 type statusData struct {
@@ -42,7 +42,7 @@ func (a *App) status(w http.ResponseWriter, r *http.Request) {
 	if !d.DBOK {
 		w.Header().Set("Retry-After", strconv.Itoa(60))
 	}
-	a.renderPage(w, r, "status", page{Title: "Status", Data: d, Desc: "Is " + a.cfg.SiteName + " up? Live status from the server."})
+	a.renderPage(w, r, "status", page{Title: "Status", Data: d, Desc: a.tr(r, "Is {site} up? Live status from the server.", "site", a.cfg.SiteName)})
 }
 
 // backPaths are the inner pages that get a "Back to PixelHop" link above their content.

@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}
 <div class="wrap">
-  <div class="page-head"><div><h1>Explore</h1><p class="muted" style="margin:4px 0 0">Images people chose to show on their public profiles.</p></div></div>
+  <div class="page-head"><div><h1>{{$.L.T "nav.explore"}}</h1><p class="muted" style="margin:4px 0 0">{{$.L.T "explore.sub"}}</p></div></div>
   {{if $d.Images}}
   <div class="masonry explore">
     {{range $d.Images}}{{$o := index $d.Owners .UserID.Int64}}
@@ -10,7 +10,7 @@
     </figure>
     {{end}}
   </div>
-  {{if gt $d.Pages 1}}<nav class="pager">{{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}">Newer</a>{{end}}<span class="btn sm ghost">Page {{$d.Page}} of {{$d.Pages}}</span>{{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}">Older</a>{{end}}</nav>{{end}}
-  {{else}}<div class="empty"><p>Nothing here yet. Images appear when their owners press <b>Show on my profile</b>.</p></div>{{end}}
+  {{if gt $d.Pages 1}}<nav class="pager">{{if gt $d.Page 1}}<a class="btn sm" href="?page={{add $d.Page -1}}">{{$.L.T "changelog.newer"}}</a>{{end}}<span class="btn sm ghost">{{$.L.T "explore.page" "page" $d.Page "pages" $d.Pages}}</span>{{if lt $d.Page $d.Pages}}<a class="btn sm" href="?page={{add $d.Page 1}}">{{$.L.T "changelog.older"}}</a>{{end}}</nav>{{end}}
+  {{else}}<div class="empty"><p>{{$.L.H "explore.empty"}}</p></div>{{end}}
 </div>
 {{end}}
