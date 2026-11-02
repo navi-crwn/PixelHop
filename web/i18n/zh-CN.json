@@ -128,7 +128,7 @@
   "about.title": "关于 {site}",
   "about.lead": "{site} 是专为图片、视频和 PDF 打造的免费开源托管服务。拖入文件即刻获取完美预览链接，同时严格守护您的地理位置隐私：在任何公众浏览前，GPS 及相机参数均已被彻底剔除。",
   "about.who_title": "运营者介绍",
-  "about.who_desc": "{site} 属于 <a href=\"https://hel.ink\">HOP</a> 家族——由独立开发者在单台独立服务器上运行的一套精小免费应用套件，无广告亦无用户追踪。代码采用 MIT 协议并在 <a href=\"https://github.com/navi-crwn/PixelHop\" rel=\"noopener\">GitHub</a> 完全开源，您可以随时自行搭建。",
+  "about.who_desc": "{site} 属于 <a href=\"https://hel.ink\">HOP</a> 家族，由独立开发者在单台独立服务器上运行的一套精小免费应用套件，无广告亦无用户追踪。代码采用 MIT 协议并在 <a href=\"https://github.com/navi-crwn/PixelHop\" rel=\"noopener\">GitHub</a> 完全开源，您可以随时自行搭建。",
   "about.built_title": "架构与技术",
   "about.built_desc": "单个 Go 程序搭配单个 SQLite 数据库文件。缩略图生成与元数据清理在上传瞬间完成；工作台绝大部分工具直接在浏览器运行，您的媒体无需离开自身设备。",
   "about.family_title": "HOP 家族成员",
