@@ -29,6 +29,7 @@ type Config struct {
 	MaxPixels      int64 // decompression-bomb guard (width*height)
 	MaxBatch       int   // files per upload request
 	MinFreeMB      int   // disk reserve; nonpositive values use 1024 MB
+	ReadOnly       bool  // maintenance: uploads are paused, everything online keeps working
 	MinFreePercent int   // disk reserve percentage; nonpositive values use 5
 
 	GuestUploads     bool
@@ -104,6 +105,7 @@ func Load() (*Config, error) {
 		MaxPixels:        int64(envInt("PIXELHOP_MAX_MEGAPIXELS", 80)) * 1_000_000,
 		MaxBatch:         envInt("PIXELHOP_MAX_BATCH", 20),
 		MinFreeMB:        envInt("PIXELHOP_MIN_FREE_MB", 1024),
+		ReadOnly:         envBool("PIXELHOP_READ_ONLY", false),
 		MinFreePercent:   envInt("PIXELHOP_MIN_FREE_PERCENT", 5),
 		GuestUploads:     envBool("PIXELHOP_GUEST_UPLOADS", true),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),

@@ -4,6 +4,18 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Safety, speed and ownership
+- Views are counted in memory and written every ten seconds in one transaction, so a viral image no longer means three database writes per visitor.
+- API keys can be limited to **Upload only** (they cannot list, rename or delete).
+- Owners can refuse embedding of their images on other websites (Settings → Embedding); links you share and direct visits still work.
+- Settings lists where you are signed in and can sign out everywhere else, and exports everything (every file in original quality plus `account.json`) as one ZIP.
+- Files taken down by the moderators (and files of banned uploaders) cannot be uploaded again: their SHA-256 is remembered.
+- Maintenance mode (`PIXELHOP_READ_ONLY=true`, or the control center) pauses uploads while everything online keeps working.
+- An album can be embedded on another website with an iframe (`/a/{id}/embed`); the album page copies the code.
+- Keyboard shortcuts (press `?`): upload, studio, dashboard, search, copy link. After a multi-file upload the album link is copied for you.
+- An OpenAPI 3 description of the API (`/static/openapi.json`) and an architecture page (`docs/ARCHITECTURE.md`).
+- The terminal boxes on the home page keep their dark panel in light mode (the site-wide `code` and `pre` styles painted them pale).
+
 ### Home v2
 - The home page below the upload box is rebuilt on the shared HOP scene engine (`hop-scenes`, HOP assets v2): a running line and numbers, then pinned scenes where the scroll plays an upload, the removal of a photo's location and camera data, an album turning into five link formats, and a photo that comes apart when its time runs out; a studio section with a live mini tool in each card; the API and self-host terminals; question cards; and the other HOP apps as four marks you can turn.
 - Everything is complete without script or with "reduce motion"; nothing loads from a CDN.

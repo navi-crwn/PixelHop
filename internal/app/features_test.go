@@ -1,8 +1,11 @@
 package app
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"image"
 	"image/color"
@@ -258,5 +261,198 @@ func TestUploadedPage(t *testing.T) {
 	}
 	if rec := fetch(h, "/uploaded?id=nope"); rec.Code != 404 {
 		t.Fatalf("no files: %d", rec.Code)
+	}
+}
+
+func TestUploadOnlyKeyCannotReadOrDelete(t *testing.T) {
+	a, h := ssoApp(t)
+	u, full := member(t, a, "scope@example.com")
+	key := "ph_" + randomToken(24)
+	if err := a.db.InsertAPIKeyScoped(context.Background(), u.ID, "uploader", key[:9], hashToken(key), "upload"); err != nil {
+		t.Fatal(err)
+	}
+	id := upload(t, h, key, 1)[0] // uploading works
+	if rec, _ := call(t, h, "GET", "/api/v1/images", key, nil); rec.Code != http.StatusForbidden {
+		t.Fatalf("listing with an upload-only key: %d", rec.Code)
+	}
+	if rec, _ := call(t, h, "DELETE", "/api/v1/images/"+id, key, nil); rec.Code != http.StatusForbidden {
+		t.Fatalf("deleting with an upload-only key: %d", rec.Code)
+	}
+	if rec, r := call(t, h, "GET", "/api/v1/images/"+id, full, nil); !r.Success {
+		t.Fatalf("full key still reads: %d", rec.Code)
+	}
+}
+
+func TestOwnerCanBlockHotlinking(t *testing.T) {
+	a, h := ssoApp(t)
+	u, key := member(t, a, "hot@example.com")
+	id := upload(t, h, key, 1)[0]
+	get := func(referer string) int {
+		req := httptest.NewRequest("GET", "/i/"+id+".png", nil)
+		req.Host = "p.example.com"
+		if referer != "" {
+			req.Header.Set("Referer", referer)
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		return rec.Code
+	}
+	if get("https://forum.example.org/thread/1") != 200 {
+		t.Fatal("embedding is allowed until the owner turns it off")
+	}
+	if err := a.db.SetBlockHotlinks(context.Background(), u.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	a.hotlinks.set(u.ID, true)
+	if get("https://forum.example.org/thread/1") != http.StatusForbidden {
+		t.Fatal("another website must not show the image")
+	}
+	if get("") != 200 {
+		t.Fatal("a direct visit (no Referer) must still work")
+	}
+	if get("https://p.example.com/"+id) != 200 {
+		t.Fatal("this site's own pages must still show it")
+	}
+}
+
+// signedIn returns a session cookie for u.
+func signedIn(t *testing.T, a *App, u *db.User) *http.Cookie {
+	t.Helper()
+	tok := randomToken(32)
+	if err := a.db.InsertSession(context.Background(), hashToken(tok), u.ID, 3600e9, "203.0.113.9", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36"); err != nil {
+		t.Fatal(err)
+	}
+	return &http.Cookie{Name: sessionCookie, Value: tok}
+}
+
+func post(h http.Handler, path string, form url.Values, c *http.Cookie) *httptest.ResponseRecorder {
+	req := httptest.NewRequest("POST", path, strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	req.AddCookie(c)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
+func TestExportAndSessions(t *testing.T) {
+	a, h := ssoApp(t)
+	u, key := member(t, a, "export@example.com")
+	id := upload(t, h, key, 2)[0]
+	cookie := signedIn(t, a, u)
+	other := signedIn(t, a, u) // a second browser
+
+	rec := post(h, "/settings/export", url.Values{}, cookie)
+	if rec.Code != 200 || rec.Header().Get("Content-Type") != "application/zip" {
+		t.Fatalf("export: %d %s", rec.Code, rec.Header().Get("Content-Type"))
+	}
+	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, f := range zr.File {
+		names = append(names, f.Name)
+	}
+	if len(names) != 3 || !strings.Contains(strings.Join(names, ","), "account.json") {
+		t.Fatalf("zip holds %v, want 2 files and account.json", names)
+	}
+	if !strings.Contains(rec.Body.String(), id) && len(names) == 0 {
+		t.Fatal("no image in the export")
+	}
+
+	page := fetch(h, "/settings", cookie).Body.String()
+	if !strings.Contains(page, "Chrome · macOS") || !strings.Contains(page, "203.0.113.9") {
+		t.Fatal("settings should list this browser")
+	}
+	if rec := post(h, "/settings/sessions/revoke", url.Values{}, cookie); rec.Code != http.StatusSeeOther {
+		t.Fatalf("revoke: %d", rec.Code)
+	}
+	if rec := fetch(h, "/dashboard", other); rec.Code == 200 {
+		t.Fatal("the other browser should be signed out")
+	}
+	if rec := fetch(h, "/dashboard", cookie); rec.Code != 200 {
+		t.Fatalf("this browser stays signed in: %d", rec.Code)
+	}
+}
+
+func TestTakenDownFileCannotBeUploadedAgain(t *testing.T) {
+	a, h := ssoApp(t)
+	_, key := member(t, a, "block@example.com")
+	sum := sha256.Sum256(testPNG(77, 30))
+	a.db.BlockHash(context.Background(), hex.EncodeToString(sum[:]), "test")
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	fw, _ := mw.CreateFormFile("file", "pic.png")
+	fw.Write(testPNG(77, 30))
+	mw.Close()
+	req := httptest.NewRequest("POST", "/api/v1/upload", &body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+key)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if !strings.Contains(rec.Body.String(), "not allowed on this server") {
+		t.Fatalf("blocked file: %d %s", rec.Code, rec.Body.String())
+	}
+	if ids := upload(t, h, key, 1); len(ids) != 1 { // a different file is fine
+		t.Fatal("other files still upload")
+	}
+}
+
+func TestMaintenanceModePausesUploadsOnly(t *testing.T) {
+	a, h := ssoApp(t)
+	_, key := member(t, a, "maint@example.com")
+	id := upload(t, h, key, 1)[0]
+	if err := a.db.SetSetting(context.Background(), "read_only", "true"); err != nil {
+		t.Fatal(err)
+	}
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	fw, _ := mw.CreateFormFile("file", "pic.png")
+	fw.Write(testPNG(55, 30))
+	mw.Close()
+	req := httptest.NewRequest("POST", "/api/v1/upload", &body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+key)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusServiceUnavailable || !strings.Contains(rec.Body.String(), "maintenance") {
+		t.Fatalf("upload during maintenance: %d %s", rec.Code, rec.Body.String())
+	}
+	if fetch(h, "/i/"+id+".png").Code != 200 || fetch(h, "/"+id).Code != 200 {
+		t.Fatal("files already online must keep working")
+	}
+	if st := fetch(h, "/api/v1/upload-status").Body.String(); !strings.Contains(st, `"available":false`) {
+		t.Fatalf("upload-status: %s", st)
+	}
+}
+
+func TestAlbumEmbed(t *testing.T) {
+	a, h := ssoApp(t)
+	_, key := member(t, a, "embed@example.com")
+	ids := upload(t, h, key, 3)
+	_, r := call(t, h, "POST", "/api/v1/albums", key, map[string]any{"title": "Trip", "ids": ids})
+	var al struct{ ID string }
+	json.Unmarshal(r.Data, &al)
+	if al.ID == "" {
+		t.Fatalf("no album: %s", r.Error)
+	}
+	if rec, r := call(t, h, "PATCH", "/api/v1/images/"+ids[2], key, map[string]any{"visibility": "private"}); !r.Success {
+		t.Fatalf("make private: %d", rec.Code)
+	}
+	rec := fetch(h, "/a/"+al.ID+"/embed")
+	body := rec.Body.String()
+	if rec.Code != 200 || !strings.Contains(rec.Header().Get("Content-Security-Policy"), "frame-ancestors *") {
+		t.Fatalf("embed: %d csp=%q", rec.Code, rec.Header().Get("Content-Security-Policy"))
+	}
+	if !strings.Contains(body, ids[0]) || !strings.Contains(body, ids[1]) || strings.Contains(body, ids[2]) {
+		t.Fatalf("embed lists what anyone may see, not private files:\n%s", body)
+	}
+	page := fetch(h, "/a/"+al.ID).Body.String()
+	if !strings.Contains(page, "/embed") || !strings.Contains(page, "iframe") {
+		t.Fatal("album page should offer the embed code")
+	}
+	if fetch(h, "/a/nonexistent1/embed").Code != 404 {
+		t.Fatal("unknown album")
 	}
 }

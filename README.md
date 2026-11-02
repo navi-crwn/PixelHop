@@ -97,6 +97,9 @@
   - One static binary, a Docker image, or a systemd unit.
   - Store images on disk or any S3-compatible bucket: AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo.
 
+> [!TIP]
+> How it works, how it stays steady under load, and where things live: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Install
 
 **Binary** (Linux, macOS, Windows; amd64 and arm64 on the [Releases](../../releases) page):

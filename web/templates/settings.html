@@ -31,6 +31,28 @@
     </form>
   </div>
 
+  <div class="card" id="sessions">
+    <h2>{{$.L.T "settings.sessions_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.sessions_sub"}}</p>
+    {{range $d.Sessions}}<div class="out-info" style="align-items:center"><span class="small"><b>{{.Device}}</b>{{if .Current}} · {{$.L.T "settings.this_device"}}{{end}}<br><span class="faint mono">{{.IP}} · {{$.L.Ago .Since}}</span></span></div>{{end}}
+    <form method="post" action="/settings/sessions/revoke" style="margin-top:8px"><button class="btn sm" type="submit">{{$.L.T "settings.sessions_revoke"}}</button></form>
+  </div>
+
+  <div class="card" id="export">
+    <h2>{{$.L.T "settings.export_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.export_sub"}}</p>
+    <form method="post" action="/settings/export"><button class="btn" type="submit"><svg><use href="#i-down"/></svg>{{$.L.T "settings.export_btn"}}</button></form>
+  </div>
+
+  <div class="card" id="embedding">
+    <h2>{{$.L.T "settings.hotlink_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.hotlink_sub"}}</p>
+    <form method="post" action="/settings/hotlinks">
+      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="block_hotlinks" {{if $d.BlockHotlinks}}checked{{end}}><span>{{$.L.T "settings.hotlink_label"}}</span></label>
+      <button class="btn" type="submit">{{$.L.T "settings.hotlink_save"}}</button>
+    </form>
+  </div>
+
   <div class="card" id="api">
     <h2>{{$.L.T "settings.api_h"}}</h2>
     <p class="muted small">{{$.L.H "settings.api_sub"}}</p>
@@ -43,13 +65,14 @@
     {{end}}
     <form method="post" action="/settings/keys" class="copy" style="margin-bottom:14px">
       <input type="text" name="name" placeholder="{{$.L.T "settings.key_ph"}}" maxlength="40" aria-label="{{$.L.T "settings.key_name"}}">
+      <select name="scope" aria-label="{{$.L.T "settings.scope"}}"><option value="full">{{$.L.T "settings.scope_full"}}</option><option value="upload">{{$.L.T "settings.scope_upload"}}</option></select>
       <button class="btn" type="submit"><svg><use href="#i-key"/></svg>{{$.L.T "settings.create_key"}}</button>
     </form>
     {{if $d.Keys}}
     <div class="table-wrap"><table>
-      <tr><th>{{$.L.T "form.name"}}</th><th>{{$.L.T "settings.th_key"}}</th><th>{{$.L.T "settings.th_last"}}</th><th></th></tr>
+      <tr><th>{{$.L.T "form.name"}}</th><th>{{$.L.T "settings.th_key"}}</th><th>{{$.L.T "settings.scope"}}</th><th>{{$.L.T "settings.th_last"}}</th><th></th></tr>
       {{range $d.Keys}}
-      <tr><td>{{.Name}}</td><td class="mono small">{{.Prefix}}…</td><td class="small muted">{{ago .LastUsed}}</td>
+      <tr><td>{{.Name}}</td><td class="mono small">{{.Prefix}}…</td><td class="small">{{if eq .Scope "upload"}}{{$.L.T "settings.scope_upload"}}{{else}}{{$.L.T "settings.scope_full"}}{{end}}</td><td class="small muted">{{$.L.Ago .LastUsed}}</td>
         <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="{{$.L.T "settings.key_confirm" "name" .Name}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></td></tr>
       {{end}}
     </table></div>

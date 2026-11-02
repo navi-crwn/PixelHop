@@ -47,6 +47,9 @@ type uploadResult struct {
 	Duplicate   bool      `json:"-"`
 }
 
+// errBlockedFile is returned for a file that was taken down before and is not welcome again.
+var errBlockedFile = errors.New("blocked file")
+
 type userError struct{ msg string }
 
 func (e userError) Error() string { return e.msg }
@@ -178,6 +181,9 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 		im, tok, dup, err := a.storeImage(ctx, in, u, ip, albumID, expiresAt, useSlug, listed, alt)
 		res.Image, res.DeleteToken, res.Duplicate, res.Err = im, tok, dup, err
+		if errors.Is(err, errBlockedFile) {
+			res.Err = userError{a.tr(r, "This file is not allowed on this server.")}
+		}
 		if err == nil && !dup {
 			used += im.Size
 		}
@@ -293,6 +299,9 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 
 	sum := sha256.Sum256(in.data)
 	sha := hex.EncodeToString(sum[:])
+	if a.db.HashBlocked(ctx, sha) {
+		return nil, "", false, errBlockedFile
+	}
 	var uid sql.NullInt64
 	if u != nil {
 		uid = sql.NullInt64{Int64: u.ID, Valid: true}

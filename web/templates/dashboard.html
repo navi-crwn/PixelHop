@@ -117,7 +117,7 @@
       <div class="tile" style="background:{{.Color}}" data-id="{{.ID}}" data-direct="{{$.Link}}{{direct .}}" data-page="{{$.Link}}/{{.ID}}">
         <a href="/{{.ID}}"><img src="{{thumb .}}" alt="{{.Title}}" loading="lazy"></a>
         {{if eq .Kind "video"}}<span class="kind-badge">▶ {{$.L.T "kind.video"}}</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}
-        {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{until .ExpiresAt}}</span>{{end}}
+        {{if .ExpiresAt}}<span class="pill warn badge"><svg width="11" height="11"><use href="#i-clock"/></svg>{{$.L.Until .ExpiresAt}}</span>{{end}}
         {{if .Hidden}}<span class="pill bad badge">{{$.L.T "dash.hidden"}}</span>{{end}}
         {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}{{$.L.T "dash.only_you"}}{{else}}{{$.L.T "form.password"}}{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}
         {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="{{$.L.T "dash.listed_title"}}"><svg width="11" height="11"><use href="#i-users"/></svg>{{$.L.T "dash.profile_badge"}}</span>{{end}}

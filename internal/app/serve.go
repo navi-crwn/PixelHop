@@ -492,6 +492,10 @@ func albumDesc(n int, by *owner, site string) string {
 // fileAllowed stops private and password-protected files for visitors who
 // may not see them (404 for private, 403 for "needs a password").
 func (a *App) fileAllowed(w http.ResponseWriter, r *http.Request, im *db.Image) bool {
+	if im.UserID.Valid && a.hotlinkRefused(w, r, im.UserID.Int64) {
+		http.Error(w, a.tr(r, "The owner does not allow this image to be shown on other websites."), http.StatusForbidden)
+		return false
+	}
 	if a.canSee(r, im) {
 		if u := currentUser(r); u != nil && (im.UserID.Int64 == u.ID || u.IsAdmin()) {
 			return true

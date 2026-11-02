@@ -69,7 +69,7 @@
         {{if $im.Private}}<span class="pill warn"><svg width="12" height="12"><use href="#i-lock"/></svg>{{$.L.T "view.private"}}</span>{{else if $im.PassHash}}<span class="pill warn"><svg width="12" height="12"><use href="#i-lock"/></svg>{{$.L.T "view.pw"}}</span>{{end}}
         {{if $im.IsAdult}}<span class="pill bad"><svg width="12" height="12"><use href="#i-flag"/></svg>{{.L.T "Adult 18+"}}</span>{{else if $im.IsSensitive}}<span class="pill warn"><svg width="12" height="12"><use href="#i-flag"/></svg>{{.L.T "Content warning"}}</span>{{end}}
         {{template "owner" (withL .L $d.Owner)}}
-        <div class="muted small">{{$.L.T "home2.s1_done"}} <time datetime="{{iso $im.CreatedAt}}">{{ago $im.CreatedAt}}</time>{{if $im.ExpiresAt}} · <span class="pill warn"><svg width="12" height="12"><use href="#i-clock"/></svg>{{$.L.T "view.deletes_in" "time" (until $im.ExpiresAt)}}</span>{{end}}{{if $im.Hidden}} · <span class="pill bad">{{$.L.T "view.hidden"}}</span>{{end}}</div>
+        <div class="muted small">{{$.L.T "home2.s1_done"}} <time datetime="{{iso $im.CreatedAt}}">{{$.L.Ago $im.CreatedAt}}</time>{{if $im.ExpiresAt}} · <span class="pill warn"><svg width="12" height="12"><use href="#i-clock"/></svg>{{$.L.T "view.deletes_in" "time" ($.L.Until $im.ExpiresAt)}}</span>{{end}}{{if $im.Hidden}} · <span class="pill bad">{{$.L.T "view.hidden"}}</span>{{end}}</div>
         <div class="btn-row" style="margin-top:14px">
           <button class="btn primary sm" type="button" data-copy-text="{{$d.Links.Page}}"><svg><use href="#i-link"/></svg>{{$.L.T "uploaded.copy_link"}}</button>
           <a class="btn sm" href="{{$d.Links.Download}}"><svg><use href="#i-down"/></svg>{{$.L.T "tools.download"}}</a>

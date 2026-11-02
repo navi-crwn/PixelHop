@@ -20,6 +20,20 @@ func (a *App) janitor(ctx context.Context) {
 	}
 }
 
+// flushViews writes the counted image views to the database every few seconds.
+func (a *App) flushViews(ctx context.Context) {
+	t := time.NewTicker(10 * time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			a.db.FlushViews(ctx)
+		}
+	}
+}
+
 func (a *App) sweep(ctx context.Context) {
 	removed := 0
 	for {

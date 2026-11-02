@@ -59,7 +59,6 @@ func loadPages(a *App) (*pages, error) {
 	funcs := template.FuncMap{
 		"bytes": humanBytes,
 		"dims":  humanDims,
-		"ago":   ago,
 		"date":  func(t int64) string { return time.Unix(t, 0).UTC().Format("2 Jan 2006") },
 		"iso":   func(t int64) string { return time.Unix(t, 0).UTC().Format(time.RFC3339) },
 		// Pages load images by path, so they work under any host name;
@@ -85,7 +84,6 @@ func loadPages(a *App) (*pages, error) {
 			}
 			return s
 		},
-		"until":         func(t int64) string { return strings.TrimSuffix(ago(2*time.Now().Unix()-t), " ago") },
 		"usage":         func(m map[int64][2]int64, id int64) [2]int64 { return m[id] },
 		"mb":            func(b int64) int64 { return b >> 20 },
 		"gb":            func(b int64) string { return strconv.FormatFloat(math.Round(float64(b)/(1<<30)*100)/100, 'f', -1, 64) },
@@ -314,33 +312,6 @@ func humanBytes(b int64) string {
 }
 
 func humanDims(w, h int) string { return fmt.Sprintf("%d × %d", w, h) }
-
-func ago(t int64) string {
-	if t == 0 {
-		return "never"
-	}
-	d := time.Since(time.Unix(t, 0))
-	switch {
-	case d < time.Minute:
-		return "just now"
-	case d < time.Hour:
-		return plural(int(d.Minutes()), "minute") + " ago"
-	case d < 48*time.Hour:
-		return plural(int(d.Hours()), "hour") + " ago"
-	case d < 60*24*time.Hour:
-		return plural(int(d.Hours()/24), "day") + " ago"
-	case d < 730*24*time.Hour:
-		return plural(int(d.Hours()/24/30), "month") + " ago"
-	}
-	return plural(int(d.Hours()/24/365), "year") + " ago"
-}
-
-func plural(n int, w string) string {
-	if n == 1 {
-		return "1 " + w
-	}
-	return fmt.Sprintf("%d %ss", n, w)
-}
 
 // wallTile is one square of the picture that comes apart on the home page: its
 // column and row, and d in [0,1) which decides when it falls (a fixed
