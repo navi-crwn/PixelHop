@@ -7,14 +7,7 @@ const docs = join(root, 'docs');
 
 const htmlFiles = [
   'index.html',
-  'en/index.html',
-  'id/index.html',
-  'zh/index.html',
-  'es/index.html',
-  'ar/index.html',
-  'pt/index.html',
-  'fr/index.html',
-  'ja/index.html'
+  ...['en', 'zh-CN', 'de', 'id', 'ja', 'pt-BR', 'es', 'fr', 'ru'].map((l) => `${l}/index.html`)
 ];
 
 let errors = 0;

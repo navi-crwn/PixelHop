@@ -1,19 +1,19 @@
 <p align="center">🌐 <b>English</b> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.de.md">Deutsch</a> · <a href="README.id.md">Bahasa Indonesia</a> · <a href="README.ja.md">日本語</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.ru.md">Русский</a></p>
 
-<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/readme/hero-en-light.webp"><img src="docs/readme/hero-en-dark.webp" alt="PixelHop: drop an image, get a link" width="100%"></picture></p>
+# PixelHop
+
+Open-source image hosting in one Go program. It removes GPS location and camera details from photos before anyone can see them, and it has a photo studio that runs in the browser, so the photo stays on your device until you upload it.
+
+Live at [pixel.hel.ink](https://pixel.hel.ink). Short links use [p.hel.ink](https://p.hel.ink).
 
 <p align="center">
-  <b>Open-source image hosting that strips your GPS location before anyone sees it,<br>with a photo studio that never uploads your photo. One small Go binary.</b>
-</p>
-
-<p align="center">
-  <a href="https://pixel.hel.ink"><b>🐰 Try pixel.hel.ink</b></a> ·
-  <a href="https://navi-crwn.github.io/pixelhop/">Website</a> ·
+  <a href="https://pixel.hel.ink"><b>Try pixel.hel.ink</b></a> ·
+  <a href="https://navi-crwn.github.io/PixelHop/">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#api">API</a> ·
   <a href="#upgrading-from-pixelhop-2">Upgrade from v2</a> ·
-  <a href="AUDIT.md">Audit</a> ·
-  <a href="CHANGELOG.md">Changelog</a>
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="SECURITY.md">Security</a>
 </p>
 
 <p align="center">
@@ -24,94 +24,43 @@
   <img src="https://img.shields.io/github/actions/workflow/status/navi-crwn/pixelhop/ci.yml?style=flat-square&label=tests" alt="Tests"/>
 </p>
 
----
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/home-dark.webp"><img src="docs/readme/home-light.webp" alt="The PixelHop upload page after a guest uploaded a photo: the link is ready and a note says GPS location, camera details and date taken were removed" width="100%"></picture></p>
 
-Install in one command (it checks your computer first, asks a few questions, and can set up the HOP ID hub for you):
+## What it does
+
+- Takes images, videos and PDFs by drop, paste, file picker or link, and gives each one a short readable link such as `beach-sunset-x7Kp2Q`.
+- Removes hidden metadata from photos and videos (see [What gets removed](#what-gets-removed) for exactly what, per file type).
+- Groups several files into an album with one link.
+- Includes a photo studio that compresses, resizes, crops, converts, blurs, reads text and removes backgrounds in the browser.
+- Runs as one static binary with SQLite built in. No PHP, Python, MySQL or cron jobs are needed. Images live on disk or in any S3-compatible bucket.
+
+It suits people who share screenshots and photos in chats, forums or on GitHub, who want a [ShareX](https://getsharex.com) destination they control, or who care about what a photo gives away.
+
+## Screenshots
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/image-dark.webp"><img src="docs/readme/image-light.webp" alt="An image page: the photo, copy buttons for direct, Markdown, HTML and BBCode links, file details and a QR code" width="100%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dashboard-dark.webp"><img src="docs/readme/dashboard-light.webp" alt="The member dashboard: sidebar with the HOP family, quick links, and a grid of uploaded files with tag filters" width="100%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/album-dark.webp"><img src="docs/readme/album-light.webp" alt="An album page with four photos and buttons to copy the album link, the embed code and every link in one format" width="100%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/studio-dark.webp"><img src="docs/readme/studio-light.webp" alt="The photo studio with the compress tool open on a photo: format, quality, longest side and the resulting file size" width="100%"></picture></p>
+
+These screenshots come from a local demo instance with generated pictures. [`scripts/readme-images.mjs`](scripts/readme-images.mjs) recreates them.
+
+## Install
+
+The installer checks your computer, asks a few questions and builds PixelHop from source. It needs Go 1.27 or newer, or Docker.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/navi-crwn/PixelHop/main/install.sh | bash
 ```
 
-From a clone: `./install.sh` · update: `./update.sh` · remove: `./uninstall.sh`. Add `--yes` to take every default; `--help` lists the options.
+From a clone, run `./install.sh`. Later, `./update.sh` pulls the new version, copies the database to `backups/` and rebuilds, and `./uninstall.sh` removes the program but keeps your data unless you add `--purge`. Every script takes `--yes` to accept the defaults, `--dry-run` to show the steps without running them, and `--help` for the rest. The installer can run PixelHop in the foreground, write a systemd unit or a Docker Compose file, and, if you like, install a [HOP ID](https://github.com/navi-crwn/HEL.ink) hub next to it.
 
-## What is PixelHop?
+You can also install by hand.
 
-**Sharing a photo**
-- Drop, paste or link an image and you get a short, readable link.
-- Photos taken on a phone carry their exact GPS location and camera details. PixelHop **removes that hidden data** before anyone can see it, without re-compressing your picture.
-- Several files at once become an **album**.
-
-**Editing a photo**
-- The built-in **studio** compresses, resizes, crops and converts.
-- It also blurs faces, reads text (OCR) and removes backgrounds.
-- All of it runs **in your browser**, so the photo stays on your device until you choose to upload it.
-
-**Running it yourself**
-- PixelHop is a single ~16 MB program, with the database built in.
-- Copy it to a server, start it, done. No PHP, Python, MySQL or cron jobs.
-
-**Good for you if you:**
-- share screenshots and photos on chats, forums, Discord or GitHub;
-- want a ShareX destination you control;
-- care about what your photos give away.
-
-<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/readme/features-en-light.webp"><img src="docs/readme/features-en-dark.webp" alt="Everything PixelHop can do" width="100%"></picture></p>
-
-<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/readme/studio-en-light.webp"><img src="docs/readme/studio-en-dark.webp" alt="The in-browser photo studio" width="100%"></picture></p>
-
-## Features
-
-- **📍 Location removed, quality kept.**
-  - Strips EXIF, XMP and IPTC from JPEG, PNG and WebP by rewriting the file container, never re-encoding the pixels.
-  - Sideways phone photos are turned upright first.
-- **🔗 Every link you need.**
-  - Readable ids like `beach-sunset-x7Kp2Q`.
-  - A direct link, Markdown, HTML, BBCode and a QR code.
-  - Open Graph tags so previews look right on Discord, X and WhatsApp.
-- **🎬 Videos & PDFs too.** Screen recordings, phone videos and PDFs get a page, a preview and a link. Videos are stripped of their location and shrunk to 720p in the background; PDFs are compressed. Big files upload in resumable pieces.
-- **🧾 Reports / tickets.** Give an upload a ticket number and a note, and get one link for everything plus a ready-to-paste list for WhatsApp or LINE.
-- **🗂️ Albums.** Upload several images and share one gallery link. Edit the title, description, cover and order afterwards, or make an album from any selection.
-- **🔒 Private or password-protected.** Per image: unlisted (default), only you, or behind a password. Locked files can't be hotlinked.
-- **🗑️ Trash & tags.** A deleted file waits in the trash for a week; tag your files and filter by tag.
-- **📈 View stats.** Views per day and the sites that link to your image, without tracking visitors.
-- **📐 Resize on the fly.** `/i/photo.jpg?w=800&format=webp` makes and caches any size.
-- **📱 Installable app.** Add PixelHop to your home screen and share photos to it from any app. iPhone HEIC photos are converted automatically.
-- **⏳ Self-destruct.** Delete after 10 minutes, an hour, a day, a week or a month.
-- **🙋 No account needed.**
-  - Guests get a private delete link for every image, also remembered in their browser.
-  - Accounts add a gallery with search, sorting, renaming, bulk delete and a storage quota.
-- **🎨 Photo studio.**
-  - In the browser: compress, resize, crop, convert (JPG, PNG, WebP, AVIF), adjust and rotate, blur & pixelate, color palette, **QR code generator**, **OCR** in 30 languages, several at once (tesseract.js) and background removal (@imgly). Nothing is uploaded unless you press *Upload result*.
-  - On the server, for signed-in users (optional [`tools/ai-server.py`](tools/ai-server.py)): **background removal** in about a second (rembg), **automatic face blur** (OpenCV), **magic eraser** (LaMa) and **HD upscale 2×** (Real-ESRGAN). One image at a time, daily limits, nothing stored.
-- **📦 Batch.** Resize, convert, watermark, remove backgrounds, blur faces or upscale a whole set, then download one ZIP or upload one album.
-- **💧 Watermark & compare.** Put your name or logo on images, and hold a button to compare with the original.
-- **🌍 Explore, oEmbed & sitemap.** A public feed of images people chose to show, embeds for WordPress/Discourse/Notion, and a gallery API for other sites.
-- **🪪 Public profiles.** A name, @username, photo, bio and website. Image and album pages (and their link previews) say who shared them; `/u/username` shows only the images you pick. Can be switched off.
-- **📋 Copy all links.** After a bulk upload, on albums and in your gallery: every direct link, page link, Markdown, BBCode or HTML in one click.
-- **👤 Own accounts, or HEL.ink sign-in** (optional add-on). PixelHop has its own sign-up, passwords and Google sign-in and needs nothing else. Only if you also run [HEL.ink](https://github.com/navi-crwn/hel.ink) can you set `HELINK_URL` and `HELINK_SSO_SECRET` to let people use one account for both; leave them empty and PixelHop never contacts HEL.ink.
-  - **HOP App Protocol.** With HEL.ink sign-in on, PixelHop also serves the signed admin API under `/hop/*` (health, manifest, stats, user 360 and actions, profile and account events pushed by HEL.ink, content and report moderation, settings, search, metrics, audit trail). Calls are signed with the same `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` (default `imperium,helink`) lists the app slugs allowed to call it. Every change made this way is kept in the `hop_audit` table.
-- **🔌 API & ShareX.**
-  - A REST API with `Bearer` keys.
-  - The settings page makes a ready-to-use `.sxcu` file for ShareX.
-  - ShareX configs made for PixelHop 2 keep working.
-  - Signed webhooks when you upload or delete.
-  - A command-line uploader in the same binary: `pixelhop push *.png --format markdown`.
-- **🛡️ Moderation.** A report button on every image, a report queue, hide/delete, IP bans, account lock/suspend, warning pop-ups, and an announcement bar, all handled through the HOP control center (signed admin API) or the CLI.
-- **🔐 Safe by default.**
-  - Argon2id passwords and Google sign-in.
-  - CSRF protection and a strict Content Security Policy.
-  - SSRF-proof "upload from link", a decompression-bomb guard, rate limits, and trusted-proxy-aware IP handling.
-  - Hashed API keys and session tokens.
-- **🏠 Self-hostable.**
-  - One static binary, a Docker image, or a systemd unit.
-  - Store images on disk or any S3-compatible bucket: AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo.
-
-> [!TIP]
-> How it works, how it stays steady under load, and where things live: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Install
-
-**Binary** (Linux, macOS, Windows; amd64 and arm64 on the [Releases](../../releases) page):
+**Binary** (Linux, macOS and Windows, amd64 and arm64, on the [Releases](../../releases) page):
 
 ```bash
 curl -L -o pixelhop https://github.com/navi-crwn/pixelhop/releases/latest/download/pixelhop-linux-amd64
@@ -127,69 +76,147 @@ docker run -d --name pixelhop -p 8080:8080 \
   -v pixelhop:/data ghcr.io/navi-crwn/pixelhop:latest
 ```
 
-**From source** (Go 1.27+):
+The image runs as the non-root user 65532, so the data volume must be writable by that user. The repository also has a [`docker-compose.yml`](docker-compose.yml) that reads a `.env` file (copy `.env.example`) and keeps data in `./data`.
+
+**From source** (Go 1.27 or newer):
 
 ```bash
 git clone https://github.com/navi-crwn/pixelhop.git && cd pixelhop
 make build && ./pixelhop
 ```
 
-Open `http://localhost:8080` and create an account. **The first account becomes the admin.** You can also make one from the command line: `pixelhop user add you@example.com --admin`.
+Open `http://localhost:8080` and create an account. The first account becomes the admin. You can also create one on the command line with `pixelhop user add you@example.com --admin`.
 
-<details>
-<summary><b>Settings</b> (environment variables; all optional)</summary>
+Video and PDF processing uses `ffmpeg`, `ffprobe` and Ghostscript (`gs`) when they are installed on the server. Without them those files are stored as uploaded. The Docker image contains none of them, so install them on the host or build your own image if you host videos or PDFs. HEIC and AVIF photos, WebP and AVIF output from the resize URL, and the server-side studio tools need the optional [`tools/ai-server.py`](tools/ai-server.py).
 
-Everything is in [`.env.example`](.env.example). The ones you're most likely to change:
+## What gets removed
+
+PixelHop works on the file's structure and copies the compressed picture data unchanged, so quality stays the same.
+
+| File | What happens |
+|---|---|
+| JPEG | EXIF (GPS, camera make and model, serial numbers, date taken), XMP, IPTC and comments are removed. The colour profile and other segments stay. A photo whose EXIF says it is rotated is turned upright and saved again as JPEG at quality 92, without a colour profile. This is the one case where pixels are re-encoded. |
+| PNG | Text chunks, the EXIF chunk and the modification time are removed. The colour profile stays. |
+| WebP | EXIF and XMP are removed from extended files. Simple WebP files carry no metadata. |
+| GIF | Stored as uploaded. Nothing is removed. |
+| BMP | Converted to PNG. |
+| HEIC, AVIF | Converted to upright JPEG or PNG without metadata, when the AI service is set up. Otherwise the upload is refused. |
+| Video (MP4, MOV, 3GP, WebM, MKV) | With `ffmpeg` installed, location, dates, camera and encoder tags are removed without re-encoding. Only the first video and first audio track are kept. A background job then shrinks the video to H.264 and AAC, at most 1280 px on the long side and 30 frames per second. Without `ffmpeg` the file is stored as uploaded. |
+| PDF | With Ghostscript installed, the file is rewritten to make it smaller, and the smaller copy is kept if it saves at least 10%. Document properties such as title and author are not removed. Without Ghostscript the file is stored as uploaded. |
+
+After an upload, the page says which kinds of data were removed. The check is by type (GPS location, camera details, date taken, editing software, XMP, IPTC, comment, embedded text). The values are never read out.
+
+## Features
+
+Sharing:
+- Direct link, page link, Markdown, HTML, BBCode and a QR code for every file, and Open Graph tags so previews work in Discord, X and WhatsApp.
+- Albums from several files, with a title, description, cover and order you can edit later. An album can be embedded on another site with an iframe (`/a/{id}/embed`).
+- Copy every link of an album or a bulk upload in one format.
+- Expiry after 10 minutes, 1 hour, 1 day, 7 days, 30 days or 90 days.
+- Each file is unlisted (the default), private to you, or behind a password. A file can carry a content warning (sensitive or adult); visitors confirm before they see it. Owners can refuse embedding of their images on other websites.
+- Tags, search and a tag filter on the dashboard. Deleted files wait in the trash for 7 days.
+- Views per day and the sites that link to a file. Referrers are stored by host name only.
+- Resized copies on the fly, for example `/i/photo.jpg?w=800`, made once and cached.
+- Public profiles at `/u/username`, an Explore feed of files people chose to show, oEmbed and a sitemap.
+
+Accounts:
+- Guests can upload (up to 20 MB per file by default) and get a private delete link for each file, which the browser also remembers.
+- Members get a gallery with search, sorting, renaming and bulk actions, a storage quota (1 GB by default), a getting-started card, and a ZIP export of everything they uploaded.
+- Settings lists where you are signed in, lets you sign out everywhere else, and manages API keys, webhooks, your profile and account deletion.
+- Sign-in with email and password, Google, or a HEL.ink account (the HOP ID hub), all optional. Without `HELINK_URL` PixelHop never contacts HEL.ink. Cloudflare Turnstile can protect the sign-in and sign-up forms.
+
+Studio:
+- In the browser: compress, resize, crop, convert (JPG, PNG, WebP, and AVIF where the browser can encode it), adjust and rotate, blur and pixelate, watermark, colour palette, QR code, text from images (OCR, 30 languages, up to five at once) and background removal. Nothing is uploaded until you press Upload result.
+- Batch: resize, convert, watermark or run the AI steps on a set of images, then download one ZIP or upload an album.
+- On the server, for signed-in users, if you run `tools/ai-server.py`: background removal, automatic face blur, magic eraser and 2x upscale. One image at a time, with a daily limit, and nothing is stored.
+
+Tools for developers:
+- A REST API with bearer keys. A key can be limited to upload only.
+- A ShareX configuration file made in Settings, and ShareX configs from PixelHop 2 keep working.
+- Webhooks for `image.uploaded` and `image.deleted`, signed with HMAC-SHA256 in the `X-PixelHop-Signature` header.
+- A command-line uploader in the same binary: `pixelhop push *.png --format markdown`.
+- An [OpenAPI description](web/static/openapi.json), served at `/static/openapi.json`, and `/healthz`, `/metrics` and `/status` for monitoring.
+- Installable as an app on phones, with a share target for photos, videos and PDFs.
+
+Running it:
+- One static binary, a Docker image, or a systemd unit. Store files on disk or in S3-compatible storage (AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, Contabo).
+- Uploads pause by themselves when free disk space gets low, and `PIXELHOP_READ_ONLY=true` pauses them for maintenance. Files already online keep working. See [docs/UPLOAD-STORAGE.md](docs/UPLOAD-STORAGE.md).
+- The interface is in nine languages: English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil), Español, Français and Русский. Use `?lang=de` to switch; the choice is kept in a cookie, and the browser's language setting is not used.
+- Shared links can live on another host than the app (`PIXELHOP_LINK_URL`). On pixel.hel.ink the app lives at pixel.hel.ink and links stay `p.hel.ink/...`.
+
+Safety:
+- Passwords use Argon2id. API keys and session tokens are stored as hashes.
+- Forms are protected against cross-site posts, and a strict Content Security Policy is sent.
+- "Upload from link" checks the resolved address of every connection, so it cannot be pointed at private networks. Large images are refused from their header, before decoding. Uploads are rate limited, and client IPs are only taken from proxies you list.
+- Files taken down by moderators cannot be uploaded again, because their SHA-256 is remembered.
+- How an upload is processed, and how the server stays steady under load: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The history behind version 3: [AUDIT.md](AUDIT.md). To report a vulnerability, read [SECURITY.md](SECURITY.md).
+
+Moderation: the built-in admin pages were retired in 3.7.0. Every page has a Report button. The report queue, hiding and deleting content, IP bans, account actions, runtime settings and the announcement bar belong to the HOP control center, which talks to PixelHop through the signed `/hop/*` API (the HOP App Protocol). It is used with HEL.ink sign-in, signed with `HELINK_SSO_SECRET`, and the callers are listed in `HOP_ADMIN_CLIENTS` (default `imperium,helink`). Every change made that way is written to the `hop_audit` table. The control center itself is private to the HOP project. A standalone install has the Report button, the `pixelhop user` commands (`add`, `passwd`, `admin`, `merge`) and the admin role's extra rights through the API, but no screen for the report queue.
+
+## Settings
+
+Settings are environment variables, and all of them are optional. [`.env.example`](.env.example) lists the usual ones with their defaults; the rest are read in [`internal/config/config.go`](internal/config/config.go). The ones you are most likely to change:
 
 | Variable | Default | What it does |
 |---|---|---|
-| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address of the app (sign-in, upload, dashboard) |
-| `PIXELHOP_LINK_URL` | `PIXELHOP_BASE_URL` | Another host for shared links (image and album pages, direct files). Point it at the old address after a move, so old links keep working while the app lives at the new one. That host must also reach PixelHop |
-| `PIXELHOP_DATA` | `./data` | Database and (local) images |
+| `PIXELHOP_ADDR` | `:8080` | Address to listen on |
+| `PIXELHOP_BASE_URL` | `http://localhost:8080` | Public address of the app (sign-in, upload, dashboard). Use `https://` in production, which also turns on secure cookies |
+| `PIXELHOP_LINK_URL` | `PIXELHOP_BASE_URL` | Another host for shared links (image and album pages, direct files). It must be a different host and must also reach PixelHop |
+| `PIXELHOP_SITE_NAME` | `PixelHop` | Name shown in pages |
+| `PIXELHOP_DATA` | `./data` | Database and, with local storage, the images |
 | `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
-| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account (also a switch in the control center) |
-| `PIXELHOP_TRUSTED_PROXIES` | — | `cloudflare`, or IPs/CIDRs of your reverse proxy |
+| `PIXELHOP_MAX_BATCH` | `20` | Files per upload request |
+| `PIXELHOP_MAX_MEGAPIXELS` | `80` | Largest image accepted, by width times height |
+| `PIXELHOP_UPLOADS_PER_MINUTE` | `30` | Rate limit per address |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `1024` | Storage for each new account |
+| `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account |
+| `PIXELHOP_REGISTRATION` | `true` | Allow new accounts |
+| `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for this many days (0 keeps everything) |
+| `PIXELHOP_MIN_FREE_MB`, `PIXELHOP_MIN_FREE_PERCENT` | `1024`, `5` | Free-space reserve; uploads pause below the larger of the two |
+| `PIXELHOP_READ_ONLY` | `false` | Pause uploads for maintenance |
+| `PIXELHOP_CONTACT_EMAIL` | none | Shown on the Terms page for copyright notices |
+| `PIXELHOP_TRUSTED_PROXIES` | none | `cloudflare`, or the IPs or CIDRs of your reverse proxy |
 | `PIXELHOP_STORAGE` | `local` | `local` or `s3` |
-| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | — | For S3-compatible storage |
-| `S3_PUBLIC_URL` | — | CDN address of the bucket; image links redirect there |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | — | "Sign in with Google" |
-| `HELINK_URL`, `HELINK_SSO_SECRET` | — | Sign in with a HEL.ink account (same secret as HEL.ink's `PIXELHOP_SSO_SECRET`) |
-| `HELINK_API_ADDR` | — | Optional `host:port` to reach HEL.ink directly (e.g. `127.0.0.1:443` on the same server) for password checks |
-| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App slugs allowed to call the signed `/hop/*` admin API (HOP App Protocol) |
-| `PIXELHOP_CONTROL_URL` | — | Address of the HOP control center; admins who open `/admin` are sent there |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile on sign-in and sign-up |
-| `PIXELHOP_REMBG_URL` | — | Address of `tools/ai-server.py`, e.g. `http://127.0.0.1:7001`, to turn on the server AI tools |
-| `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for N days |
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | none | Needed for S3 storage; `S3_REGION` (`auto`) and `S3_PATH_STYLE` (`true`) are optional |
+| `S3_PUBLIC_URL` | none | CDN address of the bucket; file links redirect there |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | none | Sign in with Google. `GOOGLE_REDIRECT_URI` defaults to `PIXELHOP_BASE_URL/auth/google/callback` |
+| `HELINK_URL`, `HELINK_SSO_SECRET` | none | Sign in with a HEL.ink account. The secret is at least 32 characters and equals `PIXELHOP_SSO_SECRET` in HEL.ink's `.env` |
+| `HELINK_SSO_SECRET_PREV` | none | The previous secret, accepted while you rotate it |
+| `HELINK_API_ADDR` | none | Optional `host:port` to reach HEL.ink directly, for example `127.0.0.1:443` on the same server |
+| `HOP_ADMIN_CLIENTS` | `imperium,helink` | App names allowed to call the signed `/hop/*` API |
+| `PIXELHOP_CONTROL_URL` | none | Address of the HOP control center; admins who open `/admin` are sent there |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | none | Cloudflare Turnstile on sign-in and sign-up. With HEL.ink accounts on, these forms refuse every attempt without the keys |
+| `PIXELHOP_REMBG_URL` | none | Address of `tools/ai-server.py`, for example `http://127.0.0.1:7001` |
+| `PIXELHOP_REMBG_PER_DAY` | `30` | Server AI uses per member per day |
 
-</details>
+The names `HOP_SSO_SECRET_PIXELHOP` and `HOP_SSO_SECRET` also work for the HEL.ink secret, and `HOP_SSO_SECRET_PREV` for the previous one.
 
-<details>
-<summary><b>Behind nginx / Cloudflare, and as a service</b></summary>
+### Reverse proxy, service and backups
 
-- [`deploy/nginx.conf`](deploy/nginx.conf) is a reverse-proxy example. Set `PIXELHOP_TRUSTED_PROXIES=127.0.0.1` so PixelHop believes nginx's `X-Forwarded-For`; add `cloudflare` if Cloudflare is in front.
-- [`deploy/pixelhop.service`](deploy/pixelhop.service) is a hardened systemd unit; [`deploy/pixelhop-ai.service`](deploy/pixelhop-ai.service) runs the optional AI tools (`pip install "rembg[cpu]" opencv-python-headless onnxruntime`, plus the LaMa and Real-ESRGAN x2plus ONNX files).
-- Back up by copying the data folder (or `sqlite3 data/pixelhop.db ".backup copy.db"` while it runs).
-
-</details>
+- [`deploy/nginx.conf`](deploy/nginx.conf) is a reverse-proxy example. Set `PIXELHOP_TRUSTED_PROXIES=127.0.0.1` so PixelHop trusts nginx's `X-Forwarded-For`, and add `cloudflare` if Cloudflare is in front.
+- [`deploy/pixelhop.service`](deploy/pixelhop.service) is a hardened systemd unit. [`deploy/pixelhop-ai.service`](deploy/pixelhop-ai.service) runs the optional AI service, which needs `rembg`, `opencv-python-headless` and `onnxruntime` (see the header of [`tools/ai-server.py`](tools/ai-server.py)).
+- To back up, copy the data folder, or run `sqlite3 data/pixelhop.db ".backup copy.db"` while PixelHop is running. `./update.sh` makes such a copy in `backups/` before every update.
 
 ## How to use it
 
 1. Open the site, then drop, paste (<kbd>Ctrl</kbd>+<kbd>V</kbd>) or link an image.
-2. Optional: pick **Delete after**, and whether the file name goes in the link.
+2. Optional: pick Delete after, and whether the file name goes in the link.
 3. The link is copied for you. Open it for the direct link, embed codes and QR code.
 
-**ShareX:** go to **Settings → API keys**, create a key, then press **Download ShareX config with this key**. Double-click the file.
+Press `?` on any page for the keyboard shortcuts.
 
-**Command line:** the same `pixelhop` binary uploads to any PixelHop server.
+**ShareX.** Go to Settings, API keys, create a key, then press Download ShareX config with this key and open the file.
+
+**Command line.** The same `pixelhop` binary uploads to any PixelHop server. `pixelhop login` stores the address and key in `~/.config/pixelhop/client.json`; `PIXELHOP_SERVER` and `PIXELHOP_KEY` override them.
 
 ```bash
 pixelhop login --server https://pixel.hel.ink --key ph_yourkey
 pixelhop push screenshot.png photos/*.jpg --expire 7d --format markdown
 ```
 
-**Phone:** open the site, choose **Add to Home Screen**, and PixelHop appears in your share sheet.
+**Phone.** Open the site and choose Add to Home Screen. PixelHop then appears in the share sheet.
 
 ## API
 
@@ -199,72 +226,77 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 
 | Endpoint | What it does |
 |---|---|
-| `POST /api/v1/upload` | Upload files (`file`, repeatable) or links (`url`); options `expire`, `slug`, `album`, `title` |
+| `POST /api/v1/upload` | Upload files (`file`, repeatable) or links (`url`). Options: `expire` (`10m`, `1h`, `1d`, `7d`, `30d`, `90d`), `slug` (`0` keeps the file name out of the link), `title`, `alt`, `album_id`, `album` (`force` or `0`), `listed`, `content_warning` (`sensitive` or `adult`), `warning_reason` |
+| `POST /api/v1/uploads`, `PUT /api/v1/uploads/{id}`, `POST /api/v1/uploads/{id}/finish` | Upload a big file in 8 MB pieces |
 | `GET /api/v1/images` | Your images (`page`, `limit`, `q`, `sort`) |
-| `GET` · `PATCH` · `DELETE /api/v1/images/{id}` | Read, rename (`{"title": …}`), show on your profile (`{"listed": true}`) or delete one |
-| `PATCH /api/v1/images/{id}` | Also `alt` and `visibility` (`unlisted`, `private`, `password` + `password`) |
+| `GET`, `PATCH`, `DELETE /api/v1/images/{id}` | Read, change or delete one. `PATCH` takes `title`, `alt`, `listed`, `visibility` (`unlisted`, `private`, or `password` with `password`), `tags`, `content_warning` and `warning_reason`. `DELETE` moves your own file to the trash; add `?permanent=1` to remove it for good |
+| `POST /api/v1/images/{id}/restore` | Bring a file back from the trash |
 | `GET /api/v1/images/{id}/stats` | Views per day and referring sites |
-| `GET` · `POST /api/v1/albums`, `GET` · `PATCH` · `DELETE /api/v1/albums/{id}` | List, create, edit (title, description, cover, order, add, remove) and delete albums |
-| `GET /api/v1/users/{username}/images` | Public: someone's profile images |
-| `GET /oembed?url=…` | oEmbed for image pages |
-| `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Resized copies, made once and cached |
+| `GET`, `POST /api/v1/albums` and `GET`, `PATCH`, `DELETE /api/v1/albums/{id}` | List, create, read, edit and delete albums |
+| `GET /api/v1/users/{username}/images` | Public: the images on someone's profile |
 | `GET /api/v1/me` | Your account and storage use |
-| `GET /api/v1/stats` | Public totals |
+| `GET /api/v1/stats` | Public totals and the server version |
+| `GET /api/v1/upload-status` | Whether uploads are accepted right now |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |
-| `GET /tools/qr.png` · `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
+| `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Resized copies, made once and cached. `format=webp` and `avif` need the AI service |
+| `GET /oembed?url=...` | oEmbed for image pages |
+| `GET /tools/qr.png`, `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
 
-Every answer looks like `{"success": true, "data": …}` or `{"success": false, "error": "…"}`. The full reference is at [`/docs`](https://pixel.hel.ink/docs) on any PixelHop server.
+Every answer looks like `{"success": true, "data": ...}` or `{"success": false, "error": "..."}`. The full reference is at [`/docs`](https://pixel.hel.ink/docs) on any PixelHop server.
 
 ## Upgrading from PixelHop 2
 
-PixelHop 2 was a PHP app with MySQL, a Python venv and cron jobs; its code lives on in the [`v2.3.0-php`](../../tree/v2.3.0-php) tag. One command brings everything over:
+PixelHop 2 was a PHP app with MySQL, a Python venv and cron jobs. Its code stays in the [`v2.3.0-php`](../../tree/v2.3.0-php) tag. One command brings the data over:
 
 ```bash
 pixelhop import --images /var/www/pichost/data/images.json \
   --mysql "user:pass@tcp(127.0.0.1:3306)/pixelhop" --copy
 ```
 
-- **Users** keep their ids, roles, quotas and **passwords** (PHP's argon2id hashes are verified and upgraded on next sign-in). Google accounts stay linked.
-- **Images** keep their ids. With `--copy` they are downloaded into PixelHop 3's storage with fresh thumbnails; without it they are served from the old buckets.
-- **Links keep working:** `/{id}`, `/i/2026/08/27/{id}_original.webp`, `/auth/google-callback` (set `GOOGLE_REDIRECT_URI`), and ShareX configs posting to `/api/upload.php`.
+- Users keep their ids, roles, quotas and passwords. PHP's argon2id hashes are verified and upgraded at the next sign-in. Google accounts stay linked.
+- Images keep their ids. With `--copy` they are downloaded into PixelHop 3's storage with fresh thumbnails; without it they are served from the old buckets.
+- Old links keep working: `/{id}`, `/i/2026/08/27/{id}_original.webp`, `/auth/google-callback` (set `GOOGLE_REDIRECT_URI`), and ShareX configs that post to `/api/upload.php`.
 
-Why the rewrite? Read [AUDIT.md](AUDIT.md).
+[AUDIT.md](AUDIT.md) explains why it was rewritten.
 
-## Project layout
+## Development
 
 ```
-cmd/pixelhop/     the command: serve, user, import
-internal/app/     web server: pages, API, uploads, admin
+cmd/pixelhop/     the command: serve, user, import, push, login
+internal/app/     web server: pages, API, uploads, moderation, HOP App Protocol
 internal/db/      SQLite schema, migrations and queries
 internal/imaging/ type sniffing, metadata stripping, thumbnails
 internal/storage/ local disk, S3 (own SigV4 signer), legacy URLs
 internal/netsafe/ SSRF-safe fetching for "upload from link"
-web/              templates and static files, embedded in the binary
-docs/             the GitHub Pages website and README images
+web/              templates, scripts and the nine language files, embedded in the binary
+docs/             the GitHub Pages website and the README images
+scripts/          helper scripts (README images, changelog data, HOP family check)
+tools/            the optional AI service
+deploy/           nginx and systemd examples
 ```
 
-`make test` runs the tests; `npm run readme-images` re-renders the README pictures from the website.
+`make test` runs `go vet` and the tests, and `make build` makes `./pixelhop`. `scripts/readme-images.mjs` re-renders the README screenshots from a running instance (see the comment at the top of the file). `python3 scripts/build-changelog.py --repo PixelHop` rebuilds `web/changelog.json`, the data behind the `/changelog` page, from the merged pull requests; it needs an authenticated `gh`.
 
 ## FAQ
 
-<details><summary><b>Is the studio really private?</b></summary>
+<details><summary>Is the studio really private?</summary>
 
-Yes. Editing happens on your device with Canvas and WebAssembly. The first time you use OCR or background removal, the browser downloads the open-source models from jsDelivr. Your image is not sent anywhere unless you press *Upload result*.
+Editing happens on your device with Canvas and WebAssembly. The first time you use text recognition or background removal, the browser downloads [tesseract.js](https://github.com/naptha/tesseract.js) and [@imgly/background-removal](https://github.com/imgly/background-removal-js) from jsDelivr, and their language data and models from tessdata.projectnaptha.com and staticimgly.com. Your image is not sent anywhere unless you press Upload result. A self-hosted server that sets a stricter Content Security Policy needs to allow those addresses.
 </details>
 
-<details><summary><b>Can I turn off guest uploads or sign-ups?</b></summary>
+<details><summary>Can I turn off guest uploads or sign-ups?</summary>
 
-Yes, both are switches in **Admin → Settings**.
+Yes. Set `PIXELHOP_GUEST_UPLOADS=false` or `PIXELHOP_REGISTRATION=false`. With the HOP control center you can also change both while the server runs.
 </details>
 
-<details><summary><b>How much does it need?</b></summary>
+<details><summary>How much does it need?</summary>
 
-PixelHop runs on a 512 MB VPS or a Raspberry Pi. It uses a few tens of MB of memory at rest. Big uploads are decoded a few at a time, so bursts can't exhaust memory.
+A small server is enough. A fresh `pixelhop` process used about 16 MB of memory in a test on macOS, and the release binaries are 16 to 17 MB. Large images are decoded a few at a time, so a burst of uploads cannot use all memory.
 </details>
 
 ## The HOP family
 
-PixelHop is part of the **HOP** family of privacy-respecting, self-hostable open-source apps.
+PixelHop is part of the HOP family of privacy-respecting, self-hostable open-source apps.
 
 <!-- hop-family:start -->
 <!-- Generated from HEL.ink resources/hop-assets/apps.source.json; edit there, then run scripts/hop_assets.py build. -->
@@ -278,10 +310,10 @@ PixelHop is part of the **HOP** family of privacy-respecting, self-hostable open
 | **Imperium** | private (owner only) | private | The HOP control panel. |
 <!-- hop-family:end -->
 
-## Credits & license
+## Credits and license
 
-- [MIT](LICENSE.md) © Ivan Novskies (navi-crwn). Third-party parts are listed in [CREDITS.md](CREDITS.md).
+- [MIT](LICENSE.md), copyright Ivan Novskies (navi-crwn). Third-party parts are listed in [CREDITS.md](CREDITS.md).
 - Built with [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) and [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
 - The studio loads [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) and [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, unmodified, from jsDelivr) on demand.
 
-More by the same author: [Amnesia](https://github.com/navi-crwn/amnesia) (a Mac that forgets at logout).
+More by the same author: [Amnesia](https://github.com/navi-crwn/amnesia), a Mac that forgets at logout.

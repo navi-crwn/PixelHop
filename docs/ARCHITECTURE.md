@@ -21,9 +21,9 @@ flowchart LR
 ## What happens on upload
 
 1. **Admission.** Size, type (by the file's own header, not its name), pixel count (a 1 MB PNG that decodes to 50 000 × 50 000 pixels is refused before it is decoded), per-address rate limit, free disk space, and the list of files that were taken down before (by SHA-256).
-2. **Processing.** Location and camera data are removed by rewriting the container, so the pixels are never re-compressed. Sideways photos are turned upright first. A thumbnail and a dominant colour (the placeholder shown while the image loads) are made.
+2. **Processing.** Location and camera data are removed from JPEG, PNG and WebP files by rewriting the container, so the compressed picture data is copied unchanged. The exception is a JPEG with an EXIF rotation: it is turned upright and saved again at quality 92. GIFs are stored as uploaded. A thumbnail and a dominant colour (the placeholder shown while the image loads) are made.
 3. **Storage.** The file goes to disk or any S3-compatible bucket under a name that never changes, so it can be cached for a year (`Cache-Control: immutable`).
-4. **Heavy work leaves the request.** Videos and PDFs are optimised by a background worker with limited concurrency, so a burst of uploads cannot exhaust memory. The link works at once.
+4. **Heavy work leaves the request.** Videos are stripped of metadata without re-encoding when `ffmpeg` is installed, then shrunk by a background worker with limited concurrency, so a burst of uploads cannot exhaust memory. PDFs are compressed with Ghostscript when `gs` is installed and keep their document properties. Without those tools the files are stored as uploaded. The link works at once.
 
 ## What happens on a view
 
@@ -41,7 +41,7 @@ flowchart LR
 | Maintenance or upgrade | `PIXELHOP_READ_ONLY=true` (or the control center) pauses uploads only |
 | A key leaks | Keys can be limited to **Upload only**; they are stored hashed |
 | Other sites eating bandwidth | Owners can refuse embedding on other websites; `Vary: Referer` keeps a CDN honest |
-| Abuse | Report button, queue, IP bans, takedown that also blocks the file's hash |
+| Abuse | Report button; the queue, IP bans and takedowns (which also block the file's hash) run in the HOP control center through the signed `/hop/*` API |
 | Monitoring | `/healthz`, Prometheus `/metrics`, `/status` page |
 
 ## Where things are
