@@ -1008,5 +1008,7 @@
   "Free": "Libre",
   "settings.bio": "Bio",
   "settings.webhooks": "Webhooks",
-  "Color": "Color"
+  "Color": "Color",
+  "Free image hosting with a built-in photo studio": "Alojamiento de imágenes gratis con estudio de fotos integrado",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Suelta una imagen y obtén un enlace. Elimina los datos GPS, crea álbumes y funciona con ShareX. Edita, comprime, convierte, haz OCR y quita fondos directamente en tu navegador."
 }

@@ -1008,5 +1008,7 @@
   "Opening…": "開いています…",
   "Same": "同じ",
   "Free": "自由",
-  "settings.webhooks": "Webhook"
+  "settings.webhooks": "Webhook",
+  "Free image hosting with a built-in photo studio": "フォトスタジオ内蔵の無料画像ホスティング",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "画像をドロップするだけでリンクが手に入ります。GPS データを削除し、アルバムを作成でき、ShareX にも対応。編集、圧縮、変換、OCR、背景除去をブラウザ内で行えます。"
 }

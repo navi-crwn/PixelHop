@@ -1008,5 +1008,7 @@
   "Same": "Как есть",
   "Free": "Свободно",
   "settings.webhooks": "Вебхуки",
-  "FAQ": "FAQ"
+  "FAQ": "FAQ",
+  "Free image hosting with a built-in photo studio": "Бесплатный хостинг изображений со встроенной фотостудией",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Перетащите изображение — получите ссылку. Удаляет данные GPS, создаёт альбомы, работает с ShareX. Редактируйте, сжимайте, конвертируйте, распознавайте текст и удаляйте фон прямо в браузере."
 }

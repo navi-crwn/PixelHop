@@ -1008,5 +1008,7 @@
   "Opening…": "正在打开…",
   "Same": "相同",
   "Free": "自由",
-  "settings.webhooks": "Webhook"
+  "settings.webhooks": "Webhook",
+  "Free image hosting with a built-in photo studio": "免费图片托管，内置照片工作台",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "拖入图片，获得链接。自动去除 GPS 数据，支持相册和 ShareX。直接在浏览器中编辑、压缩、转换、识别文字和去除背景。"
 }
