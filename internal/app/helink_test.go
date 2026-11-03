@@ -223,3 +223,25 @@ func TestHelinkDualSecretRotation(t *testing.T) {
 		t.Fatalf("unknown secret ticket accepted: %d", rec3.Code)
 	}
 }
+
+// A ticket that says the account is not active is refused even when the signature is good.
+func TestHelinkTicketStatusClaim(t *testing.T) {
+	for _, status := range []string{"suspended", "banned", "locked"} {
+		_, h := ssoApp(t)
+		c, state := start(t, h)
+		tk := ticketFor(state)
+		tk.Status = status
+		if rec := callback(h, c, signTicket(tk, testSecret)); rec.Code != http.StatusForbidden {
+			t.Errorf("status=%s: %d, want 403", status, rec.Code)
+		}
+	}
+	for _, status := range []string{"active", ""} {
+		_, h := ssoApp(t)
+		c, state := start(t, h)
+		tk := ticketFor(state)
+		tk.Status = status
+		if rec := callback(h, c, signTicket(tk, testSecret)); rec.Code != http.StatusSeeOther {
+			t.Errorf("status=%q: %d, want 303", status, rec.Code)
+		}
+	}
+}

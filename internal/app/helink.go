@@ -31,6 +31,7 @@ type helinkTicket struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 	Admin  bool   `json:"admin"`
+	Status string `json:"status,omitempty"` // v2: "active"; anything else is refused
 	State  string `json:"state"`
 	Iat    int64  `json:"iat"`
 	Exp    int64  `json:"exp"`
@@ -174,6 +175,12 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 	t, err := parseTicket(r.FormValue("ticket"), a.cfg.HelinkSecrets(), time.Now())
 	if err != nil || !hmac.Equal([]byte(t.State), []byte(state)) || !firstUse(t.Jti, t.Exp) {
 		a.fail(w, r, http.StatusBadRequest, a.tr(r, "This sign-in link is not valid any more. Please try again."))
+		return
+	}
+	// The hub never issues a ticket for an account that is not active; a ticket that says otherwise is refused
+	// before any local account is made or linked (older servers send no status).
+	if t.Status != "" && t.Status != "active" {
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "This account is suspended."))
 		return
 	}
 	u, err := a.linkHelinkUser(r.Context(), t)
