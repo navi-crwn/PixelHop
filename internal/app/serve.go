@@ -11,6 +11,7 @@ import (
 	"rsc.io/qr"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/netsafe"
 	"github.com/navi-crwn/pixelhop/internal/storage"
 )
 
@@ -486,7 +487,7 @@ func (a *App) report(w http.ResponseWriter, r *http.Request) {
 		apiOK(w, map[string]any{"reported": true}) // say thanks either way; don't help flooders
 		return
 	}
-	if err := a.db.InsertReport(r.Context(), &db.Report{ImageID: im.ID, Reason: reason, Note: trim(r.FormValue("note"), 1000), IP: ip}); err != nil {
+	if err := a.db.InsertReport(r.Context(), &db.Report{ImageID: im.ID, Reason: reason, Note: netsafe.ScrubNoteKeys(trim(r.FormValue("note"), 1000)), IP: ip}); err != nil {
 		apiError(w, http.StatusInternalServerError, "couldn't save the report")
 		return
 	}
