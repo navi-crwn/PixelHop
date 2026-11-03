@@ -107,7 +107,7 @@
           {{if $im.IsImage}}<dt>{{$.L.T "view.color"}}</dt><dd><span class="swatch" style="background:{{$im.Color}}"></span><span class="mono">{{$im.Color}}</span></dd>{{end}}
           <dt>{{$.L.T "view.views"}}</dt><dd>{{$im.Views}}</dd>
           {{if $d.Removed}}<dt>{{$.L.T "view.removed"}}</dt><dd class="removed">{{range $i, $w := $d.Removed}}{{if $i}}, {{end}}{{$w}}{{end}}</dd>
-          {{else if and (ne $im.Backend "remote") (ne $im.Kind "pdf")}}<dt>{{$.L.T "view.metadata"}}</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>{{$.L.T "view.clean"}}</span></dd>{{end}}
+          {{else if and (ne $im.Backend "remote") (ne $im.Kind "pdf") (ne $im.Mime "image/gif")}}<dt>{{$.L.T "view.metadata"}}</dt><dd><span class="pill ok"><svg width="12" height="12"><use href="#i-gps"/></svg>{{$.L.T "view.clean"}}</span></dd>{{end}}
           {{with $im.Alt}}<dt>{{$.L.T "view.alt"}}</dt><dd class="small" style="text-align:right">{{.}}</dd>{{end}}
         </dl>
         <div class="qr-row">
