@@ -244,7 +244,7 @@ func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNotFound)
 	a.renderPage(w, r, "error", page{Title: "Not found", NoIndex: true, Data: map[string]any{
-		"Code": 404, "Message": "This link doesn't lead anywhere. The image may have expired or been deleted."}})
+		"Code": 404, "Message": a.tr(r, "This link doesn't lead anywhere. The image may have expired or been deleted.")}})
 }
 
 func (a *App) fail(w http.ResponseWriter, r *http.Request, code int, msg string) {
@@ -253,12 +253,12 @@ func (a *App) fail(w http.ResponseWriter, r *http.Request, code int, msg string)
 		return
 	}
 	w.WriteHeader(code)
-	a.renderPage(w, r, "error", page{Title: http.StatusText(code), NoIndex: true, Data: map[string]any{"Code": code, "Message": msg}})
+	a.renderPage(w, r, "error", page{Title: a.tr(r, http.StatusText(code)), NoIndex: true, Data: map[string]any{"Code": code, "Message": msg}})
 }
 
 func (a *App) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	a.log.Error("server error", "path", r.URL.Path, "err", err)
-	a.fail(w, r, http.StatusInternalServerError, "Something went wrong on our side. Please try again in a moment.")
+	a.fail(w, r, http.StatusInternalServerError, a.tr(r, "Something went wrong on our side. Please try again in a moment."))
 }
 
 func (a *App) favicon(w http.ResponseWriter, r *http.Request) {

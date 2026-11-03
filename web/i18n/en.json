@@ -1073,5 +1073,13 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "Move {n} images to the trash? You can restore them for 7 days.",
   "{n} moved to the trash": "{n} moved to the trash",
   "view.tags": "Tags",
-  "view.tags_hint": "separate with commas; use them to search your files"
+  "view.tags_hint": "separate with commas; use them to search your files",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "This link doesn't lead anywhere. The image may have expired or been deleted.",
+  "Something went wrong on our side. Please try again in a moment.": "Something went wrong on our side. Please try again in a moment.",
+  "Bad Request": "Bad Request",
+  "Forbidden": "Forbidden",
+  "Internal Server Error": "Internal Server Error",
+  "Bad Gateway": "Bad Gateway",
+  "Unavailable For Legal Reasons": "Unavailable For Legal Reasons",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile."
 }

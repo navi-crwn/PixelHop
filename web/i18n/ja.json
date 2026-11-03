@@ -1073,5 +1073,13 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "{n} 枚の画像をごみ箱に移しますか？7日間は元に戻せます。",
   "{n} moved to the trash": "{n} 件をごみ箱に移しました",
   "view.tags": "タグ",
-  "view.tags_hint": "カンマで区切ります。自分のファイルの検索に使えます"
+  "view.tags_hint": "カンマで区切ります。自分のファイルの検索に使えます",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "このリンクの先には何もありません。画像の有効期限が切れたか、削除された可能性があります。",
+  "Something went wrong on our side. Please try again in a moment.": "こちら側で問題が起きました。しばらくしてからもう一度お試しください。",
+  "Bad Request": "不正なリクエスト",
+  "Forbidden": "アクセス禁止",
+  "Internal Server Error": "サーバー内部エラー",
+  "Bad Gateway": "不正なゲートウェイ",
+  "Unavailable For Legal Reasons": "法的な理由により利用できません",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "このアドレスは暗号化ノートを開き、# 以降の部分がその鍵です。プロフィールに載せず、ノートのリンクを直接共有してください。"
 }

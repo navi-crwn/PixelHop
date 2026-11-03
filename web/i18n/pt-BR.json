@@ -1073,5 +1073,13 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "Mover {n} imagens para a lixeira? Você pode restaurá-las por 7 dias.",
   "{n} moved to the trash": "{n} movidas para a lixeira",
   "view.tags_hint": "separe com vírgulas; use para pesquisar seus arquivos",
-  "view.tags": "Tags"
+  "view.tags": "Tags",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "Este link não leva a lugar nenhum. A imagem pode ter expirado ou sido excluída.",
+  "Something went wrong on our side. Please try again in a moment.": "Algo deu errado do nosso lado. Tente de novo em instantes.",
+  "Bad Request": "Requisição inválida",
+  "Forbidden": "Proibido",
+  "Internal Server Error": "Erro interno do servidor",
+  "Bad Gateway": "Gateway inválido",
+  "Unavailable For Legal Reasons": "Indisponível por motivos legais",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Esse endereço abre uma nota criptografada, e a parte depois do # é a chave dela. Compartilhe o link da nota diretamente em vez de colocá-lo em um perfil."
 }
