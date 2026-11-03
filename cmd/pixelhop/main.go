@@ -53,6 +53,12 @@ func run(args []string) error {
 		return loginCmd(args)
 	}
 
+	switch cmd { // a mistyped command must not create the data folder and database first
+	case "serve", "user", "import":
+	default:
+		fmt.Print(usage)
+		return fmt.Errorf("unknown command %q", cmd)
+	}
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -81,7 +87,6 @@ func run(args []string) error {
 	case "import":
 		return importCmd(cfg, d, args)
 	}
-	fmt.Print(usage)
 	return fmt.Errorf("unknown command %q", cmd)
 }
 
