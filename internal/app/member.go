@@ -212,9 +212,10 @@ func (a *App) purgeUser(ctx context.Context, u *db.User) (images int, err error)
 			break
 		}
 		for _, im := range ims {
-			if a.removeImage(ctx, im) == nil {
-				images++
+			if err := a.removeImage(ctx, im); err != nil {
+				return images, fmt.Errorf("delete image %s: %w", im.ID, err)
 			}
+			images++
 		}
 	}
 	if u.AvatarKey != "" {

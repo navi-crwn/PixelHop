@@ -12,10 +12,12 @@ import (
 // failingDelete is a storage backend whose deletes fail on demand.
 type failingDelete struct {
 	storage.Backend
-	fail bool
+	fail       bool
+	deleteCall int
 }
 
 func (f *failingDelete) Delete(ctx context.Context, key string) error {
+	f.deleteCall++
 	if f.fail {
 		return errors.New("storage unavailable")
 	}

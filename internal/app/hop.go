@@ -1008,19 +1008,29 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusBadRequest, "unknown_action", "Unknown report action "+strconv.Quote(q.Action)+".")
 		return
 	}
-	imageID, err := a.db.SetReportStatus(ctx, id, status)
+	rp, err := a.db.Report(ctx, id)
 	if err != nil {
 		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
 		return
 	}
+	imageID := rp.ImageID
+	deleted := false
 	if im, err := a.db.Image(ctx, imageID); err == nil {
 		switch q.Action {
 		case "resolve":
 			a.db.SetImageHidden(ctx, im.ID, true)
 		case "delete":
-			a.removeImage(ctx, im)
+			if err := a.removeImage(ctx, im); err != nil {
+				hopFail(w, http.StatusInternalServerError, "delete_failed", err.Error())
+				return
+			}
+			deleted = true // deleting the image cascades its report rows
 			a.db.DeleteEmptyAlbums(ctx)
 		}
+	}
+	if _, err := a.db.SetReportStatus(ctx, id, status); err != nil && !deleted {
+		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
+		return
 	}
 	a.audit(r, "report."+q.Action, strconv.FormatInt(id, 10), map[string]any{"reason": trim(q.Reason, 300), "image": imageID})
 	hopOK(w, map[string]any{"id": id, "action": q.Action, "status": status, "image": imageID, "done": true})
