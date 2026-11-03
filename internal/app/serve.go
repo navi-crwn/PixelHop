@@ -93,6 +93,13 @@ func (a *App) serveLegacy(w http.ResponseWriter, r *http.Request) {
 	a.sendObject(w, r, im, im.KeyFull, im.Mime)
 }
 
+// publicRedirectAllowed reports whether the file may be sent to its public CDN
+// address. Anything that needs a password, is private, expires or carries a
+// warning stays behind the app: the CDN address has no such checks.
+func (a *App) publicRedirectAllowed(r *http.Request, im *db.Image) bool {
+	return !im.Locked() && im.ExpiresAt == 0 && !r.URL.Query().Has("download") && !a.mediaHasWarning(r, im)
+}
+
 func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, key, mime string) {
 	b := a.backends[im.Backend]
 	if b == nil {
@@ -130,8 +137,8 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 		h.Set("Content-Disposition", `attachment; filename="`+name+`"`)
 	}
 
-	if s3, ok := b.(*storage.S3); ok {
-		if pub := s3.PublicURL(key); pub != "" && !r.URL.Query().Has("download") && !a.mediaHasWarning(r, im) {
+	if s3, ok := b.(*storage.S3); ok && a.publicRedirectAllowed(r, im) {
+		if pub := s3.PublicURL(key); pub != "" {
 			http.Redirect(w, r, pub, http.StatusFound)
 			return
 		}
