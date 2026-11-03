@@ -21,6 +21,7 @@ All notable changes to PixelHop will be documented in this file.
 - A profile website that opens an encrypted NoteHop note (`https://note.hel.ink/ID#k=KEY`) is refused, and the same addresses are cut down to the part before the `#` in report notes, so PixelHop never stores or shows a note key. The rule follows hop-safety's `EncryptedNoteLink`; the hosts come from `PIXELHOP_NOTE_HOSTS` (default `note.hel.ink`, `n.hel.ink`).
 - A sign-in ticket whose `status` is not `active` is refused before any local account is made or linked.
 - The address after sign-in (`next`) is refused when it holds a control character: `/<TAB>/host` was read by browsers as `//host`.
+- A build from a clone (`make`, `install.sh`, `update.sh`) and the Docker image of a release report the version without the tag's `v` (`3.8.0`), like the release binaries; before, the same release showed as `v3.8.0` on the status page and in `/hop/health`.
 - A mistyped command (`pixelhop servee`) prints the usage and exits before the data folder and database are created.
 - The janitor no longer stops at the first picture whose files cannot be deleted: it logs that picture, removes the others and still clears old sessions. The same for the trash.
 

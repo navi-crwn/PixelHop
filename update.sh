@@ -170,6 +170,7 @@ fi
 git symbolic-ref -q HEAD >/dev/null || die "This checkout is not on a branch. Run:  git checkout main  and try again."
 step "Fetching the new version" git pull --ff-only
 VERSION="$(git describe --tags --always --dirty 2>/dev/null || echo dev)"
+VERSION="${VERSION#v}" # as the release build does: 3.8.0, not v3.8.0
 if [ "$DOCKER" = 1 ]; then
   step "Rebuilding and restarting (docker)" docker compose -f compose.local.yml up -d --build
 else
