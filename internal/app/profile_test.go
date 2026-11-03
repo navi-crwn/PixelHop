@@ -182,3 +182,33 @@ func TestSaveProfileValidates(t *testing.T) {
 		t.Fatalf("avatar serve: %d %s", r.Code, r.Header().Get("Content-Type"))
 	}
 }
+
+// "Your profile page" must not point at /u/{name} while the owner has switched the page off (it answers 404).
+func TestSettingsHidesProfileLinkWhenPageIsOff(t *testing.T) {
+	a, h := ssoApp(t)
+	ctx := context.Background()
+	u, _, _ := seedOwner(t, a)
+	tok := randomToken(32)
+	a.db.InsertSession(ctx, hashToken(tok), u.ID, time.Hour, "", "")
+	page := func() string {
+		req := httptest.NewRequest("GET", "/settings", nil)
+		req.AddCookie(&http.Cookie{Name: sessionCookie, Value: tok})
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		if rec.Code != 200 {
+			t.Fatalf("settings: %d", rec.Code)
+		}
+		return rec.Body.String()
+	}
+	const link = `href="https://p.example.com/u/maya"`
+	u.ShowOwner = true
+	a.db.UpdateUser(ctx, u)
+	if !strings.Contains(page(), "/u/maya") {
+		t.Fatal("the profile link is missing while the page is on")
+	}
+	u.ShowOwner = false
+	a.db.UpdateUser(ctx, u)
+	if strings.Contains(page(), "/u/maya") {
+		t.Fatalf("the settings page links /u/maya while the profile page is off (%s)", link)
+	}
+}
