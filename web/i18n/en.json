@@ -1081,5 +1081,6 @@
   "Internal Server Error": "Internal Server Error",
   "Bad Gateway": "Bad Gateway",
   "Unavailable For Legal Reasons": "Unavailable For Legal Reasons",
-  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile."
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.",
+  "The QR code could not be made. The text may be too long.": "The QR code could not be made. The text may be too long."
 }

@@ -1081,5 +1081,6 @@
   "Internal Server Error": "Kesalahan server internal",
   "Bad Gateway": "Gateway buruk",
   "Unavailable For Legal Reasons": "Tidak tersedia karena alasan hukum",
-  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Alamat itu membuka catatan terenkripsi, dan bagian setelah # adalah kuncinya. Bagikan tautan catatan itu langsung, jangan memasangnya di profil."
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Alamat itu membuka catatan terenkripsi, dan bagian setelah # adalah kuncinya. Bagikan tautan catatan itu langsung, jangan memasangnya di profil.",
+  "The QR code could not be made. The text may be too long.": "Kode QR tidak dapat dibuat. Teksnya mungkin terlalu panjang."
 }

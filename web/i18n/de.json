@@ -1081,5 +1081,6 @@
   "Internal Server Error": "Interner Serverfehler",
   "Bad Gateway": "Fehlerhaftes Gateway",
   "Unavailable For Legal Reasons": "Aus rechtlichen Gründen nicht verfügbar",
-  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Diese Adresse öffnet eine verschlüsselte Notiz, und der Teil nach dem # ist ihr Schlüssel. Teile den Notiz-Link direkt, statt ihn in ein Profil zu setzen."
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Diese Adresse öffnet eine verschlüsselte Notiz, und der Teil nach dem # ist ihr Schlüssel. Teile den Notiz-Link direkt, statt ihn in ein Profil zu setzen.",
+  "The QR code could not be made. The text may be too long.": "Der QR-Code konnte nicht erstellt werden. Der Text ist vielleicht zu lang."
 }
