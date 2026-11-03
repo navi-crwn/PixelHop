@@ -18,8 +18,20 @@ All notable changes to PixelHop will be documented in this file.
 - A HOP ID event that fails (bad payload, storage error) no longer uses up its id, so the sender's retry is handled. Events that succeed are still handled once.
 - The image page no longer says "Metadata: clean" for GIFs, which are stored as uploaded.
 - Removed the unused `PIXELHOP_SECRET` setting; `install.sh` no longer writes it to `.env`. An existing value in `.env` is simply ignored.
+- A profile website that opens an encrypted NoteHop note (`https://note.hel.ink/ID#k=KEY`) is refused, and the same addresses are cut down to the part before the `#` in report notes, so PixelHop never stores or shows a note key. The rule follows hop-safety's `EncryptedNoteLink`; the hosts come from `PIXELHOP_NOTE_HOSTS` (default `note.hel.ink`, `n.hel.ink`).
+- A sign-in ticket whose `status` is not `active` is refused before any local account is made or linked.
+- The address after sign-in (`next`) is refused when it holds a control character: `/<TAB>/host` was read by browsers as `//host`.
+- A mistyped command (`pixelhop servee`) prints the usage and exits before the data folder and database are created.
+- The janitor no longer stops at the first picture whose files cannot be deleted: it logs that picture, removes the others and still clears old sessions. The same for the trash.
+
+### Fixes
+- The home page "Batch editing" button opened a page that does not exist (`/batch`); it now opens `/tools/batch`.
+- Settings no longer shows "Your profile page" while the profile page is switched off (that address answered 404).
+- The image page no longer scrolls sideways on phones: the side column can shrink below the width of its tab row.
+- The studio QR tool says so when the server refuses the text (more than 1500 bytes, or too long for the level) instead of saving the error text as `qr-code.png`.
 
 ### Translations
+- The 404 page and the error pages (titles and the 500 text) are translated; the profile website refusal and the QR error are new messages in all nine languages.
 - The interface, the sign-in and member pages, the home page, the documentation site and the READMEs come in nine languages: English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil), Español, Français and Русский. German and Russian are new; Arabic and right-to-left layout are gone. The old codes `zh` and `pt` still work in `?lang=` and in the cookie, and a retired language falls back to English. The browser's language setting is not used.
 - Copy edits in Chinese and German: dash connectors removed from the text.
 
