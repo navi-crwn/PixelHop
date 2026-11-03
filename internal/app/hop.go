@@ -560,10 +560,17 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	if !a.db.FirstEvent(ctx, trim(ev.ID, 200)) {
+	eventID := trim(ev.ID, 200)
+	if !a.db.FirstEvent(ctx, eventID) {
 		hopOK(w, map[string]any{"handled": false, "duplicate": true})
 		return
 	}
+	failed := true
+	defer func() {
+		if failed {
+			a.db.ForgetEvent(context.WithoutCancel(ctx), eventID)
+		}
+	}()
 	var data struct {
 		hopProfilePush
 		User string `json:"user"`
@@ -610,6 +617,7 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 			counts := map[string]any{"images": images}
 			handled = true
 			a.audit(r, "event.account.deleted", id, map[string]any{"event": ev.ID, "counts": counts})
+			failed = false
 			hopOK(w, map[string]any{"handled": true, "purged": true, "counts": counts})
 			return
 		}
@@ -622,6 +630,7 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 	case "app.secret_rotated":
 		// The secret lives in the environment; an operator must update it.
 	}
+	failed = false
 	hopOK(w, map[string]any{"handled": handled})
 }
 
