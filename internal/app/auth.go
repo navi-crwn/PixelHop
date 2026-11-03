@@ -180,7 +180,10 @@ func (a *App) startSession(w http.ResponseWriter, r *http.Request, u *db.User) e
 }
 
 func safeNext(next string) string {
-	if strings.HasPrefix(next, "/") && !strings.HasPrefix(next, "//") && !strings.HasPrefix(next, "/\\") {
+	// Browsers drop tab, CR and LF inside a URL, so "/<TAB>/host" would be read as "//host".
+	if strings.HasPrefix(next, "/") && !strings.HasPrefix(next, "//") && !strings.ContainsFunc(next, func(r rune) bool {
+		return r < ' ' || r == 0x7f || r == '\\'
+	}) {
 		return next
 	}
 	return "/dashboard"
