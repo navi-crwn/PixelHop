@@ -5,6 +5,7 @@ All notable changes to PixelHop will be documented in this file.
 ## [Unreleased]
 
 ### Documentation
+- `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.
 - README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).
 - Fresh screenshots of the home page, image page, dashboard, album page and studio, in dark and light. `scripts/readme-images.mjs` now renders them from a running instance with generated demo pictures (`scripts/demo-images`); the old hero, features and studio pictures, and the unused `docs/media` screenshots (one showed the retired admin pages), are gone.
 - `docs/ARCHITECTURE.md` no longer says that sideways photos keep their pixels: a photo with an EXIF rotation is saved again as JPEG at quality 92.
