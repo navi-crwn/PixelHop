@@ -29,6 +29,7 @@ All notable changes to PixelHop will be documented in this file.
 - The janitor no longer stops at the first picture whose files cannot be deleted: it logs that picture, removes the others and still clears old sessions. The same for the trash.
 
 ### Fixes
+- `install.sh --dry-run` no longer creates the data folder and `bin/`. It said nothing would be executed, and now nothing is.
 - The home page "Batch editing" button opened a page that does not exist (`/batch`); it now opens `/tools/batch`.
 - Settings no longer shows "Your profile page" while the profile page is switched off (that address answered 404).
 - The image page no longer scrolls sideways on phones: the side column can shrink below the width of its tab row.
