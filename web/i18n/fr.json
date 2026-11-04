@@ -1073,5 +1073,14 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "Déplacer {n} images dans la corbeille ? Vous pouvez les restaurer pendant 7 jours.",
   "{n} moved to the trash": "{n} déplacées dans la corbeille",
   "view.tags": "Étiquettes",
-  "view.tags_hint": "séparez par des virgules ; servez-vous-en pour retrouver vos fichiers"
+  "view.tags_hint": "séparez par des virgules ; servez-vous-en pour retrouver vos fichiers",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "Ce lien ne mène nulle part. L’image a peut-être expiré ou été supprimée.",
+  "Something went wrong on our side. Please try again in a moment.": "Un problème est survenu de notre côté. Réessayez dans un instant.",
+  "Bad Request": "Requête incorrecte",
+  "Forbidden": "Interdit",
+  "Internal Server Error": "Erreur interne du serveur",
+  "Bad Gateway": "Passerelle incorrecte",
+  "Unavailable For Legal Reasons": "Indisponible pour des raisons légales",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Cette adresse ouvre une note chiffrée, et la partie après le # est sa clé. Partagez directement le lien de la note au lieu de le mettre sur un profil.",
+  "The QR code could not be made. The text may be too long.": "Impossible de créer le code QR. Le texte est peut-être trop long."
 }

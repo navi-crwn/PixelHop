@@ -58,7 +58,10 @@ func (a *App) trashEmpty(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Trash: true, Limit: 200})
 	for _, im := range ims {
-		a.removeImage(r.Context(), im)
+		if err := a.removeImage(r.Context(), im); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
 	}
 	a.db.DeleteEmptyAlbums(r.Context())
 	http.Redirect(w, r, "/dashboard/trash", http.StatusSeeOther)
@@ -66,17 +69,9 @@ func (a *App) trashEmpty(w http.ResponseWriter, r *http.Request) {
 
 // purgeTrash removes files that have waited in the trash for a week.
 func (a *App) purgeTrash(ctx context.Context) {
-	for {
-		ims, err := a.db.PurgeableTrash(ctx, time.Now().Unix()-trashDays*86400, 100)
-		if err != nil || len(ims) == 0 {
-			return
-		}
-		for _, im := range ims {
-			if err := a.removeImage(ctx, im); err != nil {
-				a.log.Error("janitor: trash", "id", im.ID, "err", err)
-				return
-			}
-		}
+	if a.removeBatches(ctx, "janitor: trash", func() ([]*db.Image, error) {
+		return a.db.PurgeableTrash(ctx, time.Now().Unix()-trashDays*86400, 100)
+	}) > 0 {
 		a.db.DeleteEmptyAlbums(ctx)
 	}
 }

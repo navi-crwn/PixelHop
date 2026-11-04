@@ -889,10 +889,18 @@
       p.appendChild(trans);
       p.appendChild(field('Error correction', seg([['L', 'Low'], ['M', 'Medium'], ['Q', 'High'], ['H', 'Max']], level, function (l) { level = l; update(); }), 'higher survives logos & damage'));
       p.appendChild(img);
+      // The server refuses text it cannot encode (1500 bytes, or too long for the level): say so instead of saving its error text as a picture.
+      function qrDo(fmt, done) {
+        if (!text.value.trim()) return;
+        fetch(url(fmt)).then(function (r) {
+          if (!r.ok) throw new Error(T('The QR code could not be made. The text may be too long.'));
+          return r.blob();
+        }).then(done).catch(function (e) { toast(e.message, true); });
+      }
       p.appendChild(el('div', { class: 'btn-row' }, [
-        btn('PNG', function () { if (text.value.trim()) fetch(url('png')).then(function (r) { return r.blob(); }).then(function (b) { window.phSave(b, 'qr-code.png'); }); }, 'primary'),
-        btn('SVG', function () { if (text.value.trim()) fetch(url('svg')).then(function (r) { return r.blob(); }).then(function (b) { window.phSave(b, 'qr-code.svg'); }); }),
-        btn('Open in studio', function () { if (text.value.trim()) fetch(url('png')).then(function (r) { return r.blob(); }).then(function (b) { load(b, 'qr-code'); }); })
+        btn('PNG', function () { qrDo('png', function (b) { window.phSave(b, 'qr-code.png'); }); }, 'primary'),
+        btn('SVG', function () { qrDo('svg', function (b) { window.phSave(b, 'qr-code.svg'); }); }),
+        btn('Open in studio', function () { qrDo('png', function (b) { load(b, 'qr-code'); }); })
       ]));
     }
   };

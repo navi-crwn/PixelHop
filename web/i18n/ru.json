@@ -1073,5 +1073,14 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "Переместить изображений в корзину: {n}? Восстановить можно в течение 7 дней.",
   "{n} moved to the trash": "В корзину перемещено: {n}",
   "view.tags": "Теги",
-  "view.tags_hint": "через запятую; по ним можно искать свои файлы"
+  "view.tags_hint": "через запятую; по ним можно искать свои файлы",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "Эта ссылка никуда не ведёт. Возможно, изображение истекло или было удалено.",
+  "Something went wrong on our side. Please try again in a moment.": "С нашей стороны что-то пошло не так. Попробуйте ещё раз чуть позже.",
+  "Bad Request": "Некорректный запрос",
+  "Forbidden": "Доступ запрещён",
+  "Internal Server Error": "Внутренняя ошибка сервера",
+  "Bad Gateway": "Неверный шлюз",
+  "Unavailable For Legal Reasons": "Недоступно по юридическим причинам",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Этот адрес открывает зашифрованную заметку, а часть после # — её ключ. Делитесь ссылкой на заметку напрямую, а не размещайте её в профиле.",
+  "The QR code could not be made. The text may be too long.": "Не удалось создать QR-код. Возможно, текст слишком длинный."
 }

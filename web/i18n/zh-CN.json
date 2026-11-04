@@ -1073,5 +1073,14 @@
   "Move {n} images to the trash? You can restore them for 7 days.": "把 {n} 张图片移到回收站？7 天内可以恢复。",
   "{n} moved to the trash": "{n} 个已移到回收站",
   "view.tags": "标签",
-  "view.tags_hint": "用逗号分隔；可用来搜索您的文件"
+  "view.tags_hint": "用逗号分隔；可用来搜索您的文件",
+  "This link doesn't lead anywhere. The image may have expired or been deleted.": "此链接无处可去。图片可能已过期或已被删除。",
+  "Something went wrong on our side. Please try again in a moment.": "我们这边出了点问题，请稍后再试。",
+  "Bad Request": "请求有误",
+  "Forbidden": "禁止访问",
+  "Internal Server Error": "服务器内部错误",
+  "Bad Gateway": "网关错误",
+  "Unavailable For Legal Reasons": "因法律原因不可用",
+  "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "该地址会打开一篇加密笔记，# 之后的部分就是它的密钥。请直接分享笔记链接，不要把它放进个人资料。",
+  "The QR code could not be made. The text may be too long.": "无法生成二维码。文字可能太长。"
 }

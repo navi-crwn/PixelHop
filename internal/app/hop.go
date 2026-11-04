@@ -560,10 +560,17 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	if !a.db.FirstEvent(ctx, trim(ev.ID, 200)) {
+	eventID := trim(ev.ID, 200)
+	if !a.db.FirstEvent(ctx, eventID) {
 		hopOK(w, map[string]any{"handled": false, "duplicate": true})
 		return
 	}
+	failed := true
+	defer func() {
+		if failed {
+			a.db.ForgetEvent(context.WithoutCancel(ctx), eventID)
+		}
+	}()
 	var data struct {
 		hopProfilePush
 		User string `json:"user"`
@@ -610,6 +617,7 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 			counts := map[string]any{"images": images}
 			handled = true
 			a.audit(r, "event.account.deleted", id, map[string]any{"event": ev.ID, "counts": counts})
+			failed = false
 			hopOK(w, map[string]any{"handled": true, "purged": true, "counts": counts})
 			return
 		}
@@ -622,6 +630,7 @@ func (a *App) hopEvent(w http.ResponseWriter, r *http.Request) {
 	case "app.secret_rotated":
 		// The secret lives in the environment; an operator must update it.
 	}
+	failed = false
 	hopOK(w, map[string]any{"handled": handled})
 }
 
@@ -999,19 +1008,29 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusBadRequest, "unknown_action", "Unknown report action "+strconv.Quote(q.Action)+".")
 		return
 	}
-	imageID, err := a.db.SetReportStatus(ctx, id, status)
+	rp, err := a.db.Report(ctx, id)
 	if err != nil {
 		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
 		return
 	}
+	imageID := rp.ImageID
+	deleted := false
 	if im, err := a.db.Image(ctx, imageID); err == nil {
 		switch q.Action {
 		case "resolve":
 			a.db.SetImageHidden(ctx, im.ID, true)
 		case "delete":
-			a.removeImage(ctx, im)
+			if err := a.removeImage(ctx, im); err != nil {
+				hopFail(w, http.StatusInternalServerError, "delete_failed", err.Error())
+				return
+			}
+			deleted = true // deleting the image cascades its report rows
 			a.db.DeleteEmptyAlbums(ctx)
 		}
+	}
+	if _, err := a.db.SetReportStatus(ctx, id, status); err != nil && !deleted {
+		hopFail(w, http.StatusInternalServerError, "db_error", err.Error())
+		return
 	}
 	a.audit(r, "report."+q.Action, strconv.FormatInt(id, 10), map[string]any{"reason": trim(q.Reason, 300), "image": imageID})
 	hopOK(w, map[string]any{"id": id, "action": q.Action, "status": status, "image": imageID, "done": true})

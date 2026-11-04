@@ -7,7 +7,7 @@
 
   <div class="card" id="profile">
     <h2>{{$.L.T "mytabs.profile"}}</h2>
-    <p class="muted small">{{$.L.T "settings.profile_intro"}}{{if $u.Username.Valid}} {{$.L.H "settings.profile_page" "name" $u.Username.String "base" .Base}}{{end}}</p>
+    <p class="muted small">{{$.L.T "settings.profile_intro"}}{{if and $u.Username.Valid $u.ShowOwner}} {{$.L.H "settings.profile_page" "name" $u.Username.String "base" .Base}}{{end}}</p>
     <div class="profile-photo">
       <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="{{$.L.T "settings.photo_alt"}}" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
       <div>

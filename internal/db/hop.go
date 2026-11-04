@@ -70,6 +70,11 @@ func (d *DB) FirstEvent(ctx context.Context, id string) bool {
 	return n == 1
 }
 
+// ForgetEvent releases an id after a failed delivery so the sender can retry.
+func (d *DB) ForgetEvent(ctx context.Context, id string) {
+	d.ExecContext(ctx, `DELETE FROM hop_events_seen WHERE id=?`, id)
+}
+
 // ---- per-user counts for the user summary ----
 
 func (d *DB) CountSessions(ctx context.Context, userID int64) (n int) {

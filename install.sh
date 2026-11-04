@@ -253,6 +253,7 @@ fi
 hdr "Installing"
 mkdir -p "$DATA"
 VERSION="$(git describe --tags --always --dirty 2>/dev/null || echo dev)"
+VERSION="${VERSION#v}" # as the release build does: 3.8.0, not v3.8.0
 if [ "$RUN" != docker ]; then
   mkdir -p bin
   step "Building PixelHop $VERSION" env CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X github.com/navi-crwn/pixelhop/internal/app.Version=$VERSION" -o bin/pixelhop ./cmd/pixelhop

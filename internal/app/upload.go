@@ -434,25 +434,35 @@ func (a *App) ImportCopy(ctx context.Context, im *db.Image, url string) error {
 	return a.db.InsertImage(ctx, im)
 }
 
-// removeImage deletes an image's row and its stored files.
-func (a *App) removeImage(ctx context.Context, im *db.Image) error {
-	variants := a.db.Variants(ctx, im.ID) // read before the row (and its variants) go
-	if im.UserID.Valid {
-		a.fireWebhooks(im.UserID.Int64, "image.deleted", map[string]any{"id": im.ID})
+// deleteImageObjects removes stored files before their database keys go away.
+func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
+	for _, k := range a.db.Variants(ctx, im.ID) {
+		if err := a.store.Delete(ctx, k); err != nil {
+			return fmt.Errorf("delete variant: %w", err)
+		}
 	}
-	if err := a.db.DeleteImage(ctx, im.ID); err != nil {
-		return err
-	}
-	for _, k := range variants {
-		a.store.Delete(ctx, k)
-	}
-	if b := a.backends[im.Backend]; b != nil && a.db.CountKeyRefs(ctx, im.KeyFull) == 0 {
-		b.Delete(ctx, im.KeyFull)
+	if b := a.backends[im.Backend]; b != nil && a.db.CountKeyRefs(ctx, im.KeyFull) <= 1 {
+		if err := b.Delete(ctx, im.KeyFull); err != nil {
+			return fmt.Errorf("delete original: %w", err)
+		}
 		if im.KeyThumb != im.KeyFull {
-			b.Delete(ctx, im.KeyThumb)
+			if err := b.Delete(ctx, im.KeyThumb); err != nil {
+				return fmt.Errorf("delete thumbnail: %w", err)
+			}
 		}
 	}
 	return nil
+}
+
+// removeImage deletes an image's row and its stored files.
+func (a *App) removeImage(ctx context.Context, im *db.Image) error {
+	if err := a.deleteImageObjects(ctx, im); err != nil {
+		return err
+	}
+	if im.UserID.Valid {
+		a.fireWebhooks(im.UserID.Int64, "image.deleted", map[string]any{"id": im.ID})
+	}
+	return a.db.DeleteImage(ctx, im.ID)
 }
 
 const idAlphabet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"

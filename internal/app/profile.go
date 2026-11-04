@@ -15,6 +15,7 @@ import (
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 	"github.com/navi-crwn/pixelhop/internal/imaging"
+	"github.com/navi-crwn/pixelhop/internal/netsafe"
 )
 
 // Public profiles: every account has a handle (/u/{username}), a display
@@ -299,6 +300,11 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	if a.db.UsernameTaken(r.Context(), handle, u.ID) {
 		a.settingsError(w, r, a.tr(r, "Someone already has the username @{name}.", "name", handle))
+		return
+	}
+	if site != "" && netsafe.NoteKeyLink(site) {
+		// The key of an encrypted note is in the #fragment; a profile is public and its address is stored.
+		a.settingsError(w, r, a.tr(r, "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile."))
 		return
 	}
 	if site != "" {
