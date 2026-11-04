@@ -169,3 +169,30 @@ func TestPurgeUserKeepsAccountWhenTrashedImageStays(t *testing.T) {
 		t.Errorf("the account went first: %v", err)
 	}
 }
+
+// When the images cannot be listed nothing says they are gone, so the account stays and the error comes back.
+func TestPurgeUserKeepsAccountWhenImagesCannotBeListed(t *testing.T) {
+	for name, trash := range map[string]bool{"live": false, "trash": true} {
+		t.Run(name, func(t *testing.T) {
+			a, _ := ssoApp(t)
+			ctx := context.Background()
+			u, _ := member(t, a, "gone@example.com")
+			im := addImage(t, a, u, "unreadable-pic")
+			if trash {
+				if err := a.db.TrashImage(ctx, im.ID); err != nil {
+					t.Fatal(err)
+				}
+			}
+			// A row that does not scan makes the listing fail while every other query still works.
+			if _, err := a.db.ExecContext(ctx, `UPDATE images SET size='not a number' WHERE id=?`, im.ID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := a.purgeUser(ctx, u); err == nil {
+				t.Error("purge reported success although the images could not be listed")
+			}
+			if _, err := a.db.UserByID(ctx, u.ID); err != nil {
+				t.Errorf("the account was deleted: %v", err)
+			}
+		})
+	}
+}

@@ -201,15 +201,19 @@ func (a *App) ackWarning(w http.ResponseWriter, r *http.Request) {
 }
 
 // purgeUser deletes an account and every image it uploaded, trash included, and
-// its profile photo. Albums, API keys, webhooks and sessions go with the account (foreign
-// keys cascade). The account row is the only place that knows the photo's
-// storage key, so it goes last: when the photo cannot be removed the account
-// stays and an error comes back, and running the purge again finishes the job.
+// its profile photo. Albums, API keys, webhooks and sessions go with the account
+// (foreign keys cascade). The account row is the only place that knows the photo's
+// storage key, so it goes last: when the images cannot be listed or the photo
+// cannot be removed the account stays and an error comes back, and running the
+// purge again finishes the job.
 func (a *App) purgeUser(ctx context.Context, u *db.User) (images int, err error) {
 	for _, trash := range []bool{false, true} { // the query lists one or the other, never both
 		for {
 			ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Trash: trash, Limit: 200})
-			if err != nil || len(ims) == 0 {
+			if err != nil {
+				return images, fmt.Errorf("list images: %w", err)
+			}
+			if len(ims) == 0 {
 				break
 			}
 			for _, im := range ims {
