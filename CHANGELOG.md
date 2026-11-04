@@ -13,6 +13,7 @@ All notable changes to PixelHop will be documented in this file.
 ### Hardening
 - A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
 - Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
+- Deleting an account also removes the pictures in its trash. They used to stay, without an owner, until the janitor cleared them up to a week later, although the settings page says every image is deleted.
 - Private, password-protected and expiring files are no longer redirected to the public storage address (`S3_PUBLIC_URL`); PixelHop serves them itself, behind its own checks.
 - Deleting a picture now removes its stored files first and the database row last, and reports a storage error instead of ignoring it. Emptying the trash, deleting an account and deleting a reported picture from the control center stop at the first failure, keep the records, and can be run again.
 - A HOP ID event that fails (bad payload, storage error) no longer uses up its id, so the sender's retry is handled. Events that succeed are still handled once.

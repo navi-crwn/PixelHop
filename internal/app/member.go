@@ -200,22 +200,24 @@ func (a *App) ackWarning(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeNext(r.FormValue("back")), http.StatusSeeOther)
 }
 
-// purgeUser deletes an account and every image it uploaded, and its profile
-// photo. Albums, API keys, webhooks and sessions go with the account (foreign
+// purgeUser deletes an account and every image it uploaded, trash included, and
+// its profile photo. Albums, API keys, webhooks and sessions go with the account (foreign
 // keys cascade). The account row is the only place that knows the photo's
 // storage key, so it goes last: when the photo cannot be removed the account
 // stays and an error comes back, and running the purge again finishes the job.
 func (a *App) purgeUser(ctx context.Context, u *db.User) (images int, err error) {
-	for {
-		ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Limit: 200})
-		if err != nil || len(ims) == 0 {
-			break
-		}
-		for _, im := range ims {
-			if err := a.removeImage(ctx, im); err != nil {
-				return images, fmt.Errorf("delete image %s: %w", im.ID, err)
+	for _, trash := range []bool{false, true} { // the query lists one or the other, never both
+		for {
+			ims, _, err := a.db.Images(ctx, db.ImageQuery{UserID: u.ID, Trash: trash, Limit: 200})
+			if err != nil || len(ims) == 0 {
+				break
 			}
-			images++
+			for _, im := range ims {
+				if err := a.removeImage(ctx, im); err != nil {
+					return images, fmt.Errorf("delete image %s: %w", im.ID, err)
+				}
+				images++
+			}
 		}
 	}
 	if u.AvatarKey != "" {
