@@ -11,6 +11,7 @@ All notable changes to PixelHop will be documented in this file.
 - `web/changelog.json`, the data behind the `/changelog` page, was regenerated with `scripts/build-changelog.py`; it had stopped at the content warning pull request.
 
 ### Hardening
+- CI and release builds use Go 1.27.3 (`go` line in `go.mod`), which has the fixes the 1.27.2 toolchain lacks.
 - A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
 - Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
 - Deleting an account also removes the pictures in its trash. They used to stay, without an owner, until the janitor cleared them up to a week later, although the settings page says every image is deleted.
