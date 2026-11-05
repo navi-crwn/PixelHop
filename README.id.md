@@ -124,8 +124,8 @@ Berbagi:
 - Profil publik di `/u/username`, umpan Jelajahi berisi file yang ingin ditampilkan orang, oEmbed, dan peta situs.
 
 Akun:
-- Tamu bisa mengunggah (bawaan sampai 20 MB per file) dan mendapat tautan hapus pribadi untuk setiap file, yang juga diingat browser.
-- Anggota mendapat galeri dengan pencarian, pengurutan, penggantian nama, dan aksi massal, kuota penyimpanan (bawaan 1 GB), kartu panduan awal, dan ekspor ZIP semua file yang diunggah.
+- Tamu bisa mengunggah (bawaan sampai 20 MB per file, 25 file per hari per alamat, dan 10 gambar per album) dan mendapat tautan hapus pribadi untuk setiap file, yang juga diingat browser.
+- Anggota mendapat galeri dengan pencarian, pengurutan, penggantian nama, dan aksi massal, kuota penyimpanan (bawaan 128 MB), kartu panduan awal, dan ekspor ZIP semua file yang diunggah.
 - Pengaturan menampilkan tempat kamu masuk, bisa mengeluarkanmu dari semua tempat lain, dan mengelola kunci API, webhook, profil, dan penghapusan akun.
 - Masuk dengan email dan kata sandi, Google, atau akun HEL.ink (hub HOP ID), semuanya opsional. Tanpa `HELINK_URL`, PixelHop tidak pernah menghubungi HEL.ink. Cloudflare Turnstile bisa melindungi formulir masuk dan daftar.
 
@@ -170,6 +170,9 @@ Pengaturan berupa variabel lingkungan, semuanya opsional. [`.env.example`](.env.
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video atau PDF, untuk anggota yang masuk |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Per file jenis apa pun, untuk tamu |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Izinkan unggahan tanpa akun |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Gambar dalam album buatan tamu (0 = tanpa batas); juga bisa diatur di pusat kendali |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | File yang boleh diunggah satu alamat tamu per 24 jam (0 = tanpa batas); juga bisa diatur di pusat kendali |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Penyimpanan untuk setiap akun baru; akun yang sudah ada tetap dengan kuotanya |
 | `PIXELHOP_REGISTRATION` | `true` | Izinkan akun baru |
 | `PIXELHOP_READ_ONLY` | `false` | Hentikan unggahan untuk pemeliharaan |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare`, atau IP atau CIDR reverse proxy-mu |

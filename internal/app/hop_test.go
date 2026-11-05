@@ -202,7 +202,7 @@ func TestHopHealthManifestStats(t *testing.T) {
 		SettingsSchema []struct{ Key string }  `json:"settings_schema"`
 	}
 	decode(t, hopGet(t, h, "/hop/manifest").Data, &man)
-	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 6 {
+	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 8 {
 		t.Fatalf("manifest: %+v", man)
 	}
 
@@ -752,12 +752,24 @@ func TestHopSettings(t *testing.T) {
 	if rec, out := hopCall(t, h, "imperium", "PUT", "/hop/settings", map[string]any{"guest_uploads": "maybe"}); rec.Code != 400 || out.Error != "bad_value" {
 		t.Fatalf("bad bool: %d %s", rec.Code, rec.Body.String())
 	}
+	if gm := m["guest_album_max"]; gm.Type != "int" || gm.Value.(float64) != 10 || gm.Readonly || m["guest_daily_max"].Value.(float64) != 25 {
+		t.Fatalf("guest limits: %+v %+v", gm, m["guest_daily_max"])
+	}
+	if rec, out := hopCall(t, h, "imperium", "PUT", "/hop/settings", map[string]any{"guest_album_max": 4, "guest_daily_max": "40"}); rec.Code != 200 || !out.OK {
+		t.Fatalf("put ints: %d %s", rec.Code, rec.Body.String())
+	}
+	if m = get(); m["guest_album_max"].Value.(float64) != 4 || m["guest_daily_max"].Value.(float64) != 40 || a.guestAlbumMax(context.Background()) != 4 {
+		t.Fatalf("after put ints: %+v %+v", m["guest_album_max"], m["guest_daily_max"])
+	}
+	if rec, out := hopCall(t, h, "imperium", "PUT", "/hop/settings", map[string]any{"guest_album_max": -1}); rec.Code != 400 || out.Error != "bad_value" {
+		t.Fatalf("negative int: %d %s", rec.Code, rec.Body.String())
+	}
 	var audit []struct {
 		Action string
 		Detail map[string]any
 	}
 	decode(t, hopGet(t, h, "/hop/audit").Data, &audit)
-	if len(audit) != 1 || audit[0].Action != "settings.update" || audit[0].Detail["announcement"] != "Maintenance tonight" {
+	if len(audit) != 2 || audit[1].Action != "settings.update" || audit[1].Detail["announcement"] != "Maintenance tonight" {
 		t.Fatalf("audit: %+v", audit)
 	}
 }

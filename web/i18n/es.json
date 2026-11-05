@@ -790,6 +790,8 @@
   "Finish your other uploads first.": "Termina primero tus otras subidas.",
   "Upload failed on our side. Please try again.": "La subida falló por nuestra parte. Inténtalo de nuevo.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Tu almacenamiento está lleno ({used} de {quota}). Elimina algunos archivos para hacer sitio.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Los álbumes de invitados admiten hasta {n} imágenes. Crea una cuenta gratuita para quitar este límite: {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Los invitados pueden subir hasta {n} archivos al día desde una misma dirección. Crea una cuenta gratuita para quitar este límite: {url}",
   "Upload failed.": "Error al subir.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "Esta dirección está bloqueada. Si crees que es un error, contacta con el administrador del sitio.",
   "This image was removed by the moderators.": "Esta imagen fue eliminada por los moderadores.",

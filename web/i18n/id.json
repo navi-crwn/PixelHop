@@ -786,6 +786,8 @@
   "Finish your other uploads first.": "Selesaikan unggahan Anda yang lain dulu.",
   "Upload failed on our side. Please try again.": "Unggahan gagal di sisi kami. Silakan coba lagi.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Penyimpanan Anda penuh ({used} dari {quota}). Hapus beberapa file untuk memberi ruang.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Album tamu menampung paling banyak {n} gambar. Buat akun gratis untuk menghapus batas ini: {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Tamu dapat mengunggah paling banyak {n} file per hari dari satu alamat. Buat akun gratis untuk menghapus batas ini: {url}",
   "Upload failed.": "Unggahan gagal.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "Alamat ini diblokir. Jika Anda merasa ini kesalahan, hubungi pemilik situs.",
   "This image was removed by the moderators.": "Gambar ini dihapus oleh moderator.",

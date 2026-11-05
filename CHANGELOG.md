@@ -4,6 +4,12 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Guest and quota limits
+- An album made by a guest holds at most 10 images (`PIXELHOP_GUEST_ALBUM_MAX`, 0 = no limit). The eleventh image in one upload is refused with a message that names the limit and links to the sign-up page; the first ten are kept.
+- One guest address may upload at most 25 files per rolling 24 hours (`PIXELHOP_GUEST_DAILY_MAX`, 0 = no limit), counted by hashed address (behind `PIXELHOP_TRUSTED_PROXIES` like the per-minute limit) and kept in the database, so a restart does not reset it. The 26th file gets 429 with `Retry-After` and the same kind of message; rows older than 48 hours are pruned by the janitor.
+- Both limits are also control center settings (`guest_album_max`, `guest_daily_max`) and change without a restart. Members are not limited this way.
+- New accounts start with 128 MB of storage: the default of `PIXELHOP_DEFAULT_QUOTA_MB` went from 1024 to 128. Accounts that exist keep their quota. Owners who want the old value set `PIXELHOP_DEFAULT_QUOTA_MB=1024`.
+
 ### Documentation
 - `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.
 - README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).

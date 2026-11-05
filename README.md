@@ -120,8 +120,8 @@ Sharing:
 - Public profiles at `/u/username`, an Explore feed of files people chose to show, oEmbed and a sitemap.
 
 Accounts:
-- Guests can upload (up to 20 MB per file by default) and get a private delete link for each file, which the browser also remembers.
-- Members get a gallery with search, sorting, renaming and bulk actions, a storage quota (1 GB by default), a getting-started card, and a ZIP export of everything they uploaded.
+- Guests can upload (up to 20 MB per file, 25 files a day per address and 10 images per album by default) and get a private delete link for each file, which the browser also remembers.
+- Members get a gallery with search, sorting, renaming and bulk actions, a storage quota (128 MB by default), a getting-started card, and a ZIP export of everything they uploaded.
 - Settings lists where you are signed in, lets you sign out everywhere else, and manages API keys, webhooks, your profile and account deletion.
 - Sign-in with email and password, Google, or a HEL.ink account (the HOP ID hub), all optional. Without `HELINK_URL` PixelHop never contacts HEL.ink. Cloudflare Turnstile can protect the sign-in and sign-up forms.
 
@@ -167,10 +167,12 @@ Settings are environment variables, and all of them are optional. [`.env.example
 | `PIXELHOP_MAX_UPLOAD_MB` | `20` | Per image |
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Per video or PDF, for signed-in members |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Per file of any kind, for guests |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Images in an album made by a guest (0 = no limit); also a control center setting |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | Files one guest address may upload per 24 hours (0 = no limit); also a control center setting |
 | `PIXELHOP_MAX_BATCH` | `20` | Files per upload request |
 | `PIXELHOP_MAX_MEGAPIXELS` | `80` | Largest image accepted, by width times height |
 | `PIXELHOP_UPLOADS_PER_MINUTE` | `30` | Rate limit per address |
-| `PIXELHOP_DEFAULT_QUOTA_MB` | `1024` | Storage for each new account |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Storage for each new account; accounts that exist keep theirs |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Allow uploads without an account |
 | `PIXELHOP_REGISTRATION` | `true` | Allow new accounts |
 | `PIXELHOP_INACTIVE_DAYS` | `0` | Delete images nobody viewed for this many days (0 keeps everything) |

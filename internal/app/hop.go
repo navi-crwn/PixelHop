@@ -254,6 +254,8 @@ func (a *App) hopHealth(w http.ResponseWriter, r *http.Request) {
 // hopSettingSchema describes the runtime settings the control center may edit.
 var hopSettingSchema = []map[string]any{
 	{"key": "guest_uploads", "type": "bool", "description": "Let visitors upload without an account", "restart_required": false},
+	{"key": "guest_album_max", "type": "int", "description": "Images an album made by a guest may hold, 0 = no limit (PIXELHOP_GUEST_ALBUM_MAX)", "restart_required": false},
+	{"key": "guest_daily_max", "type": "int", "description": "Files one guest address may upload per 24 hours, 0 = no limit (PIXELHOP_GUEST_DAILY_MAX)", "restart_required": false},
 	{"key": "registration", "type": "bool", "description": "Let people create accounts", "restart_required": false},
 	{"key": "read_only", "type": "bool", "description": "Maintenance: pause uploads; everything already online keeps working", "restart_required": false},
 	{"key": "announcement", "type": "string", "description": "Banner shown on every page (empty = none)", "restart_required": false},
@@ -1041,6 +1043,7 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
 	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration, "read_only": a.cfg.ReadOnly,
+		"guest_album_max": a.cfg.GuestAlbumMax, "guest_daily_max": a.cfg.GuestDailyMax,
 		"announcement": "", "seo_title": "", "seo_description": ""}
 	var out []map[string]any
 	for _, s := range hopSettingSchema {
@@ -1051,9 +1054,12 @@ func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
 		}
 		row["default"] = defaults[key]
 		raw := a.db.Setting(ctx, key, fmt.Sprint(defaults[key]))
-		if s["type"] == "bool" {
+		switch s["type"] {
+		case "bool":
 			row["value"] = raw == "true"
-		} else {
+		case "int":
+			row["value"] = a.intSetting(ctx, key, defaults[key].(int))
+		default:
 			row["value"] = raw
 		}
 		out = append(out, row)
@@ -1068,7 +1074,7 @@ func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
 		{"max_media_mb", "int", a.cfg.MaxMediaBytes >> 20, "Largest video or PDF for members, in MB (PIXELHOP_MAX_MEDIA_MB)"},
 		{"guest_max_mb", "int", a.cfg.GuestMaxBytes >> 20, "Largest file for guests, in MB (PIXELHOP_GUEST_MAX_MB)"},
 		{"max_batch", "int", a.cfg.MaxBatch, "Files per upload request (PIXELHOP_MAX_BATCH)"},
-		{"default_quota_mb", "int", a.cfg.DefaultQuota >> 20, "Storage for new accounts, in MB (PIXELHOP_DEFAULT_QUOTA_MB)"},
+		{"default_quota_mb", "int", a.cfg.DefaultQuota >> 20, "Storage for new accounts, in MB, default 128; accounts that exist keep theirs (PIXELHOP_DEFAULT_QUOTA_MB)"},
 		{"inactive_days", "int", a.cfg.InactiveDays, "Delete files nobody viewed for N days, 0 = never (PIXELHOP_INACTIVE_DAYS)"},
 		{"uploads_per_minute", "int", a.cfg.UploadsPerMinute, "Upload rate limit per address (PIXELHOP_UPLOADS_PER_MINUTE)"},
 		{"storage", "string", a.store.Name(), "Where new uploads go (PIXELHOP_STORAGE)"},
@@ -1121,6 +1127,23 @@ func (a *App) hopPutSettings(w http.ResponseWriter, r *http.Request) {
 				hopFail(w, http.StatusBadRequest, "bad_value", key+" must be true or false.")
 				return
 			}
+		case typ == "int":
+			n := -1
+			switch x := v.(type) {
+			case float64:
+				if x == float64(int(x)) {
+					n = int(x)
+				}
+			case string:
+				if p, err := strconv.Atoi(strings.TrimSpace(x)); err == nil {
+					n = p
+				}
+			}
+			if n < 0 {
+				hopFail(w, http.StatusBadRequest, "bad_value", key+" must be a whole number, 0 or more.")
+				return
+			}
+			val = strconv.Itoa(n)
 		default:
 			s, ok := v.(string)
 			if !ok {

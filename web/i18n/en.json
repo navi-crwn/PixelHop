@@ -793,6 +793,8 @@
   "Finish your other uploads first.": "Finish your other uploads first.",
   "Upload failed on our side. Please try again.": "Upload failed on our side. Please try again.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Your storage is full ({used} of {quota}). Delete some files to make room.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}",
   "Upload failed.": "Upload failed.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "This address is blocked. If you think this is a mistake, contact the site owner.",
   "This image was removed by the moderators.": "This image was removed by the moderators.",
