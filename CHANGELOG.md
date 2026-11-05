@@ -5,20 +5,25 @@ All notable changes to PixelHop will be documented in this file.
 ## [Unreleased]
 
 ### Documentation
+- `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.
 - README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).
 - Fresh screenshots of the home page, image page, dashboard, album page and studio, in dark and light. `scripts/readme-images.mjs` now renders them from a running instance with generated demo pictures (`scripts/demo-images`); the old hero, features and studio pictures, and the unused `docs/media` screenshots (one showed the retired admin pages), are gone.
 - `docs/ARCHITECTURE.md` no longer says that sideways photos keep their pixels: a photo with an EXIF rotation is saved again as JPEG at quality 92.
 - `web/changelog.json`, the data behind the `/changelog` page, was regenerated with `scripts/build-changelog.py`; it had stopped at the content warning pull request.
 
 ### Hardening
+- CI and release builds use Go 1.27.3 (`go` line in `go.mod`), which has the fixes the 1.27.2 toolchain lacks.
 - A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
 - Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
+- Deleting an account also removes the pictures in its trash. They used to stay, without an owner, until the janitor cleared them up to a week later, although the settings page says every image is deleted.
+- An account is no longer deleted when its pictures could not be listed: the purge stops, reports the error and can be run again.
 - Private, password-protected and expiring files are no longer redirected to the public storage address (`S3_PUBLIC_URL`); PixelHop serves them itself, behind its own checks.
 - Deleting a picture now removes its stored files first and the database row last, and reports a storage error instead of ignoring it. Emptying the trash, deleting an account and deleting a reported picture from the control center stop at the first failure, keep the records, and can be run again.
 - A HOP ID event that fails (bad payload, storage error) no longer uses up its id, so the sender's retry is handled. Events that succeed are still handled once.
 - The image page no longer says "Metadata: clean" for GIFs, which are stored as uploaded.
 - Removed the unused `PIXELHOP_SECRET` setting; `install.sh` no longer writes it to `.env`. An existing value in `.env` is simply ignored.
 - A profile website that opens an encrypted NoteHop note (`https://note.hel.ink/ID#k=KEY`) is refused, and the same addresses are cut down to the part before the `#` in report notes, so PixelHop never stores or shows a note key. The rule follows hop-safety's `EncryptedNoteLink`; the hosts come from `PIXELHOP_NOTE_HOSTS` (default `note.hel.ink`, `n.hel.ink`).
+- The same rule now covers what the hub sends: a website with a note key in a profile push (`POST /hop/profile`, the `profile.updated` event) or a sign-in ticket is ignored and the earlier address stays, and a key in a name or bio is cut out, there and in the settings form. The form also refuses an escaped `%23k=` and an address hidden inside another one. A key stored earlier stays in the row until its owner changes it, but `/hop/users` and the profile page no longer hand it out.
 - A sign-in ticket whose `status` is not `active` is refused before any local account is made or linked.
 - The address after sign-in (`next`) is refused when it holds a control character: `/<TAB>/host` was read by browsers as `//host`.
 - A build from a clone (`make`, `install.sh`, `update.sh`) and the Docker image of a release report the version without the tag's `v` (`3.8.0`), like the release binaries; before, the same release showed as `v3.8.0` on the status page and in `/hop/health`.
@@ -26,6 +31,7 @@ All notable changes to PixelHop will be documented in this file.
 - The janitor no longer stops at the first picture whose files cannot be deleted: it logs that picture, removes the others and still clears old sessions. The same for the trash.
 
 ### Fixes
+- `install.sh --dry-run` no longer creates the data folder and `bin/`. It said nothing would be executed, and now nothing is.
 - The home page "Batch editing" button opened a page that does not exist (`/batch`); it now opens `/tools/batch`.
 - Settings no longer shows "Your profile page" while the profile page is switched off (that address answered 404).
 - The image page no longer scrolls sideways on phones: the side column can shrink below the width of its tab row.

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/netsafe"
 )
 
 // The HOP App Protocol: a signed server-to-server API under /hop/* that lets
@@ -353,7 +354,7 @@ func (a *App) hopUserJSON(ctx context.Context, u *db.User) map[string]any {
 		"images": sum.Images + sum.Videos + sum.PDFs, "albums": sum.Albums,
 		"api_keys": a.db.CountAPIKeys(ctx, u.ID), "webhooks": a.db.CountWebhooks(ctx, u.ID), "sessions": a.db.CountSessions(ctx, u.ID),
 		"created_at": isoTime(u.CreatedAt), "last_login": isoTime(u.LastLogin), "last_seen": isoTime(u.LastLogin),
-		"helink_linked": u.HelinkID.Valid, "bio": u.Bio, "website": u.Website, "show_owner": u.ShowOwner,
+		"helink_linked": u.HelinkID.Valid, "bio": u.Bio, "website": shownWebsite(u.Website), "show_owner": u.ShowOwner,
 		"profile_url": a.cfg.BaseURL + "/u/" + u.Username.String,
 	}
 }
@@ -482,7 +483,7 @@ func (a *App) applyProfilePush(ctx context.Context, p *hopProfilePush) (*db.User
 		return nil, err
 	}
 	if p.Name != nil && strings.TrimSpace(*p.Name) != "" {
-		u.Name = trim(strings.TrimSpace(*p.Name), 60)
+		u.Name = trim(strings.TrimSpace(netsafe.ScrubNoteKeys(*p.Name)), 60)
 	}
 	if e := strings.TrimSpace(p.Email); e != "" && !a.db.EmailTaken(ctx, e, u.ID) {
 		u.Email = e

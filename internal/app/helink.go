@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
+	"github.com/navi-crwn/pixelhop/internal/netsafe"
 )
 
 // Sign in with HEL.ink. HEL.ink owns the account (sign-up, password, Google,
@@ -68,16 +69,17 @@ func roleFromHop(roles []string) (role string, ok bool) {
 
 // applyHopProfile copies the profile fields HOP ID owns onto a local user.
 // A username that breaks the local rules or belongs to someone else is left
-// as it is: the person keeps their current handle.
+// as it is: the person keeps their current handle. So is a website that holds
+// the key of an encrypted note: the hub only checks that it is an http(s) address.
 func (a *App) applyHopProfile(ctx context.Context, u *db.User, username string, bio, website *string, showOwner *bool) {
 	if h := strings.ToLower(strings.TrimSpace(strings.TrimPrefix(username, "@"))); h != "" &&
 		usernameProblem(h) == "" && !a.db.UsernameTaken(ctx, h, u.ID) {
 		u.Username = sql.NullString{String: h, Valid: true}
 	}
 	if bio != nil {
-		u.Bio = trim(strings.TrimSpace(*bio), 300)
+		u.Bio = trim(strings.TrimSpace(netsafe.ScrubNoteKeys(*bio)), 300)
 	}
-	if website != nil {
+	if website != nil && !holdsNoteKey(*website) {
 		u.Website = trim(strings.TrimSpace(*website), 200)
 	}
 	if showOwner != nil {
@@ -211,7 +213,7 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 		}
 	}
 	if errors.Is(err, db.ErrNotFound) {
-		u = &db.User{Email: t.Email, Name: trim(t.Name, 60), AvatarURL: t.Avatar, QuotaBytes: a.cfg.DefaultQuota,
+		u = &db.User{Email: t.Email, Name: trim(netsafe.ScrubNoteKeys(t.Name), 60), AvatarURL: t.Avatar, QuotaBytes: a.cfg.DefaultQuota,
 			HelinkID: sql.NullString{String: t.Sub, Valid: true}}
 		if role, ok := roleFromHop(t.Roles); ok {
 			u.Role = role
@@ -237,7 +239,7 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	// HEL.ink's only fill them in when they're empty.
 	u.Email = t.Email
 	if strings.TrimSpace(u.Name) == "" && t.Name != "" {
-		u.Name = trim(t.Name, 60)
+		u.Name = trim(netsafe.ScrubNoteKeys(t.Name), 60)
 	}
 	if t.Avatar != "" {
 		u.AvatarURL = t.Avatar // used only while no photo is uploaded here

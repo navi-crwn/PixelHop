@@ -191,7 +191,7 @@ func (a *App) profile(w http.ResponseWriter, r *http.Request) {
 	me := currentUser(r)
 	d := profileData{Owner: a.ownerOf(r.Context(), sql.NullInt64{Int64: u.ID, Valid: true}), User: u, Images: ims, Total: total,
 		Mine: me != nil && me.ID == u.ID}
-	if site, err := url.Parse(u.Website); err == nil && site.Host != "" {
+	if site, err := url.Parse(shownWebsite(u.Website)); err == nil && site.Host != "" {
 		d.Website = strings.TrimPrefix(strings.TrimPrefix(u.Website, "https://"), "http://")
 	}
 	desc := u.Bio
@@ -283,12 +283,27 @@ func (a *App) deleteAvatar(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/settings?ok=photo-removed#profile", http.StatusSeeOther)
 }
 
+// holdsNoteKey reports whether a profile address carries the key of an encrypted
+// note, as the address itself or inside another one, with the # escaped or not.
+func holdsNoteKey(site string) bool {
+	return netsafe.NoteKeyLink(site) || netsafe.NoteKeyInText(site)
+}
+
+// shownWebsite is the stored address unless it holds a note key: rows from before
+// the key was refused stay until their owner changes them, and are not handed out.
+func shownWebsite(site string) string {
+	if holdsNoteKey(site) {
+		return ""
+	}
+	return site
+}
+
 // saveProfile stores the public profile: name, handle, bio, website, visibility.
 func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
-	name := trim(strings.TrimSpace(r.FormValue("name")), 60)
+	name := trim(strings.TrimSpace(netsafe.ScrubNoteKeys(r.FormValue("name"))), 60)
 	handle := strings.ToLower(strings.TrimSpace(strings.TrimPrefix(r.FormValue("username"), "@")))
-	bio := trim(strings.TrimSpace(r.FormValue("bio")), 300)
+	bio := trim(strings.TrimSpace(netsafe.ScrubNoteKeys(r.FormValue("bio"))), 300)
 	site := strings.TrimSpace(r.FormValue("website"))
 	if site != "" && !strings.Contains(site, "://") {
 		site = "https://" + site
@@ -302,7 +317,7 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 		a.settingsError(w, r, a.tr(r, "Someone already has the username @{name}.", "name", handle))
 		return
 	}
-	if site != "" && netsafe.NoteKeyLink(site) {
+	if site != "" && holdsNoteKey(site) {
 		// The key of an encrypted note is in the #fragment; a profile is public and its address is stored.
 		a.settingsError(w, r, a.tr(r, "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile."))
 		return

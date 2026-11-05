@@ -6,6 +6,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/navi-crwn/pixelhop/internal/db"
 	"github.com/navi-crwn/pixelhop/internal/storage"
 )
 
@@ -116,5 +117,82 @@ func TestPurgeUserKeepsAccountWhenPhotoDeleteFails(t *testing.T) {
 	}
 	if _, err := a.db.UserByID(ctx, u.ID); err == nil {
 		t.Error("the account is still there after the retry")
+	}
+}
+
+// "Deletes every image" includes the ones waiting in the trash: without this the row and the files outlive the account.
+func TestPurgeUserRemovesTrashedImages(t *testing.T) {
+	a, _ := ssoApp(t)
+	ctx := context.Background()
+	u, _ := member(t, a, "gone@example.com")
+	live, trashed := addImage(t, a, u, "live-pic"), addImage(t, a, u, "trashed-pic")
+	for _, im := range []*db.Image{live, trashed} {
+		if err := a.store.Put(ctx, im.KeyFull, bytes.NewReader([]byte("jpeg bytes")), 10, "image/jpeg"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := a.db.TrashImage(ctx, trashed.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	n, err := a.purgeUser(ctx, u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 2 {
+		t.Errorf("purge counted %d images, want 2", n)
+	}
+	if _, err := a.db.Image(ctx, trashed.ID); err == nil {
+		t.Error("the row of the trashed image is still there")
+	}
+	if hasObject(a, trashed.KeyFull) {
+		t.Error("the trashed image is still in storage")
+	}
+}
+
+// A trashed image that cannot be deleted keeps the account, like a live one: the purge can run again.
+func TestPurgeUserKeepsAccountWhenTrashedImageStays(t *testing.T) {
+	a, _ := ssoApp(t)
+	ctx := context.Background()
+	u, _ := member(t, a, "gone@example.com")
+	im := addImage(t, a, u, "trashed-pic")
+	if err := a.db.TrashImage(ctx, im.ID); err != nil {
+		t.Fatal(err)
+	}
+	broken := &failingDelete{Backend: a.backends["local"], fail: true}
+	a.backends["local"] = broken
+
+	if _, err := a.purgeUser(ctx, u); err == nil {
+		t.Error("purge reported success with an image left")
+	}
+	if _, err := a.db.UserByID(ctx, u.ID); err != nil {
+		t.Errorf("the account went first: %v", err)
+	}
+}
+
+// When the images cannot be listed nothing says they are gone, so the account stays and the error comes back.
+func TestPurgeUserKeepsAccountWhenImagesCannotBeListed(t *testing.T) {
+	for name, trash := range map[string]bool{"live": false, "trash": true} {
+		t.Run(name, func(t *testing.T) {
+			a, _ := ssoApp(t)
+			ctx := context.Background()
+			u, _ := member(t, a, "gone@example.com")
+			im := addImage(t, a, u, "unreadable-pic")
+			if trash {
+				if err := a.db.TrashImage(ctx, im.ID); err != nil {
+					t.Fatal(err)
+				}
+			}
+			// A row that does not scan makes the listing fail while every other query still works.
+			if _, err := a.db.ExecContext(ctx, `UPDATE images SET size='not a number' WHERE id=?`, im.ID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := a.purgeUser(ctx, u); err == nil {
+				t.Error("purge reported success although the images could not be listed")
+			}
+			if _, err := a.db.UserByID(ctx, u.ID); err != nil {
+				t.Errorf("the account was deleted: %v", err)
+			}
+		})
 	}
 }
