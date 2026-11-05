@@ -791,6 +791,8 @@
   "Finish your other uploads first.": "请先完成您的其他上传。",
   "Upload failed on our side. Please try again.": "上传在我们这边出了问题。请重试。",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "您的存储空间已满（{used} / {quota}）。请删除一些文件腾出空间。",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "访客相册最多可放 {n} 张图片。注册免费账户即可解除此限制：{url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "访客每个地址每天最多可上传 {n} 个文件。注册免费账户即可解除此限制：{url}",
   "Upload failed.": "上传失败。",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "此地址已被阻止。如果您认为这是误判，请联系站点管理员。",
   "This image was removed by the moderators.": "这张图片已被管理员移除。",

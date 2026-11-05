@@ -791,6 +791,8 @@
   "Finish your other uploads first.": "先に他のアップロードを完了してください。",
   "Upload failed on our side. Please try again.": "こちら側の問題でアップロードに失敗しました。もう一度お試しください。",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "ストレージがいっぱいです（{quota} 中 {used}）。ファイルをいくつか削除して空き容量を確保してください。",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "ゲストのアルバムに入れられる画像は {n} 枚までです。無料アカウントを作成するとこの制限はなくなります：{url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "ゲストは 1 つのアドレスから 1 日に {n} 個までファイルをアップロードできます。無料アカウントを作成するとこの制限はなくなります：{url}",
   "Upload failed.": "アップロードに失敗しました。",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "このアドレスはブロックされています。誤りだと思われる場合はサイトの管理者に連絡してください。",
   "This image was removed by the moderators.": "この画像はモデレーターにより削除されました。",

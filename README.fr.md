@@ -124,8 +124,8 @@ Partage :
 - Des profils publics sur `/u/username`, un fil Explorer avec les fichiers que les gens ont choisi d'afficher, oEmbed et un plan du site.
 
 Comptes :
-- Les invités peuvent téléverser (jusqu'à 20 Mo par fichier par défaut) et reçoivent pour chaque fichier un lien de suppression privé, que le navigateur retient aussi.
-- Les membres ont une galerie avec recherche, tri, renommage et actions groupées, un quota de stockage (1 Go par défaut), une carte de premiers pas et un export ZIP de tout ce qu'ils ont téléversé.
+- Les invités peuvent téléverser (jusqu'à 20 Mo par fichier, 25 fichiers par jour et par adresse et 10 images par album par défaut) et reçoivent pour chaque fichier un lien de suppression privé, que le navigateur retient aussi.
+- Les membres ont une galerie avec recherche, tri, renommage et actions groupées, un quota de stockage (128 Mo par défaut), une carte de premiers pas et un export ZIP de tout ce qu'ils ont téléversé.
 - Les paramètres montrent où vous êtes connecté, vous déconnectent partout ailleurs et gèrent les clés d'API, les webhooks, votre profil et la suppression du compte.
 - Connexion par e-mail et mot de passe, par Google ou avec un compte HEL.ink (le hub HOP ID), le tout facultatif. Sans `HELINK_URL`, PixelHop ne contacte jamais HEL.ink. Cloudflare Turnstile peut protéger les formulaires de connexion et d'inscription.
 
@@ -170,6 +170,9 @@ Les paramètres sont des variables d'environnement, toutes facultatives. [`.env.
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Par vidéo ou PDF, pour les membres connectés |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Par fichier de tout type, pour les invités |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Autoriser les téléversements sans compte |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Images dans un album créé par un invité (0 = sans limite) ; réglable aussi dans le centre de contrôle |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | Fichiers qu'une adresse invitée peut envoyer par 24 heures (0 = sans limite) ; réglable aussi dans le centre de contrôle |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Stockage de chaque nouveau compte ; les comptes existants gardent le leur |
 | `PIXELHOP_REGISTRATION` | `true` | Autoriser les nouveaux comptes |
 | `PIXELHOP_READ_ONLY` | `false` | Mettre les téléversements en pause pour maintenance |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare`, ou les IP ou CIDR de votre proxy inverse |

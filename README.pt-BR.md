@@ -124,8 +124,8 @@ Compartilhamento:
 - Perfis públicos em `/u/username`, um feed Explorar com os arquivos que as pessoas escolheram mostrar, oEmbed e um sitemap.
 
 Contas:
-- Visitantes podem enviar arquivos (por padrão, até 20 MB cada) e recebem um link de exclusão privado para cada um, que o navegador também lembra.
-- Membros ganham uma galeria com busca, ordenação, renomeação e ações em lote, uma cota de armazenamento (1 GB por padrão), um cartão de primeiros passos e uma exportação em ZIP de tudo o que enviaram.
+- Visitantes podem enviar arquivos (por padrão, até 20 MB cada, 25 arquivos por dia por endereço e 10 imagens por álbum) e recebem um link de exclusão privado para cada um, que o navegador também lembra.
+- Membros ganham uma galeria com busca, ordenação, renomeação e ações em lote, uma cota de armazenamento (128 MB por padrão), um cartão de primeiros passos e uma exportação em ZIP de tudo o que enviaram.
 - As configurações mostram onde você está conectado, encerram a sessão em todos os outros lugares e gerenciam chaves de API, webhooks, seu perfil e a exclusão da conta.
 - Login com e-mail e senha, Google ou uma conta HEL.ink (o hub HOP ID), tudo opcional. Sem `HELINK_URL`, o PixelHop nunca contata o HEL.ink. O Cloudflare Turnstile pode proteger os formulários de login e de cadastro.
 
@@ -170,6 +170,9 @@ As configurações são variáveis de ambiente, todas opcionais. O [`.env.exampl
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Por vídeo ou PDF, para membros conectados |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Por arquivo de qualquer tipo, para visitantes |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Permitir envios sem conta |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Imagens em um álbum criado por um visitante (0 = sem limite); também ajustável na central de controle |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | Arquivos que um endereço de visitante pode enviar em 24 horas (0 = sem limite); também ajustável na central de controle |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Armazenamento de cada conta nova; as contas existentes mantêm o seu |
 | `PIXELHOP_REGISTRATION` | `true` | Permitir novas contas |
 | `PIXELHOP_READ_ONLY` | `false` | Pausar os envios para manutenção |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare`, ou os IPs ou CIDRs do seu proxy reverso |

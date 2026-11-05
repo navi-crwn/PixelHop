@@ -785,6 +785,8 @@
   "Finish your other uploads first.": "Terminez d’abord vos autres envois.",
   "Upload failed on our side. Please try again.": "L’envoi a échoué de notre côté. Veuillez réessayer.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Votre stockage est plein ({used} sur {quota}). Supprimez des fichiers pour libérer de la place.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Les albums des invités contiennent au plus {n} images. Créez un compte gratuit pour lever cette limite : {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Les invités peuvent envoyer au plus {n} fichiers par jour depuis une même adresse. Créez un compte gratuit pour lever cette limite : {url}",
   "Upload failed.": "Échec de l’envoi.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "Cette adresse est bloquée. Si vous pensez que c’est une erreur, contactez le propriétaire du site.",
   "This image was removed by the moderators.": "Cette image a été supprimée par les modérateurs.",

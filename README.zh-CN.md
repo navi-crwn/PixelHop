@@ -124,8 +124,8 @@ PixelHop 只处理文件结构，压缩后的图像数据原样复制，所以�
 - 位于 `/u/username` 的公开主页、公开展示文件的“探索”页、oEmbed 和站点地图。
 
 账户：
-- 访客可以上传（默认每个文件最大 20 MB），每个文件都有一个私密删除链接，浏览器也会记住它。
-- 会员有图库（搜索、排序、重命名和批量操作）、存储配额（默认 1 GB）、新手引导卡片，以及把自己上传的所有文件导出为 ZIP 的功能。
+- 访客可以上传（默认每个文件最大 20 MB，每个地址每天 25 个文件，每个相册 10 张图片），每个文件都有一个私密删除链接，浏览器也会记住它。
+- 会员有图库（搜索、排序、重命名和批量操作）、存储配额（默认 128 MB）、新手引导卡片，以及把自己上传的所有文件导出为 ZIP 的功能。
 - 设置页会列出你登录过的设备，可以退出其他所有设备，还能管理 API 密钥、webhook、个人资料和账户删除。
 - 可用邮箱和密码、Google 或 HEL.ink 账户（HOP ID 中心）登录，均为可选。没设置 `HELINK_URL` 时，PixelHop 不会联系 HEL.ink。登录和注册表单可以用 Cloudflare Turnstile 保护。
 
@@ -170,6 +170,9 @@ PixelHop 只处理文件结构，压缩后的图像数据原样复制，所以�
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | 登录会员每个视频或 PDF 的上限 |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | 访客每个文件（任何类型）的上限 |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | 允许不登录就上传 |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | 访客创建的相册可容纳的图片数（0 = 不限制）；也可在控制中心修改 |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | 一个访客地址 24 小时内可上传的文件数（0 = 不限制）；也可在控制中心修改 |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | 每个新账户的存储空间；已有账户保留原有配额 |
 | `PIXELHOP_REGISTRATION` | `true` | 允许注册新账户 |
 | `PIXELHOP_READ_ONLY` | `false` | 维护期间暂停上传 |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare`，或你的反向代理的 IP 或 CIDR |

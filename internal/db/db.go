@@ -233,6 +233,10 @@ ALTER TABLE albums ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';`,
 	`ALTER TABLE images ADD COLUMN deleted_at INTEGER NOT NULL DEFAULT 0;`,
 	// 13: tags, kept as ",beach,sunset," so a tag can be matched exactly
 	`ALTER TABLE images ADD COLUMN tags TEXT NOT NULL DEFAULT '';`,
+	// 14: one row per file a guest uploaded, by hashed address, for the daily
+	// guest limit; kept in the database so a restart does not reset the count
+	`CREATE TABLE guest_uploads (ip_hash TEXT NOT NULL, at INTEGER NOT NULL);
+CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 }
 
 func (d *DB) migrate() error {

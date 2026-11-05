@@ -103,6 +103,15 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			return nil, "", userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}
 		}
 	}
+	// Guests: how many more files this address may store today (-1 = no
+	// limit). A guest who already used the day's share is refused outright.
+	dailyRoom := -1
+	if u == nil {
+		var err error
+		if dailyRoom, err = a.guestDailyRoom(r); err != nil {
+			return nil, "", err
+		}
+	}
 
 	var expiresAt int64
 	if d, ok := expiries[r.FormValue("expire")]; ok {
@@ -145,6 +154,14 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		}
 	}
 
+	// An album made by a guest holds only so many images (-1 = no limit).
+	albumRoom := -1
+	if u == nil && albumID != "" {
+		if max := a.guestAlbumMax(ctx); max > 0 {
+			albumRoom = max
+		}
+	}
+
 	results := make([]uploadResult, 0, len(inputs))
 	for _, in := range inputs {
 		res := uploadResult{Name: in.name}
@@ -167,6 +184,21 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		if in.size == 0 {
 			in.size = int64(len(in.data))
 		}
+		if dailyRoom == 0 {
+			// The day's share ran out during this batch: the rest waits.
+			room, err := a.guestDailyRoom(r)
+			if err != nil {
+				res.Err = err
+				results = append(results, res)
+				continue
+			}
+			dailyRoom = room
+		}
+		if albumRoom == 0 {
+			res.Err = a.guestAlbumFull(r, a.guestAlbumMax(ctx))
+			results = append(results, res)
+			continue
+		}
 		in.contentWarning = contentWarning
 		in.warningReason = warningReason
 		done, used, fits := a.reserveQuota(ctx, u, in.size)
@@ -182,6 +214,15 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		res.Image, res.DeleteToken, res.Duplicate, res.Err = im, tok, dup, err
 		if errors.Is(err, errBlockedFile) {
 			res.Err = userError{a.tr(r, "This file is not allowed on this server.")}
+		}
+		if u == nil && res.Err == nil {
+			a.countGuestUpload(r)
+			if dailyRoom > 0 {
+				dailyRoom--
+			}
+			if albumRoom > 0 {
+				albumRoom--
+			}
 		}
 		results = append(results, res)
 	}
