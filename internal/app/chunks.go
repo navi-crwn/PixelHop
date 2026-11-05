@@ -109,6 +109,8 @@ func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 			apiError(w, http.StatusBadRequest, a.tr(r, "Your storage is full ({used} of {quota}). Delete some files to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes)))
 			return
 		}
+	} else if a.guestDayUsedUp(w, r) {
+		return
 	}
 	if !a.limits.allow("bigup:"+clientIP(r), 60, time.Hour) {
 		apiError(w, http.StatusTooManyRequests, a.tr(r, "You're uploading very fast. Please wait a little."))
@@ -202,6 +204,9 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 	// The check at the start only looked at what was stored back then; other
 	// uploads may have finished since. Count this file in when it lands.
 	ctx, u := r.Context(), currentUser(r)
+	if u == nil && a.guestDayUsedUp(w, r) {
+		return
+	}
 	done, used, fits := a.reserveQuota(ctx, u, c.size)
 	if !fits {
 		apiError(w, http.StatusBadRequest, a.tr(r, "Your storage is full ({used} of {quota}). Delete some files to make room.", "used", humanBytes(used), "quota", humanBytes(u.QuotaBytes)))
@@ -244,6 +249,9 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 	if dup && albumID != "" && im.AlbumID.String != albumID {
 		im.AlbumID = sql.NullString{String: albumID, Valid: true}
 		a.db.UpdateImageMeta(ctx, im)
+	}
+	if u == nil {
+		a.countGuestUpload(r)
 	}
 	m := a.imageJSON(im)
 	if tok != "" {

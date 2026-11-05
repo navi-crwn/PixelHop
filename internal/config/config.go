@@ -32,6 +32,8 @@ type Config struct {
 	MinFreePercent int   // disk reserve percentage; nonpositive values use 5
 
 	GuestUploads     bool
+	GuestAlbumMax    int // images an album made by a guest may hold (0 = no limit)
+	GuestDailyMax    int // files one guest address may upload per rolling 24 hours (0 = no limit)
 	Registration     bool
 	DefaultQuota     int64 // bytes per new account
 	InactiveDays     int   // delete images not viewed for N days (0 = never)
@@ -106,8 +108,10 @@ func Load() (*Config, error) {
 		ReadOnly:         envBool("PIXELHOP_READ_ONLY", false),
 		MinFreePercent:   envInt("PIXELHOP_MIN_FREE_PERCENT", 5),
 		GuestUploads:     envBool("PIXELHOP_GUEST_UPLOADS", true),
+		GuestAlbumMax:    envInt("PIXELHOP_GUEST_ALBUM_MAX", 10),
+		GuestDailyMax:    envInt("PIXELHOP_GUEST_DAILY_MAX", 25),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),
-		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 1024)) << 20,
+		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 128)) << 20,
 		InactiveDays:     envInt("PIXELHOP_INACTIVE_DAYS", 0),
 		UploadsPerMinute: envInt("PIXELHOP_UPLOADS_PER_MINUTE", 30),
 		Storage:          env("PIXELHOP_STORAGE", "local"),

@@ -46,6 +46,7 @@ func (a *App) sweep(ctx context.Context) {
 		a.log.Info("janitor: removed expired images", "count", removed)
 	}
 	a.db.PurgeSessions(ctx)
+	a.db.PruneGuestUploads(ctx, time.Now().Add(-2*guestDay).Unix())
 }
 
 // removeBatches removes what next returns, batch after batch. A picture whose files cannot be deleted is logged

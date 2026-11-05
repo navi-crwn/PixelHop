@@ -124,8 +124,8 @@ Compartir:
 - Perfiles públicos en `/u/username`, un feed Explorar con los archivos que la gente eligió mostrar, oEmbed y un mapa del sitio.
 
 Cuentas:
-- Los invitados pueden subir archivos (por defecto hasta 20 MB cada uno) y reciben un enlace privado para borrar cada archivo, que el navegador también recuerda.
-- Los miembros tienen una galería con búsqueda, orden, cambio de nombre y acciones en bloque, una cuota de almacenamiento (1 GB por defecto), una tarjeta de primeros pasos y una exportación en ZIP de todo lo que han subido.
+- Los invitados pueden subir archivos (por defecto hasta 20 MB cada uno, 25 archivos al día por dirección y 10 imágenes por álbum) y reciben un enlace privado para borrar cada archivo, que el navegador también recuerda.
+- Los miembros tienen una galería con búsqueda, orden, cambio de nombre y acciones en bloque, una cuota de almacenamiento (128 MB por defecto), una tarjeta de primeros pasos y una exportación en ZIP de todo lo que han subido.
 - Los ajustes muestran dónde has iniciado sesión, cierran la sesión en todos los demás sitios y gestionan claves de API, webhooks, tu perfil y el borrado de la cuenta.
 - Inicio de sesión con correo y contraseña, con Google o con una cuenta de HEL.ink (el hub de HOP ID), todo opcional. Sin `HELINK_URL`, PixelHop nunca contacta con HEL.ink. Cloudflare Turnstile puede proteger los formularios de inicio de sesión y de registro.
 
@@ -170,6 +170,9 @@ Los ajustes son variables de entorno, todas opcionales. [`.env.example`](.env.ex
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Por vídeo o PDF, para miembros con sesión iniciada |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Por archivo de cualquier tipo, para invitados |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Permitir subidas sin cuenta |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Imágenes en un álbum creado por un invitado (0 = sin límite); también se ajusta en el centro de control |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | Archivos que una dirección de invitado puede subir en 24 horas (0 = sin límite); también se ajusta en el centro de control |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Almacenamiento de cada cuenta nueva; las cuentas existentes conservan el suyo |
 | `PIXELHOP_REGISTRATION` | `true` | Permitir cuentas nuevas |
 | `PIXELHOP_READ_ONLY` | `false` | Pausar las subidas por mantenimiento |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare`, o las IP o CIDR de tu proxy inverso |

@@ -790,6 +790,8 @@
   "Finish your other uploads first.": "Сначала дождитесь окончания других загрузок.",
   "Upload failed on our side. Please try again.": "Загрузка не удалась по нашей вине. Попробуйте ещё раз.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Хранилище заполнено ({used} из {quota}). Удалите часть файлов, чтобы освободить место.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Гостевые альбомы вмещают не более {n} изображений. Создайте бесплатный аккаунт, чтобы снять это ограничение: {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Гости могут загружать не более {n} файлов в день с одного адреса. Создайте бесплатный аккаунт, чтобы снять это ограничение: {url}",
   "Upload failed.": "Не удалось загрузить.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "Этот адрес заблокирован. Если это ошибка, свяжитесь с владельцем сайта.",
   "This image was removed by the moderators.": "Это изображение удалено модераторами.",

@@ -782,6 +782,8 @@
   "Finish your other uploads first.": "Schließe zuerst deine anderen Uploads ab.",
   "Upload failed on our side. Please try again.": "Der Upload ist auf unserer Seite fehlgeschlagen. Bitte versuche es erneut.",
   "Your storage is full ({used} of {quota}). Delete some files to make room.": "Dein Speicher ist voll ({used} von {quota}). Lösche einige Dateien, um Platz zu schaffen.",
+  "Guest albums hold up to {n} images. Create a free account to remove this limit: {url}": "Gast-Alben fassen höchstens {n} Bilder. Erstelle ein kostenloses Konto, um diese Grenze aufzuheben: {url}",
+  "Guests can upload {n} files a day from one address. Create a free account to remove this limit: {url}": "Gäste können pro Adresse höchstens {n} Dateien am Tag hochladen. Erstelle ein kostenloses Konto, um diese Grenze aufzuheben: {url}",
   "Upload failed.": "Upload fehlgeschlagen.",
   "This address is blocked. If you think this is a mistake, contact the site owner.": "Diese Adresse ist gesperrt. Wenn du das für einen Fehler hältst, wende dich an den Betreiber der Website.",
   "This image was removed by the moderators.": "Dieses Bild wurde von den Moderatoren entfernt.",

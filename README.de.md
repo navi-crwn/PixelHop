@@ -124,8 +124,8 @@ Teilen:
 - Öffentliche Profile unter `/u/username`, ein Explore-Feed mit Dateien, die Leute zeigen wollen, oEmbed und eine Sitemap.
 
 Konten:
-- Gäste können hochladen (standardmäßig bis 20 MB pro Datei) und bekommen für jede Datei einen privaten Löschlink, den sich auch der Browser merkt.
-- Mitglieder bekommen eine Galerie mit Suche, Sortierung, Umbenennen und Sammelaktionen, ein Speicherkontingent (standardmäßig 1 GB), eine Einstiegskarte und einen ZIP-Export aller hochgeladenen Dateien.
+- Gäste können hochladen (standardmäßig bis 20 MB pro Datei, 25 Dateien am Tag pro Adresse und 10 Bilder pro Album) und bekommen für jede Datei einen privaten Löschlink, den sich auch der Browser merkt.
+- Mitglieder bekommen eine Galerie mit Suche, Sortierung, Umbenennen und Sammelaktionen, ein Speicherkontingent (standardmäßig 128 MB), eine Einstiegskarte und einen ZIP-Export aller hochgeladenen Dateien.
 - Die Einstellungen zeigen, wo du angemeldet bist, melden dich überall sonst ab und verwalten API-Schlüssel, Webhooks, dein Profil und die Kontolöschung.
 - Anmeldung mit E-Mail und Passwort, mit Google oder mit einem HEL.ink-Konto (dem HOP-ID-Hub), alles optional. Ohne `HELINK_URL` nimmt PixelHop nie Kontakt zu HEL.ink auf. Cloudflare Turnstile kann Anmelde- und Registrierungsformulare schützen.
 
@@ -170,6 +170,9 @@ Einstellungen sind Umgebungsvariablen, alle optional. [`.env.example`](.env.exam
 | `PIXELHOP_MAX_MEDIA_MB` | `100` | Pro Video oder PDF, für angemeldete Mitglieder |
 | `PIXELHOP_GUEST_MAX_MB` | `20` | Pro Datei beliebigen Typs, für Gäste |
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Uploads ohne Konto erlauben |
+| `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Bilder in einem Album eines Gastes (0 = keine Grenze); auch im Kontrollzentrum einstellbar |
+| `PIXELHOP_GUEST_DAILY_MAX` | `25` | Dateien, die eine Gast-Adresse in 24 Stunden hochladen darf (0 = keine Grenze); auch im Kontrollzentrum einstellbar |
+| `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Speicher für jedes neue Konto; bestehende Konten behalten ihres |
 | `PIXELHOP_REGISTRATION` | `true` | Neue Konten erlauben |
 | `PIXELHOP_READ_ONLY` | `false` | Uploads für Wartungsarbeiten pausieren |
 | `PIXELHOP_TRUSTED_PROXIES` | - | `cloudflare` oder die IPs oder CIDRs deines Reverse-Proxys |
