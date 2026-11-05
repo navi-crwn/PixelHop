@@ -229,6 +229,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `GET`, `POST /api/v1/albums` / `GET`, `PATCH`, `DELETE /api/v1/albums/{id}` | 列出、创建、读取、编辑和删除相册 |
 | `GET /api/v1/users/{username}/images` | 公开接口：某人个人主页上的图片 |
 | `GET /api/v1/me` | 你的账户和存储用量 |
+| `GET /api/v1/me/media` | 你自己的、可在其他页面展示的图片（`type=image`）或 PDF（`type=pdf`）：不含私密、带密码、会过期或带内容警告的文件（`cursor`、`limit`）。也开放给 `PIXELHOP_MEDIA_CLIENTS` 中列出的 HOP 应用（BioHop 的媒体选择器），以服务器间签名代表一位成员调用 |
 | `GET /api/v1/stats` | 公开的统计总数和服务器版本 |
 | `GET /api/v1/upload-status` | 当前是否接受上传 |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | 服务器 AI 工具（需登录；`file`，擦除还需要 `mask`） |

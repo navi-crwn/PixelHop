@@ -229,6 +229,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `GET`, `POST /api/v1/albums` / `GET`, `PATCH`, `DELETE /api/v1/albums/{id}` | アルバムの一覧、作成、取得、編集、削除 |
 | `GET /api/v1/users/{username}/images` | 公開: ユーザーのプロフィールにある画像 |
 | `GET /api/v1/me` | 自分のアカウントと保存容量の使用状況 |
+| `GET /api/v1/me/media` | 他のページに表示してよい自分の画像（`type=image`）または PDF（`type=pdf`）。非公開、パスワード付き、期限付き、コンテンツ警告付きのファイルは含まれません（`cursor`、`limit`）。`PIXELHOP_MEDIA_CLIENTS` に挙げた HOP アプリ（BioHop のメディア選択）からも、メンバー一人分としてサーバー間署名付きで呼び出せます |
 | `GET /api/v1/stats` | 公開の合計数とサーバーのバージョン |
 | `GET /api/v1/upload-status` | いまアップロードを受け付けているか |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | サーバーの AI ツール（サインイン済み。`file`、消去には `mask` も） |

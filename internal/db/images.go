@@ -131,9 +131,12 @@ type ImageQuery struct {
 	Sort        string // new | old | views | size
 	Kind        string // "" = any | image | video | pdf
 	Trash       bool   // only files in the trash (default: none of them)
-	Tag         string // only files with this tag
-	Limit       int
-	Offset      int
+	// Embeddable: only files another site may show without a check: not hidden, not private, no
+	// password, no expiry date, no content warning (own or the album's). What a bio page can embed.
+	Embeddable bool
+	Tag        string // only files with this tag
+	Limit      int
+	Offset     int
 }
 
 func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
@@ -158,6 +161,9 @@ func (d *DB) Images(ctx context.Context, q ImageQuery) ([]*Image, int, error) {
 	}
 	if q.PublicOwner {
 		where = append(where, "user_id IN (SELECT id FROM users WHERE show_owner=1 AND status='active')")
+	}
+	if q.Embeddable {
+		where = append(where, "hidden=0 AND private=0 AND pass_hash='' AND expires_at=0 AND content_warning='none' AND NOT EXISTS (SELECT 1 FROM albums WHERE albums.id=images.album_id AND albums.content_warning<>'none')")
 	}
 	switch q.Kind {
 	case "video":

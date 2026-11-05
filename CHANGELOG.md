@@ -4,11 +4,8 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
-### Guest and quota limits
-- An album made by a guest holds at most 10 images (`PIXELHOP_GUEST_ALBUM_MAX`, 0 = no limit). The eleventh image in one upload is refused with a message that names the limit and links to the sign-up page; the first ten are kept.
-- One guest address may upload at most 25 files per rolling 24 hours (`PIXELHOP_GUEST_DAILY_MAX`, 0 = no limit), counted by hashed address (behind `PIXELHOP_TRUSTED_PROXIES` like the per-minute limit) and kept in the database, so a restart does not reset it. The 26th file gets 429 with `Retry-After` and the same kind of message; rows older than 48 hours are pruned by the janitor.
-- Both limits are also control center settings (`guest_album_max`, `guest_daily_max`) and change without a restart. Members are not limited this way.
-- New accounts start with 128 MB of storage: the default of `PIXELHOP_DEFAULT_QUOTA_MB` went from 1024 to 128. Accounts that exist keep their quota. Owners who want the old value set `PIXELHOP_DEFAULT_QUOTA_MB=1024`.
+### HOP family
+- `GET /api/v1/me/media` lists a member's own pictures (`type=image`) or PDFs (`type=pdf`) with their public address, thumbnail, size and album, newest first, with an opaque `cursor`. It leaves out what a page elsewhere could not show: private, password-protected, expiring, hidden (trash, moderation, suspension) and content-warning files. It also says whether the member blocks embedding on other sites. Besides a session or a full API key, a HOP app named in `PIXELHOP_MEDIA_CLIENTS` (default `biohop`, for BioHop's "Choose from PixelHop" picker) may call it server to server with a HOP App Protocol signature and `X-HOP-Actor` set to the member's HOP ID; the shared SSO secret verifies it, or that app's own secret in `HOP_SSO_SECRET_<APP>` when the family keeps one per app. Media clients are not admin clients: they cannot call `/hop/*`. The file stays here; the other app only keeps the address.
 
 ### Documentation
 - `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.

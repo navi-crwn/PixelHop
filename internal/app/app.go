@@ -185,6 +185,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("DELETE /api/v1/images/{id}", a.apiDeleteImage)
 	mux.HandleFunc("POST /api/v1/images/{id}/restore", a.apiRestoreImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
+	mux.HandleFunc("GET /api/v1/me/media", a.apiMyMedia)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
 	mux.HandleFunc("GET /api/v1/albums", a.apiAlbums)
 	mux.HandleFunc("POST /api/v1/albums", a.apiCreateAlbum)
