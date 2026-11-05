@@ -4,6 +4,9 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### HOP family
+- `GET /api/v1/me/media` lists a member's own pictures (`type=image`) or PDFs (`type=pdf`) with their public address, thumbnail, size and album, newest first, with an opaque `cursor`. It leaves out what a page elsewhere could not show: private, password-protected, expiring, hidden (trash, moderation, suspension) and content-warning files. It also says whether the member blocks embedding on other sites. Besides a session or a full API key, a HOP app named in `PIXELHOP_MEDIA_CLIENTS` (default `biohop`, for BioHop's "Choose from PixelHop" picker) may call it server to server with a HOP App Protocol signature and `X-HOP-Actor` set to the member's HOP ID; the shared SSO secret verifies it, or that app's own secret in `HOP_SSO_SECRET_<APP>` when the family keeps one per app. Media clients are not admin clients: they cannot call `/hop/*`. The file stays here; the other app only keeps the address.
+
 ### Documentation
 - `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.
 - README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).

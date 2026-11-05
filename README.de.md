@@ -226,6 +226,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `GET`, `POST /api/v1/albums` / `GET`, `PATCH`, `DELETE /api/v1/albums/{id}` | Alben auflisten, anlegen, lesen, bearbeiten und löschen |
 | `GET /api/v1/users/{username}/images` | Öffentlich: die Bilder im Profil einer Person |
 | `GET /api/v1/me` | Dein Konto und der Speicherverbrauch |
+| `GET /api/v1/me/media` | Deine eigenen Bilder (`type=image`) oder PDFs (`type=pdf`), die eine andere Seite zeigen darf: keine privaten, passwortgeschützten, ablaufenden oder mit Inhaltswarnung versehenen Dateien (`cursor`, `limit`). Auch für die in `PIXELHOP_MEDIA_CLIENTS` genannten HOP-Apps (BioHops Medienauswahl), serverseitig signiert für ein Mitglied |
 | `GET /api/v1/stats` | Öffentliche Summen und die Serverversion |
 | `GET /api/v1/upload-status` | Ob gerade Uploads angenommen werden |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server-KI-Werkzeuge (angemeldet; `file`, bei erase zusätzlich `mask`) |

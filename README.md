@@ -235,6 +235,7 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `GET`, `POST /api/v1/albums` and `GET`, `PATCH`, `DELETE /api/v1/albums/{id}` | List, create, read, edit and delete albums |
 | `GET /api/v1/users/{username}/images` | Public: the images on someone's profile |
 | `GET /api/v1/me` | Your account and storage use |
+| `GET /api/v1/me/media` | Your own pictures (`type=image`) or PDFs (`type=pdf`) that another page may show: no private, password-protected, expiring or content-warning files (`cursor`, `limit`). Also open to the HOP apps named in `PIXELHOP_MEDIA_CLIENTS` (BioHop's media picker), signed server to server for one member |
 | `GET /api/v1/stats` | Public totals and the server version |
 | `GET /api/v1/upload-status` | Whether uploads are accepted right now |
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |

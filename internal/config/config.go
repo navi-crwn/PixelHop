@@ -61,6 +61,14 @@ type Config struct {
 	// ControlURL is where the HOP control center lives. When set, /admin
 	// sends admins there; the built-in admin pages are gone.
 	ControlURL string
+	// MediaClients are the HOP apps that may list a member's files on their
+	// behalf (GET /api/v1/me/media signed as the app, X-HOP-Actor = HOP ID);
+	// BioHop's media picker. They are not admin clients.
+	MediaClients []string
+	// mediaSecrets holds a client's own secret (HOP_SSO_SECRET_<APP>) for a
+	// family that uses one secret per app; without it the shared SSO secret
+	// verifies the client's calls too.
+	mediaSecrets map[string]string
 
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
@@ -159,6 +167,16 @@ func Load() (*Config, error) {
 		}
 	}
 	c.ControlURL = strings.TrimRight(env("PIXELHOP_CONTROL_URL", ""), "/")
+	c.mediaSecrets = map[string]string{}
+	for _, s := range strings.Split(env("PIXELHOP_MEDIA_CLIENTS", "biohop"), ",") {
+		if s = strings.ToLower(strings.TrimSpace(s)); s != "" {
+			c.MediaClients = append(c.MediaClients, s)
+			ownKey := "HOP_SSO_SECRET_" + strings.ToUpper(strings.ReplaceAll(s, "-", "_"))
+			if own := os.Getenv(ownKey); len(own) >= 32 {
+				c.mediaSecrets[s] = own
+			}
+		}
+	}
 	c.LinkURL = strings.TrimRight(env("PIXELHOP_LINK_URL", c.BaseURL), "/")
 	if c.LinkURL != c.BaseURL {
 		lu, err := url.Parse(c.LinkURL)
@@ -203,6 +221,26 @@ func (c *Config) HelinkSecrets() []string {
 		s = append(s, c.HelinkSecretPrev)
 	}
 	return s
+}
+
+// MediaClient reports whether app may list members' files on their behalf.
+func (c *Config) MediaClient(app string) bool {
+	for _, s := range c.MediaClients {
+		if s == app {
+			return true
+		}
+	}
+	return false
+}
+
+// MediaClientSecrets returns the secrets that verify a media client's calls:
+// the app's own (HOP_SSO_SECRET_<APP>) when the family keeps one secret per
+// app, else the shared SSO secret and its predecessor.
+func (c *Config) MediaClientSecrets(app string) []string {
+	if own, ok := c.mediaSecrets[app]; ok {
+		return []string{own}
+	}
+	return c.HelinkSecrets()
 }
 
 // TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.
