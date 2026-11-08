@@ -360,6 +360,9 @@ type Album struct {
 	Description    string
 	ContentWarning string // none | sensitive | adult
 	WarningReason  string
+	// AdminNote is what the uploader wrote "for the admin" with a ticket. The
+	// owner and the moderators see it; the shared page never shows it.
+	AdminNote string
 }
 
 func (a *Album) IsAdult() bool     { return a.ContentWarning == "adult" }
@@ -378,8 +381,8 @@ func (d *DB) InsertAlbum(ctx context.Context, a *Album) error {
 
 func (d *DB) Album(ctx context.Context, id string) (*Album, error) {
 	var a Album
-	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at,cover_id,description,content_warning,warning_reason FROM albums WHERE id=?`, id).
-		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description, &a.ContentWarning, &a.WarningReason)
+	err := d.QueryRowContext(ctx, `SELECT id,user_id,title,owner_token,created_at,cover_id,description,content_warning,warning_reason,admin_note FROM albums WHERE id=?`, id).
+		Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description, &a.ContentWarning, &a.WarningReason, &a.AdminNote)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
 	}
@@ -390,8 +393,8 @@ func (d *DB) UpdateAlbum(ctx context.Context, a *Album) error {
 	if a.ContentWarning == "" {
 		a.ContentWarning = "none"
 	}
-	_, err := d.ExecContext(ctx, `UPDATE albums SET title=?, cover_id=?, description=?, content_warning=?, warning_reason=? WHERE id=?`,
-		a.Title, a.CoverID, a.Description, a.ContentWarning, a.WarningReason, a.ID)
+	_, err := d.ExecContext(ctx, `UPDATE albums SET title=?, cover_id=?, description=?, content_warning=?, warning_reason=?, admin_note=? WHERE id=?`,
+		a.Title, a.CoverID, a.Description, a.ContentWarning, a.WarningReason, a.AdminNote, a.ID)
 	return err
 }
 

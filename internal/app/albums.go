@@ -31,7 +31,7 @@ func (a *App) albumJSON(r *http.Request, al *db.Album) map[string]any {
 	for _, im := range ims {
 		list = append(list, a.imageJSON(im))
 	}
-	return map[string]any{"id": al.ID, "title": al.Title, "description": al.Description, "cover_id": al.CoverID,
+	return map[string]any{"id": al.ID, "title": al.Title, "description": al.Description, "admin_note": al.AdminNote, "cover_id": al.CoverID,
 		"content_warning": al.ContentWarning, "warning_reason": al.WarningReason,
 		"url": a.albumURL(al.ID), "created_at": al.CreatedAt, "images": list}
 }
@@ -60,7 +60,8 @@ func (a *App) apiAlbum(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// apiCreateAlbum makes an album from your images: {"title", "ids": [...]}
+// apiCreateAlbum makes an album from your images: {"title", "ids": [...]}.
+// "description" is shown on the shared page; "admin_note" only to you and the moderators.
 func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 	u := a.apiUser(w, r)
 	if u == nil {
@@ -71,6 +72,7 @@ func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 		WarningReason  string   `json:"warning_reason"`
 		Title          string   `json:"title"`
 		Description    string   `json:"description"`
+		AdminNote      string   `json:"admin_note"`
 		IDs            []string `json:"ids"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10)).Decode(&body); err != nil {
@@ -90,8 +92,9 @@ func (a *App) apiCreateAlbum(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusInternalServerError, "couldn't create the album")
 		return
 	}
-	if d := trim(strings.TrimSpace(body.Description), 1000); d != "" {
-		al.Description = d
+	al.Description = trim(strings.TrimSpace(body.Description), 1000)
+	al.AdminNote = trim(strings.TrimSpace(body.AdminNote), 1000)
+	if al.Description != "" || al.AdminNote != "" {
 		a.db.UpdateAlbum(r.Context(), al)
 	}
 	a.addToAlbum(r, u, al, body.IDs)
@@ -119,7 +122,7 @@ func (a *App) addToAlbum(r *http.Request, u *db.User, al *db.Album, ids []string
 	return n
 }
 
-// apiUpdateAlbum: {"title", "description", "cover_id", "order": [ids], "add": [ids], "remove": [ids]}
+// apiUpdateAlbum: {"title", "description", "admin_note", "cover_id", "order": [ids], "add": [ids], "remove": [ids]}
 func (a *App) apiUpdateAlbum(w http.ResponseWriter, r *http.Request) {
 	u, al := a.ownAlbum(w, r)
 	if al == nil {
@@ -130,6 +133,7 @@ func (a *App) apiUpdateAlbum(w http.ResponseWriter, r *http.Request) {
 		WarningReason  *string  `json:"warning_reason"`
 		Title          *string  `json:"title"`
 		Description    *string  `json:"description"`
+		AdminNote      *string  `json:"admin_note"`
 		CoverID        *string  `json:"cover_id"`
 		Order          []string `json:"order"`
 		Add            []string `json:"add"`
@@ -154,6 +158,9 @@ func (a *App) apiUpdateAlbum(w http.ResponseWriter, r *http.Request) {
 	}
 	if body.Description != nil {
 		al.Description = trim(strings.TrimSpace(*body.Description), 1000)
+	}
+	if body.AdminNote != nil {
+		al.AdminNote = trim(strings.TrimSpace(*body.AdminNote), 1000)
 	}
 	if body.CoverID != nil {
 		al.CoverID = *body.CoverID

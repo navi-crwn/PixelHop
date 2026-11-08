@@ -397,7 +397,7 @@
       var batch = { left: count, ids: [] };
       var mediaRows = media.map(function (f) { var r = row(f.name, ''); r.batch = batch; return r; });
       var albumReady = wantAlbum
-        ? api('POST', '/api/v1/albums', { title: ticket, description: note, content_warning: $('#upload-warning').value, warning_reason: $('#upload-warning-reason').value }).then(function (al) {
+        ? api('POST', '/api/v1/albums', { title: ticket, admin_note: note, content_warning: $('#upload-warning').value, warning_reason: $('#upload-warning-reason').value }).then(function (al) {
             $('#album-banner').classList.remove('hide');
             $('#album-link').value = al.url; $('#album-open').href = al.url;
             return al.id;
@@ -682,7 +682,7 @@
       grid.insertBefore(dragged, after ? over.nextSibling : over);
     });
     $('#ae-save').addEventListener('click', function () {
-      var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, remove: removed,
+      var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, admin_note: $('#ae-note').value, remove: removed,
         order: $$('.order-item', grid).map(function (x) { return x.dataset.id; }) };
       if (cover) body.cover_id = cover;
       sv(body).then(function () { toast(T('Album saved')); removed = []; }, function (e) { toast(e.message, true); });
