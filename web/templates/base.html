@@ -40,6 +40,7 @@
     <nav class="shell-nav" aria-label="{{.Site}}">
       <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>{{.L.T "nav.dashboard"}}</a>
       <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
+      <a href="/dashboard/trash" {{if eq .Path "/dashboard/trash"}}aria-current="page"{{end}}><svg><use href="#i-trash"/></svg>{{.L.T "mytabs.trash"}}</a>
       {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg><use href="#i-users"/></svg>{{.L.T "nav.my_profile"}}</a>{{end}}
       <a href="/"><svg><use href="#i-upload"/></svg>{{.L.T "nav.upload"}}</a>
       <a href="/tools"><svg><use href="#i-adjust"/></svg>{{.L.T "nav.studio"}}</a>
