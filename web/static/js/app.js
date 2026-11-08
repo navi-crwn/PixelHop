@@ -48,13 +48,42 @@
     root.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
   });
-  var burger = $('#burger');
-  if (burger) burger.addEventListener('click', function () { $('#nav').classList.toggle('open'); });
-  var menu = $('#menu');
-  if (menu) {
-    menu.querySelector('button').addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.classList.remove('open'); });
+  // The phone navigation: the burger opens it, a tap outside, a chosen link or Escape closes it.
+  var nav = $('#nav'), burger = $('#burger');
+  function setNav(open) {
+    if (!nav || !burger) return;
+    nav.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', String(open));
   }
+  if (burger && nav) {
+    burger.setAttribute('aria-expanded', 'false');
+    burger.addEventListener('click', function (e) { e.stopPropagation(); setNav(!nav.classList.contains('open')); });
+    nav.addEventListener('click', function (e) { if (e.target.closest('.nav-links a')) setNav(false); });
+    document.addEventListener('click', function (e) { if (nav.classList.contains('open') && !e.target.closest('.nav-links, #burger')) setNav(false); });
+  }
+  // Drop-down menus (language, account): one open at a time; a tap outside or Escape closes them.
+  var menus = $$('.menu');
+  function closeMenus(except) {
+    menus.forEach(function (m) {
+      if (m === except) return;
+      m.classList.remove('open');
+      var b = m.querySelector(':scope > button'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  menus.forEach(function (m) {
+    var b = m.querySelector(':scope > button'); if (!b) return;
+    b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function (e) {
+      e.stopPropagation(); closeMenus(m);
+      b.setAttribute('aria-expanded', String(m.classList.toggle('open')));
+    });
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.menu')) closeMenus(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    closeMenus();
+    if (nav && nav.classList.contains('open')) { setNav(false); burger.focus(); }
+  });
 
   // ---------- generic helpers wired by data attributes ----------
   document.addEventListener('click', function (e) {

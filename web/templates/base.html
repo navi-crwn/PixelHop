@@ -91,7 +91,7 @@
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
-    <nav class="nav-links" aria-label="{{$.L.T "nav.main"}}">
+    <nav class="nav-links" id="nav-links" aria-label="{{$.L.T "nav.main"}}">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>{{.L.T "nav.upload"}}</a>
       <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>{{.L.T "nav.studio"}}</a>
       <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>{{.L.T "nav.explore"}}</a>
@@ -129,7 +129,7 @@
       {{else}}
       <a class="btn sm ghost" href="/login">{{.L.T "nav.sign_in"}}</a>
       {{end}}
-      <button class="icon-btn burger" id="burger" type="button" aria-label="{{.L.T "nav.menu"}}"><svg><use href="#i-menu"/></svg></button>
+      <button class="icon-btn burger" id="burger" type="button" aria-label="{{.L.T "nav.menu"}}" aria-controls="nav-links" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
     </div>
   </div>
 </header>

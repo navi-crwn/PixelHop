@@ -132,9 +132,11 @@ main { flex: 1; padding: 28px 0 64px; }
 .menu-list .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .burger { display: none; }
 @media (max-width: 760px) {
-  .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; flex-direction: column; background: var(--panel);
-    border-bottom: 1px solid var(--line); padding: 10px 16px 14px; margin: 0; }
+  .nav .wrap { height: auto; min-height: 60px; flex-wrap: wrap; row-gap: 0; }
+  .nav-links { display: none; order: 10; flex: 1 1 100%; flex-direction: column; background: var(--panel);
+    border-top: 1px solid var(--line); padding: 10px 16px 14px; margin: 0 -20px; }
   .nav.open .nav-links { display: flex; }
+  .nav-links a { padding: 10px 12px; }
   .burger { display: inline-grid; }
 }
 .announce { background: color-mix(in srgb, var(--violet) 18%, var(--bg)); border-bottom: 1px solid var(--line); text-align: center; padding: 8px 16px; font-size: .9rem; }
