@@ -31,6 +31,7 @@ var linkPatterns = map[string]bool{
 	"POST /gate/a/{id}":         true,
 	"POST /report/{id}":         true,
 	"GET /static/":              true,
+	"GET /i18n/{lang}":          true, // the page's own translations; another origin's would fail CSP script-src
 	"GET /favicon.ico":          true,
 	"GET /robots.txt":           true,
 	"GET /healthz":              true,
