@@ -490,7 +490,13 @@ td select, td input { height: 32px; font-size: .85rem; width: auto; }
 .endpoint { display: flex; gap: 10px; align-items: center; font: 600 .95rem var(--mono); margin: 18px 0 8px; }
 .method { padding: 2px 8px; border-radius: 6px; font-size: .75rem; color: #061016; }
 .method.post { background: var(--lime); } .method.get { background: var(--cyan); } .method.del { background: var(--red); color: #fff; } .method.patch { background: var(--amber); }
-.prose { max-width: 720px; }
+.prose { max-width: 720px; min-width: 0; overflow-wrap: anywhere; }
+.prose table { display: block; max-width: 100%; overflow-x: auto; }
+.endpoint { flex-wrap: wrap; }
+@media (max-width: 760px) {
+  /* a curl line or a JSON sample is wider than a phone: wrap it rather than widen the page */
+  .prose pre { white-space: pre-wrap; }
+}
 .prose details { border-bottom: 1px solid var(--line); padding: 12px 0; }
 .prose details summary { cursor: pointer; }
 .prose details p { margin: 8px 0 0; color: var(--muted); }
