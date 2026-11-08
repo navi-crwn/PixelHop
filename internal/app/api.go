@@ -215,8 +215,12 @@ func (a *App) apiMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	used, count := a.db.UserStorage(r.Context(), u.ID)
+	sum := a.db.UserSummary(r.Context(), u.ID)
 	apiOK(w, map[string]any{"id": u.ID, "email": u.Email, "name": u.Name, "role": u.Role,
-		"images": count, "storage_used": used, "storage_quota": u.QuotaBytes})
+		"images": count, "storage_used": used, "storage_quota": u.QuotaBytes,
+		// what the dashboard shows: live files by kind (the trash left out) and albums
+		"files": sum.Images + sum.Videos + sum.PDFs, "kinds": map[string]int{"image": sum.Images, "video": sum.Videos, "pdf": sum.PDFs},
+		"albums": sum.Albums})
 }
 
 func (a *App) apiStats(w http.ResponseWriter, r *http.Request) {

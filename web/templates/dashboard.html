@@ -21,7 +21,7 @@
       <span class="stat-ico"><svg><use href="#i-image"/></svg></span>
       <span class="stat-label">{{$.L.T "dash.files"}}</span>
       <b data-stat="files">{{$files}}</b>
-      <span class="stat-sub">{{$.L.T "dash.files_sub" "images" $d.Sum.Images "videos" $d.Sum.Videos "pdfs" $d.Sum.PDFs}}</span>
+      <span class="stat-sub" data-stat="files_sub">{{$.L.T "dash.files_sub" "images" $d.Sum.Images "videos" $d.Sum.Videos "pdfs" $d.Sum.PDFs}}</span>
     </a>
     <div class="stat" style="--c:var(--lime)">
       <span class="stat-ico"><svg><use href="#i-eye"/></svg></span>
@@ -32,13 +32,13 @@
     <a class="stat" href="/dashboard/albums" style="--c:var(--violet)">
       <span class="stat-ico"><svg><use href="#i-album"/></svg></span>
       <span class="stat-label">{{$.L.T "home.feat_albums_title"}}</span>
-      <b>{{$d.Sum.Albums}}</b>
+      <b data-stat="albums">{{$d.Sum.Albums}}</b>
       <span class="stat-sub">{{$.L.T "dash.albums_sub" "n" $d.Sum.Listed}}</span>
     </a>
     <div class="stat" style="--c:var(--amber)">
       <span class="stat-ico"><svg><use href="#i-server"/></svg></span>
       <span class="stat-label">{{$.L.T "dash.storage"}}</span>
-      <b>{{bytes $d.Used}}</b>
+      <b data-stat="storage">{{bytes $d.Used}}</b>
       {{if $d.Quota}}<span class="meter" title="{{$d.Percent}}%"><i style="width:{{$d.Percent}}%"></i></span>
       <span class="stat-sub">{{$.L.T "dash.of_quota" "percent" $d.Percent "quota" (bytes $d.Quota)}}</span>{{else}}<span class="stat-sub">{{$.L.T "dash.no_limit"}}</span>{{end}}
     </div>
@@ -76,7 +76,7 @@
 
   <section class="dash-files" id="files">
     <div class="page-head">
-      <div><h2>{{$.L.T "dash.my_files"}}</h2><p class="muted" style="margin:2px 0 0">{{if eq $d.Kind "image"}}{{$.L.T "album.n_images" "n" $d.Total}}{{else if eq $d.Kind "video"}}{{$.L.T "dash.n_videos" "n" $d.Total}}{{else if eq $d.Kind "pdf"}}{{$.L.T "dash.n_pdfs" "n" $d.Total}}{{else}}{{$.L.T "dash.n_files" "n" $d.Total}}{{end}}{{with $d.Query}} {{$.L.T "dash.matching" "q" .}}{{end}}</p></div>
+      <div><h2>{{$.L.T "dash.my_files"}}</h2><p class="muted" style="margin:2px 0 0" data-stat="total" data-kind="{{$d.Kind}}"{{if $d.Query}} data-filtered="1"{{end}}>{{if eq $d.Kind "image"}}{{$.L.T "album.n_images" "n" $d.Total}}{{else if eq $d.Kind "video"}}{{$.L.T "dash.n_videos" "n" $d.Total}}{{else if eq $d.Kind "pdf"}}{{$.L.T "dash.n_pdfs" "n" $d.Total}}{{else}}{{$.L.T "dash.n_files" "n" $d.Total}}{{end}}{{with $d.Query}} {{$.L.T "dash.matching" "q" .}}{{end}}</p></div>
       <div class="btn-row">
         <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>{{$.L.T "dash.select"}}</button>
         <span class="sel-actions hide" id="sel-actions">
@@ -94,10 +94,10 @@
 
     <div class="toolbar">
       <nav class="kind-tabs" aria-label="{{$.L.T "dash.file_type"}}">
-        <a href="?q={{$d.Query}}&sort={{$d.Sort}}#files" {{if not $d.Kind}}aria-current="page"{{end}}>{{$.L.T "dash.all"}} <span>{{$files}}</span></a>
-        <a href="?kind=image&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "image"}}aria-current="page"{{end}}>{{$.L.T "albumedit.images"}} <span>{{$d.Sum.Images}}</span></a>
-        <a href="?kind=video&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "video"}}aria-current="page"{{end}}>{{$.L.T "dash.videos"}} <span>{{$d.Sum.Videos}}</span></a>
-        <a href="?kind=pdf&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "pdf"}}aria-current="page"{{end}}>{{$.L.T "dash.pdfs"}} <span>{{$d.Sum.PDFs}}</span></a>
+        <a href="?q={{$d.Query}}&sort={{$d.Sort}}#files" {{if not $d.Kind}}aria-current="page"{{end}}>{{$.L.T "dash.all"}} <span data-count="all">{{$files}}</span></a>
+        <a href="?kind=image&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "image"}}aria-current="page"{{end}}>{{$.L.T "albumedit.images"}} <span data-count="image">{{$d.Sum.Images}}</span></a>
+        <a href="?kind=video&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "video"}}aria-current="page"{{end}}>{{$.L.T "dash.videos"}} <span data-count="video">{{$d.Sum.Videos}}</span></a>
+        <a href="?kind=pdf&q={{$d.Query}}&sort={{$d.Sort}}#files" {{if eq $d.Kind "pdf"}}aria-current="page"{{end}}>{{$.L.T "dash.pdfs"}} <span data-count="pdf">{{$d.Sum.PDFs}}</span></a>
       </nav>
       <form method="get" role="search" action="#files">
         {{with $d.Kind}}<input type="hidden" name="kind" value="{{.}}">{{end}}

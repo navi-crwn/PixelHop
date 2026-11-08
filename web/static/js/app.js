@@ -371,7 +371,38 @@
       if (bar && $$('#uploads [data-link]').length > 1) bar.classList.remove('hide');
       remember(im);
       addToGallery(im);
+      refreshNumbers();
       settle(r, im.id);
+    }
+
+    // After an upload the dashboard's numbers (files by kind, storage, albums, the filter chips and the
+    // "My files" count) come fresh from the server instead of waiting for a reload.
+    var numbersTimer;
+    function refreshNumbers() {
+      if (!$('[data-stat="files"]')) return;
+      clearTimeout(numbersTimer);
+      numbersTimer = setTimeout(function () {
+        api('GET', '/api/v1/me').then(function (me) {
+          var k = me.kinds || {}, set = function (sel, v) { var el = $(sel); if (el && v !== undefined) el.textContent = v; };
+          set('[data-stat="files"]', me.files);
+          set('[data-stat="files_sub"]', T('dash.files_sub', { images: k.image, videos: k.video, pdfs: k.pdf }));
+          set('[data-stat="albums"]', me.albums);
+          set('[data-stat="storage"]', fmtBytes(me.storage_used));
+          set('[data-count="all"]', me.files); set('[data-count="image"]', k.image); set('[data-count="video"]', k.video); set('[data-count="pdf"]', k.pdf);
+          var tot = $('[data-stat="total"]');
+          if (tot && !tot.dataset.filtered) {
+            var kind = tot.dataset.kind;
+            tot.textContent = kind === 'image' ? T('album.n_images', { n: k.image }) : kind === 'video' ? T('dash.n_videos', { n: k.video })
+              : kind === 'pdf' ? T('dash.n_pdfs', { n: k.pdf }) : T('dash.n_files', { n: me.files });
+          }
+        }, function () {});
+      }, 400);
+    }
+    function fmtBytes(b) {
+      if (!(b >= 1024)) return (b || 0) + ' B';
+      var u = 'KMGTPE', e = -1;
+      do { b /= 1024; e++; } while (b >= 1024 && e < u.length - 1);
+      return (b >= 100 ? b.toFixed(0) : b.toFixed(1)) + ' ' + u[e] + 'B';
     }
 
     // On the dashboard a new upload lands at the top of "My files" straight away.
