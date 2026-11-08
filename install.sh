@@ -21,6 +21,9 @@ warn() { printf ' %s!%s %s\n' "$Y" "$Z" "$*" >&2; }
 bad()  { printf ' %s✗%s %s\n' "$R" "$Z" "$*" >&2; }
 die()  { bad "$*"; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
+# PHP_BIN: the PHP that runs the hub's artisan, chosen as the hub installer does: PHP_BIN from the
+# environment, else php8.3 when it is installed, else php.
+if [ -z "${PHP_BIN:-}" ]; then if have php8.3; then PHP_BIN=php8.3; else PHP_BIN=php; fi; fi
 
 YES=0; DRY=0; STAR=ask; INTERACTIVE=0
 [ -t 0 ] && INTERACTIVE=1
@@ -282,7 +285,8 @@ fi
 
 if [ "$HUB" = new ] && [ "$DRY" = 0 ] && [ -f "$HUB_DIR/.env" ]; then
   set_env "$HUB_DIR/.env" PIXELHOP_URL "$URL"; set_env "$HUB_DIR/.env" PIXELHOP_ENABLED true
-  (cd "$HUB_DIR" && php artisan config:clear >/dev/null 2>&1 && php artisan optimize >/dev/null 2>&1) && ok "Registered PixelHop in the hub's list of apps"
+  (cd "$HUB_DIR" && "$PHP_BIN" artisan config:clear >/dev/null 2>&1 && "$PHP_BIN" artisan optimize >/dev/null 2>&1 \
+    && "$PHP_BIN" artisan db:seed --class='Database\Seeders\HopAppsSeeder' --force >/dev/null 2>&1) && ok "Registered PixelHop in the hub's list of apps"
 fi
 
 # --- 7. Run scripts ---------------------------------------------------------------------
