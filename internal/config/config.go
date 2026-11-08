@@ -71,6 +71,10 @@ type Config struct {
 	// family that uses one secret per app; without it the shared SSO secret
 	// verifies the client's calls too.
 	mediaSecrets map[string]string
+	// PickerSecret (HOP_PICKER_SECRET) verifies the media clients' calls with
+	// a secret the hub never uses, so PixelHop need not hold another app's
+	// SSO secret. Accepted next to the older secrets while a family moves.
+	PickerSecret string
 
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
@@ -172,6 +176,9 @@ func Load() (*Config, error) {
 	}
 	c.ControlURL = strings.TrimRight(env("PIXELHOP_CONTROL_URL", ""), "/")
 	c.mediaSecrets = map[string]string{}
+	if v := os.Getenv("HOP_PICKER_SECRET"); len(v) >= 32 {
+		c.PickerSecret = v
+	}
 	for _, s := range strings.Split(env("PIXELHOP_MEDIA_CLIENTS", "biohop"), ",") {
 		if s = strings.ToLower(strings.TrimSpace(s)); s != "" {
 			c.MediaClients = append(c.MediaClients, s)
@@ -238,13 +245,19 @@ func (c *Config) MediaClient(app string) bool {
 }
 
 // MediaClientSecrets returns the secrets that verify a media client's calls:
-// the app's own (HOP_SSO_SECRET_<APP>) when the family keeps one secret per
-// app, else the shared SSO secret and its predecessor.
+// HOP_PICKER_SECRET when set, then the app's own (HOP_SSO_SECRET_<APP>) when
+// the family keeps one secret per app, else the shared SSO secret and its
+// predecessor. Once every picker signs with HOP_PICKER_SECRET, the copy of
+// another app's SSO secret can be removed from this server.
 func (c *Config) MediaClientSecrets(app string) []string {
-	if own, ok := c.mediaSecrets[app]; ok {
-		return []string{own}
+	var s []string
+	if c.PickerSecret != "" {
+		s = append(s, c.PickerSecret)
 	}
-	return c.HelinkSecrets()
+	if own, ok := c.mediaSecrets[app]; ok {
+		return append(s, own)
+	}
+	return append(s, c.HelinkSecrets()...)
 }
 
 // TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.
