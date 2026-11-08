@@ -29,8 +29,8 @@ func TestHopFamilyTypography(t *testing.T) {
 	if strings.Contains(footer, "apps/pixelhop/mark.svg") {
 		t.Error("the footer family list should not link PixelHop to itself")
 	}
-	if !strings.Contains(body, `href="https://pixel.hel.ink" aria-current="true"`) || len(hopFamily("")) != 5 {
-		t.Error("the switcher must list all five apps and identify PixelHop")
+	if !strings.Contains(body, `href="https://pixel.hel.ink" aria-current="true"`) || len(hopFamily("")) != 6 {
+		t.Error("the switcher must list all six apps and identify PixelHop")
 	}
 	csp := rec.Header().Get("Content-Security-Policy")
 	for _, d := range []string{"style-src 'self' 'unsafe-inline' https://hel.ink", "font-src 'self' https://hel.ink"} {
