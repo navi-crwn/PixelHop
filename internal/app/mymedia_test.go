@@ -254,3 +254,32 @@ func TestMyMediaNeedsSSO(t *testing.T) {
 		t.Fatalf("no sso: %d %s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestMyMediaPickerSecret(t *testing.T) {
+	// HOP_PICKER_SECRET: BioHop signs its picker calls with a secret the hub never uses. PixelHop accepts it next
+	// to the older secret while the family moves over, and without HOP_SSO_SECRET_BIOHOP it no longer needs
+	// BioHop's sign-in secret at all.
+	picker := "picker-secret-that-is-long-enough-0000000"
+	t.Setenv("HOP_PICKER_SECRET", picker)
+	a, h := ssoApp(t)
+	linked(t, a, "101", "me@example.com")
+	path := "/api/v1/me/media"
+	if rec, _ := signedMedia(h, "biohop", picker, "101", path); rec.Code != 200 {
+		t.Fatalf("picker secret: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec, _ := signedMedia(h, "biohop", testSecret, "101", path); rec.Code != 200 {
+		t.Fatalf("the older secret keeps working during the move: %d", rec.Code)
+	}
+	if rec, _ := signedMedia(h, "biohop", "another-secret-that-is-long-enough-000000", "101", path); rec.Code != 401 {
+		t.Fatalf("an unknown secret: %d", rec.Code)
+	}
+}
+
+func TestMyMediaShortPickerSecretIgnored(t *testing.T) {
+	t.Setenv("HOP_PICKER_SECRET", "short")
+	a, h := ssoApp(t)
+	linked(t, a, "101", "me@example.com")
+	if rec, _ := signedMedia(h, "biohop", "short", "101", "/api/v1/me/media"); rec.Code != 401 {
+		t.Fatalf("a short picker secret must not verify anything: %d", rec.Code)
+	}
+}
