@@ -5,6 +5,7 @@ All notable changes to PixelHop will be documented in this file.
 ## [Unreleased]
 
 ### HOP family
+- FileHop (file.hel.ink), the sixth HOP app, is in the family list: the dashboard sidebar, the app switcher, the footer and the About page (from the bundled asset manifest), the FAQ and features text in all nine languages, and the README family table.
 - `GET /api/v1/me/media` lists a member's own pictures (`type=image`) or PDFs (`type=pdf`) with their public address, thumbnail, size and album, newest first, with an opaque `cursor`. It leaves out what a page elsewhere could not show: private, password-protected, expiring, hidden (trash, moderation, suspension) and content-warning files. It also says whether the member blocks embedding on other sites. Besides a session or a full API key, a HOP app named in `PIXELHOP_MEDIA_CLIENTS` (default `biohop`, for BioHop's "Choose from PixelHop" picker) may call it server to server with a HOP App Protocol signature and `X-HOP-Actor` set to the member's HOP ID; the shared SSO secret verifies it, or that app's own secret in `HOP_SSO_SECRET_<APP>` when the family keeps one per app. Media clients are not admin clients: they cannot call `/hop/*`. The file stays here; the other app only keeps the address.
 
 ### Documentation
