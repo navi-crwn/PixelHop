@@ -119,13 +119,13 @@
   <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
     <h2>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_images_h"}}{{else}}{{$.L.T "settings.del_account_h"}}{{end}}</h2>
     <p class="muted small">{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_text_helink"}}{{else}}{{$.L.T "settings.del_text"}}{{end}} {{$.L.T "settings.del_links"}}</p>
-    <form method="post" action="/settings/delete-account" data-confirm="{{$.L.T "settings.del_confirm"}}">
+    <form method="post" action="/settings/delete-account" data-confirm="{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_confirm_helink"}}{{else}}{{$.L.T "settings.del_confirm"}}{{end}}">
       {{if $d.HasPass}}
       <div class="field"><label for="del-pw">{{$.L.T "settings.del_pw"}}</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
       {{else}}
       <div class="field"><label for="del-confirm">{{$.L.T "settings.del_email"}}</label><input type="text" id="del-confirm" name="confirm" required></div>
       {{end}}
-      <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{$.L.T "settings.del_btn"}}</button>
+      <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_btn_helink"}}{{else}}{{$.L.T "settings.del_btn"}}{{end}}</button>
     </form>
   </div>
 </div>

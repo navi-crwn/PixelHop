@@ -182,6 +182,9 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	if u.PassHash == "" && r.FormValue("confirm") != u.Email {
 		d := a.settingsData(r)
 		d.Error = a.tr(r, "Type your email address to confirm deleting your account.")
+		if u.HelinkID.Valid { // a HOP ID member loses their images and profile here; the account lives at the hub
+			d.Error = a.tr(r, "Type your email address to confirm deleting your images and profile.")
+		}
 		w.WriteHeader(http.StatusBadRequest)
 		a.render(w, r, "settings", "Settings", d)
 		return
