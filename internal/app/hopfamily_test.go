@@ -15,9 +15,9 @@ func TestHopFamilyTypography(t *testing.T) {
 	}
 	body := rec.Body.String()
 	for _, want := range []string{
-		`href="https://hel.ink/hop-assets/v2/fonts-amnesia.css" integrity="sha384-`,
-		`https://hel.ink/hop-assets/v2/apps/linkhop/mark.svg`,
-		`https://hel.ink/hop-assets/v2/apps/notehop/mark.svg`,
+		`href="https://hel.ink/hop-assets/v3/fonts-amnesia.css" integrity="sha384-`,
+		`https://hel.ink/hop-assets/v3/apps/linkhop/mark.svg`,
+		`https://hel.ink/hop-assets/v3/apps/notehop/mark.svg`,
 		`>BioHop<`,
 		`Part of the HOP family`,
 	} {
