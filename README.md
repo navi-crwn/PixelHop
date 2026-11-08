@@ -297,6 +297,23 @@ Yes. Set `PIXELHOP_GUEST_UPLOADS=false` or `PIXELHOP_REGISTRATION=false`. With t
 A small server is enough. A fresh `pixelhop` process used about 16 MB of memory in a test on macOS, and the release binaries are 16 to 17 MB. Large images are decoded a few at a time, so a burst of uploads cannot use all memory.
 </details>
 
+## Self-hosting
+
+<!-- self-hosting:start -->
+Everything PixelHop needs is in public repositories: no private repository, no token and no hel.ink account. The family guide has the details: [docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md).
+
+| Piece | For PixelHop | What it does |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (hub, HOP ID) | Optional: adds “Sign in with HOP ID” | Accounts and sign-in for every app |
+| [Imperium](https://github.com/navi-crwn/Imperium) | Optional, but the admin pages of PixelHop live there | Admin panel for the whole family; needs the hub |
+| Family fonts and tiles | Nothing to install: loaded from `hel.ink/hop-assets` | Without hel.ink: system fonts, no floating tiles |
+
+- **Install order**: PixelHop alone with `./install.sh`. For HOP ID sign-in, the [hub](https://github.com/navi-crwn/HEL.ink) first: `./install.sh --hub new` installs one next to it.
+- **Minimum settings**: `PIXELHOP_BASE_URL`; with the hub: `HELINK_URL`, `HELINK_SSO_SECRET`; with Imperium: `PIXELHOP_CONTROL_URL`.
+- **Alone or in the family**: PixelHop runs alone with its own accounts. With a hub, people can also sign in with HOP ID and sign out of every app at once.
+- **Without Imperium**: `/admin` shows a notice. Use `pixelhop user add` and the signed `/hop/*` API (the first account is the admin).
+<!-- self-hosting:end -->
+
 ## The HOP family
 
 PixelHop is part of the HOP family of privacy-respecting, self-hostable open-source apps.
@@ -311,7 +328,7 @@ PixelHop is part of the HOP family of privacy-respecting, self-hostable open-sou
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
 
 ## Credits and license

@@ -291,6 +291,23 @@ Bisa. Setel `PIXELHOP_GUEST_UPLOADS=false` atau `PIXELHOP_REGISTRATION=false`. D
 Server kecil sudah cukup. Proses `pixelhop` yang baru dimulai memakai sekitar 16 MB memori dalam pengujian di macOS, dan biner rilisnya berukuran 16 sampai 17 MB. Gambar besar didekode beberapa saja sekaligus, sehingga lonjakan unggahan tidak bisa menghabiskan seluruh memori.
 </details>
 
+## Hosting sendiri
+
+<!-- self-hosting:start -->
+Semua yang dibutuhkan PixelHop ada di repositori publik: tanpa repositori privat, tanpa token, dan tanpa akun hel.ink. Rinciannya ada di panduan keluarga: [docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md) (bahasa Inggris).
+
+| Komponen | Untuk PixelHop | Fungsinya |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (hub, HOP ID) | Opsional: menambahkan “Masuk dengan HOP ID” | Akun dan proses masuk untuk semua aplikasi |
+| [Imperium](https://github.com/navi-crwn/Imperium) | Opsional, tetapi halaman admin PixelHop ada di sana | Panel admin untuk seluruh keluarga; butuh hub |
+| Font dan ubin keluarga | Tidak perlu dipasang: dimuat dari `hel.ink/hop-assets` | Tanpa hel.ink: font sistem, tanpa ubin melayang |
+
+- **Urutan pemasangan**: PixelHop sendiri dengan `./install.sh`. Untuk masuk dengan HOP ID, pasang [hub](https://github.com/navi-crwn/HEL.ink) dulu: `./install.sh --hub new` memasangnya di sebelahnya.
+- **Pengaturan minimum**: `PIXELHOP_BASE_URL`; dengan hub: `HELINK_URL`, `HELINK_SSO_SECRET`; dengan Imperium: `PIXELHOP_CONTROL_URL`.
+- **Sendiri atau dalam keluarga**: PixelHop berjalan sendiri dengan akunnya sendiri. Dengan hub, orang juga bisa masuk dengan HOP ID dan keluar dari semua aplikasi sekaligus.
+- **Tanpa Imperium**: `/admin` hanya menampilkan pemberitahuan. Gunakan `pixelhop user add` dan API bertanda tangan `/hop/*` (akun pertama menjadi admin).
+<!-- self-hosting:end -->
+
 ## Keluarga HOP
 
 PixelHop adalah bagian dari keluarga HOP, aplikasi open source yang menghargai privasi dan bisa di-host sendiri.
@@ -305,7 +322,7 @@ PixelHop adalah bagian dari keluarga HOP, aplikasi open source yang menghargai p
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
 
 ## Kredit dan lisensi

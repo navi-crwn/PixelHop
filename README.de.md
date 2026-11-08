@@ -291,6 +291,23 @@ Ja. Setze `PIXELHOP_GUEST_UPLOADS=false` oder `PIXELHOP_REGISTRATION=false`. Mit
 Ein kleiner Server genügt. Ein frisch gestarteter `pixelhop`-Prozess brauchte bei einem Test unter macOS etwa 16 MB Arbeitsspeicher, und die Release-Binärdateien sind 16 bis 17 MB groß. Große Bilder werden nur wenige gleichzeitig dekodiert, ein Schwung Uploads kann also nicht den ganzen Speicher aufbrauchen.
 </details>
 
+## Selbst hosten
+
+<!-- self-hosting:start -->
+Alles, was PixelHop braucht, liegt in öffentlichen Repositorys: kein privates Repository, kein Token und kein hel.ink-Konto. Details stehen in der Familienanleitung: [docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md) (Englisch).
+
+| Baustein | Für PixelHop | Wozu |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (Hub, HOP ID) | Optional: ergänzt „Mit HOP ID anmelden“ | Konten und Anmeldung für alle Apps |
+| [Imperium](https://github.com/navi-crwn/Imperium) | Optional, aber die Admin-Seiten von PixelHop liegen dort | Admin-Panel für die ganze Familie; braucht den Hub |
+| Familien-Schriften und -Kacheln | Nichts zu installieren: kommen von `hel.ink/hop-assets` | Ohne hel.ink: Systemschriften, keine schwebenden Kacheln |
+
+- **Reihenfolge**: PixelHop allein mit `./install.sh`. Für die Anmeldung mit HOP ID zuerst der [Hub](https://github.com/navi-crwn/HEL.ink): `./install.sh --hub new` installiert einen daneben.
+- **Mindest-Einstellungen**: `PIXELHOP_BASE_URL`; mit Hub: `HELINK_URL`, `HELINK_SSO_SECRET`; mit Imperium: `PIXELHOP_CONTROL_URL`.
+- **Allein oder in der Familie**: PixelHop läuft allein mit eigenen Konten. Mit einem Hub kann man sich zusätzlich mit HOP ID anmelden und überall zugleich abmelden.
+- **Ohne Imperium**: `/admin` zeigt einen Hinweis. Dafür gibt es `pixelhop user add` und die signierte `/hop/*`-API (das erste Konto ist Admin).
+<!-- self-hosting:end -->
+
 ## Die HOP-Familie
 
 PixelHop gehört zur HOP-Familie datenschutzfreundlicher, selbst hostbarer Open-Source-Apps.
@@ -305,7 +322,7 @@ PixelHop gehört zur HOP-Familie datenschutzfreundlicher, selbst hostbarer Open-
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
 
 ## Danksagung und Lizenz

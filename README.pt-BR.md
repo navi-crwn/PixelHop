@@ -305,8 +305,25 @@ O PixelHop faz parte da família HOP de apps de código aberto que respeitam a p
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
+
+## Hospedagem própria
+
+<!-- self-hosting:start -->
+Tudo o que o PixelHop precisa está em repositórios públicos: nenhum repositório privado, nenhum token e nenhuma conta no hel.ink. Os detalhes estão no guia da família: [docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md) (em inglês).
+
+| Peça | Para o PixelHop | O que faz |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (hub, HOP ID) | Opcional: adiciona “Entrar com HOP ID” | Contas e login para todos os apps |
+| [Imperium](https://github.com/navi-crwn/Imperium) | Opcional, mas as páginas de administração do PixelHop ficam lá | Painel de administração de toda a família; precisa do hub |
+| Fontes e blocos da família | Nada a instalar: carregados de `hel.ink/hop-assets` | Sem hel.ink: fontes do sistema, sem blocos flutuantes |
+
+- **Ordem de instalação**: o PixelHop sozinho com `./install.sh`. Para login com HOP ID, primeiro o [hub](https://github.com/navi-crwn/HEL.ink): `./install.sh --hub new` instala um ao lado.
+- **Configuração mínima**: `PIXELHOP_BASE_URL`; com o hub: `HELINK_URL`, `HELINK_SSO_SECRET`; com o Imperium: `PIXELHOP_CONTROL_URL`.
+- **Sozinho ou na família**: o PixelHop funciona sozinho, com contas próprias. Com um hub, as pessoas também podem entrar com HOP ID e sair de todos os apps de uma vez.
+- **Sem o Imperium**: `/admin` mostra um aviso. Use `pixelhop user add` e a API assinada `/hop/*` (a primeira conta é a de administrador).
+<!-- self-hosting:end -->
 
 ## Créditos e licença
 
