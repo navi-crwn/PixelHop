@@ -291,6 +291,23 @@ deploy/           nginx と systemd の例
 小さなサーバーで足ります。macOS での試験では、起動直後の `pixelhop` プロセスは約 16 MB のメモリを使い、リリースのバイナリは 16〜17 MB です。大きな画像は一度に数枚ずつデコードするので、アップロードが集中してもメモリを使い切ることはありません。
 </details>
 
+## セルフホスティング
+
+<!-- self-hosting:start -->
+PixelHop に必要なものはすべて公開リポジトリにあります。非公開リポジトリ、トークン、hel.ink のアカウントは不要です。詳しくはファミリーガイド [docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md)（英語）を参照してください。
+
+| 構成要素 | PixelHop にとって | 役割 |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (ハブ、HOP ID) | 任意：「HOP ID でサインイン」を追加 | すべてのアプリのアカウントとサインイン |
+| [Imperium](https://github.com/navi-crwn/Imperium) | 任意。ただし PixelHop の管理ページはそこにあります | ファミリー全体の管理パネル。ハブが必要 |
+| ファミリーのフォントとタイル | インストール不要：`hel.ink/hop-assets` から読み込み | hel.ink がなければシステムフォント、浮遊タイルなし |
+
+- **インストール順**：PixelHop は `./install.sh` だけで動きます。HOP ID でのサインインには先に[ハブ](https://github.com/navi-crwn/HEL.ink)を。`./install.sh --hub new` が隣にインストールします。
+- **最小限の設定**：`PIXELHOP_BASE_URL`; ハブ利用時: `HELINK_URL`, `HELINK_SSO_SECRET`; Imperium 利用時: `PIXELHOP_CONTROL_URL`。
+- **単体かファミリーか**：PixelHop は独自のアカウントで単体で動きます。ハブがあれば HOP ID でサインインでき、全アプリから一度にサインアウトできます。
+- **Imperium なしの場合**：`/admin` には案内が表示されるだけです。`pixelhop user add` と署名付き `/hop/*` API（最初のアカウントが管理者）を使えます。
+<!-- self-hosting:end -->
+
 ## HOP ファミリー
 
 PixelHop は、プライバシーを大切にするセルフホスト可能なオープンソースアプリ、HOP ファミリーの一員です。
@@ -305,7 +322,7 @@ PixelHop は、プライバシーを大切にするセルフホスト可能な�
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
 
 ## クレジットとライセンス

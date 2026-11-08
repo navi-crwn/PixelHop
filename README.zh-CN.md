@@ -291,6 +291,23 @@ deploy/           nginx 和 systemd 示例
 一台小服务器就够了。在 macOS 上的一次测试中，刚启动的 `pixelhop` 进程约占用 16 MB 内存，发布的二进制文件为 16 到 17 MB。大图一次只解码几张，所以突发的上传不会耗尽内存。
 </details>
 
+## 自行托管
+
+<!-- self-hosting:start -->
+PixelHop 所需的一切都在公开仓库中：不需要私有仓库、令牌或 hel.ink 账户。详细说明见家族指南：[docs/self-hosting.md](https://github.com/navi-crwn/HEL.ink/blob/main/docs/self-hosting.md)（英文）。
+
+| 组件 | 对 PixelHop 而言 | 作用 |
+| --- | --- | --- |
+| [HEL.ink](https://github.com/navi-crwn/HEL.ink) (中心，HOP ID) | 可选：增加“使用 HOP ID 登录” | 所有应用的账户与登录 |
+| [Imperium](https://github.com/navi-crwn/Imperium) | 可选，但 PixelHop 的管理页面在那里 | 整个家族的管理面板；需要中心 |
+| 家族字体与浮动图块 | 无需安装：从 `hel.ink/hop-assets` 加载 | 无法访问 hel.ink 时：使用系统字体，没有浮动图块 |
+
+- **安装顺序**：用 `./install.sh` 单独安装 PixelHop。如需 HOP ID 登录，先装[中心](https://github.com/navi-crwn/HEL.ink)：`./install.sh --hub new` 会在旁边装一个。
+- **最少设置**：`PIXELHOP_BASE_URL`; 连接中心时: `HELINK_URL`, `HELINK_SSO_SECRET`; 使用 Imperium 时: `PIXELHOP_CONTROL_URL`。
+- **单独运行或加入家族**：PixelHop 可带自己的账户单独运行。连接中心后，用户还可以用 HOP ID 登录，并一次退出所有应用。
+- **没有 Imperium 时**：`/admin` 只显示一条说明。可使用 `pixelhop user add` 和签名的 `/hop/*` API（第一个账户就是管理员）。
+<!-- self-hosting:end -->
+
 ## HOP 家族
 
 PixelHop 属于 HOP 家族：注重隐私、可自托管的开源应用。
@@ -305,7 +322,7 @@ PixelHop 属于 HOP 家族：注重隐私、可自托管的开源应用。
 | **PixelHop** | [pixel.hel.ink](https://pixel.hel.ink) · `p.hel.ink/…` | [navi-crwn/PixelHop](https://github.com/navi-crwn/PixelHop) | Image hosting with albums and direct links. |
 | **NoteHop** | [note.hel.ink](https://note.hel.ink) · `n.hel.ink/…` | [navi-crwn/NoteHop](https://github.com/navi-crwn/NoteHop) | Encrypted notes you share with a link. |
 | **FileHop** | [file.hel.ink](https://file.hel.ink) | [navi-crwn/FileHop](https://github.com/navi-crwn/FileHop) | Convert files in your browser; nothing is uploaded. |
-| **Imperium** | private (owner only) | private | The HOP control panel. |
+| **Imperium** | not public-facing: optional, for admins | [navi-crwn/Imperium](https://github.com/navi-crwn/Imperium) | The HOP control panel. |
 <!-- hop-family:end -->
 
 ## 致谢与许可证
