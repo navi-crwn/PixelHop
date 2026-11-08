@@ -592,7 +592,9 @@ func (a *App) gateConfirm(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   maxAge,
 	})
-	http.Redirect(w, r, a.pageURL(im.ID), http.StatusSeeOther)
+	// Back to the page on the host the form was posted to: the cookie above belongs to that host, and CSP
+	// form-action blocks a redirect after a form post that leaves for another one.
+	http.Redirect(w, r, "/"+im.ID, http.StatusSeeOther)
 }
 
 func (a *App) albumGateConfirm(w http.ResponseWriter, r *http.Request) {
@@ -619,5 +621,5 @@ func (a *App) albumGateConfirm(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   maxAge,
 	})
-	http.Redirect(w, r, a.albumURL(al.ID), http.StatusSeeOther)
+	http.Redirect(w, r, "/a/"+al.ID, http.StatusSeeOther) // same host as the form, see gateConfirm
 }

@@ -27,6 +27,8 @@ var linkPatterns = map[string]bool{
 	"GET /qr/{id}":              true,
 	"GET /avatar/{id}":          true,
 	"POST /unlock/{id}":         true,
+	"POST /gate/{id}":           true, // the content warning of a shared image or album
+	"POST /gate/a/{id}":         true,
 	"POST /report/{id}":         true,
 	"GET /static/":              true,
 	"GET /favicon.ico":          true,
