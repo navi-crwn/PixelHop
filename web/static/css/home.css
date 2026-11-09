@@ -6,7 +6,8 @@
 .pixel-home .h-tool .drop-icon { width:44px; height:44px; margin-bottom:8px; }
 .pixel-home .h-tool .drop-in h2 { font-size:20px; margin:0 0 4px; }
 .pixel-home .h-tool .drop .sub { font-size:12px; }
-.pixel-home .h-tool .btn.lg { height:42px; font-size:.92rem; }
+.pixel-home .h-tool .btn.lg { font-size:.92rem; }
+.pixel-home .h-term button { border-radius:var(--hop-ctl-radius); }
 .pixel-home .h-tool .guest-note { margin-top:10px; text-align:start; }
 .pixel-home .h-art figcaption { text-align:center; }
 .pixel-home .h-drop { display:grid; place-items:center; gap:8px; border:1px dashed var(--home-line); padding:16px; border-radius:12px; }
