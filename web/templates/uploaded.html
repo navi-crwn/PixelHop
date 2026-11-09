@@ -8,10 +8,12 @@
     <span class="pill ok"><svg width="12" height="12"><use href="#i-check"/></svg>{{$.L.T "uploaded.count" "n" (len $d.Items)}}</span>
     <h1>{{with $d.Title}}{{.}}{{else}}{{$.L.T "uploaded.ready"}}{{end}}</h1>
     {{with $d.Note}}<p class="result-note">{{.}}</p>{{end}}
+    {{with $d.AdminNote}}<p class="result-note admin-note"><b class="muted">{{$.L.T "album.admin_note"}}</b> {{.}}</p>{{end}}
+    {{with $d.AdminNote}}<p class="result-note admin-note"><b class="muted">{{$.L.T "album.admin_note"}}</b> {{.}}</p>{{end}}
     {{if not $.User}}<p class="small muted">{{$.L.T "uploaded.keep_delete"}}</p>{{end}}
   </div>
 
-  <div data-copy-all-root data-report-title="{{$d.Title}}" data-report-note="{{$d.Note}}" data-report-link="{{$d.Album}}">
+  <div data-copy-all-root data-report-title="{{$d.Title}}" data-report-note="{{if $d.AdminNote}}{{$d.AdminNote}}{{else}}{{$d.Note}}{{end}}" data-report-link="{{$d.Album}}">
     <div class="result-actions">
       <button class="btn primary lg" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>{{$.L.T "upload.copy_chat"}}</button>
       <button class="btn lg" type="button" data-copy-all="direct"><svg><use href="#i-link"/></svg>{{$.L.T "uploaded.copy_direct"}}</button>
