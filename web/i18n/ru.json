@@ -1090,5 +1090,6 @@
   "Bad Gateway": "Неверный шлюз",
   "Unavailable For Legal Reasons": "Недоступно по юридическим причинам",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Этот адрес открывает зашифрованную заметку, а часть после # — её ключ. Делитесь ссылкой на заметку напрямую, а не размещайте её в профиле.",
-  "The QR code could not be made. The text may be too long.": "Не удалось создать QR-код. Возможно, текст слишком длинный."
+  "The QR code could not be made. The text may be too long.": "Не удалось создать QR-код. Возможно, текст слишком длинный.",
+  "The delete links saved in this browser are dropped. The images stay online.": "Ссылки на удаление, сохранённые в этом браузере, будут потеряны. Изображения останутся в сети."
 }

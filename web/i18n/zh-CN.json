@@ -1090,5 +1090,6 @@
   "Bad Gateway": "网关错误",
   "Unavailable For Legal Reasons": "因法律原因不可用",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "该地址会打开一篇加密笔记，# 之后的部分就是它的密钥。请直接分享笔记链接，不要把它放进个人资料。",
-  "The QR code could not be made. The text may be too long.": "无法生成二维码。文字可能太长。"
+  "The QR code could not be made. The text may be too long.": "无法生成二维码。文字可能太长。",
+  "The delete links saved in this browser are dropped. The images stay online.": "保存在此浏览器中的删除链接将被丢弃。图片仍然在线。"
 }

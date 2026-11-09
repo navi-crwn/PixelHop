@@ -1090,5 +1090,6 @@
   "Bad Gateway": "不正なゲートウェイ",
   "Unavailable For Legal Reasons": "法的な理由により利用できません",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "このアドレスは暗号化ノートを開き、# 以降の部分がその鍵です。プロフィールに載せず、ノートのリンクを直接共有してください。",
-  "The QR code could not be made. The text may be too long.": "QR コードを作成できませんでした。テキストが長すぎる可能性があります。"
+  "The QR code could not be made. The text may be too long.": "QR コードを作成できませんでした。テキストが長すぎる可能性があります。",
+  "The delete links saved in this browser are dropped. The images stay online.": "このブラウザーに保存された削除リンクは失われます。画像はオンラインのままです。"
 }

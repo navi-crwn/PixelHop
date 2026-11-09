@@ -1090,5 +1090,6 @@
   "Bad Gateway": "Passerelle incorrecte",
   "Unavailable For Legal Reasons": "Indisponible pour des raisons légales",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Cette adresse ouvre une note chiffrée, et la partie après le # est sa clé. Partagez directement le lien de la note au lieu de le mettre sur un profil.",
-  "The QR code could not be made. The text may be too long.": "Impossible de créer le code QR. Le texte est peut-être trop long."
+  "The QR code could not be made. The text may be too long.": "Impossible de créer le code QR. Le texte est peut-être trop long.",
+  "The delete links saved in this browser are dropped. The images stay online.": "Les liens de suppression enregistrés dans ce navigateur sont perdus. Les images restent en ligne."
 }

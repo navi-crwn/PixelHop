@@ -1090,5 +1090,6 @@
   "Bad Gateway": "Puerta de enlace incorrecta",
   "Unavailable For Legal Reasons": "No disponible por motivos legales",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Esa dirección abre una nota cifrada, y la parte después del # es su clave. Comparte el enlace de la nota directamente en lugar de ponerlo en un perfil.",
-  "The QR code could not be made. The text may be too long.": "No se pudo crear el código QR. Puede que el texto sea demasiado largo."
+  "The QR code could not be made. The text may be too long.": "No se pudo crear el código QR. Puede que el texto sea demasiado largo.",
+  "The delete links saved in this browser are dropped. The images stay online.": "Se pierden los enlaces de borrado guardados en este navegador. Las imágenes siguen en línea."
 }
