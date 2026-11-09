@@ -1,7 +1,7 @@
 {{define "content"}}{{$d := .Data}}
 <div class="wrap">
   <div class="page-head"><div><h1>{{$.L.T "mytabs.trash"}}</h1><p class="muted" style="margin:4px 0 0">{{$.L.T "trash.sub" "days" $d.Days}}</p></div>
-    {{if $d.Items}}<form method="post" action="/dashboard/trash/empty" data-confirm="{{$.L.T "trash.empty_confirm"}}"><button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{$.L.T "trash.empty_btn"}}</button></form>{{end}}</div>
+    {{if $d.Items}}<form method="post" action="/dashboard/trash/empty" data-confirm="{{$.L.T "trash.empty_confirm"}}" data-confirm-danger><button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{$.L.T "trash.empty_btn"}}</button></form>{{end}}</div>
   {{template "mytabs" .}}
   {{if $d.Items}}
   <p class="small muted">{{$.L.T "trash.note"}}</p>
@@ -12,7 +12,7 @@
       <div class="album-meta"><b>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</b><span class="small muted">{{$.L.T "trash.left" "time" ($.L.Until .Left)}}</span></div>
       <div class="btn-row">
         <form method="post" action="/dashboard/trash/{{.ID}}/restore"><button class="btn sm primary" type="submit">{{$.L.T "trash.restore"}}</button></form>
-        <form method="post" action="/dashboard/trash/{{.ID}}/delete" data-confirm="{{$.L.T "trash.confirm_one"}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "delete.forever"}}</button></form>
+        <form method="post" action="/dashboard/trash/{{.ID}}/delete" data-confirm="{{$.L.T "trash.confirm_one"}}" data-confirm-danger data-confirm-subject="{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "delete.forever"}}</button></form>
       </div>
     </div>
     {{end}}

@@ -73,7 +73,7 @@
       <tr><th>{{$.L.T "form.name"}}</th><th>{{$.L.T "settings.th_key"}}</th><th>{{$.L.T "settings.scope"}}</th><th>{{$.L.T "settings.th_last"}}</th><th></th></tr>
       {{range $d.Keys}}
       <tr><td>{{.Name}}</td><td class="mono small">{{.Prefix}}…</td><td class="small">{{if eq .Scope "upload"}}{{$.L.T "settings.scope_upload"}}{{else}}{{$.L.T "settings.scope_full"}}{{end}}</td><td class="small muted">{{$.L.Ago .LastUsed}}</td>
-        <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="{{$.L.T "settings.key_confirm" "name" .Name}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></td></tr>
+        <td style="text-align:right"><form method="post" action="/settings/keys/{{.ID}}/delete" data-confirm="{{$.L.T "settings.key_confirm" "name" .Name}}" data-confirm-danger data-confirm-subject="{{.Name}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></td></tr>
       {{end}}
     </table></div>
     {{else}}<p class="small faint">{{$.L.T "settings.no_keys"}}</p>{{end}}
@@ -95,7 +95,7 @@
     {{with $d.NewWebhookSecret}}<div class="key-once"><b>{{$.L.T "settings.wh_secret"}}</b><div class="copy" style="margin-top:8px"><input type="text" readonly value="{{.}}" id="wh-secret"><button class="btn sm" type="button" data-copy="#wh-secret"><svg><use href="#i-copy"/></svg>{{$.L.T "upload.copy"}}</button></div></div>{{end}}
     {{range $d.Webhooks}}
     <div class="out-info" style="align-items:center"><span class="mono small" style="overflow:hidden;text-overflow:ellipsis">{{.URL}}<br><span class="faint">{{.Events}}{{with .LastStatus}} · {{$.L.T "settings.wh_last" "status" .}}{{end}}</span></span>
-      <form method="post" action="/settings/webhooks/{{.ID}}/delete" data-confirm="{{$.L.T "settings.wh_confirm"}}"><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></div>
+      <form method="post" action="/settings/webhooks/{{.ID}}/delete" data-confirm="{{$.L.T "settings.wh_confirm"}}" data-confirm-danger><button class="btn sm ghost danger" type="submit">{{$.L.T "view.delete"}}</button></form></div>
     {{end}}
     <form method="post" action="/settings/webhooks" class="copy" style="margin-top:8px">
       <input type="url" name="url" placeholder="https://example.com/pixelhop-hook" required aria-label="{{$.L.T "settings.wh_url"}}">
@@ -119,7 +119,7 @@
   <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
     <h2>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_images_h"}}{{else}}{{$.L.T "settings.del_account_h"}}{{end}}</h2>
     <p class="muted small">{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_text_helink"}}{{else}}{{$.L.T "settings.del_text"}}{{end}} {{$.L.T "settings.del_links"}}</p>
-    <form method="post" action="/settings/delete-account" data-confirm="{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_confirm_helink"}}{{else}}{{$.L.T "settings.del_confirm"}}{{end}}">
+    <form method="post" action="/settings/delete-account" data-confirm="{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_confirm_helink"}}{{else}}{{$.L.T "settings.del_confirm"}}{{end}}" data-confirm-danger>
       {{if $d.HasPass}}
       <div class="field"><label for="del-pw">{{$.L.T "settings.del_pw"}}</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
       {{else}}

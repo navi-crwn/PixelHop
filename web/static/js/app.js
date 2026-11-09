@@ -14,6 +14,29 @@
   }
   window.phT = T;
 
+  // Questions and name prompts go through the HOP family's shared dialogs (hop-ui.js from
+  // hel.ink, see base.html) and fall back to the browser's own when that script is not on the
+  // page: offline, blocked, or not deployed yet. Both answer with a Promise.
+  //   phConfirm(text | {title, message}, {danger, subject, ok, anchor})  -> true / false
+  //   phPrompt({title, label, value, maxlength})                          -> the text, or null
+  // A plain sentence is split after its first sentence: the question is the title, the rest the
+  // message.
+  function parts(text) {
+    var m = /^(.*?(?:[?？。!！]|\.(?:\s|$)))\s*([\s\S]*)$/.exec(String(text));
+    return m && m[2] ? { title: m[1], message: m[2] } : { title: String(text) };
+  }
+  function phConfirm(text, opts) {
+    var o = Object.assign(typeof text === 'string' ? parts(text) : text, opts || {});
+    if (window.HopUI && HopUI.confirm) return HopUI.confirm(o);
+    return Promise.resolve(window.confirm([o.title, o.message].filter(Boolean).join('\n\n')));
+  }
+  function phPrompt(opts) {
+    if (window.HopUI && HopUI.prompt) return HopUI.prompt(opts);
+    return Promise.resolve(window.prompt(opts.title || opts.label || '', opts.value == null ? '' : opts.value));
+  }
+  window.phConfirm = phConfirm;
+  window.phPrompt = phPrompt;
+
   // ---------- toasts ----------
   function toast(msg, err) {
     var box = $('#toasts'); if (!box) return;
@@ -141,15 +164,30 @@
   });
 
   // Confirmations and prompts without inline scripts (the CSP forbids them).
+  // A form may carry data-confirm, data-confirm-danger and data-confirm-subject (what goes), and
+  // data-prompt with data-prompt-field. The question is a shared dialog; submit waits for it and
+  // sends the form only when it is answered yes.
+  var asked = false;
   document.addEventListener('submit', function (e) {
     var f = e.target, btn = e.submitter;
     var msg = (btn && btn.dataset.confirm) || f.dataset.confirm;
-    if (msg && !confirm(msg)) { e.preventDefault(); return; }
-    if (f.dataset.prompt) {
-      var v = prompt(f.dataset.prompt);
-      if (v === null) { e.preventDefault(); return; }
-      f.querySelector('[name="' + f.dataset.promptField + '"]').value = v;
+    var promptText = f.dataset.prompt;
+    if (!msg && !promptText) return;
+    if (asked) { asked = false; return; }
+    e.preventDefault();
+    var go = function () { asked = true; if (f.requestSubmit) { f.requestSubmit(btn); } else { f.submit(); } };
+    if (promptText) {
+      phPrompt({ title: promptText, value: '' }).then(function (v) {
+        if (v === null) return;
+        f.querySelector('[name="' + f.dataset.promptField + '"]').value = v;
+        go();
+      });
+      return;
     }
+    phConfirm(msg, {
+      danger: f.dataset.confirmDanger != null,
+      subject: f.dataset.confirmSubject || ''
+    }).then(function (ok) { if (ok) go(); });
   }, true);
   $$('[data-autosubmit]').forEach(function (s) { s.addEventListener('change', function () { s.form.submit(); }); });
   $$('input[readonly]').forEach(function (i) { i.addEventListener('focus', function () { i.select(); }); });
@@ -207,9 +245,13 @@
   }
   var clearBtn = $('#clear-history');
   if (clearBtn) clearBtn.addEventListener('click', function () {
-    if (!confirm(T('Forget this list? The images stay online; you lose the delete links saved here.'))) return;
-    try { localStorage.removeItem(HKEY); } catch (e) {}
-    renderHistory();
+    phConfirm(T('Forget this list? The images stay online; you lose the delete links saved here.'), {
+      ok: T('Forget'), anchor: clearBtn
+    }).then(function (ok) {
+      if (!ok) return;
+      try { localStorage.removeItem(HKEY); } catch (e) {}
+      renderHistory();
+    });
   });
   renderHistory();
 
@@ -603,9 +645,11 @@
   }
   var ren = $('#rename');
   if (ren) ren.addEventListener('click', function () {
-    var t = prompt(T('New name for this image:'), $('#title').textContent.trim());
-    if (t === null) return;
-    api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast(T('Renamed')); }, function (e) { toast(e.message, true); });
+    phPrompt({ title: T('Rename this image'), label: T('New name'), value: $('#title').textContent.trim(), maxlength: 200, anchor: ren })
+      .then(function (t) {
+        if (t === null) return;
+        api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast(T('Renamed')); }, function (e) { toast(e.message, true); });
+      });
   });
   // dialogs opened by buttons
   document.addEventListener('click', function (e) {
@@ -652,8 +696,12 @@
   });
   var del = $('#delete');
   if (del) del.addEventListener('click', function () {
-    if (!confirm(T('Move this image to the trash? The link stops working now; you can restore it for 7 days.'))) return;
-    api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
+    phConfirm(T('Move this image to the trash? The link stops working now; you can restore it for 7 days.'), {
+      danger: true, ok: T('Move to trash'), anchor: del
+    }).then(function (ok) {
+      if (!ok) return;
+      api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
+    });
   });
 
   // ---------- dashboard: select, copy, download & delete many ----------
@@ -707,17 +755,24 @@
     if (mk) mk.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
-      var t = prompt(T('Name for the new album ({n} images):', { n: ids.length }), '');
-      if (t === null) return;
-      api('POST', '/api/v1/albums', { title: t, ids: ids }).then(function (d) { location.href = '/a/' + d.id + '/edit'; }, function (e) { toast(e.message, true); });
+      phPrompt({ title: T('Name for the new album ({n} images)', { n: ids.length }), label: T('Album name'), value: '', maxlength: 120, anchor: mk })
+        .then(function (t) {
+          if (t === null) return;
+          api('POST', '/api/v1/albums', { title: t, ids: ids }).then(function (d) { location.href = '/a/' + d.id + '/edit'; }, function (e) { toast(e.message, true); });
+        });
     });
     if (/[?&]select=1/.test(location.search)) selBtn.click();
-    $('#delete-selected').addEventListener('click', function () {
+    var delSelected = $('#delete-selected');
+    delSelected.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
-      if (!confirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }))) return;
-      Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
-        .then(function (res) { reloadAfter(res, 'deleted'); });
+      phConfirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }), {
+        danger: true, ok: T('Move to trash'), anchor: delSelected
+      }).then(function (ok) {
+        if (!ok) return;
+        Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
+          .then(function (res) { reloadAfter(res, 'deleted'); });
+      });
     });
   }
 
@@ -754,8 +809,13 @@
       sv({ add: ids }).then(function () { location.reload(); }, function (e) { toast(e.message, true); });
     });
     $('#ae-delete').addEventListener('click', function () {
-      if (!confirm(T('Delete this album? The images themselves stay.'))) return;
-      api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
+      var aeDel = $('#ae-delete');
+      phConfirm(T('Delete this album? The images themselves stay.'), {
+        danger: true, subject: aeDel.dataset.album || '', ok: T('Delete album'), anchor: aeDel
+      }).then(function (ok) {
+        if (!ok) return;
+        api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
+      });
     });
   }
 

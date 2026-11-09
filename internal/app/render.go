@@ -91,6 +91,7 @@ func loadPages(a *App) (*pages, error) {
 		"display":       displayName,
 		"initial":       func(u *db.User) string { return strings.ToUpper(string([]rune(displayName(u))[:1])) },
 		"hopFonts":      hopFonts,
+		"hopUI":         hopUI,
 		"hopFamily":     func() []hopApp { return hopFamily("pixelhop") },
 		"hopPublicApps": func() []hopApp { return hopFamily("") },
 		"backable":      func(path string) bool { return backPaths[path] },
@@ -184,9 +185,10 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	if name == "tools" || name == "batch" {
 		eval = " 'unsafe-eval'"
 	}
-	// https://hel.ink serves the HOP family fonts (style-src, font-src) and app marks (img-src https:).
+	// https://hel.ink serves the HOP family fonts (style-src, font-src) and app marks (img-src https:), and one
+	// script: the family's hop-ui.js (base.html), always with its SRI hash.
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline' https://hel.ink; "+
-		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
+		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://hel.ink https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
 		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
 		"font-src 'self' https://hel.ink; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {

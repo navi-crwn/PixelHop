@@ -21,6 +21,10 @@
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 {{with hopFonts}}<link rel="preconnect" href="https://hel.ink" crossorigin>
 <link rel="stylesheet" href="{{.URL}}" integrity="{{.Integrity}}" crossorigin="anonymous">{{end}}
+{{/* The family's dialogs (hop-assets hop-ui, v5 on): loaded once the manifest lists both files, with their SRI
+     hashes. Until then app.js asks with the browser's own confirm() and prompt(). */}}
+{{with hopUI}}<link rel="stylesheet" href="{{.CSS.URL}}"{{with .CSS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous">
+<script src="{{.JS.URL}}"{{with .JS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous" defer></script>{{end}}
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 <link rel="stylesheet" href="/static/css/family-switcher.css?v={{.Asset}}">
