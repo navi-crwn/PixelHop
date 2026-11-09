@@ -704,7 +704,7 @@ func (a *App) hopAlbumRow(ctx context.Context, al db.HopAlbum) map[string]any {
 	return map[string]any{
 		"id": al.ID, "type": "album", "title": al.Title, "owner": a.hopOwner(ctx, al.UserID), "status": "visible",
 		"created": isoTime(al.CreatedAt), "size": al.Bytes, "count": al.Count, "url": a.albumURL(al.ID),
-		"direct_url": "", "flags": flags, "preview": "", "ip": "", "description": al.Description,
+		"direct_url": "", "flags": flags, "preview": "", "ip": "", "description": al.Description, "admin_note": al.AdminNote,
 		"content_warning": al.ContentWarning, "warning_reason": al.WarningReason,
 	}
 }

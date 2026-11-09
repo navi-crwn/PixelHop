@@ -30,6 +30,26 @@ func (a *App) lookup(w http.ResponseWriter, r *http.Request, id string, page boo
 		a.serverError(w, r, err)
 		return nil
 	case im.Hidden && !(currentUser(r) != nil && currentUser(r).IsAdmin()):
+		if im.HiddenReason == "trash" {
+			// Put in the trash by its owner, not taken down: a plain 404 for everyone else. The owner is sent
+			// to the trash, where the file can be restored, and still gets the file itself (the trash page
+			// shows its thumbnail).
+			if u := currentUser(r); u != nil && im.UserID.Valid && im.UserID.Int64 == u.ID {
+				if !page {
+					return im
+				}
+				w.Header().Set("Cache-Control", "private, no-store")
+				http.Redirect(w, r, "/dashboard/trash", http.StatusSeeOther)
+				return nil
+			}
+			w.Header().Set("Cache-Control", "private, no-store") // it may come back within the week
+			if page {
+				a.notFound(w, r)
+			} else {
+				http.Error(w, "not found", http.StatusNotFound)
+			}
+			return nil
+		}
 		if page {
 			a.fail(w, r, http.StatusUnavailableForLegalReasons, a.tr(r, "This image was removed by the moderators."))
 		} else {
@@ -96,9 +116,9 @@ func (a *App) serveLegacy(w http.ResponseWriter, r *http.Request) {
 
 // publicRedirectAllowed reports whether the file may be sent to its public CDN
 // address. Anything that needs a password, is private, expires or carries a
-// warning stays behind the app: the CDN address has no such checks.
+// warning or is hidden stays behind the app: the CDN address has no such checks.
 func (a *App) publicRedirectAllowed(r *http.Request, im *db.Image) bool {
-	return !im.Locked() && im.ExpiresAt == 0 && !r.URL.Query().Has("download") && !a.mediaHasWarning(r, im)
+	return !im.Hidden && !im.Locked() && im.ExpiresAt == 0 && !r.URL.Query().Has("download") && !a.mediaHasWarning(r, im)
 }
 
 func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, key, mime string) {
@@ -123,7 +143,7 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Del("X-Frame-Options")
-	if im.Locked() || a.mediaHasWarning(r, im) {
+	if im.Hidden || im.Locked() || a.mediaHasWarning(r, im) {
 		h.Set("Cache-Control", "private, no-store") // never let a CDN keep a private image
 	} else if im.ExpiresAt > 0 {
 		h.Set("Cache-Control", "public, max-age=300")
@@ -592,7 +612,9 @@ func (a *App) gateConfirm(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   maxAge,
 	})
-	http.Redirect(w, r, a.pageURL(im.ID), http.StatusSeeOther)
+	// Back to the page on the host the form was posted to: the cookie above belongs to that host, and CSP
+	// form-action blocks a redirect after a form post that leaves for another one.
+	http.Redirect(w, r, "/"+im.ID, http.StatusSeeOther)
 }
 
 func (a *App) albumGateConfirm(w http.ResponseWriter, r *http.Request) {
@@ -619,5 +641,5 @@ func (a *App) albumGateConfirm(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   maxAge,
 	})
-	http.Redirect(w, r, a.albumURL(al.ID), http.StatusSeeOther)
+	http.Redirect(w, r, "/a/"+al.ID, http.StatusSeeOther) // same host as the form, see gateConfirm
 }

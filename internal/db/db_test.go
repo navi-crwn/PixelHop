@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,6 +23,43 @@ func TestOpenSetsFilePermissions0600(t *testing.T) {
 	}
 	if perm := info.Mode().Perm(); perm != 0o600 {
 		t.Fatalf("expected file mode 0600, got %04o", perm)
+	}
+}
+
+func TestAdminNoteMigrationPreservesLegacyDescriptions(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "pixelhop.db")
+	sqlDB, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, stmt := range []string{
+		`CREATE TABLE schema_version (v INTEGER NOT NULL)`,
+		`INSERT INTO schema_version (v) VALUES (14)`,
+		`CREATE TABLE albums (id TEXT PRIMARY KEY, description TEXT NOT NULL DEFAULT '')`,
+		`INSERT INTO albums (id, description) VALUES ('legacy-ticket', 'ambiguous legacy text')`,
+	} {
+		if _, err := sqlDB.Exec(stmt); err != nil {
+			sqlDB.Close()
+			t.Fatal(err)
+		}
+	}
+	if err := sqlDB.Close(); err != nil {
+		t.Fatal(err)
+	}
+	d, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	var description, note string
+	var version int
+	if err := d.QueryRow(`SELECT description, admin_note, (SELECT MAX(v) FROM schema_version) FROM albums WHERE id='legacy-ticket'`).Scan(&description, &note, &version); err != nil {
+		t.Fatal(err)
+	}
+	// There is no provenance that distinguishes an old ticket note from a public description.
+	if description != "ambiguous legacy text" || note != "" || version != len(migrations) {
+		t.Fatalf("description=%q admin_note=%q schema=%d; legacy text must remain unchanged", description, note, version)
 	}
 }
 

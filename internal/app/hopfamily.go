@@ -42,6 +42,25 @@ func hopFonts() *hopAsset {
 	return nil
 }
 
+// hopUIAssets are the family's shared dialogs and reminder cards: hop-ui.js
+// and its stylesheet, hop-assets v5 on hel.ink.
+type hopUIAssets struct{ CSS, JS hopAsset }
+
+// hopUI is nil until the bundled manifest lists both files with the script's
+// SRI hash; the pages then keep the browser's own dialogs (app.js falls back).
+func hopUI() *hopUIAssets {
+	return hopUIFrom(hopManifestOnce().Assets)
+}
+
+// hopUIFrom is hopUI over a given asset map, so the absence of either file can be tested.
+func hopUIFrom(assets map[string]hopAsset) *hopUIAssets {
+	css, js := assets["ui_css"], assets["ui_js"]
+	if css.URL == "" || js.URL == "" || js.Integrity == "" {
+		return nil
+	}
+	return &hopUIAssets{CSS: css, JS: js}
+}
+
 // hopFamily lists the other public HOP apps, in family order.
 func hopFamily(current string) []hopApp {
 	var out []hopApp

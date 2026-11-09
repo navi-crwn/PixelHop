@@ -139,6 +139,11 @@ func (a *App) uploadedPage(w http.ResponseWriter, r *http.Request) {
 		if al, err := a.db.Album(r.Context(), albumID); err == nil {
 			data["Album"] = a.albumURL(al.ID)
 			data["Title"], data["Note"] = al.Title, al.Description
+			// The note for the admin is the uploader's (and the moderators'): this page opens for anyone who
+			// has the ids, so everyone else gets the public description only.
+			if u := currentUser(r); u != nil && (u.IsAdmin() || al.UserID.Valid && al.UserID.Int64 == u.ID) {
+				data["AdminNote"] = al.AdminNote
+			}
 		}
 	}
 	a.renderPage(w, r, "uploaded", page{Title: "Uploaded", NoIndex: true, Data: data})

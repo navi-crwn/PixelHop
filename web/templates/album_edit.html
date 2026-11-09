@@ -6,9 +6,10 @@
     <div class="card">
       <div class="field"><label for="ae-title">{{$.L.T "albumedit.title"}}</label><input type="text" id="ae-title" value="{{$al.Title}}" maxlength="120" placeholder="{{$.L.T "albumedit.title_ph"}}"></div>
       <div class="field"><label for="ae-desc">{{$.L.T "albumedit.desc"}}</label><textarea id="ae-desc" maxlength="1000" rows="3">{{$al.Description}}</textarea></div>
+      <div class="field"><label for="ae-note">{{$.L.T "albumedit.admin_note"}}</label><textarea id="ae-note" maxlength="1000" rows="2">{{$al.AdminNote}}</textarea><p class="small muted" style="margin:4px 0 0">{{$.L.T "albumedit.admin_note_hint"}}</p></div>
       <div class="field"><label for="ae-warning">{{.L.T "Content warning"}}</label><select id="ae-warning"><option value="none" {{if eq $al.ContentWarning "none"}}selected{{end}}>{{.L.T "None"}}</option><option value="sensitive" {{if eq $al.ContentWarning "sensitive"}}selected{{end}}>{{.L.T "Sensitive content"}}</option><option value="adult" {{if eq $al.ContentWarning "adult"}}selected{{end}}>{{.L.T "Adult 18+"}}</option></select></div>
       <div class="field"><label for="ae-warning-reason">{{.L.T "Reason (optional)"}}</label><input id="ae-warning-reason" maxlength="255" value="{{$al.WarningReason}}"></div>
-      <button class="btn sm danger" type="button" id="ae-delete"><svg><use href="#i-trash"/></svg>{{$.L.T "albumedit.delete"}}</button>
+      <button class="btn sm danger" type="button" id="ae-delete" data-album="{{$al.Title}}"><svg><use href="#i-trash"/></svg>{{$.L.T "albumedit.delete"}}</button>
     </div>
     <div class="card">
       <h2>{{$.L.T "albumedit.add_h"}}</h2>

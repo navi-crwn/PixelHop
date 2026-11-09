@@ -148,7 +148,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 		if err := a.db.InsertAlbum(ctx, al); err == nil {
 			albumID = al.ID
 			if note := trim(strings.TrimSpace(r.FormValue("note")), 1000); note != "" {
-				al.Description = note
+				al.AdminNote = note // for the owner and the moderators; the shared page never shows it
 				a.db.UpdateAlbum(ctx, al)
 			}
 		}

@@ -7,6 +7,7 @@
       <h1 style="margin-top:8px">{{if $d.Album.Title}}{{$d.Album.Title}}{{else}}{{$.L.T "album.n_images" "n" (len $d.Images)}}{{end}}</h1>
       {{template "owner" (withL .L $d.By)}}
       {{with $d.Album.Description}}<p style="max-width:680px;white-space:pre-line">{{.}}</p>{{end}}
+      {{if and $d.Owner $d.Album.AdminNote}}<p class="small admin-note" style="max-width:680px;white-space:pre-line"><b class="muted">{{$.L.T "album.admin_note"}}</b> {{$d.Album.AdminNote}}</p>{{end}}
       <p class="muted" style="margin:0">{{$.L.T "album.shared"}} <time datetime="{{iso $d.Album.CreatedAt}}">{{$.L.Ago $d.Album.CreatedAt}}</time></p>
     </div>
     <div class="btn-row">
@@ -64,7 +65,7 @@
   </div>
   {{end}}
 
-  <div data-copy-all-root data-report-title="{{$d.Album.Title}}" data-report-note="{{$d.Album.Description}}" data-report-link="{{$d.Link}}">
+  <div data-copy-all-root data-report-title="{{$d.Album.Title}}" data-report-note="{{if $d.Owner}}{{$d.Album.AdminNote}}{{end}}" data-report-link="{{$d.Link}}">
   <div class="copy-all" data-copy-all-scope>
   <button class="btn sm primary" type="button" data-copy-all="report"><svg><use href="#i-copy"/></svg>{{$.L.T "upload.copy_chat"}}</button>
   <span class="small muted">{{$.L.T "album.all_links_as"}}</span>

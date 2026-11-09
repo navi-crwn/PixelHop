@@ -194,7 +194,7 @@ func (d *DB) HopAlbums(ctx context.Context, q ContentQuery) ([]HopAlbum, int, er
 	if err := d.QueryRowContext(ctx, `SELECT COUNT(*) FROM albums a`+w, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := d.QueryContext(ctx, `SELECT a.id,a.user_id,a.title,a.owner_token,a.created_at,a.cover_id,a.description,
+	rows, err := d.QueryContext(ctx, `SELECT a.id,a.user_id,a.title,a.owner_token,a.created_at,a.cover_id,a.description,a.admin_note,
 		COUNT(i.id), COALESCE(SUM(i.size),0) FROM albums a LEFT JOIN images i ON i.album_id=a.id`+w+`
 		GROUP BY a.id ORDER BY a.created_at DESC, a.id LIMIT ? OFFSET ?`, append(args, q.Limit, q.Offset)...)
 	if err != nil {
@@ -204,7 +204,7 @@ func (d *DB) HopAlbums(ctx context.Context, q ContentQuery) ([]HopAlbum, int, er
 	var out []HopAlbum
 	for rows.Next() {
 		var a HopAlbum
-		if err := rows.Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description, &a.Count, &a.Bytes); err != nil {
+		if err := rows.Scan(&a.ID, &a.UserID, &a.Title, &a.OwnerToken, &a.CreatedAt, &a.CoverID, &a.Description, &a.AdminNote, &a.Count, &a.Bytes); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, a)

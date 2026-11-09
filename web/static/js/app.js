@@ -14,6 +14,29 @@
   }
   window.phT = T;
 
+  // Questions and name prompts go through the HOP family's shared dialogs (hop-ui.js from
+  // hel.ink, see base.html) and fall back to the browser's own when that script is not on the
+  // page: offline, blocked, or not deployed yet. Both answer with a Promise.
+  //   phConfirm(text | {title, message}, {danger, subject, ok, anchor})  -> true / false
+  //   phPrompt({title, label, value, maxlength})                          -> the text, or null
+  // A plain sentence is split after its first sentence: the question is the title, the rest the
+  // message.
+  function parts(text) {
+    var m = /^(.*?(?:[?？。!！]|\.(?:\s|$)))\s*([\s\S]*)$/.exec(String(text));
+    return m && m[2] ? { title: m[1], message: m[2] } : { title: String(text) };
+  }
+  function phConfirm(text, opts) {
+    var o = Object.assign(typeof text === 'string' ? parts(text) : text, opts || {});
+    if (window.HopUI && HopUI.confirm) return HopUI.confirm(o);
+    return Promise.resolve(window.confirm([o.title, o.message].filter(Boolean).join('\n\n')));
+  }
+  function phPrompt(opts) {
+    if (window.HopUI && HopUI.prompt) return HopUI.prompt(opts);
+    return Promise.resolve(window.prompt(opts.title || opts.label || '', opts.value == null ? '' : opts.value));
+  }
+  window.phConfirm = phConfirm;
+  window.phPrompt = phPrompt;
+
   // ---------- toasts ----------
   function toast(msg, err) {
     var box = $('#toasts'); if (!box) return;
@@ -48,13 +71,42 @@
     root.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
   });
-  var burger = $('#burger');
-  if (burger) burger.addEventListener('click', function () { $('#nav').classList.toggle('open'); });
-  var menu = $('#menu');
-  if (menu) {
-    menu.querySelector('button').addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', function (e) { if (!menu.contains(e.target)) menu.classList.remove('open'); });
+  // The phone navigation: the burger opens it, a tap outside, a chosen link or Escape closes it.
+  var nav = $('#nav'), burger = $('#burger');
+  function setNav(open) {
+    if (!nav || !burger) return;
+    nav.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', String(open));
   }
+  if (burger && nav) {
+    burger.setAttribute('aria-expanded', 'false');
+    burger.addEventListener('click', function (e) { e.stopPropagation(); setNav(!nav.classList.contains('open')); });
+    nav.addEventListener('click', function (e) { if (e.target.closest('.nav-links a')) setNav(false); });
+    document.addEventListener('click', function (e) { if (nav.classList.contains('open') && !e.target.closest('.nav-links, #burger')) setNav(false); });
+  }
+  // Drop-down menus (language, account): one open at a time; a tap outside or Escape closes them.
+  var menus = $$('.menu');
+  function closeMenus(except) {
+    menus.forEach(function (m) {
+      if (m === except) return;
+      m.classList.remove('open');
+      var b = m.querySelector(':scope > button'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  menus.forEach(function (m) {
+    var b = m.querySelector(':scope > button'); if (!b) return;
+    b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function (e) {
+      e.stopPropagation(); closeMenus(m);
+      b.setAttribute('aria-expanded', String(m.classList.toggle('open')));
+    });
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.menu')) closeMenus(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    closeMenus();
+    if (nav && nav.classList.contains('open')) { setNav(false); burger.focus(); }
+  });
 
   // ---------- generic helpers wired by data attributes ----------
   document.addEventListener('click', function (e) {
@@ -112,15 +164,30 @@
   });
 
   // Confirmations and prompts without inline scripts (the CSP forbids them).
+  // A form may carry data-confirm, data-confirm-danger and data-confirm-subject (what goes), and
+  // data-prompt with data-prompt-field. The question is a shared dialog; submit waits for it and
+  // sends the form only when it is answered yes.
+  var asked = false;
   document.addEventListener('submit', function (e) {
     var f = e.target, btn = e.submitter;
     var msg = (btn && btn.dataset.confirm) || f.dataset.confirm;
-    if (msg && !confirm(msg)) { e.preventDefault(); return; }
-    if (f.dataset.prompt) {
-      var v = prompt(f.dataset.prompt);
-      if (v === null) { e.preventDefault(); return; }
-      f.querySelector('[name="' + f.dataset.promptField + '"]').value = v;
+    var promptText = f.dataset.prompt;
+    if (!msg && !promptText) return;
+    if (asked) { asked = false; return; }
+    e.preventDefault();
+    var go = function () { asked = true; if (f.requestSubmit) { f.requestSubmit(btn); } else { f.submit(); } };
+    if (promptText) {
+      phPrompt({ title: promptText, value: '' }).then(function (v) {
+        if (v === null) return;
+        f.querySelector('[name="' + f.dataset.promptField + '"]').value = v;
+        go();
+      });
+      return;
     }
+    phConfirm(msg, {
+      danger: f.dataset.confirmDanger != null,
+      subject: f.dataset.confirmSubject || ''
+    }).then(function (ok) { if (ok) go(); });
   }, true);
   $$('[data-autosubmit]').forEach(function (s) { s.addEventListener('change', function () { s.form.submit(); }); });
   $$('input[readonly]').forEach(function (i) { i.addEventListener('focus', function () { i.select(); }); });
@@ -178,9 +245,14 @@
   }
   var clearBtn = $('#clear-history');
   if (clearBtn) clearBtn.addEventListener('click', function () {
-    if (!confirm(T('Forget this list? The images stay online; you lose the delete links saved here.'))) return;
-    try { localStorage.removeItem(HKEY); } catch (e) {}
-    renderHistory();
+    phConfirm(T('Forget this list? The images stay online; you lose the delete links saved here.'), {
+      message: T('The delete links saved in this browser are dropped. The images stay online.'),
+      ok: T('Forget this list'), anchor: clearBtn
+    }).then(function (ok) {
+      if (!ok) return;
+      try { localStorage.removeItem(HKEY); } catch (e) {}
+      renderHistory();
+    });
   });
   renderHistory();
 
@@ -342,7 +414,38 @@
       if (bar && $$('#uploads [data-link]').length > 1) bar.classList.remove('hide');
       remember(im);
       addToGallery(im);
+      refreshNumbers();
       settle(r, im.id);
+    }
+
+    // After an upload the dashboard's numbers (files by kind, storage, albums, the filter chips and the
+    // "My files" count) come fresh from the server instead of waiting for a reload.
+    var numbersTimer;
+    function refreshNumbers() {
+      if (!$('[data-stat="files"]')) return;
+      clearTimeout(numbersTimer);
+      numbersTimer = setTimeout(function () {
+        api('GET', '/api/v1/me').then(function (me) {
+          var k = me.kinds || {}, set = function (sel, v) { var el = $(sel); if (el && v !== undefined) el.textContent = v; };
+          set('[data-stat="files"]', me.files);
+          set('[data-stat="files_sub"]', T('dash.files_sub', { images: k.image, videos: k.video, pdfs: k.pdf }));
+          set('[data-stat="albums"]', me.albums);
+          set('[data-stat="storage"]', fmtBytes(me.storage_used));
+          set('[data-count="all"]', me.files); set('[data-count="image"]', k.image); set('[data-count="video"]', k.video); set('[data-count="pdf"]', k.pdf);
+          var tot = $('[data-stat="total"]');
+          if (tot && !tot.dataset.filtered) {
+            var kind = tot.dataset.kind;
+            tot.textContent = kind === 'image' ? T('album.n_images', { n: k.image }) : kind === 'video' ? T('dash.n_videos', { n: k.video })
+              : kind === 'pdf' ? T('dash.n_pdfs', { n: k.pdf }) : T('dash.n_files', { n: me.files });
+          }
+        }, function () {});
+      }, 400);
+    }
+    function fmtBytes(b) {
+      if (!(b >= 1024)) return (b || 0) + ' B';
+      var u = 'KMGTPE', e = -1;
+      do { b /= 1024; e++; } while (b >= 1024 && e < u.length - 1);
+      return (b >= 100 ? b.toFixed(0) : b.toFixed(1)) + ' ' + u[e] + 'B';
     }
 
     // On the dashboard a new upload lands at the top of "My files" straight away.
@@ -397,7 +500,7 @@
       var batch = { left: count, ids: [] };
       var mediaRows = media.map(function (f) { var r = row(f.name, ''); r.batch = batch; return r; });
       var albumReady = wantAlbum
-        ? api('POST', '/api/v1/albums', { title: ticket, description: note, content_warning: $('#upload-warning').value, warning_reason: $('#upload-warning-reason').value }).then(function (al) {
+        ? api('POST', '/api/v1/albums', { title: ticket, admin_note: note, content_warning: $('#upload-warning').value, warning_reason: $('#upload-warning-reason').value }).then(function (al) {
             $('#album-banner').classList.remove('hide');
             $('#album-link').value = al.url; $('#album-open').href = al.url;
             return al.id;
@@ -543,9 +646,11 @@
   }
   var ren = $('#rename');
   if (ren) ren.addEventListener('click', function () {
-    var t = prompt(T('New name for this image:'), $('#title').textContent.trim());
-    if (t === null) return;
-    api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast(T('Renamed')); }, function (e) { toast(e.message, true); });
+    phPrompt({ title: T('New name for this image:'), value: $('#title').textContent.trim(), maxlength: 200, anchor: ren })
+      .then(function (t) {
+        if (t === null) return;
+        api('PATCH', '/api/v1/images/' + ren.dataset.id, { title: t }).then(function (d) { $('#title').textContent = d.title || d.id; toast(T('Renamed')); }, function (e) { toast(e.message, true); });
+      });
   });
   // dialogs opened by buttons
   document.addEventListener('click', function (e) {
@@ -592,8 +697,12 @@
   });
   var del = $('#delete');
   if (del) del.addEventListener('click', function () {
-    if (!confirm(T('Move this image to the trash? The link stops working now; you can restore it for 7 days.'))) return;
-    api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
+    phConfirm(T('Move this image to the trash? The link stops working now; you can restore it for 7 days.'), {
+      danger: true, anchor: del
+    }).then(function (ok) {
+      if (!ok) return;
+      api('DELETE', '/api/v1/images/' + del.dataset.id).then(function () { location.href = '/dashboard'; }, function (e) { toast(e.message, true); });
+    });
   });
 
   // ---------- dashboard: select, copy, download & delete many ----------
@@ -647,17 +756,24 @@
     if (mk) mk.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
-      var t = prompt(T('Name for the new album ({n} images):', { n: ids.length }), '');
-      if (t === null) return;
-      api('POST', '/api/v1/albums', { title: t, ids: ids }).then(function (d) { location.href = '/a/' + d.id + '/edit'; }, function (e) { toast(e.message, true); });
+      phPrompt({ title: T('Name for the new album ({n} images)', { n: ids.length }), value: '', maxlength: 120, anchor: mk })
+        .then(function (t) {
+          if (t === null) return;
+          api('POST', '/api/v1/albums', { title: t, ids: ids }).then(function (d) { location.href = '/a/' + d.id + '/edit'; }, function (e) { toast(e.message, true); });
+        });
     });
     if (/[?&]select=1/.test(location.search)) selBtn.click();
-    $('#delete-selected').addEventListener('click', function () {
+    var delSelected = $('#delete-selected');
+    delSelected.addEventListener('click', function () {
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
-      if (!confirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }))) return;
-      Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
-        .then(function (res) { reloadAfter(res, 'deleted'); });
+      phConfirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }), {
+        danger: true, anchor: delSelected
+      }).then(function (ok) {
+        if (!ok) return;
+        Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
+          .then(function (res) { reloadAfter(res, 'deleted'); });
+      });
     });
   }
 
@@ -682,7 +798,7 @@
       grid.insertBefore(dragged, after ? over.nextSibling : over);
     });
     $('#ae-save').addEventListener('click', function () {
-      var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, remove: removed,
+      var body = { content_warning: $('#ae-warning').value, warning_reason: $('#ae-warning-reason').value, title: $('#ae-title').value, description: $('#ae-desc').value, admin_note: $('#ae-note').value, remove: removed,
         order: $$('.order-item', grid).map(function (x) { return x.dataset.id; }) };
       if (cover) body.cover_id = cover;
       sv(body).then(function () { toast(T('Album saved')); removed = []; }, function (e) { toast(e.message, true); });
@@ -694,8 +810,13 @@
       sv({ add: ids }).then(function () { location.reload(); }, function (e) { toast(e.message, true); });
     });
     $('#ae-delete').addEventListener('click', function () {
-      if (!confirm(T('Delete this album? The images themselves stay.'))) return;
-      api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
+      var aeDel = $('#ae-delete');
+      phConfirm(T('Delete this album? The images themselves stay.'), {
+        danger: true, subject: aeDel.dataset.album || '', anchor: aeDel
+      }).then(function (ok) {
+        if (!ok) return;
+        api('DELETE', '/api/v1/albums/' + aid).then(function () { location.href = '/dashboard/albums'; }, function (e) { toast(e.message, true); });
+      });
     });
   }
 

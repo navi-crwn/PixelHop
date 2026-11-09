@@ -1,5 +1,5 @@
 {{define "base"}}<!doctype html>
-<html lang="{{.L.Code}}" dir="{{.L.Dir}}">
+<html lang="{{.L.Code}}" dir="{{.L.Dir}}"{{if .UIClean}} data-ui="clean"{{end}}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,10 +21,15 @@
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 {{with hopFonts}}<link rel="preconnect" href="https://hel.ink" crossorigin>
 <link rel="stylesheet" href="{{.URL}}" integrity="{{.Integrity}}" crossorigin="anonymous">{{end}}
+{{/* The family's dialogs (hop-assets hop-ui, v5 on): loaded once the manifest lists both files, with their SRI
+     hashes. Until then app.js asks with the browser's own confirm() and prompt(). */}}
+{{with hopUI}}<link rel="stylesheet" href="{{.CSS.URL}}"{{with .CSS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous">
+<script src="{{.JS.URL}}"{{with .JS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous" defer></script>{{end}}
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 <link rel="stylesheet" href="/static/css/family-switcher.css?v={{.Asset}}">
 {{if .Dash}}<link rel="stylesheet" href="/static/css/shell.css?v={{.Asset}}">{{end}}
+<link rel="stylesheet" href="/static/css/coss.css?v={{.Asset}}">
 <script src="/static/js/family-switcher.js?v={{.Asset}}" defer></script>
 {{block "head" .}}{{end}}
 </head>
@@ -40,6 +45,7 @@
     <nav class="shell-nav" aria-label="{{.Site}}">
       <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>{{.L.T "nav.dashboard"}}</a>
       <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
+      <a href="/dashboard/trash" {{if eq .Path "/dashboard/trash"}}aria-current="page"{{end}}><svg><use href="#i-trash"/></svg>{{.L.T "mytabs.trash"}}</a>
       {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg><use href="#i-users"/></svg>{{.L.T "nav.my_profile"}}</a>{{end}}
       <a href="/"><svg><use href="#i-upload"/></svg>{{.L.T "nav.upload"}}</a>
       <a href="/tools"><svg><use href="#i-adjust"/></svg>{{.L.T "nav.studio"}}</a>
@@ -80,6 +86,7 @@
     </header>
     <main id="main">{{template "mainbody" .}}</main>
     <footer class="shell-foot">
+      {{if .UIClean}}<p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>{{end}}
       <nav aria-label="{{.Site}}">
         <a href="/about">{{.L.T "footer.about"}}</a><a href="/help">{{.L.T "footer.help"}}</a><a href="/faq">{{.L.T "footer.faq"}}</a><a href="/status">{{.L.T "footer.status"}}</a><a href="/legal">{{.L.T "footer.legal"}}</a><a href="/docs">{{.L.T "footer.api"}}</a><a href="/contact">{{.L.T "footer.contact"}}</a>
       </nav>
@@ -91,7 +98,7 @@
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
-    <nav class="nav-links" aria-label="{{$.L.T "nav.main"}}">
+    <nav class="nav-links" id="nav-links" aria-label="{{$.L.T "nav.main"}}">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>{{.L.T "nav.upload"}}</a>
       <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>{{.L.T "nav.studio"}}</a>
       <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>{{.L.T "nav.explore"}}</a>
@@ -129,7 +136,7 @@
       {{else}}
       <a class="btn sm ghost" href="/login">{{.L.T "nav.sign_in"}}</a>
       {{end}}
-      <button class="icon-btn burger" id="burger" type="button" aria-label="{{.L.T "nav.menu"}}"><svg><use href="#i-menu"/></svg></button>
+      <button class="icon-btn burger" id="burger" type="button" aria-label="{{.L.T "nav.menu"}}" aria-controls="nav-links" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
     </div>
   </div>
 </header>
@@ -137,7 +144,7 @@
 <footer class="footer-columns">
   <div class="wrap footer-grid">
     <div class="foot-col foot-brand">
-      <b>{{.Site}}</b>
+      {{if .UIClean}}<p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>{{else}}<b>{{.Site}}</b>{{end}}
       <p class="muted small">{{.L.T "footer.tagline"}}</p>
     </div>
     <div class="foot-col">

@@ -237,6 +237,9 @@ ALTER TABLE albums ADD COLUMN warning_reason TEXT NOT NULL DEFAULT '';`,
 	// guest limit; kept in the database so a restart does not reset the count
 	`CREATE TABLE guest_uploads (ip_hash TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
+	// 15: the note a member writes "for the admin" when uploading with a
+	// ticket: for the owner and the moderators only, never on the shared page
+	`ALTER TABLE albums ADD COLUMN admin_note TEXT NOT NULL DEFAULT '';`,
 }
 
 func (d *DB) migrate() error {
