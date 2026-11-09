@@ -66,6 +66,7 @@
   "nav.helink_dashboard": "Dasbor HEL.ink",
   "nav.back": "Kembali ke {site}",
   "footer.tagline": "hosting gambar open source",
+  "footer.part_of": "Bagian dari {name}",
   "footer.about": "Tentang",
   "footer.features": "Fitur",
   "footer.studio": "Studio",

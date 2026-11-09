@@ -5,6 +5,7 @@ All notable changes to PixelHop will be documented in this file.
 ## Unreleased
 
 ### Added
+- Every footer starts with the HOP ID mark and "Part of Hop Easy Link" (linking to hel.ink), for everyone and in both looks; the Clean-only brand strip is replaced by it.
 - HopUI dialogs: questions and notices use the family's shared dialog instead of the browser's own, with the question's title and its explanation said separately.
 - A ticket's private note is shown once on the upload result page, to its owner, and stays visible only to the owner and the moderators.
 - The trash has its own entry in the dashboard sidebar.

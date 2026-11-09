@@ -66,6 +66,7 @@
   "nav.helink_dashboard": "HEL.ink 控制台",
   "nav.back": "返回 {site}",
   "footer.tagline": "开源图床与媒体托管",
+  "footer.part_of": "{name} 的一部分",
   "footer.about": "关于",
   "footer.features": "特性",
   "footer.studio": "工作台",

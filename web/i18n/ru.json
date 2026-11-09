@@ -66,6 +66,7 @@
   "nav.helink_dashboard": "Панель HEL.ink",
   "nav.back": "Назад на {site}",
   "footer.tagline": "хостинг изображений с открытым кодом",
+  "footer.part_of": "Часть {name}",
   "footer.about": "О проекте",
   "footer.features": "Возможности",
   "footer.studio": "Студия",
