@@ -11,6 +11,7 @@ All notable changes to PixelHop will be documented in this file.
 - An optional Clean interface style (flat surfaces, solid bordered cards, quiet tables and tabs), chosen with the `hop_ui` cookie, which the server reads. The HOP look stays the default.
 
 ### Fixed
+- The changelog page lists every merged pull request again: the snapshot is rebuilt from a freshly fetched main, and `make check-changelog` fails when merged PRs are missing from it.
 - A file its owner put in the trash answers 404, not 451. Hidden media is no longer cached publicly or redirected.
 - The content gate stays on the host it was posted to.
 - The language menu stays on the screen at 375 px and closes with Escape.
