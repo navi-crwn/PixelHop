@@ -482,8 +482,9 @@ td select, td input { height: 32px; font-size: .85rem; width: auto; }
 
 /* ---------- docs ---------- */
 .doc { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 34px; }
-@media (max-width: 860px) { .doc { grid-template-columns: 1fr; } .doc nav { display: none; } }
 .doc nav { position: sticky; top: 80px; align-self: start; display: grid; gap: 2px; }
+/* after the rule above, or its display: grid wins and the sticky list lies over the text on a phone */
+@media (max-width: 860px) { .doc { grid-template-columns: 1fr; } .doc nav { display: none; } }
 .doc nav a { color: var(--muted); padding: 5px 10px; border-radius: 8px; font-size: .9rem; }
 .doc nav a:hover { background: var(--panel); color: var(--text); text-decoration: none; }
 .doc section { margin-bottom: 40px; scroll-margin-top: 80px; }
