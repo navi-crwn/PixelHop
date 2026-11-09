@@ -40,6 +40,9 @@ func TestTicketNoteOnTheUploadResultPage(t *testing.T) {
 	if !strings.Contains(body, "only you and the moderators") || !strings.Contains(body, `data-report-note="`+note+`"`) {
 		t.Errorf("owner's result page lacks the note (labelled: %v, in the copy-for-chat data: %v)", strings.Contains(body, "only you and the moderators"), strings.Contains(body, `data-report-note="`+note+`"`))
 	}
+	if n, l := strings.Count(body, note), strings.Count(body, "only you and the moderators"); n != 2 || l != 1 {
+		t.Errorf("owner's result page has the note %d time(s) and its label %d time(s), want 2 (paragraph, copy-for-chat data) and 1", n, l)
+	}
 	// An admin sees it too.
 	admin, _ := member(t, a, "boss-result@example.com")
 	admin.Role = "admin"

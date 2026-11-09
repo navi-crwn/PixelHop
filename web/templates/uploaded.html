@@ -9,7 +9,6 @@
     <h1>{{with $d.Title}}{{.}}{{else}}{{$.L.T "uploaded.ready"}}{{end}}</h1>
     {{with $d.Note}}<p class="result-note">{{.}}</p>{{end}}
     {{with $d.AdminNote}}<p class="result-note admin-note"><b class="muted">{{$.L.T "album.admin_note"}}</b> {{.}}</p>{{end}}
-    {{with $d.AdminNote}}<p class="result-note admin-note"><b class="muted">{{$.L.T "album.admin_note"}}</b> {{.}}</p>{{end}}
     {{if not $.User}}<p class="small muted">{{$.L.T "uploaded.keep_delete"}}</p>{{end}}
   </div>
 
