@@ -1,8 +1,10 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -64,6 +66,64 @@ func TestTrashedFileIsNotAModerationTakedown(t *testing.T) {
 				t.Errorf("moderated %s (cookie %v): %d, want 451", path, c != nil, rec.Code)
 			}
 		}
+	}
+}
+
+func TestHiddenMediaIsPrivateForPermittedViewers(t *testing.T) {
+	a, h := linkApp(t)
+	ctx := context.Background()
+	owner, _ := member(t, a, "hidden-owner@example.com")
+	admin, _ := member(t, a, "hidden-admin@example.com")
+	admin.Role = "admin"
+	if err := a.db.UpdateUser(ctx, admin); err != nil {
+		t.Fatal(err)
+	}
+	ownerCookie, adminCookie := sessionFor(t, a, owner.ID), sessionFor(t, a, admin.ID)
+	data := testPNG(40, 30)
+	for _, reason := range []string{"trash", "moderation"} {
+		t.Run(reason, func(t *testing.T) {
+			im := addImage(t, a, owner, "hidden-"+reason)
+			if reason == "trash" {
+				if err := a.db.TrashImage(ctx, im.ID); err != nil {
+					t.Fatal(err)
+				}
+			} else if err := a.db.SetImageHidden(ctx, im.ID, true); err != nil {
+				t.Fatal(err)
+			}
+			for _, key := range []string{im.KeyFull, im.KeyThumb} {
+				if err := a.backends[im.Backend].Put(ctx, key, bytes.NewReader(data), int64(len(data)), "image/png"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			paths := []string{
+				"/i/" + im.ID + ".jpg", "/t/" + im.ID + ".jpg", "/i/" + im.ID + ".jpg?w=20",
+				"/i/2026/11/09/" + im.ID + "_original.jpg", "/i/2026/11/09/" + im.ID + "_thumb.jpg",
+			}
+			for _, path := range paths {
+				want := http.StatusNotFound
+				if reason == "moderation" {
+					want = http.StatusUnavailableForLegalReasons
+				}
+				if rec := fetch(h, path); rec.Code != want || (reason == "trash" && rec.Header().Get("Cache-Control") != "private, no-store") {
+					t.Errorf("visitor %s: %d, Cache-Control %q; want %d", path, rec.Code, rec.Header().Get("Cache-Control"), want)
+				}
+				for who, cookie := range map[string]*http.Cookie{"owner": ownerCookie, "admin": adminCookie} {
+					req := httptest.NewRequest(http.MethodGet, path, nil)
+					req.AddCookie(cookie)
+					rec := httptest.NewRecorder()
+					h.ServeHTTP(rec, req)
+					if reason == "moderation" && who == "owner" {
+						if rec.Code != http.StatusUnavailableForLegalReasons {
+							t.Errorf("owner %s: %d; want 451", path, rec.Code)
+						}
+						continue
+					}
+					if rec.Code != http.StatusOK || rec.Body.Len() == 0 || rec.Header().Get("Cache-Control") != "private, no-store" {
+						t.Errorf("%s %s: %d, %d bytes, Cache-Control %q; want an uncached file", who, path, rec.Code, rec.Body.Len(), rec.Header().Get("Cache-Control"))
+					}
+				}
+			}
+		})
 	}
 }
 

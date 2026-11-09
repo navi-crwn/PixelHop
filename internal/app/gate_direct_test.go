@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,10 @@ func TestDirectLinksToWarnedFilesGoThroughTheGate(t *testing.T) {
 	a, h := linkApp(t)
 	ctx := context.Background()
 	im := addImage(t, a, nil, "adult-direct-AbC123")
+	data := testPNG(10, 10)
+	if err := a.backends[im.Backend].Put(ctx, im.KeyFull, bytes.NewReader(data), int64(len(data)), "image/png"); err != nil {
+		t.Fatal(err)
+	}
 	im.ContentWarning = "adult"
 	if err := a.db.UpdateImageMeta(ctx, im); err != nil {
 		t.Fatal(err)
@@ -47,7 +52,7 @@ func TestDirectLinksToWarnedFilesGoThroughTheGate(t *testing.T) {
 	req.AddCookie(&http.Cookie{Name: gateCookieName(im.ID), Value: "1"})
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
-	if rec.Code == http.StatusSeeOther || rec.Header().Get("Cache-Control") != "private, no-store" {
+	if rec.Code != http.StatusOK || rec.Body.Len() == 0 || rec.Header().Get("Cache-Control") != "private, no-store" {
 		t.Errorf("with the gate cookie: %d, Cache-Control %q", rec.Code, rec.Header().Get("Cache-Control"))
 	}
 }
