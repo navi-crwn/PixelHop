@@ -4,7 +4,19 @@ All notable changes to PixelHop will be documented in this file.
 
 ## Unreleased
 
+### Added
+- HopUI dialogs: questions and notices use the family's shared dialog instead of the browser's own, with the question's title and its explanation said separately.
+- A ticket's private note is shown once on the upload result page, to its owner, and stays visible only to the owner and the moderators.
+- The trash has its own entry in the dashboard sidebar.
+- An optional Clean interface style (flat surfaces, solid bordered cards, quiet tables and tabs), chosen with the `hop_ui` cookie, which the server reads. The HOP look stays the default.
+
+### Fixed
+- A file its owner put in the trash answers 404, not 451. Hidden media is no longer cached publicly or redirected.
+- The content gate stays on the host it was posted to.
+- The language menu stays on the screen at 375 px and closes with Escape.
+
 ### Changed
+- Controls follow the HOP control standard: one 8 px radius, 36 px controls (32 px in rows, 40 px on forms), capped field widths.
 - HOP family assets move to hop-assets v4: FileHop's new pixel mark in the family list, the app switcher, the footer and the About page (bundled manifest), and the copied home engine with FileHop's matching 3D map. `scripts/sync-hop-assets.sh` copies from v4.
 
 ### Security
