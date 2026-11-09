@@ -717,10 +717,8 @@ footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr
 .foot-col nav { display: flex; flex-direction: column; gap: 8px; margin: 0; }
 .foot-col nav a { color: var(--muted); text-decoration: none; font-size: 0.88rem; transition: color .15s; }
 .foot-col nav a:hover { color: var(--text); }
-.foot-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 16px; font-size: 0.82rem; }
-.foot-langs { display: flex; flex-wrap: wrap; gap: 10px; }
-.foot-langs a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
-.foot-langs a:hover { color: var(--text); }
+.foot-bottom { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 16px; font-size: 0.82rem; }
+@media (max-width: 640px) { .foot-bottom { justify-content: center; text-align: center; } }
 .status-dl dt { color: var(--muted); }
 .status-dl dd { margin: 0; }
 
