@@ -1,0 +1,87 @@
+/* coss-style surfaces (owner-approved pilot, 2026-11-10). Loaded after app.css and shell.css; it only restates
+   values the base sheets already read (tokens) and flattens surfaces: solid cards with a 1 px low-contrast
+   border, flat sidebar and top bar divided by a hairline, quiet tabs and tables, no blur or gradients on
+   dashboard surfaces. Accent colours and family typography are unchanged. The home hero art is not touched. */
+:root {
+  --bg: #0a0a0c; --bg-2: rgba(255, 255, 255, .04); --panel: #141418; --panel-2: rgba(255, 255, 255, .06);
+  --line: rgba(255, 255, 255, .09); --line-2: rgba(255, 255, 255, .16);
+  --coss-card-shadow: none; --coss-frame: rgba(255, 255, 255, .03); --hop-card-radius: 14px;
+}
+:root[data-theme="light"] {
+  --bg: #f7f7f8; --bg-2: #ffffff; --panel: #ffffff; --panel-2: rgba(0, 0, 0, .05);
+  --line: rgba(0, 0, 0, .09); --line-2: rgba(0, 0, 0, .14);
+  --coss-card-shadow: 0 1px 2px rgba(0, 0, 0, .04); --coss-frame: rgba(0, 0, 0, .035);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f7f8; --bg-2: #ffffff; --panel: #ffffff; --panel-2: rgba(0, 0, 0, .05);
+    --line: rgba(0, 0, 0, .09); --line-2: rgba(0, 0, 0, .14);
+    --coss-card-shadow: 0 1px 2px rgba(0, 0, 0, .04); --coss-frame: rgba(0, 0, 0, .035);
+  }
+}
+/* no dotted grid behind the app; the home page keeps its own art */
+body:not(:has(.pixel-home))::before { display: none; }
+
+/* Dashboard chrome: flat sidebar and top bar, hairline dividers. */
+.shell { background: var(--bg); }
+.shell-side { inset: 0 auto 0 0; border-width: 0 1px 0 0; border-radius: 0; background: var(--bg); box-shadow: none; }
+@media (min-width: 1024px) { .shell-side { width: var(--side); } }
+.shell-top { top: 0; height: 56px; margin: 0; padding: 0 16px; border-width: 0 0 1px; border-radius: 0; background: var(--bg); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.shell-body main { padding: 24px 16px 12px; }
+.shell-foot { margin: 8px 16px 12px; }
+.shell-nav a { min-height: 36px; border-radius: 8px; font-size: .9rem; font-weight: 500; }
+.shell-nav a:hover { background: color-mix(in srgb, var(--muted) 10%, transparent); }
+.shell-nav a[aria-current="page"] { background: color-mix(in srgb, var(--muted) 14%, transparent); box-shadow: none; }
+.shell-label { text-transform: none; letter-spacing: 0; font-size: .75rem; font-weight: 500; color: var(--muted); }
+.shell-brand { letter-spacing: -.02em; }
+.menu-list { border-color: var(--line); box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .18); }
+
+/* Public header: flat bar with a hairline. */
+.nav { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--bg); }
+
+/* Surfaces: solid, bordered, 14 px, barely-there shadow. */
+.card, .panel, .stat, .table-wrap, .stage, .member-nav, .profile-head, .studio-teaser, .album-banner, .copy-all, .one-account {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--hop-card-radius); box-shadow: var(--coss-card-shadow);
+}
+.stat::before { display: none; }
+.stat { overflow: visible; }
+.stat b, .stats b, td, .stat-sub { font-variant-numeric: tabular-nums; }
+.stat-label, .eyebrow, .stat-sub { text-transform: none; letter-spacing: 0; }
+.stat-label { font-size: .78rem; font-weight: 500; }
+.stat b { font-weight: 650; }
+.stat-ico { border-radius: 8px; }
+.stage img { box-shadow: none; }
+.auth .card { border-radius: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 12px 32px -16px rgba(0, 0, 0, .14); }
+.empty { border-radius: var(--hop-card-radius); background: var(--panel); border: 1px dashed var(--line-2); }
+
+/* Upload drop zone: one bordered surface instead of a gradient frame. */
+.drop { padding: 0; border: 1px solid var(--line-2); border-radius: var(--hop-card-radius); background: var(--panel); box-shadow: var(--coss-card-shadow); }
+.drop-in { border-radius: calc(var(--hop-card-radius) - 1px); }
+.drop.over { border-color: var(--accent); }
+
+/* Tabs and member nav. */
+.tabs { border-radius: 8px; background: var(--coss-frame); }
+.tabs button[aria-selected="true"] { background: var(--panel); box-shadow: var(--coss-card-shadow), 0 0 0 1px var(--line); color: var(--text); }
+.member-nav a { border-radius: 8px; font-weight: 500; }
+.member-nav a[aria-current] { background: color-mix(in srgb, var(--muted) 14%, transparent); box-shadow: none; }
+
+/* Tables: muted head row, row hover. */
+th { text-transform: none; letter-spacing: 0; font-size: .75rem; font-weight: 500; background: var(--coss-frame); padding-block: 9px; }
+tbody tr:hover { background: var(--coss-frame); }
+
+/* Badges: 6 px radius, for real status only. */
+.pill { border-radius: 6px; height: 20px; padding: 0 7px; font-size: .75rem; font-weight: 500; }
+.tile { border-radius: 10px; }
+
+/* Inputs read as inputs on solid cards. */
+input[type=text], input[type=email], input[type=password], input[type=url], input[type=number], input[type=search], select, textarea { background: var(--bg-2); border-color: var(--line-2); box-shadow: 0 1px 1px rgba(0, 0, 0, .03); }
+.btn { font-weight: 500; }
+.btn:not(.primary):not(.danger.solid) { background: var(--bg-2); box-shadow: 0 1px 1px rgba(0, 0, 0, .04); }
+.btn.ghost { background: transparent; box-shadow: none; }
+
+/* Footer strip: logo + the family phrase. */
+.coss-footer-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 10px; font-size: .875rem; color: var(--muted); }
+.coss-footer-brand img { width: 24px; height: 24px; }
+.coss-footer-brand b { color: var(--text); font-weight: 600; }
+.foot-brand .coss-footer-brand { justify-content: flex-start; margin: 0 0 8px; }
+@media (prefers-reduced-motion: reduce) { .shell-nav a, .tile img { transition: none; } }

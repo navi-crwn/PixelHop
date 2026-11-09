@@ -29,6 +29,7 @@
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 <link rel="stylesheet" href="/static/css/family-switcher.css?v={{.Asset}}">
 {{if .Dash}}<link rel="stylesheet" href="/static/css/shell.css?v={{.Asset}}">{{end}}
+<link rel="stylesheet" href="/static/css/coss.css?v={{.Asset}}">
 <script src="/static/js/family-switcher.js?v={{.Asset}}" defer></script>
 {{block "head" .}}{{end}}
 </head>
@@ -85,6 +86,7 @@
     </header>
     <main id="main">{{template "mainbody" .}}</main>
     <footer class="shell-foot">
+      <p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>
       <nav aria-label="{{.Site}}">
         <a href="/about">{{.L.T "footer.about"}}</a><a href="/help">{{.L.T "footer.help"}}</a><a href="/faq">{{.L.T "footer.faq"}}</a><a href="/status">{{.L.T "footer.status"}}</a><a href="/legal">{{.L.T "footer.legal"}}</a><a href="/docs">{{.L.T "footer.api"}}</a><a href="/contact">{{.L.T "footer.contact"}}</a>
       </nav>
@@ -142,7 +144,7 @@
 <footer class="footer-columns">
   <div class="wrap footer-grid">
     <div class="foot-col foot-brand">
-      <b>{{.Site}}</b>
+      <p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>
       <p class="muted small">{{.L.T "footer.tagline"}}</p>
     </div>
     <div class="foot-col">
