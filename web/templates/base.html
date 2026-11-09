@@ -1,5 +1,5 @@
 {{define "base"}}<!doctype html>
-<html lang="{{.L.Code}}" dir="{{.L.Dir}}">
+<html lang="{{.L.Code}}" dir="{{.L.Dir}}"{{if .UIClean}} data-ui="clean"{{end}}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -86,7 +86,7 @@
     </header>
     <main id="main">{{template "mainbody" .}}</main>
     <footer class="shell-foot">
-      <p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>
+      {{if .UIClean}}<p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>{{end}}
       <nav aria-label="{{.Site}}">
         <a href="/about">{{.L.T "footer.about"}}</a><a href="/help">{{.L.T "footer.help"}}</a><a href="/faq">{{.L.T "footer.faq"}}</a><a href="/status">{{.L.T "footer.status"}}</a><a href="/legal">{{.L.T "footer.legal"}}</a><a href="/docs">{{.L.T "footer.api"}}</a><a href="/contact">{{.L.T "footer.contact"}}</a>
       </nav>
@@ -144,7 +144,7 @@
 <footer class="footer-columns">
   <div class="wrap footer-grid">
     <div class="foot-col foot-brand">
-      <p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>
+      {{if .UIClean}}<p class="coss-footer-brand"><img src="/static/img/logo.svg" alt="" width="24" height="24"><span><b>{{.Site}}</b> · Hop Easy Link</span></p>{{else}}<b>{{.Site}}</b>{{end}}
       <p class="muted small">{{.L.T "footer.tagline"}}</p>
     </div>
     <div class="foot-col">

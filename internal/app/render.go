@@ -34,6 +34,7 @@ type page struct {
 	Canon         string // the canonical address of a shared page
 	OnLink        bool   // served through the link host
 	Path          string
+	UIClean       bool // optional "Clean" style: cookie hop_ui=clean puts data-ui="clean" on <html>
 	Dash          bool // the signed-in dashboard shell (sidebar, settings-type top bar)
 	Announcement  string
 	Version       string
@@ -122,6 +123,7 @@ func (a *App) base(r *http.Request, p page) page {
 	p.Base = a.cfg.BaseURL
 	p.Link = a.cfg.LinkURL
 	p.OnLink = onLinkHost(r)
+	p.UIClean = uiClean(r)
 	p.Path = r.URL.Path
 	p.Version = Version
 	p.Asset = Version + "-" + startedAt
@@ -167,6 +169,7 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" || name == "trash" {
 		p.NoIndex = true
 	}
+	w.Header().Add("Vary", "Cookie") // the page differs with the hop_ui cookie
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "base", p); err != nil {
 		a.log.Error("render", "page", name, "err", err)
@@ -332,4 +335,11 @@ func wallTiles(cols, rows int) []wallTile {
 		}
 	}
 	return tiles
+}
+
+// uiClean reports whether the visitor chose the optional "Clean" interface style.
+// The cookie hop_ui is written by script and shared across *.hel.ink; any value but "clean" means the default HOP look.
+func uiClean(r *http.Request) bool {
+	c, err := r.Cookie("hop_ui")
+	return err == nil && c.Value == "clean"
 }
