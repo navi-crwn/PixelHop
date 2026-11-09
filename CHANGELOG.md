@@ -2,7 +2,9 @@
 
 All notable changes to PixelHop will be documented in this file.
 
-## Unreleased
+## [Unreleased]
+
+## [3.9.0] - 2026-11-10
 
 ### Added
 - HopUI dialogs: questions and notices use the family's shared dialog instead of the browser's own, with the question's title and its explanation said separately.
@@ -22,7 +24,6 @@ All notable changes to PixelHop will be documented in this file.
 ### Security
 - `HOP_PICKER_SECRET` (32+ characters) verifies the media picker's calls (`GET /api/v1/me/media` signed by an app in `PIXELHOP_MEDIA_CLIENTS`) with a secret the hub never uses. Until now PixelHop had to hold BioHop's sign-in secret (`HOP_SSO_SECRET_BIOHOP`) for that, so a leak here could forge a hub ticket for BioHop. It is accepted next to the older secrets while the family moves; once BioHop signs with it (navi-crwn/BioHop `fix/picker-secret`), remove `HOP_SSO_SECRET_BIOHOP` from this server.
 
-## [Unreleased]
 
 ### HOP family
 - FileHop (file.hel.ink), the sixth HOP app, is in the family list: the dashboard sidebar, the app switcher, the footer and the About page (from the bundled asset manifest), the FAQ and features text in all nine languages, and the README family table.
