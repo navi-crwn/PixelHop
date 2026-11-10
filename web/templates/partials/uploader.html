@@ -10,7 +10,7 @@
           <button class="btn lg" type="button" id="paste-btn"><svg><use href="#i-copy"/></svg>{{.L.T "upload.paste"}}</button>
           <button class="btn lg" type="button" id="show-url" title="{{.L.T "upload.from_link"}}"><svg><use href="#i-link"/></svg><span class="url-label">{{.L.T "upload.from_link"}}</span></button>
         </div>
-        {{if and (not .User) .GuestTTLDays}}<p class="guest-ttl" id="guest-ttl">{{.L.T "upload.guest_ttl" "n" .GuestTTLDays}}</p>{{end}}
+        {{if and (not .User) .GuestUploads .GuestTTLDays}}<p class="guest-ttl" id="guest-ttl">{{.L.T "upload.guest_ttl" "n" .GuestTTLDays}}</p>{{end}}
         <input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,image/heic,image/heif,image/avif,.heic,.heif,.avif,video/*,.mp4,.mov,.webm,.3gp,.mkv,application/pdf,.pdf" multiple hidden>
         <div class="paste-box hide" id="paste-box" contenteditable="true" role="textbox" aria-label="{{.L.T "upload.paste"}}" data-placeholder="{{.L.T "upload.paste_hint"}}"></div>
         <form class="url-row hide" id="url-form">
@@ -31,13 +31,14 @@
           </div>
           <label>{{.L.T "upload.delete_after"}}
             <select id="expire">
-              <option value="">{{.L.T "upload.never"}}</option>
+              {{$all := or .User (not .GuestTTLDays)}}
+              <option value="">{{if $all}}{{.L.T "upload.never"}}{{else}}{{.L.T "upload.days" "n" .GuestTTLDays}}{{end}}</option>
               <option value="10m">{{.L.T "upload.minutes" "n" 10}}</option>
               <option value="1h">{{.L.T "upload.hour"}}</option>
               <option value="1d">{{.L.T "upload.day"}}</option>
-              <option value="7d">{{.L.T "upload.days" "n" 7}}</option>
-              <option value="30d">{{.L.T "upload.days" "n" 30}}</option>
-              <option value="90d">{{.L.T "upload.days" "n" 90}}</option>
+              {{if or $all (lt 7 .GuestTTLDays)}}<option value="7d">{{.L.T "upload.days" "n" 7}}</option>{{end}}
+              {{if or $all (lt 30 .GuestTTLDays)}}<option value="30d">{{.L.T "upload.days" "n" 30}}</option>{{end}}
+              {{if or $all (lt 90 .GuestTTLDays)}}<option value="90d">{{.L.T "upload.days" "n" 90}}</option>{{end}}
             </select>
           </label>
           <label><input type="checkbox" id="slug" checked> {{.L.T "upload.filename"}}</label>

@@ -100,9 +100,6 @@ func csrf(next http.Handler) http.Handler {
 		}
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			// Pages that run under COEP: require-corp (FileHop) may only embed
-			// responses that opt in, so the API says it is shareable.
-			w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
 			if r.Method == http.MethodOptions {

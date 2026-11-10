@@ -7,9 +7,6 @@ All notable changes to PixelHop will be documented in this file.
 ### Added
 - New guest uploads expire after 30 days by default (`PIXELHOP_GUEST_TTL_DAYS`, also the `guest_ttl_days` control center setting; 0 turns it off). A shorter choice is kept, a longer one is capped. Member and API-key uploads and every file already stored are unchanged. The upload form tells guests, in all nine languages.
 
-### Fixed
-- API responses carry `Cross-Origin-Resource-Policy: cross-origin`, so pages served with `Cross-Origin-Embedder-Policy: require-corp` (FileHop) can load them.
-
 ### Changed
 - The home page no longer shows the small numbered section labels above its headings.
 - The embedded HOP asset manifest and `scripts/sync-hop-assets.sh` read hop-assets v8 (they pointed at v6 while the vendored home engine, motion and bento files were already the v8 copies), so the fonts, floating tiles and app marks, including the new BioHop mark, come from v8.

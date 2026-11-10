@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -13,7 +12,7 @@ import (
 // row has an owner.
 func storedExpiries(t *testing.T, a *App) (guest, owned []int64) {
 	t.Helper()
-	rows, err := a.db.Query(`SELECT expires_at, user_id IS NULL FROM images`)
+	rows, err := a.db.Query(`SELECT expires_at, user_id IS NULL FROM images ORDER BY rowid`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,17 +97,28 @@ func TestGuestTTLNotice(t *testing.T) {
 	}
 }
 
-// The API opts in to being embedded by pages under COEP: require-corp.
-func TestAPICrossOriginResourcePolicy(t *testing.T) {
-	_, h := guestApp(t)
-	for _, path := range []string{"/api/v1/me", "/api/v1/images"} {
-		for _, method := range []string{"GET", "OPTIONS"} {
-			rec := httptest.NewRecorder()
-			h.ServeHTTP(rec, httptest.NewRequest(method, path, nil))
-			if got := rec.Header().Get("Cross-Origin-Resource-Policy"); got != "cross-origin" {
-				t.Errorf("%s %s (%d): CORP %q", method, path, rec.Code, got)
+// Guests are only offered lifetimes the server will honour; members see all.
+func TestExpireOptionsMatchWhoIsUploading(t *testing.T) {
+	a, h := guestApp(t)
+	opts := func(body string) (all []string) {
+		for _, v := range []string{`value="">Never`, `value="1d"`, `value="7d"`, `value="30d"`, `value="90d"`} {
+			if strings.Contains(body, v) {
+				all = append(all, v)
 			}
 		}
+		return
 	}
-	_ = http.StatusOK
+	guest := hostGet(h, "pixel.example", "/").Body.String()
+	if got := strings.Join(opts(guest), " "); got != `value="1d" value="7d"` || !strings.Contains(guest, `value="">30 days`) {
+		t.Errorf("guest options (30-day cap): %q", got)
+	}
+	u, _ := member(t, a, "opts@example.com")
+	mem := hostGet(h, "pixel.example", "/", sessionFor(t, a, u.ID)).Body.String()
+	if got := strings.Join(opts(mem), " "); got != `value="">Never value="1d" value="7d" value="30d" value="90d"` {
+		t.Errorf("member options: %q", got)
+	}
+	a.db.SetSetting(context.Background(), "guest_ttl_days", "0")
+	if got := strings.Join(opts(hostGet(h, "pixel.example", "/").Body.String()), " "); !strings.Contains(got, `Never`) || !strings.Contains(got, `90d`) {
+		t.Errorf("guest options with no cap: %q", got)
+	}
 }
