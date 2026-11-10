@@ -157,6 +157,12 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, name, title string,
 	a.renderPage(w, r, name, page{Title: title, Data: data})
 }
 
+// siteImagePages are the fixed public pages that share the site's social image when a link to them
+// is pasted somewhere (the home page sets its own; image and album pages use their picture).
+var siteImagePages = map[string]bool{"changelog": true, "legal": true, "tools": true, "batch": true, "help": true,
+	"features": true, "faq": true, "docs": true, "contact": true, "about": true, "status": true, "explore": true,
+	"login": true, "register": true}
+
 func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p page) {
 	t := a.pages.t[name]
 	if t == nil {
@@ -172,6 +178,9 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 		p.Desc = p.L.T(p.Desc)
 	}
 	p = a.base(r, p)
+	if p.OGImage == "" && siteImagePages[name] {
+		p.OGImage = a.cfg.BaseURL + "/static/img/social.jpg"
+	}
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
 	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" || name == "trash" {
 		p.NoIndex = true
