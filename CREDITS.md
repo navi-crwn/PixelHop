@@ -37,4 +37,4 @@ Built by [navi-crwn](https://github.com/navi-crwn)
 
 ## Brand name fonts
 
-The app names in the header and footer each use their own typeface, as name-only subsets, all under the SIL Open Font License 1.1: Syne (HOP ID), Pixelify Sans (LinkHop), Space Grotesk (BioHop), Silkscreen (PixelHop), Caveat (NoteHop), Sora (FileHop) and Unbounded (PayHop). The licence texts sit next to the files in `web/static/hop-brand/fonts/brand/`; Unbounded is credited here because PayHop's name appears in the footer's family list once the PayHop face ships with hop-assets v9.
+The app names in the header and footer each use their own typeface, as name-only subsets, all under the SIL Open Font License 1.1: Syne (HOP ID), Pixelify Sans (LinkHop), Space Grotesk (BioHop), Silkscreen (PixelHop), Caveat (NoteHop), Sora (FileHop) and Unbounded (PayHop). The licence texts sit next to the files in `web/static/hop-brand/fonts/brand/`; The Unbounded subset (`payhop-name.woff2`) and its licence ship next to the Silkscreen one.
