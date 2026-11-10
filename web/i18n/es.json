@@ -66,6 +66,7 @@
   "nav.helink_dashboard": "Panel de HEL.ink",
   "nav.back": "Volver a {site}",
   "footer.tagline": "alojamiento de imágenes de código abierto",
+  "footer.part_of": "Parte de {name}",
   "footer.about": "Acerca de",
   "footer.features": "Características",
   "footer.studio": "Estudio",

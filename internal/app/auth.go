@@ -346,11 +346,16 @@ func validEmail(s string) bool {
 }
 
 func (a *App) logout(w http.ResponseWriter, r *http.Request) {
+	next := "/"
 	if c, err := r.Cookie(sessionCookie); err == nil {
+		// A HOP ID account signs out of the whole family and comes back here.
+		if u, err := a.db.SessionUser(r.Context(), hashToken(c.Value)); err == nil && u.HelinkID.Valid && a.cfg.HelinkURL != "" && a.cfg.BaseURL != "" {
+			next = a.cfg.HelinkURL + "/logout?return=" + url.QueryEscape(a.cfg.BaseURL+"/")
+		}
 		a.db.DeleteSession(r.Context(), hashToken(c.Value))
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies()})
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, next, http.StatusSeeOther)
 }
 
 // helinkLogout is a step of HOP ID's chained logout: signing out at the hub (or

@@ -94,6 +94,8 @@ func loadPages(a *App) (*pages, error) {
 		"hopFonts":      hopFonts,
 		"hopUI":         hopUI,
 		"hopFamily":     func() []hopApp { return hopFamily("pixelhop") },
+		"hubMark":       hubMark,
+		"partOf":        partOf,
 		"hopPublicApps": func() []hopApp { return hopFamily("") },
 		"backable":      func(path string) bool { return backPaths[path] },
 	}

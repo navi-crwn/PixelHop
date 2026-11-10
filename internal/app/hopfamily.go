@@ -2,6 +2,8 @@ package app
 
 import (
 	"encoding/json"
+	"html/template"
+	"strings"
 	"sync"
 
 	"github.com/navi-crwn/pixelhop/web"
@@ -70,4 +72,20 @@ func hopFamily(current string) []hopApp {
 		}
 	}
 	return out
+}
+
+// hubMark is the HOP ID mark from the family manifest (the "Part of Hop Easy Link" row).
+func hubMark() string {
+	for _, a := range hopManifestOnce().Apps {
+		if a.Slug == "hub" {
+			return a.Icons["mark"].URL
+		}
+	}
+	return ""
+}
+
+// partOf fills the name into the translated "Part of {name}" sentence; the name
+// stays "Hop Easy Link" in every language.
+func partOf(s string) template.HTML {
+	return template.HTML(strings.Replace(template.HTMLEscapeString(s), "{name}", "<b>Hop Easy Link</b>", 1))
 }

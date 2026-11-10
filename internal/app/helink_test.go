@@ -245,3 +245,30 @@ func TestHelinkTicketStatusClaim(t *testing.T) {
 		}
 	}
 }
+
+// Signing out a HOP ID account goes through the account server and asks it to
+// come back to this app; the session here is gone either way.
+func TestHelinkSignOutReturnsToApp(t *testing.T) {
+	a, h := ssoApp(t)
+	c, state := start(t, h)
+	rec := callback(h, c, signTicket(ticketFor(state), testSecret))
+	var session *http.Cookie
+	for _, ck := range rec.Result().Cookies() {
+		if ck.Name == sessionCookie {
+			session = ck
+		}
+	}
+	if session == nil {
+		t.Fatal("no session to sign out of")
+	}
+	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
+	req.AddCookie(session)
+	out := httptest.NewRecorder()
+	h.ServeHTTP(out, req)
+	if want := "https://hel.example.com/logout?return=" + url.QueryEscape("https://p.example.com/"); out.Code != http.StatusSeeOther || out.Header().Get("Location") != want {
+		t.Fatalf("%d %q, want %q", out.Code, out.Header().Get("Location"), want)
+	}
+	if _, err := a.db.SessionUser(context.Background(), hashToken(session.Value)); err == nil {
+		t.Fatal("session still valid after sign-out")
+	}
+}

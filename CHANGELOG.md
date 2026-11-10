@@ -5,17 +5,22 @@ All notable changes to PixelHop will be documented in this file.
 ## Unreleased
 
 ### Added
+- Every footer starts with the HOP ID mark and "Part of Hop Easy Link" (linking to hel.ink), for everyone and in both looks; the Clean-only brand strip is replaced by it.
 - HopUI dialogs: questions and notices use the family's shared dialog instead of the browser's own, with the question's title and its explanation said separately.
 - A ticket's private note is shown once on the upload result page, to its owner, and stays visible only to the owner and the moderators.
 - The trash has its own entry in the dashboard sidebar.
 - An optional Clean interface style (flat surfaces, solid bordered cards, quiet tables and tabs), chosen with the `hop_ui` cookie, which the server reads. The HOP look stays the default.
 
 ### Fixed
+- Signing out of a HOP ID account goes through the account server with `return=` set to this app, so the person ends up back on PixelHop.
+- The footer no longer repeats the language list (the language menu is in the top bar); the copyright line is right-aligned, centred on phones.
+- The changelog page lists every merged pull request again: the snapshot is rebuilt from a freshly fetched main, and `make check-changelog` fails when merged PRs are missing from it.
 - A file its owner put in the trash answers 404, not 451. Hidden media is no longer cached publicly or redirected.
 - The content gate stays on the host it was posted to.
 - The language menu stays on the screen at 375 px and closes with Escape.
 
 ### Changed
+- New LinkHop and BioHop marks from hop-assets v6 (the embedded manifest and, where the app carries them, the home art and floating-tile copies).
 - Controls follow the HOP control standard: one 8 px radius, 36 px controls (32 px in rows, 40 px on forms), capped field widths.
 - HOP family assets move to hop-assets v4: FileHop's new pixel mark in the family list, the app switcher, the footer and the About page (bundled manifest), and the copied home engine with FileHop's matching 3D map. `scripts/sync-hop-assets.sh` copies from v4.
 

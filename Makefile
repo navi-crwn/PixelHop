@@ -1,7 +1,7 @@
 VERSION ?= $(patsubst v%,%,$(shell git describe --tags --always --dirty 2>/dev/null || echo dev))
 LDFLAGS := -s -w -X github.com/navi-crwn/pixelhop/internal/app.Version=$(VERSION)
 
-.PHONY: run build test release clean
+.PHONY: check-changelog run build test release clean
 run:            ## start a dev server on :8080
 	go run ./cmd/pixelhop
 build:          ## build ./pixelhop
@@ -16,3 +16,5 @@ release:        ## cross-compile into dist/
 	done
 clean:
 	rm -rf pixelhop dist
+check-changelog: ## fail when merged PRs are missing from web/changelog.json (needs gh)
+	python3 scripts/check-changelog.py

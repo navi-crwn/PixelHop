@@ -66,6 +66,7 @@
   "nav.helink_dashboard": "Tableau de bord HEL.ink",
   "nav.back": "Retour à {site}",
   "footer.tagline": "hébergement d'images open source",
+  "footer.part_of": "Fait partie de {name}",
   "footer.about": "À propos",
   "footer.features": "Fonctionnalités",
   "footer.studio": "Studio",

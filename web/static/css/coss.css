@@ -73,11 +73,6 @@
 :root[data-ui="clean"] .btn:not(.primary):not(.danger.solid) { background: var(--bg-2); box-shadow: 0 1px 1px rgba(0, 0, 0, .04); }
 :root[data-ui="clean"] .btn.ghost { background: transparent; box-shadow: none; }
 /* Footer strip: logo + the family phrase. */
-:root[data-ui="clean"] .coss-footer-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 10px; font-size: .875rem; color: var(--muted); }
-:root[data-ui="clean"] .coss-footer-brand img { width: 24px; height: 24px; }
-:root[data-ui="clean"] .coss-footer-brand b { color: var(--text); font-weight: 600; }
-:root[data-ui="clean"] .shell-foot .coss-footer-brand { margin: 0; }
-:root[data-ui="clean"] .foot-brand .coss-footer-brand { justify-content: flex-start; margin: 0 0 8px; }
 @media (prefers-reduced-motion: reduce) {
   :root[data-ui="clean"] .shell-nav a, :root[data-ui="clean"] .tile img { transition: none; }
 }
