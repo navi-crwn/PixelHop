@@ -12,6 +12,7 @@ All notable changes to PixelHop will be documented in this file.
 - An optional Clean interface style (flat surfaces, solid bordered cards, quiet tables and tabs), chosen with the `hop_ui` cookie, which the server reads. The HOP look stays the default.
 
 ### Fixed
+- The family section on the home page draws every other app, FileHop included, as the same 3D tile (hop-assets v6 engine, WebP before WebGL) with its name and host below; the numbered "10 · HOP" label is gone and the five tiles sit in one row, a 3 + 2 bento on tablets and two columns on phones. The footer's HOP family list shows each app's mark.
 - Signing out of a HOP ID account goes through the account server with `return=` set to this app, so the person ends up back on PixelHop.
 - The footer no longer repeats the language list (the language menu is in the top bar); the copyright line is right-aligned, centred on phones.
 - The changelog page lists every merged pull request again: the snapshot is rebuilt from a freshly fetched main, and `make check-changelog` fails when merged PRs are missing from it.
