@@ -187,11 +187,32 @@ func (d *DB) DeleteUser(ctx context.Context, id int64) error {
 
 // ---- sessions ----
 
+// DetachedSession marks a session that no hub browser session stands behind (password, Google,
+// local sign-up): HOP ID's state is never used to end it.
+const DetachedSession = -1
+
 func (d *DB) InsertSession(ctx context.Context, tokenHash string, userID int64, ttl time.Duration, ip, ua string) error {
+	return d.insertSession(ctx, tokenHash, userID, ttl, ip, ua, DetachedSession)
+}
+
+// InsertHubSession is a session the hub has just vouched for (its ticket was accepted).
+func (d *DB) InsertHubSession(ctx context.Context, tokenHash string, userID int64, ttl time.Duration, ip, ua string) error {
+	return d.insertSession(ctx, tokenHash, userID, ttl, ip, ua, now())
+}
+
+func (d *DB) insertSession(ctx context.Context, tokenHash string, userID int64, ttl time.Duration, ip, ua string, verified int64) error {
 	t := now()
-	_, err := d.ExecContext(ctx, `INSERT INTO sessions (token_hash,user_id,created_at,expires_at,ip,user_agent) VALUES (?,?,?,?,?,?)`,
-		tokenHash, userID, t, t+int64(ttl.Seconds()), ip, ua)
+	_, err := d.ExecContext(ctx, `INSERT INTO sessions (token_hash,user_id,created_at,expires_at,ip,user_agent,verified_at) VALUES (?,?,?,?,?,?,?)`,
+		tokenHash, userID, t, t+int64(ttl.Seconds()), ip, ua, verified)
 	return err
+}
+
+// SessionVerifiedAt is when the hub last vouched for the session: unix seconds, 0 for one older than
+// the column, DetachedSession for one the hub has no say over.
+func (d *DB) SessionVerifiedAt(ctx context.Context, tokenHash string) (int64, error) {
+	var at int64
+	err := d.QueryRowContext(ctx, `SELECT verified_at FROM sessions WHERE token_hash=? AND expires_at>?`, tokenHash, now()).Scan(&at)
+	return at, err
 }
 
 func (d *DB) SessionUser(ctx context.Context, tokenHash string) (*User, error) {

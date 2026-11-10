@@ -135,6 +135,10 @@ func (a *App) withUser(next http.Handler) http.Handler {
 			ctx = context.WithValue(ctx, keyViaAPIKey, true)
 		} else if c, err := r.Cookie(sessionCookie); err == nil && c.Value != "" {
 			if u, err := a.db.SessionUser(ctx, hashToken(c.Value)); err == nil && u.Status == "active" {
+				if a.recheckDue(r, c.Value, u) {
+					a.recheck(w, r)
+					return
+				}
 				ctx = context.WithValue(ctx, keyUser, u)
 			}
 		}
@@ -162,9 +166,28 @@ func (a *App) admin(h http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// startSession signs the browser in as u with a session HOP ID has no say over (password, Google,
+// local sign-up). Whatever session the browser held before ends here.
 func (a *App) startSession(w http.ResponseWriter, r *http.Request, u *db.User) error {
+	return a.openSession(w, r, u, false)
+}
+
+// startHubSession is the same for a ticket the hub has just issued: the session counts as vouched
+// for now and is checked with the hub again after recheckAfter.
+func (a *App) startHubSession(w http.ResponseWriter, r *http.Request, u *db.User) error {
+	return a.openSession(w, r, u, true)
+}
+
+func (a *App) openSession(w http.ResponseWriter, r *http.Request, u *db.User, hub bool) error {
+	if c, err := r.Cookie(sessionCookie); err == nil && c.Value != "" {
+		a.db.DeleteSession(r.Context(), hashToken(c.Value))
+	}
 	tok := randomToken(32)
-	if err := a.db.InsertSession(r.Context(), hashToken(tok), u.ID, config.SessionTTL, clientIP(r), trim(r.UserAgent(), 200)); err != nil {
+	insert := a.db.InsertSession
+	if hub {
+		insert = a.db.InsertHubSession
+	}
+	if err := insert(r.Context(), hashToken(tok), u.ID, config.SessionTTL, clientIP(r), trim(r.UserAgent(), 200)); err != nil {
 		return err
 	}
 	u.LastLogin = time.Now().Unix()

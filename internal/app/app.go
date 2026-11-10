@@ -45,12 +45,16 @@ type App struct {
 	uploadMu  sync.Mutex
 	quota     quotaLocks
 	space     func(string) (int64, int64)
+	hubUp     func() bool // is HEL.ink reachable (cached); replaced in tests
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
 	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour),
 		mediaQueue: make(chan string, 256), chunks: newChunkStore(), started: time.Now()}
 	a.space = diskSpace
+	if cfg.SSOEnabled() {
+		a.hubUp = newHubProbe(cfg.HelinkURL).Up
+	}
 
 	local, err := storage.NewLocal(cfg.DataDir + "/images")
 	if err != nil {

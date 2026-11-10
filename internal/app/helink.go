@@ -157,9 +157,19 @@ func (a *App) helinkStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	state := randomToken(24)
-	http.SetCookie(w, &http.Cookie{Name: helinkCookie, Value: state + "|" + safeNext(r.FormValue("next")), Path: "/auth/",
+	// prompt=none: the hub must never show a page. It answers with a ticket, or with error=login_required
+	// to the callback, which then ends this app's session. The cookie remembers which kind of trip this is.
+	silent := r.FormValue("prompt") == "none"
+	mode := "-"
+	if silent {
+		mode = "none"
+	}
+	http.SetCookie(w, &http.Cookie{Name: helinkCookie, Value: state + "|" + mode + "|" + safeNext(r.FormValue("next")), Path: "/auth/",
 		HttpOnly: true, Secure: a.cfg.SecureCookies(), SameSite: http.SameSiteLaxMode, MaxAge: 900})
 	q := url.Values{"state": {state}, "return_to": {a.cfg.BaseURL + "/auth/helink/callback"}}
+	if silent {
+		q.Set("prompt", "none")
+	}
 	http.Redirect(w, r, a.cfg.HelinkURL+"/sso/pixelhop?"+q.Encode(), http.StatusFound)
 }
 
@@ -173,7 +183,28 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, http.StatusBadRequest, a.tr(r, "That sign-in took too long or came from another browser. Please try again."))
 		return
 	}
-	state, next, _ := strings.Cut(c.Value, "|")
+	state, rest, _ := strings.Cut(c.Value, "|")
+	mode, next, _ := strings.Cut(rest, "|")
+	silent := mode == "none"
+	if e := r.FormValue("error"); e != "" {
+		// Only the answer to our own quiet check counts (same state, a trip we made).
+		if !silent || !hmac.Equal([]byte(r.FormValue("state")), []byte(state)) {
+			a.fail(w, r, http.StatusBadRequest, a.tr(r, "This sign-in link is not valid any more. Please try again."))
+			return
+		}
+		http.SetCookie(w, &http.Cookie{Name: helinkCookie, Path: "/auth/", MaxAge: -1})
+		if e == "login_required" {
+			// The hub has no session for this browser: whatever account this app held is no longer valid.
+			// A public page carries on as a guest; the dashboard goes to the sign-in flow.
+			if c, err := r.Cookie(sessionCookie); err == nil && c.Value != "" {
+				a.db.DeleteSession(r.Context(), hashToken(c.Value))
+			}
+			http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies(), SameSite: http.SameSiteLaxMode})
+		}
+		// Any other error (temporarily_unavailable): keep the session, the cooldown cookie spaces the next try.
+		http.Redirect(w, r, safeNext(next), http.StatusSeeOther)
+		return
+	}
 	t, err := parseTicket(r.FormValue("ticket"), a.cfg.HelinkSecrets(), time.Now())
 	if err != nil || !hmac.Equal([]byte(t.State), []byte(state)) || !firstUse(t.Jti, t.Exp) {
 		a.fail(w, r, http.StatusBadRequest, a.tr(r, "This sign-in link is not valid any more. Please try again."))
@@ -194,7 +225,7 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 		a.fail(w, r, http.StatusForbidden, msg)
 		return
 	}
-	if err := a.startSession(w, r, u); err != nil {
+	if err := a.startHubSession(w, r, u); err != nil {
 		a.serverError(w, r, err)
 		return
 	}
