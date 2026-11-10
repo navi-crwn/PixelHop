@@ -4,6 +4,8 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-11-11
+
 ### Added
 - New guest uploads expire after 30 days by default (`PIXELHOP_GUEST_TTL_DAYS`, also the `guest_ttl_days` control center setting; 0 turns it off). A shorter choice is kept, a longer one is capped. Member and API-key uploads and every file already stored are unchanged. The upload form tells guests, in all nine languages.
 
