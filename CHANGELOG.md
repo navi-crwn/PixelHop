@@ -5,6 +5,7 @@ All notable changes to PixelHop will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- The home page grids use the hop-assets v8 bento (five family tiles in one row from 1100 px, no lone box, art capped at 160-200 px); the 3D engine, bento stylesheet and BioHop assets are byte-identical v8 copies.
 - The family tiles stay in one row of five down to 860 px (art capped at 160 px, 130 px on phones), a 3 + 2 bento below that and two columns on phones; the footer's HOP family list shows the mark left of the name on one line under the shared "HOP family" heading.
 
 ## [3.9.0] - 2026-11-10

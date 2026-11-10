@@ -1,4 +1,5 @@
 {{define "head"}}
+<link rel="stylesheet" href="/static/hop-home/hop-bento.css?v={{.Asset}}">
 <link rel="stylesheet" href="/static/hop-home/hop-home.css?v={{.Asset}}">
 <link rel="stylesheet" href="/static/hop-home/hop-scenes.css?v={{.Asset}}">
 <link rel="stylesheet" href="/static/css/home.css?v={{.Asset}}">
@@ -189,7 +190,7 @@
   </section>
 
   <!-- 10 family -->
-  <section class="px-sec" id="family" aria-labelledby="family-title"><h2 id="family-title" class="px-h2"><em>{{.L.T "home.family_title"}}</em></h2><p class="h-sub">{{.L.T "home.family_desc"}}</p><ul class="hop-fam" role="list">{{range hopFamily}}<li><div class="hop-fam-tile"><figure class="hop-fam-art"><picture><source srcset="/static/hop-home/home/{{.Slug}}-dark.webp" media="(prefers-color-scheme: dark)"><img src="/static/hop-home/home/{{.Slug}}-light.webp" alt="" width="150" height="150" loading="lazy"></picture><canvas data-hop-hero="{{.Slug}}" aria-hidden="true"></canvas></figure><a class="hop-fam-name" href="{{.URL}}"><b>{{if eq .Slug "hub"}}HOP ID{{else}}{{.Name}}{{end}}</b><span>{{hostOf .URL}}</span></a></div></li>{{end}}</ul></section>
+  <section class="px-sec" id="family" aria-labelledby="family-title"><h2 id="family-title" class="px-h2"><em>{{.L.T "home.family_title"}}</em></h2><p class="h-sub">{{.L.T "home.family_desc"}}</p><div class="hop-bento hop-fam" data-tiles>{{range hopFamily}}<article class="hop-fam-tile" data-spot><figure class="hop-fam-art" data-media><picture><source srcset="/static/hop-home/home/{{.Slug}}-dark.webp" media="(prefers-color-scheme: dark)"><img src="/static/hop-home/home/{{.Slug}}-light.webp" alt="" width="150" height="150" loading="lazy"></picture><canvas data-hop-hero="{{.Slug}}" aria-hidden="true"></canvas></figure><a class="hop-fam-name" href="{{.URL}}"><b>{{if eq .Slug "hub"}}HOP ID{{else}}{{.Name}}{{end}}</b><span>{{hostOf .URL}}</span></a></article>{{end}}</div></section>
 
   <!-- 11 the last word -->
   <section class="px-sec h-final" aria-labelledby="final-title"><h2 id="final-title" class="px-h2">{{.L.H "home.hero_title"}}</h2><p class="h-sub">{{.L.T "home.hero_lead"}}</p><div class="h-cta"><a class="h-pill dark" href="#quick">{{.L.T "nav.upload"}} ↑</a><a class="h-pill" href="/features">{{.L.T "features.title"}}</a></div></section>
