@@ -4,6 +4,9 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- The family tiles stay in one row of five down to 860 px (art capped at 160 px, 130 px on phones), a 3 + 2 bento below that and two columns on phones; the footer's HOP family list shows the mark left of the name on one line under the shared "HOP family" heading.
+
 ## [3.9.0] - 2026-11-10
 
 ### Added
