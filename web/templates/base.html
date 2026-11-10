@@ -25,6 +25,7 @@
      hashes. Until then app.js asks with the browser's own confirm() and prompt(). */}}
 {{with hopUI}}<link rel="stylesheet" href="{{.CSS.URL}}"{{with .CSS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous">
 <script src="{{.JS.URL}}"{{with .JS.Integrity}} integrity="{{.}}"{{end}} crossorigin="anonymous" defer></script>{{end}}
+<link rel="stylesheet" href="/static/hop-brand/hop-brand.css?v={{.Asset}}">
 <link rel="stylesheet" href="/static/css/app.css?v={{.Asset}}">
 <script src="/static/js/theme.js?v={{.Asset}}"></script>
 <link rel="stylesheet" href="/static/css/family-switcher.css?v={{.Asset}}">
@@ -41,7 +42,7 @@
 <div class="shell" id="shell">
   <div class="shell-scrim" id="shell-scrim" hidden></div>
   <aside class="shell-side" id="shell-side" aria-label="{{.Site}}">
-    <a class="shell-brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="32" height="32"><span>{{.Site}}</span></a>
+    <a class="shell-brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="32" height="32"><span class="hop-name hop-name-pixelhop">{{.Site}}</span></a>
     <nav class="shell-nav" aria-label="{{.Site}}">
       <a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}><svg><use href="#i-grid"/></svg>{{.L.T "nav.dashboard"}}</a>
       <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
@@ -97,7 +98,7 @@
 {{else}}
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28">{{.Site}}</a>
+    <a class="brand" href="/"><img src="/static/img/logo.svg?v={{.Asset}}" alt="" width="28" height="28"><span class="hop-name hop-name-pixelhop">{{.Site}}</span></a>
     <nav class="nav-links" id="nav-links" aria-label="{{$.L.T "nav.main"}}">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>{{.L.T "nav.upload"}}</a>
       <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>{{.L.T "nav.studio"}}</a>
@@ -145,7 +146,7 @@
   <div class="wrap"><a class="part-of" href="https://hel.ink" rel="noopener">{{with hubMark}}<img src="{{.}}" alt="" width="20" height="20" loading="lazy">{{end}}<span>{{partOf (.L.T "footer.part_of")}}</span></a></div>
   <div class="wrap footer-grid">
     <div class="foot-col foot-brand">
-      <b>{{.Site}}</b>
+      <b><img src="/static/img/logo.svg" alt="" width="20" height="20"><span class="hop-name hop-name-pixelhop">{{.Site}}</span></b>
       <p class="muted small">{{.L.T "footer.tagline"}}</p>
     </div>
     <div class="foot-col">
@@ -180,7 +181,7 @@
     <div class="foot-col">
       <h2 class="foot-heading">{{.L.H "footer.family"}}</h2>
       <nav aria-label="{{.L.T "family.foot"}}">
-        {{range hopFamily}}<a href="{{.URL}}">{{.Name}}</a>{{end}}
+        {{range hopFamily}}<a href="{{.URL}}">{{with index .Icons "mark"}}<img src="{{.URL}}" alt="" width="16" height="16" loading="lazy">{{end}}{{.Name}}</a>{{end}}
       </nav>
     </div>
   </div>
