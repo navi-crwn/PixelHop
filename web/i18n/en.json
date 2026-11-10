@@ -11,6 +11,7 @@
   "upload.ticket_note": "Ticket & note",
   "upload.delete_after": "Delete after",
   "upload.never": "Never",
+  "upload.guest_ttl": "Guest uploads are deleted after {n} days. Sign in to choose how long to keep them.",
   "upload.minutes": "{n} minutes",
   "upload.hour": "1 hour",
   "upload.day": "1 day",

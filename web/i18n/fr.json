@@ -11,6 +11,7 @@
   "upload.ticket_note": "Ticket et note",
   "upload.delete_after": "Supprimer après",
   "upload.never": "Jamais",
+  "upload.guest_ttl": "Les envois d’invités sont supprimés après {n} jours. Connectez-vous pour choisir la durée de conservation.",
   "upload.minutes": "{n} minutes",
   "upload.hour": "1 heure",
   "upload.day": "1 jour",

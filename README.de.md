@@ -172,6 +172,7 @@ Einstellungen sind Umgebungsvariablen, alle optional. [`.env.example`](.env.exam
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Uploads ohne Konto erlauben |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Bilder in einem Album eines Gastes (0 = keine Grenze); auch im Kontrollzentrum einstellbar |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Dateien, die eine Gast-Adresse in 24 Stunden hochladen darf (0 = keine Grenze); auch im Kontrollzentrum einstellbar |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | Tage, die ein neuer Gast-Upload online bleibt (0 = bis zum Löschen); ältere Dateien bleiben unverändert; auch im Kontrollzentrum einstellbar |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Speicher für jedes neue Konto; bestehende Konten behalten ihres |
 | `PIXELHOP_REGISTRATION` | `true` | Neue Konten erlauben |
 | `PIXELHOP_READ_ONLY` | `false` | Uploads für Wartungsarbeiten pausieren |

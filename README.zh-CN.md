@@ -172,6 +172,7 @@ PixelHop 只处理文件结构，压缩后的图像数据原样复制，所以�
 | `PIXELHOP_GUEST_UPLOADS` | `true` | 允许不登录就上传 |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | 访客创建的相册可容纳的图片数（0 = 不限制）；也可在控制中心修改 |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | 一个访客地址 24 小时内可上传的文件数（0 = 不限制）；也可在控制中心修改 |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | 新的访客上传保留的天数（0 = 直到删除）；已有文件不受影响；也可在控制中心修改 |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | 每个新账户的存储空间；已有账户保留原有配额 |
 | `PIXELHOP_REGISTRATION` | `true` | 允许注册新账户 |
 | `PIXELHOP_READ_ONLY` | `false` | 维护期间暂停上传 |

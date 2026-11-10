@@ -172,6 +172,7 @@ PixelHop はファイルの構造を操作し、圧縮された画像データ�
 | `PIXELHOP_GUEST_UPLOADS` | `true` | アカウントなしのアップロードを許可 |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | ゲストが作ったアルバムに入れられる画像数（0 = 無制限）。コントロールセンターでも変更できます |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | ゲストのアドレス 1 つが 24 時間にアップロードできるファイル数（0 = 無制限）。コントロールセンターでも変更できます |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | 新しいゲスト投稿が公開され続ける日数（0 = 削除するまで）。既存のファイルは変わりません。コントロールセンターでも変更できます |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | 新しいアカウントごとの保存容量。既存のアカウントは今の容量のままです |
 | `PIXELHOP_REGISTRATION` | `true` | 新規アカウントの作成を許可 |
 | `PIXELHOP_READ_ONLY` | `false` | メンテナンスのためアップロードを一時停止 |

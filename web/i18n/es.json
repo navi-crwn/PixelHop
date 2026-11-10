@@ -11,6 +11,7 @@
   "upload.ticket_note": "Ticket y nota",
   "upload.delete_after": "Eliminar después de",
   "upload.never": "Nunca",
+  "upload.guest_ttl": "Las subidas de invitados se eliminan tras {n} días. Inicia sesión para elegir cuánto tiempo guardarlas.",
   "upload.minutes": "{n} minutos",
   "upload.hour": "1 hora",
   "upload.day": "1 día",

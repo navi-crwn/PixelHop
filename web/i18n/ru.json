@@ -11,6 +11,7 @@
   "upload.ticket_note": "Тикет и заметка",
   "upload.delete_after": "Удалить через",
   "upload.never": "Никогда",
+  "upload.guest_ttl": "Файлы, загруженные гостями, удаляются через {n} дн. Войдите, чтобы самостоятельно выбирать срок хранения.",
   "upload.minutes": "{n} мин.",
   "upload.hour": "1 час",
   "upload.day": "1 день",

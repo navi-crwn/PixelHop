@@ -11,6 +11,7 @@
   "upload.ticket_note": "チケットとメモ",
   "upload.delete_after": "自動削除までの期間",
   "upload.never": "削除しない",
+  "upload.guest_ttl": "ゲストの投稿は {n} 日後に削除されます。ログインすると保存期間を選べます。",
   "upload.minutes": "{n} 分",
   "upload.hour": "1 時間",
   "upload.day": "1 日",

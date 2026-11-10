@@ -11,6 +11,7 @@
   "upload.ticket_note": "Tiket & catatan",
   "upload.delete_after": "Hapus setelah",
   "upload.never": "Tidak pernah",
+  "upload.guest_ttl": "Unggahan tamu dihapus setelah {n} hari. Masuk untuk memilih berapa lama file disimpan.",
   "upload.minutes": "{n} menit",
   "upload.hour": "1 jam",
   "upload.day": "1 hari",

@@ -11,6 +11,7 @@
   "upload.ticket_note": "Ticket e nota",
   "upload.delete_after": "Excluir após",
   "upload.never": "Nunca",
+  "upload.guest_ttl": "Envios de visitantes são apagados após {n} dias. Entre na conta para escolher por quanto tempo guardar.",
   "upload.minutes": "{n} minutos",
   "upload.hour": "1 hora",
   "upload.day": "1 dia",

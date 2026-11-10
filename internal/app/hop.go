@@ -256,6 +256,7 @@ var hopSettingSchema = []map[string]any{
 	{"key": "guest_uploads", "type": "bool", "description": "Let visitors upload without an account", "restart_required": false},
 	{"key": "guest_album_max", "type": "int", "description": "Images an album made by a guest may hold, 0 = no limit (PIXELHOP_GUEST_ALBUM_MAX)", "restart_required": false},
 	{"key": "guest_daily_max", "type": "int", "description": "Files one guest address may upload per 24 hours, 0 = no limit (PIXELHOP_GUEST_DAILY_MAX)", "restart_required": false},
+	{"key": "guest_ttl_days", "type": "int", "description": "Days a new guest upload stays online, 0 = until deleted; existing files are not changed (PIXELHOP_GUEST_TTL_DAYS)", "restart_required": false},
 	{"key": "registration", "type": "bool", "description": "Let people create accounts", "restart_required": false},
 	{"key": "read_only", "type": "bool", "description": "Maintenance: pause uploads; everything already online keeps working", "restart_required": false},
 	{"key": "announcement", "type": "string", "description": "Banner shown on every page (empty = none)", "restart_required": false},
@@ -1043,7 +1044,7 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
 	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration, "read_only": a.cfg.ReadOnly,
-		"guest_album_max": a.cfg.GuestAlbumMax, "guest_daily_max": a.cfg.GuestDailyMax,
+		"guest_album_max": a.cfg.GuestAlbumMax, "guest_daily_max": a.cfg.GuestDailyMax, "guest_ttl_days": a.cfg.GuestTTLDays,
 		"announcement": "", "seo_title": "", "seo_description": ""}
 	var out []map[string]any
 	for _, s := range hopSettingSchema {

@@ -33,6 +33,7 @@ type Config struct {
 
 	GuestUploads     bool
 	GuestAlbumMax    int // images an album made by a guest may hold (0 = no limit)
+	GuestTTLDays     int // days a new guest upload stays online (0 = keep until deleted)
 	GuestDailyMax    int // files one guest address may upload per rolling 24 hours (0 = no limit)
 	Registration     bool
 	DefaultQuota     int64 // bytes per new account
@@ -122,6 +123,7 @@ func Load() (*Config, error) {
 		GuestUploads:     envBool("PIXELHOP_GUEST_UPLOADS", true),
 		GuestAlbumMax:    envInt("PIXELHOP_GUEST_ALBUM_MAX", 10),
 		GuestDailyMax:    envInt("PIXELHOP_GUEST_DAILY_MAX", 25),
+		GuestTTLDays:     envInt("PIXELHOP_GUEST_TTL_DAYS", 30),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),
 		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 128)) << 20,
 		InactiveDays:     envInt("PIXELHOP_INACTIVE_DAYS", 0),

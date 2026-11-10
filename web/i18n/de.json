@@ -11,6 +11,7 @@
   "upload.ticket_note": "Ticket & Notiz",
   "upload.delete_after": "Löschen nach",
   "upload.never": "Nie",
+  "upload.guest_ttl": "Gast-Uploads werden nach {n} Tagen gelöscht. Mit Anmeldung bestimmst du die Aufbewahrungsdauer selbst.",
   "upload.minutes": "{n} Minuten",
   "upload.hour": "1 Stunde",
   "upload.day": "1 Tag",

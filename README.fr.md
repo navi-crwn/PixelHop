@@ -172,6 +172,7 @@ Les paramètres sont des variables d'environnement, toutes facultatives. [`.env.
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Autoriser les téléversements sans compte |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Images dans un album créé par un invité (0 = sans limite) ; réglable aussi dans le centre de contrôle |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Fichiers qu'une adresse invitée peut envoyer par 24 heures (0 = sans limite) ; réglable aussi dans le centre de contrôle |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | Jours pendant lesquels un nouvel envoi invité reste en ligne (0 = jusqu'à suppression) ; les fichiers existants ne changent pas ; réglable aussi dans le centre de contrôle |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Stockage de chaque nouveau compte ; les comptes existants gardent le leur |
 | `PIXELHOP_REGISTRATION` | `true` | Autoriser les nouveaux comptes |
 | `PIXELHOP_READ_ONLY` | `false` | Mettre les téléversements en pause pour maintenance |
