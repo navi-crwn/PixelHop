@@ -1,9 +1,189 @@
 {
   "schema": 1,
   "sources": {
-    "PixelHop": "b480ca6eab020d32cbc43059c8f2c1c7df890873"
+    "PixelHop": "6d5b0eba93c3ddc4a782470f2671a41a9621d159"
   },
   "entries": [
+    {
+      "kind": "pr",
+      "date": "2026-11-10T07:15:25Z",
+      "title": "Round 4: proportional family tiles, family footer list",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/46",
+      "id": "#46",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T14:15:24+07:00",
+      "title": "Merge pull request #46: Round 4: proportional family tiles, family footer list",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/6d5b0eba93c3ddc4a782470f2671a41a9621d159",
+      "id": "6d5b0eba",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T07:58:40+01:00",
+      "title": "Use the hop-assets v8 bento and 3D engine",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/793fc7c292968b3840273af3bd2470f6a0b8ca04",
+      "id": "793fc7c2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T07:43:48+01:00",
+      "title": "Proportional family tiles and the family footer list",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/65c2f734cb83760a54cee224781f66767d7f99b4",
+      "id": "65c2f734",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "tag",
+      "date": "2026-11-10T13:04:16+07:00",
+      "title": "v3.9.0",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.9.0",
+      "id": "v3.9.0",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T13:04:16+07:00",
+      "title": "Merge pull request #42: Release 3.9.0",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e3c483fd049827b0e37e032e6a636c8d559f2643",
+      "id": "e3c483fd",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-11-10T06:04:16Z",
+      "title": "Release 3.9.0",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/42",
+      "id": "#42",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T12:53:37+07:00",
+      "title": "Merge pull request #44: Family section: shared 3D tiles, no lonely last tile",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/faa83f896ec9c2360c3b5e5cc4b62c32763c47f5",
+      "id": "faa83f89",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-11-10T05:53:37Z",
+      "title": "Family section: shared 3D tiles, no lonely last tile",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/44",
+      "id": "#44",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T06:28:24+01:00",
+      "title": "Show the app name as text in its own typeface next to the mark",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/35811eee6dabf59c0d3395f4af53f086010ec79f",
+      "id": "35811eee",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T06:16:09+01:00",
+      "title": "Use the hop-assets v7 engine and motion script",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/21232b255f04772f3939dd5b4854763935507ecf",
+      "id": "21232b25",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T05:48:52+01:00",
+      "title": "Draw the family section with the shared 3D tiles",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/6ad2f38bb2198156af9c0758dd41afd6035a2626",
+      "id": "6ad2f38b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T11:05:22+07:00",
+      "title": "Merge pull request #43: Post-release fixes: changelog snapshot, footer language row, sign-out return",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/faf349c9bab0e0af5c9109d579dd5c4642fc4769",
+      "id": "faf349c9",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-11-10T04:05:22Z",
+      "title": "Post-release fixes: changelog snapshot, footer language row, sign-out return",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/43",
+      "id": "#43",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T04:43:34+01:00",
+      "title": "Sync the HOP assets to v6 (new LinkHop and BioHop marks)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/20cf6f59dfb036b0a85850795a2a4b67d104af4b",
+      "id": "20cf6f59",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-09T22:49:08+01:00",
+      "title": "Show \"Part of Hop Easy Link\" as the first footer row",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/ffb4d2db7e21323a64589a5b2f93522e1b3518e8",
+      "id": "ffb4d2db",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-09T22:35:46+01:00",
+      "title": "Return to the app after signing out through HOP ID",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/40d6eb5e898eb1587c8abe07d9c113a014212e3d",
+      "id": "40d6eb5e",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-09T22:32:01+01:00",
+      "title": "Remove the language row from the footer",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/5c663f8bdfa120f8562c3900a4b04d427cb8a3d6",
+      "id": "5c663f8b",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-09T22:32:01+01:00",
+      "title": "Refresh the changelog snapshot and fetch before building it",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/1ccf2678d14c6ff78516212b470dd291fa6b46e1",
+      "id": "1ccf2678",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-09T22:12:48+01:00",
+      "title": "Release 3.9.0",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/4940e7b2db8e355d504a406b1549321edd4b60f7",
+      "id": "4940e7b2",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
     {
       "kind": "pr",
       "date": "2026-11-09T20:58:52Z",
