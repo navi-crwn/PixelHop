@@ -37,6 +37,8 @@ func TestAdminNoteMigrationPreservesLegacyDescriptions(t *testing.T) {
 		`CREATE TABLE schema_version (v INTEGER NOT NULL)`,
 		`INSERT INTO schema_version (v) VALUES (14)`,
 		`CREATE TABLE albums (id TEXT PRIMARY KEY, description TEXT NOT NULL DEFAULT '')`,
+		`CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, ip TEXT NOT NULL DEFAULT '', user_agent TEXT NOT NULL DEFAULT '')`,
+		`INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES ('old', 1, 1, 4102444800)`,
 		`INSERT INTO albums (id, description) VALUES ('legacy-ticket', 'ambiguous legacy text')`,
 	} {
 		if _, err := sqlDB.Exec(stmt); err != nil {
@@ -56,6 +58,10 @@ func TestAdminNoteMigrationPreservesLegacyDescriptions(t *testing.T) {
 	var version int
 	if err := d.QueryRow(`SELECT description, admin_note, (SELECT MAX(v) FROM schema_version) FROM albums WHERE id='legacy-ticket'`).Scan(&description, &note, &version); err != nil {
 		t.Fatal(err)
+	}
+	// A session from before verified_at existed counts as never verified (0), so its first page load re-checks it.
+	if at, err := d.SessionVerifiedAt(t.Context(), "old"); err != nil || at != 0 {
+		t.Fatalf("old session verified_at = %d, %v", at, err)
 	}
 	// There is no provenance that distinguishes an old ticket note from a public description.
 	if description != "ambiguous legacy text" || note != "" || version != len(migrations) {
