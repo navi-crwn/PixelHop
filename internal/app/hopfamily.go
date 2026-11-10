@@ -28,8 +28,8 @@ type hopApp struct {
 
 type hopManifest struct {
 	Version string              `json:"version"`
-	Assets map[string]hopAsset `json:"assets"`
-	Apps   []hopApp            `json:"apps"`
+	Assets  map[string]hopAsset `json:"assets"`
+	Apps    []hopApp            `json:"apps"`
 }
 
 var hopManifestOnce = sync.OnceValue(func() hopManifest {
