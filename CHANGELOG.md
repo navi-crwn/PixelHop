@@ -22,6 +22,7 @@ All notable changes to PixelHop will be documented in this file.
 - The language menu stays on the screen at 375 px and closes with Escape.
 
 ### Changed
+- The header and footer show the mark and the app name as real text in the app's own typeface (hop-assets v7 brand fonts: name-only subsets, vendored byte-identical, SIL OFL).
 - New LinkHop and BioHop marks from hop-assets v6 (the embedded manifest and, where the app carries them, the home art and floating-tile copies).
 - Controls follow the HOP control standard: one 8 px radius, 36 px controls (32 px in rows, 40 px on forms), capped field widths.
 - HOP family assets move to hop-assets v4: FileHop's new pixel mark in the family list, the app switcher, the footer and the About page (bundled manifest), and the copied home engine with FileHop's matching 3D map. `scripts/sync-hop-assets.sh` copies from v4.

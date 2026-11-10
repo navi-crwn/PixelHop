@@ -34,3 +34,7 @@ Pull requests are welcome. Please open an issue first to discuss bigger changes,
 Built by [navi-crwn](https://github.com/navi-crwn)
 
 </div>
+
+## Brand name fonts
+
+The app names in the header and footer use name-only subsets of Silkscreen (PixelHop), Caveat (NoteHop) and Sora (FileHop), SIL Open Font License 1.1; the licence texts sit next to the files in `web/static/hop-brand/fonts/brand/`.
