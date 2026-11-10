@@ -1,9 +1,81 @@
 {
   "schema": 1,
   "sources": {
-    "PixelHop": "6d5b0eba93c3ddc4a782470f2671a41a9621d159"
+    "PixelHop": "51756d9c21a011da37eb2d3f4e2dd2e3f88a2249"
   },
   "entries": [
+    {
+      "kind": "pr",
+      "date": "2026-11-10T07:49:17Z",
+      "title": "Use hop-assets v8 everywhere",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/47",
+      "id": "#47",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T14:49:16+07:00",
+      "title": "Merge pull request #47: Use hop-assets v8 everywhere",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/51756d9c21a011da37eb2d3f4e2dd2e3f88a2249",
+      "id": "51756d9c",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T08:45:07+01:00",
+      "title": "README screenshots: retake with the hop-assets v8 manifest",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e6ee3d0fc6de025b2bc269c37f48520b679aee0f",
+      "id": "e6ee3d0f",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T08:41:23+01:00",
+      "title": "Sync the embedded HOP asset manifest and sync script to hop-assets v8",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/a4d3558345289ad301ecabf1e3aabd46c7870ab1",
+      "id": "a4d35583",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T14:40:03+07:00",
+      "title": "Merge pull request #45: Sync repository with what is live (2026-11-10)",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/f30b7e25207f9c469733df607655fef8c929d3cb",
+      "id": "f30b7e25",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-11-10T07:40:03Z",
+      "title": "Sync repository with what is live (2026-11-10)",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/45",
+      "id": "#45",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T08:33:16+01:00",
+      "title": "README screenshots: retake from current main",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/3a35184d1c9b0e1668a1d9505c06cb057c197f52",
+      "id": "3a35184d",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T08:26:07+01:00",
+      "title": "Changelog snapshot: rebuild from fresh main",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/e00f37b90c88b5b432822bbf2fa155e9b964b27a",
+      "id": "e00f37b9",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
     {
       "kind": "pr",
       "date": "2026-11-10T07:15:25Z",

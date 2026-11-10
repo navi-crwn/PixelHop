@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/navi-crwn/pixelhop/internal/db"
 )
 
 // Guests (no account) are nudged toward an account: an album they make
 // holds at most a few images, and one address may store only so many files
 // a day. Both limits have a default from the environment and can be changed
-// from the control center (settings guest_album_max and guest_daily_max);
+// from the control center (settings guest_album_max, guest_daily_max and guest_ttl_days);
 // 0 turns a limit off. Members are never limited this way.
 
 const guestDay = 24 * time.Hour
@@ -41,6 +43,28 @@ func (a *App) guestAlbumMax(ctx context.Context) int {
 
 func (a *App) guestDailyMax(ctx context.Context) int {
 	return a.intSetting(ctx, "guest_daily_max", a.cfg.GuestDailyMax)
+}
+
+func (a *App) guestTTLDays(ctx context.Context) int {
+	return a.intSetting(ctx, "guest_ttl_days", a.cfg.GuestTTLDays)
+}
+
+// guestExpiry is when a NEW upload expires. Guests get the default lifetime
+// when they chose none, and never more than it; members and API-key uploads
+// keep exactly what they asked for. Existing images are not touched.
+func (a *App) guestExpiry(ctx context.Context, u *db.User, chosen int64) int64 {
+	if u != nil {
+		return chosen
+	}
+	days := a.guestTTLDays(ctx)
+	if days <= 0 {
+		return chosen
+	}
+	limit := time.Now().Add(time.Duration(days) * guestDay).Unix()
+	if chosen == 0 || chosen > limit {
+		return limit
+	}
+	return chosen
 }
 
 // guestKey is how a guest address is stored: hashed, never the address itself.

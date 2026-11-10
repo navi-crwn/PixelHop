@@ -4,7 +4,14 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- New guest uploads expire after 30 days by default (`PIXELHOP_GUEST_TTL_DAYS`, also the `guest_ttl_days` control center setting; 0 turns it off). A shorter choice is kept, a longer one is capped. Member and API-key uploads and every file already stored are unchanged. The upload form tells guests, in all nine languages.
+
+### Fixed
+- API responses carry `Cross-Origin-Resource-Policy: cross-origin`, so pages served with `Cross-Origin-Embedder-Policy: require-corp` (FileHop) can load them.
+
 ### Changed
+- The home page no longer shows the small numbered section labels above its headings.
 - The embedded HOP asset manifest and `scripts/sync-hop-assets.sh` read hop-assets v8 (they pointed at v6 while the vendored home engine, motion and bento files were already the v8 copies), so the fonts, floating tiles and app marks, including the new BioHop mark, come from v8.
 - The home page grids use the hop-assets v8 bento (five family tiles in one row from 1100 px, no lone box, art capped at 160-200 px); the 3D engine, bento stylesheet and BioHop assets are byte-identical v8 copies.
 - The family tiles stay in one row of five down to 860 px (art capped at 160 px, 130 px on phones), a 3 + 2 bento below that and two columns on phones; the footer's HOP family list shows the mark left of the name on one line under the shared "HOP family" heading.

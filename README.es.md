@@ -172,6 +172,7 @@ Los ajustes son variables de entorno, todas opcionales. [`.env.example`](.env.ex
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Permitir subidas sin cuenta |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Imágenes en un álbum creado por un invitado (0 = sin límite); también se ajusta en el centro de control |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Archivos que una dirección de invitado puede subir en 24 horas (0 = sin límite); también se ajusta en el centro de control |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | Días que una subida nueva de invitado permanece en línea (0 = hasta que se elimine); los archivos anteriores no cambian; también se ajusta en el centro de control |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Almacenamiento de cada cuenta nueva; las cuentas existentes conservan el suyo |
 | `PIXELHOP_REGISTRATION` | `true` | Permitir cuentas nuevas |
 | `PIXELHOP_READ_ONLY` | `false` | Pausar las subidas por mantenimiento |

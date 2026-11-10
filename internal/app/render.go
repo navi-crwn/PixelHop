@@ -46,6 +46,7 @@ type page struct {
 	Turnstile     string // Turnstile site key, when forms are protected
 	RembgServer   bool   // background removal can run on the server
 	GuestUploads  bool
+	GuestTTLDays  int // lifetime of a new guest upload, shown to guests (0 = none)
 	MaxMB         int64
 	MaxMediaMB    int64
 	MemberMediaMB int64 // what signing in would allow, for the guest hint
@@ -142,6 +143,9 @@ func (a *App) base(r *http.Request, p page) page {
 	p.RembgServer = a.cfg.RembgURL != ""
 	p.Announcement = a.db.Setting(ctx, "announcement", "")
 	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
+	if p.User == nil {
+		p.GuestTTLDays = a.guestTTLDays(ctx)
+	}
 	p.MaxMB = a.imageLimit(p.User) >> 20
 	p.MaxMediaMB = a.mediaLimit(p.User) >> 20
 	p.MemberMediaMB = a.cfg.MaxMediaBytes >> 20

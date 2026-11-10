@@ -117,6 +117,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	if d, ok := expiries[r.FormValue("expire")]; ok {
 		expiresAt = time.Now().Add(d).Unix()
 	}
+	expiresAt = a.guestExpiry(ctx, u, expiresAt)
 	useSlug := r.FormValue("slug") != "0" && r.FormValue("slug") != "false"
 	listed := u != nil && (r.FormValue("listed") == "1" || r.FormValue("listed") == "true")
 	alt := trim(strings.TrimSpace(r.FormValue("alt")), 300)

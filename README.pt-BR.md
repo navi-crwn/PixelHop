@@ -172,6 +172,7 @@ As configurações são variáveis de ambiente, todas opcionais. O [`.env.exampl
 | `PIXELHOP_GUEST_UPLOADS` | `true` | Permitir envios sem conta |
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Imagens em um álbum criado por um visitante (0 = sem limite); também ajustável na central de controle |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Arquivos que um endereço de visitante pode enviar em 24 horas (0 = sem limite); também ajustável na central de controle |
+| `PIXELHOP_GUEST_TTL_DAYS` | `30` | Dias em que um novo envio de visitante fica no ar (0 = até apagar); arquivos antigos não mudam; também ajustável na central de controle |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Armazenamento de cada conta nova; as contas existentes mantêm o seu |
 | `PIXELHOP_REGISTRATION` | `true` | Permitir novas contas |
 | `PIXELHOP_READ_ONLY` | `false` | Pausar os envios para manutenção |

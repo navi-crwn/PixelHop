@@ -11,6 +11,7 @@
   "upload.ticket_note": "工单和备注",
   "upload.delete_after": "自动删除时间",
   "upload.never": "永不",
+  "upload.guest_ttl": "访客上传的文件将在 {n} 天后删除。登录后可自行选择保留时长。",
   "upload.minutes": "{n} 分钟",
   "upload.hour": "1 小时",
   "upload.day": "1 天",

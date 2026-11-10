@@ -189,3 +189,5 @@
 .hop-fam-name:hover b { text-decoration: underline; }
 .foot-col nav a { display: flex; align-items: center; gap: 8px; }
 .foot-col nav a img { width: 16px; height: 16px; flex: none; border-radius: 4px; }
+
+.drop .guest-ttl { margin:10px 0 0; font-size:.8rem; line-height:1.4; color:var(--muted,inherit); text-align:center; text-wrap:balance; }

@@ -223,6 +223,7 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 	if d, ok := expiries[r.FormValue("expire")]; ok {
 		expiresAt = time.Now().Add(d).Unix()
 	}
+	expiresAt = a.guestExpiry(ctx, u, expiresAt)
 	albumID := ""
 	if aid := r.FormValue("album_id"); aid != "" && u != nil && validID(aid) {
 		if al, err := a.db.Album(ctx, aid); err == nil && al.UserID.Valid && al.UserID.Int64 == u.ID {
