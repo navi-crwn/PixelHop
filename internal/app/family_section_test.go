@@ -13,10 +13,10 @@ func TestHomeFamilySection(t *testing.T) {
 	newTestApp(t).ServeHTTP(rec, httptest.NewRequest("GET", "/", nil))
 	_, sec, _ := strings.Cut(rec.Body.String(), `id="family"`)
 	sec, _, _ = strings.Cut(sec, "</section>")
-	if n := strings.Count(sec, `class="hop-fam-tile"`); n != 5 {
-		t.Fatalf("%d tiles, want 5", n)
+	if n := strings.Count(sec, `class="hop-fam-tile"`); n != publicApps(t)-1 {
+		t.Fatalf("%d tiles, want one per other public app (%d)", n, publicApps(t)-1)
 	}
-	for _, want := range []string{`data-hop-hero="filehop"`, `/static/hop-home/home/filehop-light.webp`, `<span>file.hel.ink</span>`} {
+	for _, want := range []string{`data-hop-hero="filehop"`, `/static/hop-home/home/filehop-light.webp`, `<span>file.hel.ink</span>`, `data-hop-hero="payhop"`, `/static/hop-home/home/payhop-dark.webp`, `<span>pay.hel.ink</span>`} {
 		if !strings.Contains(sec, want) {
 			t.Errorf("family section lacks %q", want)
 		}

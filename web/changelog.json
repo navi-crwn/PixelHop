@@ -1,9 +1,45 @@
 {
   "schema": 1,
   "sources": {
-    "PixelHop": "51756d9c21a011da37eb2d3f4e2dd2e3f88a2249"
+    "PixelHop": "18acf1529fffa2640fb0f319d0515f43e870a13f"
   },
   "entries": [
+    {
+      "kind": "commit",
+      "date": "2026-11-10T21:51:04+07:00",
+      "title": "Merge pull request #48: Expire new guest uploads after 30 days by default; remove home section labels",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/18acf1529fffa2640fb0f319d0515f43e870a13f",
+      "id": "18acf152",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "pr",
+      "date": "2026-11-10T14:51:04Z",
+      "title": "Expire new guest uploads after 30 days by default; remove home section labels",
+      "url": "https://github.com/navi-crwn/PixelHop/pull/48",
+      "id": "#48",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T14:47:10+01:00",
+      "title": "Offer guests only expiry choices the server honours; drop the CORP change",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/11fe40e69669d9ce194d594199315336aed7dad5",
+      "id": "11fe40e6",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
+    {
+      "kind": "commit",
+      "date": "2026-11-10T14:35:57+01:00",
+      "title": "Guest upload TTL, CORP on API responses, drop home eyebrows",
+      "url": "https://github.com/navi-crwn/PixelHop/commit/8679bd262fa715396c19b022ac801a4bfe665af4",
+      "id": "8679bd26",
+      "app": "PixelHop",
+      "repo": "PixelHop"
+    },
     {
       "kind": "pr",
       "date": "2026-11-10T07:49:17Z",
