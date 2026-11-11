@@ -6,11 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/hop"
 )
@@ -355,6 +357,106 @@ func TestIsolatedPagesCanFetchAndEmbed(t *testing.T) {
 	for _, path := range []string{"/api/v1/images/" + id, "/api/v1/me"} { // answered, and refused
 		if hd := fetch(h, path).Header(); hd.Get("Access-Control-Allow-Origin") != "*" {
 			t.Errorf("%s: no CORS header for a page on another origin", path)
+		}
+	}
+}
+
+// trapBody is a request body that fails the test when anything reads it.
+type trapBody struct {
+	t    *testing.T
+	read bool
+}
+
+func (b *trapBody) Read(p []byte) (int, error) {
+	b.read = true
+	b.t.Error("the body was read before the caller was known")
+	return 0, io.EOF
+}
+
+// shaped is a call whose headers look right (a signature that is the right length) but is not signed by anyone.
+func shaped(body io.Reader, size int64, mod func(http.Header)) *http.Request {
+	req := httptest.NewRequest("POST", "/hop/media", body)
+	req.ContentLength = size
+	h := req.Header
+	h.Set("X-HOP-App", "filehop")
+	h.Set("X-HOP-Timestamp", strconv.FormatInt(time.Now().Unix(), 10))
+	h.Set("X-HOP-Nonce", "abcdefghijklmnopqrstuv")
+	h.Set("X-HOP-Actor", "201")
+	h.Set("X-HOP-Signature", strings.Repeat("A", 43))
+	if mod != nil {
+		mod(h)
+	}
+	return req
+}
+
+// A caller without the secret is turned away before its body is read, and is never counted against the app.
+func TestHopMediaRefusesCheaplyBeforeReadingTheBody(t *testing.T) {
+	a, h := storeApp(t)
+	linked(t, a, "201", "me@example.com")
+	cases := map[string]struct {
+		mod  func(http.Header)
+		size int64
+		want int
+	}{
+		"short signature":     {func(x http.Header) { x.Set("X-HOP-Signature", "abc") }, 100, 401},
+		"bad signature chars": {func(x http.Header) { x.Set("X-HOP-Signature", strings.Repeat("!", 43)) }, 100, 401},
+		"short nonce":         {func(x http.Header) { x.Set("X-HOP-Nonce", "short") }, 100, 401},
+		"old timestamp":       {func(x http.Header) { x.Set("X-HOP-Timestamp", "1000") }, 100, 401},
+		"no timestamp":        {func(x http.Header) { x.Del("X-HOP-Timestamp") }, 100, 401},
+		"unknown app":         {func(x http.Header) { x.Set("X-HOP-App", "nobody") }, 100, 401},
+		"announced too large": {nil, a.cfg.MaxUploadBytes + 1, 413},
+	}
+	for name, c := range cases {
+		body := &trapBody{t: t}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, shaped(body, c.size, c.mod))
+		if rec.Code != c.want || body.read {
+			t.Errorf("%s: %d (want %d), body read %v", name, rec.Code, c.want, body.read)
+		}
+	}
+	// Only a fixed number of unverified bodies may be held at once: with every slot taken, the next is refused unread.
+	for i := 0; i < cap(a.hopMediaSlots); i++ {
+		a.hopMediaSlots <- struct{}{}
+	}
+	body := &trapBody{t: t}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, shaped(body, 100, nil))
+	if rec.Code != http.StatusServiceUnavailable || body.read {
+		t.Errorf("all slots taken: %d, body read %v", rec.Code, body.read)
+	}
+	for i := 0; i < cap(a.hopMediaSlots); i++ {
+		<-a.hopMediaSlots
+	}
+	if rec, _ := storeCall(t, h, "filehop", storeSecret, "201", "a.png", testPNG(20, 20)); rec.Code != http.StatusCreated {
+		t.Errorf("a signed call after the slots freed: %d", rec.Code)
+	}
+}
+
+// Bad-signature traffic from elsewhere does not use up what the real app may do.
+func TestHopMediaFloodOfBadSignaturesDoesNotBlockTheRealApp(t *testing.T) {
+	a, h := storeApp(t)
+	linked(t, a, "201", "me@example.com")
+	limited := 0
+	for i := 0; i < hopMediaPerIP+hopMediaPerApp/2; i++ {
+		req := shaped(strings.NewReader("junk"), 4, func(x http.Header) { x.Set("X-HOP-Nonce", "flood-nonce-number-"+strconv.Itoa(i)) })
+		req.RemoteAddr = "203.0.113.7:4000"
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		switch rec.Code {
+		case http.StatusUnauthorized:
+		case http.StatusTooManyRequests:
+			limited++
+		default:
+			t.Fatalf("flood call %d answered %d", i, rec.Code)
+		}
+	}
+	if limited == 0 {
+		t.Error("the flooding address was never limited")
+	}
+	// The real caller (another address) is not limited: neither the app's nor the member's allowance was spent.
+	for i := 0; i < 4; i++ {
+		if rec, _ := storeCall(t, h, "filehop", storeSecret, "201", "ok"+strconv.Itoa(i)+".png", testPNG(20+i, 20)); rec.Code != http.StatusCreated {
+			t.Fatalf("signed call %d after the flood: %d %s", i, rec.Code, rec.Body.String())
 		}
 	}
 }

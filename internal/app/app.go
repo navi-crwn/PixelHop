@@ -43,14 +43,16 @@ type App struct {
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
 	uploadMu  sync.Mutex
-	quota     quotaLocks
-	space     func(string) (int64, int64)
-	hubUp     func() bool // is HEL.ink reachable (cached); replaced in tests
+	// hopMediaSlots bounds how many /hop/media bodies are held in memory before their signature is checked.
+	hopMediaSlots chan struct{}
+	quota         quotaLocks
+	space         func(string) (int64, int64)
+	hubUp         func() bool // is HEL.ink reachable (cached); replaced in tests
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
 	a := &App{cfg: cfg, db: d, log: log, limits: newLimiter(), views: newSeen(time.Hour),
-		mediaQueue: make(chan string, 256), chunks: newChunkStore(), started: time.Now()}
+		mediaQueue: make(chan string, 256), hopMediaSlots: make(chan struct{}, hopMediaUnverified), chunks: newChunkStore(), started: time.Now()}
 	a.space = diskSpace
 	if cfg.SSOEnabled() {
 		a.hubUp = newHubProbe(cfg.HelinkURL).Up

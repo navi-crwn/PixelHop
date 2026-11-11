@@ -4,6 +4,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"net/netip"
 	"net/url"
 	"os"
@@ -203,6 +204,11 @@ func Load() (*Config, error) {
 			c.StoreClients = append(c.StoreClients, s)
 			ownKey := "HOP_STORE_SECRET_" + strings.ToUpper(strings.ReplaceAll(s, "-", "_"))
 			if own := os.Getenv(ownKey); len(own) >= 32 {
+				if c.secretInUse(own) {
+					// A store secret must be its own: never the hub, picker or media-client secret, nor another store client's.
+					slog.Warn("store secret refused: it equals another HOP secret; the client stays off", "client", s, "env", ownKey)
+					continue
+				}
 				c.storeSecrets[s] = own
 			}
 		}
@@ -277,6 +283,30 @@ func (c *Config) MediaClientSecrets(app string) []string {
 		return append(s, own)
 	}
 	return append(s, c.HelinkSecrets()...)
+}
+
+// secretInUse reports whether v equals a secret that serves another purpose: the SSO secrets (current,
+// previous, shared), the picker secret, a media client's own secret or another store client's secret.
+func (c *Config) secretInUse(v string) bool {
+	for _, o := range c.HelinkSecrets() {
+		if o == v {
+			return true
+		}
+	}
+	if c.PickerSecret == v {
+		return true
+	}
+	for _, o := range c.mediaSecrets {
+		if o == v {
+			return true
+		}
+	}
+	for _, o := range c.storeSecrets {
+		if o == v {
+			return true
+		}
+	}
+	return false
 }
 
 // StoreClientsConfigured reports whether any app may store files for members.

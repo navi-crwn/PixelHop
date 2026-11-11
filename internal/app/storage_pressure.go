@@ -52,7 +52,7 @@ func (a *App) storageGate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		upload := (r.Method == "POST" || r.Method == "PUT") &&
-			(p == "/api/v1/upload" || p == "/hop/media" || p == "/api/upload.php" || p == "/share" ||
+			(p == "/api/v1/upload" || p == "/api/upload.php" || p == "/share" ||
 				p == "/settings/avatar" || p == "/api/v1/uploads" || strings.HasPrefix(p, "/api/v1/uploads/") || strings.HasPrefix(p, "/api/v1/tools/"))
 		if !upload {
 			next.ServeHTTP(w, r)

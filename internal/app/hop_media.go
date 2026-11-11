@@ -30,6 +30,37 @@ import (
 // a normal upload. The whole body is held in memory to verify the signature, so
 // videos and PDFs are accepted only up to the picture limit.
 
+const (
+	hopMediaUnverified = 4   // bodies held in memory before their signature is checked
+	hopMediaPerIP      = 300 // calls a minute from one address, counted before the signature is known
+	hopMediaPerApp     = 600 // calls a minute for a verified app
+)
+
+// hopSignatureShape refuses, without reading the body, a call whose signature headers cannot be valid:
+// a missing or malformed signature, a nonce of the wrong length or a timestamp outside the allowed age.
+func hopSignatureShape(r *http.Request) string {
+	sig := r.Header.Get("X-HOP-Signature")
+	if len(sig) != 43 { // base64url of a SHA-256 HMAC, no padding
+		return "bad_signature"
+	}
+	for _, c := range sig {
+		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-' || c == '_') {
+			return "bad_signature"
+		}
+	}
+	if n := r.Header.Get("X-HOP-Nonce"); len(n) < 16 || len(n) > 128 {
+		return "bad_signature"
+	}
+	t, err := strconv.ParseInt(r.Header.Get("X-HOP-Timestamp"), 10, 64)
+	if err != nil {
+		return "stale_request"
+	}
+	if d := time.Now().Unix() - t; d > int64(hopMaxAge.Seconds()) || -d > int64(hopMaxAge.Seconds()) {
+		return "stale_request"
+	}
+	return ""
+}
+
 // hopMediaAnswer is the data of a successful call.
 func (a *App) hopMediaAnswer(im *db.Image, duplicate bool) map[string]any {
 	return map[string]any{
@@ -49,10 +80,17 @@ func (a *App) hopMedia(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusUnauthorized, "bad_signature", "Unknown calling app.")
 		return
 	}
-	// Cheap limits before the body is read: per calling app and per address.
-	if !a.limits.allow("hopmedia:app:"+app, 600, time.Minute) || !a.limits.allow("hopmedia:ip:"+clientIP(r), 600, time.Minute) {
+	// Before the body is read, and before the signature is known to be good, only what costs nothing:
+	// the shape of the headers, a small limit per address, the size the caller announces, and a
+	// fixed number of bodies in memory at once. Nothing here is counted against the app or the member,
+	// so a caller without the secret cannot use up their limits.
+	if code := hopSignatureShape(r); code != "" {
+		hopFail(w, http.StatusUnauthorized, code, "The request signature was not accepted.")
+		return
+	}
+	if !a.limits.allow("hopmedia:ip:"+clientIP(r), hopMediaPerIP, time.Minute) {
 		w.Header().Set("Retry-After", "60")
-		hopFail(w, http.StatusTooManyRequests, "rate_limited", "Too many calls. Wait a minute.")
+		hopFail(w, http.StatusTooManyRequests, "rate_limited", "Too many calls from this address. Wait a minute.")
 		return
 	}
 	limit := a.cfg.MaxUploadBytes // a member's picture limit
@@ -60,17 +98,33 @@ func (a *App) hopMedia(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusRequestEntityTooLarge, "too_large", "The file is larger than "+strconv.FormatInt(limit>>20, 10)+" MB.")
 		return
 	}
+	select {
+	case a.hopMediaSlots <- struct{}{}:
+	default:
+		w.Header().Set("Retry-After", "5")
+		hopFail(w, http.StatusServiceUnavailable, "busy", "Try again in a moment.")
+		return
+	}
 	body, err := io.ReadAll(io.LimitReader(r.Body, limit+1))
-	if err != nil {
+	var verr error
+	if err == nil && int64(len(body)) <= limit {
+		verr = a.hopNonces.Verify(r, body, app, a.cfg.StoreClientSecrets(app), hopMaxAge)
+	}
+	<-a.hopMediaSlots // from here on the caller is known (or refused), and the limits below apply
+	switch {
+	case err != nil:
 		hopFail(w, http.StatusBadRequest, "bad_request", "The body could not be read.")
 		return
-	}
-	if int64(len(body)) > limit {
+	case int64(len(body)) > limit:
 		hopFail(w, http.StatusRequestEntityTooLarge, "too_large", "The file is larger than "+strconv.FormatInt(limit>>20, 10)+" MB.")
 		return
+	case verr != nil:
+		hopFail(w, http.StatusUnauthorized, verr.Error(), "The request signature was not accepted.")
+		return
 	}
-	if err := a.hopNonces.Verify(r, body, app, a.cfg.StoreClientSecrets(app), hopMaxAge); err != nil {
-		hopFail(w, http.StatusUnauthorized, err.Error(), "The request signature was not accepted.")
+	if !a.limits.allow("hopmedia:app:"+app, hopMediaPerApp, time.Minute) {
+		w.Header().Set("Retry-After", "60")
+		hopFail(w, http.StatusTooManyRequests, "rate_limited", "Too many calls. Wait a minute.")
 		return
 	}
 	actor := trim(r.Header.Get("X-HOP-Actor"), 100)
@@ -97,6 +151,20 @@ func (a *App) hopMedia(w http.ResponseWriter, r *http.Request) {
 	if !a.limits.allow("hopmedia:u:"+strconv.FormatInt(u.ID, 10), a.cfg.UploadsPerMinute*4, time.Minute) {
 		w.Header().Set("Retry-After", "60")
 		hopFail(w, http.StatusTooManyRequests, "rate_limited", "Too many files in a minute. Wait a bit.")
+		return
+	}
+
+	// The same gate as a normal upload: read-only mode and free disk space, and one upload admitted at a time.
+	if a.readOnly(r) {
+		w.Header().Set("Retry-After", "300")
+		hopFail(w, http.StatusServiceUnavailable, "read_only", "PixelHop is paused for maintenance.")
+		return
+	}
+	a.uploadMu.Lock()
+	defer a.uploadMu.Unlock()
+	if !a.storageAvailable(int64(len(body))) {
+		w.Header().Set("Retry-After", "60")
+		hopFail(w, http.StatusInsufficientStorage, "storage_full", "PixelHop is short of disk space.")
 		return
 	}
 
