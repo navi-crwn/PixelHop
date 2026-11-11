@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
@@ -31,10 +33,41 @@ import (
 // videos and PDFs are accepted only up to the picture limit.
 
 const (
-	hopMediaUnverified = 4   // bodies held in memory before their signature is checked
+	hopMediaUnverified = 4   // bodies held in memory before their signature is checked, at most one per address
 	hopMediaPerIP      = 300 // calls a minute from one address, counted before the signature is known
 	hopMediaPerApp     = 600 // calls a minute for a verified app
 )
+
+// hopMediaReadWindow is how long the body of a call may take to arrive once its headers did. The caller is a
+// server on the same network or close to it, and 20 MB (the default picture limit) at 10 Mbit/s takes 16 s, so
+// 20 s is enough for it and short enough that a sender without the secret cannot sit on a slot. It is a variable
+// only so a test can shorten it.
+var hopMediaReadWindow = 20 * time.Second
+
+// hopSlots limits the unverified bodies in memory: at most max at once and one per address.
+type hopSlots struct {
+	mu   sync.Mutex
+	held map[string]bool
+}
+
+func (s *hopSlots) take(ip string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.held == nil {
+		s.held = map[string]bool{}
+	}
+	if s.held[ip] || len(s.held) >= hopMediaUnverified {
+		return false
+	}
+	s.held[ip] = true
+	return true
+}
+
+func (s *hopSlots) release(ip string) {
+	s.mu.Lock()
+	delete(s.held, ip)
+	s.mu.Unlock()
+}
 
 // hopSignatureShape refuses, without reading the body, a call whose signature headers cannot be valid:
 // a missing or malformed signature, a nonce of the wrong length or a timestamp outside the allowed age.
@@ -98,21 +131,28 @@ func (a *App) hopMedia(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusRequestEntityTooLarge, "too_large", "The file is larger than "+strconv.FormatInt(limit>>20, 10)+" MB.")
 		return
 	}
-	select {
-	case a.hopMediaSlots <- struct{}{}:
-	default:
+	ip := clientIP(r)
+	if !a.hopMediaSlots.take(ip) {
 		w.Header().Set("Retry-After", "5")
 		hopFail(w, http.StatusServiceUnavailable, "busy", "Try again in a moment.")
 		return
 	}
+	// The only legitimate caller is another server, so the whole body must arrive within a short time:
+	// a sender that stalls loses its slot instead of keeping it.
+	http.NewResponseController(w).SetReadDeadline(time.Now().Add(hopMediaReadWindow))
 	body, err := io.ReadAll(io.LimitReader(r.Body, limit+1))
 	var verr error
 	if err == nil && int64(len(body)) <= limit {
 		verr = a.hopNonces.Verify(r, body, app, a.cfg.StoreClientSecrets(app), hopMaxAge)
 	}
-	<-a.hopMediaSlots // from here on the caller is known (or refused), and the limits below apply
+	a.hopMediaSlots.release(ip) // from here on the caller is known (or refused), and the limits below apply
 	switch {
 	case err != nil:
+		var ne net.Error
+		if errors.As(err, &ne) && ne.Timeout() {
+			hopFail(w, http.StatusRequestTimeout, "body_timeout", "The file did not arrive in time.")
+			return
+		}
 		hopFail(w, http.StatusBadRequest, "bad_request", "The body could not be read.")
 		return
 	case int64(len(body)) > limit:

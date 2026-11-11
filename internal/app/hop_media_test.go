@@ -1,12 +1,15 @@
 package app
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -415,8 +418,8 @@ func TestHopMediaRefusesCheaplyBeforeReadingTheBody(t *testing.T) {
 		}
 	}
 	// Only a fixed number of unverified bodies may be held at once: with every slot taken, the next is refused unread.
-	for i := 0; i < cap(a.hopMediaSlots); i++ {
-		a.hopMediaSlots <- struct{}{}
+	for i := 0; i < hopMediaUnverified; i++ {
+		a.hopMediaSlots.take("10.0.0." + strconv.Itoa(i))
 	}
 	body := &trapBody{t: t}
 	rec := httptest.NewRecorder()
@@ -424,8 +427,8 @@ func TestHopMediaRefusesCheaplyBeforeReadingTheBody(t *testing.T) {
 	if rec.Code != http.StatusServiceUnavailable || body.read {
 		t.Errorf("all slots taken: %d, body read %v", rec.Code, body.read)
 	}
-	for i := 0; i < cap(a.hopMediaSlots); i++ {
-		<-a.hopMediaSlots
+	for i := 0; i < hopMediaUnverified; i++ {
+		a.hopMediaSlots.release("10.0.0." + strconv.Itoa(i))
 	}
 	if rec, _ := storeCall(t, h, "filehop", storeSecret, "201", "a.png", testPNG(20, 20)); rec.Code != http.StatusCreated {
 		t.Errorf("a signed call after the slots freed: %d", rec.Code)
@@ -458,5 +461,68 @@ func TestHopMediaFloodOfBadSignaturesDoesNotBlockTheRealApp(t *testing.T) {
 		if rec, _ := storeCall(t, h, "filehop", storeSecret, "201", "ok"+strconv.Itoa(i)+".png", testPNG(20+i, 20)); rec.Code != http.StatusCreated {
 			t.Fatalf("signed call %d after the flood: %d %s", i, rec.Code, rec.Body.String())
 		}
+	}
+}
+
+// slowSender opens a connection as the address ip (through X-Forwarded-For), sends well-formed headers that announce
+// a body, then only part of it, and holds the connection.
+func slowSender(t *testing.T, addr, ip string, rest int) net.Conn {
+	t.Helper()
+	c, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Fprintf(c, "POST /hop/media HTTP/1.1\r\nHost: x\r\nX-Forwarded-For: %s\r\nContent-Length: 1000\r\n"+
+		"X-HOP-App: filehop\r\nX-HOP-Timestamp: %d\r\nX-HOP-Nonce: abcdefghijklmnopqrstuv\r\nX-HOP-Actor: 201\r\nX-HOP-Signature: %s\r\n\r\nabc",
+		ip, time.Now().Unix(), strings.Repeat("A", 43))
+	c.Write(bytes.Repeat([]byte("x"), rest)) // the rest of the announced body, or nothing: then the sender stalls
+	return c
+}
+
+// One address holds one slot; a body that stalls past the deadline frees it and gets an error;
+// a real signed call from another address works all the while.
+func TestHopMediaSlowBodiesCannotHoldTheSlots(t *testing.T) {
+	t.Setenv("PIXELHOP_TRUSTED_PROXIES", "127.0.0.1")
+	a, h := storeApp(t)
+	linked(t, a, "201", "me@example.com")
+	old := hopMediaReadWindow
+	hopMediaReadWindow = 700 * time.Millisecond
+	defer func() { hopMediaReadWindow = old }()
+	srv := httptest.NewServer(h)
+	defer srv.Close()
+	addr := strings.TrimPrefix(srv.URL, "http://")
+
+	first := slowSender(t, addr, "198.51.100.1", 0)
+	defer first.Close()
+	time.Sleep(200 * time.Millisecond) // it is now holding its slot
+	// Same address again: refused at once, without waiting for the first.
+	second := slowSender(t, addr, "198.51.100.1", 997) // a whole body, so the refusal is not held up by it
+	defer second.Close()
+	second.SetReadDeadline(time.Now().Add(400 * time.Millisecond))
+	resp, err := http.ReadResponse(bufio.NewReader(second), nil)
+	if err != nil || resp.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("a second slot for one address: %v %v", resp, err)
+	}
+	// Another address still gets through and is served while the first one stalls.
+	body := testPNG(25, 25)
+	path := "/hop/media?name=a.png"
+	req, _ := http.NewRequest("POST", srv.URL+path, bytes.NewReader(body))
+	for k, v := range hop.Headers("filehop", storeSecret, "201", "POST", path, body) {
+		req.Header[k] = v
+	}
+	req.Header.Set("X-Forwarded-For", "198.51.100.2")
+	ok, err := http.DefaultClient.Do(req)
+	if err != nil || ok.StatusCode != http.StatusCreated {
+		t.Fatalf("a signed call from another address while one is stalled: %v %v", ok, err)
+	}
+	ok.Body.Close()
+	// The stalled body runs out of time: it gets an error answer and its slot is free again.
+	first.SetReadDeadline(time.Now().Add(3 * time.Second))
+	late, err := http.ReadResponse(bufio.NewReader(first), nil)
+	if err != nil || late.StatusCode != http.StatusRequestTimeout {
+		t.Fatalf("a stalled body: %v %v", late, err)
+	}
+	if !a.hopMediaSlots.take("198.51.100.1") {
+		t.Fatal("the stalled sender still holds its slot")
 	}
 }
