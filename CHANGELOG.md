@@ -4,6 +4,8 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-11-12
+
 ### Added
 - Claim your guest uploads after signing in. A browser that uploaded while signed out keeps the delete link of each file; once you are signed in, the dashboard and the home page say "You uploaded N images before signing in" with a Claim button. Claiming (`POST /dashboard/claim`, tokens in the JSON body only, never in a URL or a log line, 10 calls an hour per member) moves the files that still have no owner into your library in one transaction, checks the secret of each one, respects your storage quota, skips removed, trashed, reported or expired files, forgets the old delete link and clears an expiry that only came from the guest limit (one the guest chose stays). A stolen image id without its token claims nothing. Schema migration 17 adds `images.claimed_at`. All new texts are in the nine languages.
 - `POST /hop/media`: a HOP app listed in `PIXELHOP_STORE_CLIENTS` (FileHop's "Save to PixelHop") can store one file in the library of the member whose HOP ID it names, signed with its own secret `HOP_STORE_SECRET_<APP>` (not the SSO or picker secret). Same size limit, types, safety checks, quota and webhooks as a normal upload; answers with the file's public address and id. Off until a client is configured; the manifest names the `media_store` capability when it is on. Calls are written to the audit trail.
