@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "Tidak tersedia karena alasan hukum",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Alamat itu membuka catatan terenkripsi, dan bagian setelah # adalah kuncinya. Bagikan tautan catatan itu langsung, jangan memasangnya di profil.",
   "The QR code could not be made. The text may be too long.": "Kode QR tidak dapat dibuat. Teksnya mungkin terlalu panjang.",
-  "The delete links saved in this browser are dropped. The images stay online.": "Tautan hapus yang tersimpan di peramban ini dibuang. Gambarnya tetap online."
+  "The delete links saved in this browser are dropped. The images stay online.": "Tautan hapus yang tersimpan di peramban ini dibuang. Gambarnya tetap online.",
+  "claim.title": "Kamu mengunggah {n} gambar sebelum masuk",
+  "claim.title_one": "Kamu mengunggah 1 gambar sebelum masuk",
+  "claim.desc": "Pindahkan ke pustakamu agar tersimpan dan bisa dikelola di sini. Gambar tetap online apa pun pilihanmu.",
+  "claim.button": "Klaim",
+  "claim.later": "Nanti saja",
+  "claim.done_title": "Ditambahkan ke pustakamu",
+  "claim.done": "{n} gambar kini ada di pustakamu. Tautan hapus yang lama tidak berlaku lagi; kelola semuanya di sini.",
+  "claim.done_some": "{n} gambar kini ada di pustakamu. {k} belum bisa dipindahkan dan tetap tersimpan di browser ini.",
+  "claim.none_title": "Tidak ada yang bisa diklaim",
+  "claim.none": "Gambar ini tidak bisa diklaim lagi: sudah dihapus, sedang ditinjau, atau milik orang lain.",
+  "claim.view": "Lihat pustakaku",
+  "claim.error": "Belum bisa mengklaim sekarang. Coba lagi sebentar lagi.",
+  "You're doing this very fast. Please wait a while.": "Terlalu cepat. Tunggu beberapa saat."
 }

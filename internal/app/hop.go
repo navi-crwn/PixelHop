@@ -62,6 +62,7 @@ func (a *App) hopRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /hop/x/ip", a.hopAuth(a.hopIPBans))
 	mux.HandleFunc("POST /hop/x/ip/actions", a.hopAuth(a.hopIPBanAction))
 	mux.HandleFunc("GET /hop/audit", a.hopAuth(a.hopAudit))
+	mux.HandleFunc("POST /hop/media", a.hopMedia) // signed by a store client, not an admin client: see hop_media.go
 	mux.HandleFunc("/hop/", a.hopAuth(func(w http.ResponseWriter, r *http.Request) {
 		hopFail(w, http.StatusNotFound, "not_found", "No such endpoint.")
 	}))
@@ -265,9 +266,13 @@ var hopSettingSchema = []map[string]any{
 }
 
 func (a *App) hopManifest(w http.ResponseWriter, r *http.Request) {
+	caps := []string{"admin_api", "events", "account_api", "metrics"}
+	if a.cfg.StoreClientsConfigured() {
+		caps = append(caps, "media_store") // POST /hop/media
+	}
 	hopOK(w, map[string]any{
 		"app": "pixelhop", "name": a.cfg.SiteName, "icon": "image", "base_url": a.cfg.BaseURL, "version": Version,
-		"capabilities": []string{"admin_api", "events", "account_api", "metrics"},
+		"capabilities": caps,
 		"content_types": []map[string]any{
 			{"type": "image", "label": "Images", "actions": []string{"hide", "unhide", "delete", "ban_ip", "transfer"}},
 			{"type": "album", "label": "Albums", "actions": []string{"delete", "transfer"}},

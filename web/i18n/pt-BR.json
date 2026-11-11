@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "Indisponível por motivos legais",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Esse endereço abre uma nota criptografada, e a parte depois do # é a chave dela. Compartilhe o link da nota diretamente em vez de colocá-lo em um perfil.",
   "The QR code could not be made. The text may be too long.": "Não foi possível criar o código QR. O texto pode ser longo demais.",
-  "The delete links saved in this browser are dropped. The images stay online.": "Os links de exclusão salvos neste navegador são descartados. As imagens continuam online."
+  "The delete links saved in this browser are dropped. The images stay online.": "Os links de exclusão salvos neste navegador são descartados. As imagens continuam online.",
+  "claim.title": "Você enviou {n} imagens antes de entrar",
+  "claim.title_one": "Você enviou 1 imagem antes de entrar",
+  "claim.desc": "Mova-as para a sua biblioteca para guardá-las e gerenciá-las aqui. Elas continuam online de qualquer forma.",
+  "claim.button": "Reivindicar",
+  "claim.later": "Agora não",
+  "claim.done_title": "Adicionadas à sua biblioteca",
+  "claim.done": "{n} imagens agora estão na sua biblioteca. Os links de exclusão antigos deixam de funcionar; você as gerencia aqui.",
+  "claim.done_some": "{n} imagens agora estão na sua biblioteca. {k} ainda não puderam ser movidas e continuam neste navegador.",
+  "claim.none_title": "Nada para reivindicar",
+  "claim.none": "Estas imagens não podem mais ser reivindicadas: foram removidas, estão em análise ou pertencem a outra pessoa.",
+  "claim.view": "Ver minha biblioteca",
+  "claim.error": "Não foi possível reivindicar agora. Tente de novo em instantes.",
+  "You're doing this very fast. Please wait a while.": "Você está indo rápido demais. Aguarde um pouco."
 }

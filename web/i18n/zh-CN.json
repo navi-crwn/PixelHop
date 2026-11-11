@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "因法律原因不可用",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "该地址会打开一篇加密笔记，# 之后的部分就是它的密钥。请直接分享笔记链接，不要把它放进个人资料。",
   "The QR code could not be made. The text may be too long.": "无法生成二维码。文字可能太长。",
-  "The delete links saved in this browser are dropped. The images stay online.": "保存在此浏览器中的删除链接将被丢弃。图片仍然在线。"
+  "The delete links saved in this browser are dropped. The images stay online.": "保存在此浏览器中的删除链接将被丢弃。图片仍然在线。",
+  "claim.title": "你在登录前上传了 {n} 张图片",
+  "claim.title_one": "你在登录前上传了 1 张图片",
+  "claim.desc": "把它们移入你的图库，即可在这里保留和管理。无论是否移入，图片都会保持在线。",
+  "claim.button": "认领",
+  "claim.later": "暂不",
+  "claim.done_title": "已加入你的图库",
+  "claim.done": "{n} 张图片已进入你的图库。旧的删除链接不再有效，请在这里管理它们。",
+  "claim.done_some": "{n} 张图片已进入你的图库。另有 {k} 张暂时无法移入，仍保留在此浏览器中。",
+  "claim.none_title": "没有可认领的图片",
+  "claim.none": "这些图片已无法认领：已被删除、正在审核，或属于其他人。",
+  "claim.view": "查看我的图库",
+  "claim.error": "暂时无法认领，请稍后再试。",
+  "You're doing this very fast. Please wait a while.": "操作太快了，请稍等一会儿。"
 }

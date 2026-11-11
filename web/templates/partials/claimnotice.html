@@ -1,0 +1,14 @@
+{{define "claimnotice"}}
+<div class="claim-notice" id="claim-notice" data-claim-url="/dashboard/claim" hidden>
+  <span class="claim-peek" id="claim-peek" aria-hidden="true"></span>
+  <div class="claim-text">
+    <b id="claim-title"></b>
+    <span class="small muted" id="claim-desc">{{.L.T "claim.desc"}}</span>
+    <span class="small" id="claim-result" role="status" hidden></span>
+  </div>
+  <div class="claim-actions">
+    <button class="btn primary sm" type="button" id="claim-go">{{.L.T "claim.button"}}</button>
+    <button class="btn sm ghost" type="button" id="claim-later">{{.L.T "claim.later"}}</button>
+  </div>
+</div>
+{{end}}

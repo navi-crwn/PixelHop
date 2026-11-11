@@ -256,6 +256,57 @@
   });
   renderHistory();
 
+  // ---------- claim guest uploads after signing in ----------
+  // The delete link of every guest upload is kept in this browser (ph_history). Its last two parts are
+  // the image id and the secret token. Claiming sends them in the body of one POST, never in a URL.
+  (function claim() {
+    var box = $('#claim-notice');
+    if (!box) return;
+    var DEL = /\/delete\/([A-Za-z0-9_-]{1,64})\/([A-Za-z0-9_-]{1,128})\/?$/;
+    function pending() {
+      var out = [];
+      loadHistory().forEach(function (x) { var m = DEL.exec(x.del || ''); if (m) out.push({ id: m[1], token: m[2], thumb: x.thumb }); });
+      return out;
+    }
+    function snoozed() { try { return sessionStorage.getItem('ph_claim_later') === '1'; } catch (e) { return false; } }
+    function show() {
+      var list = pending();
+      if (!list.length || snoozed()) { box.hidden = true; return; }
+      $('#claim-title').textContent = list.length === 1 ? T('claim.title_one') : T('claim.title', { n: list.length });
+      var peek = $('#claim-peek'); peek.innerHTML = '';
+      list.slice(0, 3).forEach(function (x) { var i = document.createElement('img'); i.src = x.thumb; i.alt = ''; i.loading = 'lazy'; i.onerror = function () { i.remove(); }; peek.appendChild(i); });
+      box.hidden = false;
+    }
+    function say(text) { var r = $('#claim-result'); r.textContent = text; r.hidden = false; $('#claim-desc').hidden = true; }
+    $('#claim-later').addEventListener('click', function () { try { sessionStorage.setItem('ph_claim_later', '1'); } catch (e) {} box.hidden = true; });
+    $('#claim-go').addEventListener('click', function () {
+      var list = pending().slice(0, 200);
+      if (!list.length) return;
+      box.setAttribute('aria-busy', 'true');
+      fetch(box.dataset.claimUrl, {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ items: list.map(function (x) { return { id: x.id, token: x.token }; }) })
+      }).then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); }).then(function (r) {
+        box.removeAttribute('aria-busy');
+        if (!r.ok || !r.j.success) { say(T('claim.error')); return; }
+        var d = r.j.data, gone = {}, dead = {}, kept = 0;
+        (d.claimed || []).concat(d.already || []).forEach(function (id) { gone[id] = 1; });
+        (d.skipped || []).forEach(function (s) { if (s.reason === 'invalid') dead[s.id] = 1; else kept++; });
+        // Forget the tokens that are spent or useless; keep the ones that may still work later.
+        var h = loadHistory().filter(function (x) { return !gone[x.id]; }).map(function (x) { if (dead[x.id]) x.del = ''; return x; });
+        try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch (e) {}
+        var n = (d.claimed || []).length;
+        say(n ? T(kept ? 'claim.done_some' : 'claim.done', { n: n, k: kept }) : T('claim.none'));
+        $('#claim-go').hidden = true; $('#claim-later').hidden = true;
+        $('#claim-title').textContent = n ? T('claim.done_title') : T('claim.none_title');
+        if (n) { var a = document.createElement('a'); a.className = 'btn sm'; a.href = '/dashboard'; a.textContent = T('claim.view'); box.querySelector('.claim-actions').appendChild(a); }
+        renderHistory();
+      }).catch(function () { box.removeAttribute('aria-busy'); say(T('claim.error')); });
+    });
+    show();
+  })();
+
   // ---------- uploader ----------
   var drop = $('#drop');
   if (drop) {

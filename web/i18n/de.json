@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "Aus rechtlichen Gründen nicht verfügbar",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Diese Adresse öffnet eine verschlüsselte Notiz, und der Teil nach dem # ist ihr Schlüssel. Teile den Notiz-Link direkt, statt ihn in ein Profil zu setzen.",
   "The QR code could not be made. The text may be too long.": "Der QR-Code konnte nicht erstellt werden. Der Text ist vielleicht zu lang.",
-  "The delete links saved in this browser are dropped. The images stay online.": "Die in diesem Browser gespeicherten Löschlinks entfallen. Die Bilder bleiben online."
+  "The delete links saved in this browser are dropped. The images stay online.": "Die in diesem Browser gespeicherten Löschlinks entfallen. Die Bilder bleiben online.",
+  "claim.title": "Du hast {n} Bilder hochgeladen, bevor du dich angemeldet hast",
+  "claim.title_one": "Du hast 1 Bild hochgeladen, bevor du dich angemeldet hast",
+  "claim.desc": "Übernimm sie in deine Bibliothek, um sie hier zu behalten und zu verwalten. Online bleiben sie in jedem Fall.",
+  "claim.button": "Übernehmen",
+  "claim.later": "Jetzt nicht",
+  "claim.done_title": "In deine Bibliothek übernommen",
+  "claim.done": "{n} Bilder sind jetzt in deiner Bibliothek. Die alten Löschlinks funktionieren nicht mehr; du verwaltest sie hier.",
+  "claim.done_some": "{n} Bilder sind jetzt in deiner Bibliothek. {k} konnten noch nicht übernommen werden und bleiben in diesem Browser.",
+  "claim.none_title": "Nichts zu übernehmen",
+  "claim.none": "Diese Bilder können nicht mehr übernommen werden: Sie wurden entfernt, werden geprüft oder gehören jemand anderem.",
+  "claim.view": "Meine Bibliothek ansehen",
+  "claim.error": "Das Übernehmen hat gerade nicht geklappt. Bitte versuche es gleich noch einmal.",
+  "You're doing this very fast. Please wait a while.": "Das geht zu schnell. Bitte warte eine Weile."
 }

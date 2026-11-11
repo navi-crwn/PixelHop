@@ -43,9 +43,11 @@ type App struct {
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
 	uploadMu  sync.Mutex
-	quota     quotaLocks
-	space     func(string) (int64, int64)
-	hubUp     func() bool // is HEL.ink reachable (cached); replaced in tests
+	// hopMediaSlots bounds the /hop/media bodies held in memory before their signature is checked.
+	hopMediaSlots hopSlots
+	quota         quotaLocks
+	space         func(string) (int64, int64)
+	hubUp         func() bool // is HEL.ink reachable (cached); replaced in tests
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
@@ -143,6 +145,7 @@ func (a *App) Handler() http.Handler {
 	// member area
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
 	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
+	mux.HandleFunc("POST /dashboard/claim", a.member(a.claimUploads))
 	mux.HandleFunc("GET /dashboard/albums", a.member(a.myAlbums))
 	mux.HandleFunc("GET /dashboard/trash", a.member(a.trashPage))
 	mux.HandleFunc("POST /dashboard/trash/{id}/restore", a.member(a.trashRestore))

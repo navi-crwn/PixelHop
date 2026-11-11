@@ -4,6 +4,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"net/netip"
 	"net/url"
 	"os"
@@ -76,6 +77,13 @@ type Config struct {
 	// a secret the hub never uses, so PixelHop need not hold another app's
 	// SSO secret. Accepted next to the older secrets while a family moves.
 	PickerSecret string
+
+	// StoreClients are the HOP apps that may store a file in a member's library
+	// on their behalf (POST /hop/media, FileHop's "Save to PixelHop"). Each one
+	// needs its own secret in HOP_STORE_SECRET_<APP>; without it the app is not
+	// accepted, and neither the SSO secret nor the picker secret ever is.
+	StoreClients []string
+	storeSecrets map[string]string
 
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
@@ -190,6 +198,21 @@ func Load() (*Config, error) {
 			}
 		}
 	}
+	c.storeSecrets = map[string]string{}
+	for _, s := range strings.Split(env("PIXELHOP_STORE_CLIENTS", ""), ",") {
+		if s = strings.ToLower(strings.TrimSpace(s)); s != "" {
+			c.StoreClients = append(c.StoreClients, s)
+			ownKey := "HOP_STORE_SECRET_" + strings.ToUpper(strings.ReplaceAll(s, "-", "_"))
+			if own := os.Getenv(ownKey); len(own) >= 32 {
+				if c.secretInUse(own) {
+					// A store secret must be its own: never the hub, picker or media-client secret, nor another store client's.
+					slog.Warn("store secret refused: it equals another HOP secret; the client stays off", "client", s, "env", ownKey)
+					continue
+				}
+				c.storeSecrets[s] = own
+			}
+		}
+	}
 	c.LinkURL = strings.TrimRight(env("PIXELHOP_LINK_URL", c.BaseURL), "/")
 	if c.LinkURL != c.BaseURL {
 		lu, err := url.Parse(c.LinkURL)
@@ -260,6 +283,48 @@ func (c *Config) MediaClientSecrets(app string) []string {
 		return append(s, own)
 	}
 	return append(s, c.HelinkSecrets()...)
+}
+
+// secretInUse reports whether v equals a secret that serves another purpose: the SSO secrets (current,
+// previous, shared), the picker secret, a media client's own secret or another store client's secret.
+func (c *Config) secretInUse(v string) bool {
+	for _, o := range c.HelinkSecrets() {
+		if o == v {
+			return true
+		}
+	}
+	if c.PickerSecret == v {
+		return true
+	}
+	for _, o := range c.mediaSecrets {
+		if o == v {
+			return true
+		}
+	}
+	for _, o := range c.storeSecrets {
+		if o == v {
+			return true
+		}
+	}
+	return false
+}
+
+// StoreClientsConfigured reports whether any app may store files for members.
+func (c *Config) StoreClientsConfigured() bool { return len(c.storeSecrets) > 0 }
+
+// StoreClient reports whether app may store files on a member's behalf: it is
+// listed in PIXELHOP_STORE_CLIENTS and has its own secret.
+func (c *Config) StoreClient(app string) bool {
+	_, ok := c.storeSecrets[app]
+	return ok
+}
+
+// StoreClientSecrets is the one secret that verifies a store client's calls.
+func (c *Config) StoreClientSecrets(app string) []string {
+	if s, ok := c.storeSecrets[app]; ok {
+		return []string{s}
+	}
+	return nil
 }
 
 // TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.

@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "Indisponible pour des raisons légales",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "Cette adresse ouvre une note chiffrée, et la partie après le # est sa clé. Partagez directement le lien de la note au lieu de le mettre sur un profil.",
   "The QR code could not be made. The text may be too long.": "Impossible de créer le code QR. Le texte est peut-être trop long.",
-  "The delete links saved in this browser are dropped. The images stay online.": "Les liens de suppression enregistrés dans ce navigateur sont perdus. Les images restent en ligne."
+  "The delete links saved in this browser are dropped. The images stay online.": "Les liens de suppression enregistrés dans ce navigateur sont perdus. Les images restent en ligne.",
+  "claim.title": "Vous avez envoyé {n} images avant de vous connecter",
+  "claim.title_one": "Vous avez envoyé 1 image avant de vous connecter",
+  "claim.desc": "Ajoutez-les à votre bibliothèque pour les garder et les gérer ici. Elles restent en ligne dans tous les cas.",
+  "claim.button": "Récupérer",
+  "claim.later": "Plus tard",
+  "claim.done_title": "Ajoutées à votre bibliothèque",
+  "claim.done": "{n} images sont maintenant dans votre bibliothèque. Les anciens liens de suppression ne fonctionnent plus ; vous les gérez ici.",
+  "claim.done_some": "{n} images sont maintenant dans votre bibliothèque. {k} n’ont pas pu être ajoutées pour l’instant et restent dans ce navigateur.",
+  "claim.none_title": "Rien à récupérer",
+  "claim.none": "Ces images ne peuvent plus être récupérées : elles ont été supprimées, sont en cours d’examen ou appartiennent à quelqu’un d’autre.",
+  "claim.view": "Voir ma bibliothèque",
+  "claim.error": "Impossible de les récupérer pour le moment. Réessayez dans un instant.",
+  "You're doing this very fast. Please wait a while.": "Vous allez trop vite. Patientez un moment."
 }
