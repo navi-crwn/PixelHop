@@ -262,6 +262,15 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .history-foot { display: flex; gap: 8px; justify-content: space-between; padding: 14px 16px; }
 .history-foot [hidden] { display: none; }
 @media (max-width: 560px) { .history-title .small { display: none; } }
+.claim-notice { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 16px 0; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--panel); }
+.claim-notice[hidden] { display: none; }
+.claim-peek { display: flex; flex: none; }
+.claim-peek img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 2px solid var(--panel); background: var(--panel-2); }
+.claim-peek img + img { margin-left: -14px; }
+.claim-text { display: grid; gap: 2px; flex: 1 1 240px; min-width: 0; }
+.claim-text [hidden] { display: none; }
+.claim-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.claim-notice[aria-busy="true"] .claim-actions { opacity: .6; pointer-events: none; }
 .section-head .eyebrow { margin-bottom: 14px; }
 .drop { position: relative; max-width: 820px; margin: 0 auto; border-radius: 22px; padding: 2px; background: var(--grad); box-shadow: var(--shadow); }
 .drop-in { border-radius: 20px; background: var(--panel); padding: 38px 26px 24px; text-align: center; cursor: pointer; transition: background .2s; }

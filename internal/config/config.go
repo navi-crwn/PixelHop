@@ -77,6 +77,13 @@ type Config struct {
 	// SSO secret. Accepted next to the older secrets while a family moves.
 	PickerSecret string
 
+	// StoreClients are the HOP apps that may store a file in a member's library
+	// on their behalf (POST /hop/media, FileHop's "Save to PixelHop"). Each one
+	// needs its own secret in HOP_STORE_SECRET_<APP>; without it the app is not
+	// accepted, and neither the SSO secret nor the picker secret ever is.
+	StoreClients []string
+	storeSecrets map[string]string
+
 	// Cloudflare Turnstile on PixelHop's own sign-in and sign-up forms.
 	TurnstileSiteKey string
 	TurnstileSecret  string
@@ -190,6 +197,16 @@ func Load() (*Config, error) {
 			}
 		}
 	}
+	c.storeSecrets = map[string]string{}
+	for _, s := range strings.Split(env("PIXELHOP_STORE_CLIENTS", ""), ",") {
+		if s = strings.ToLower(strings.TrimSpace(s)); s != "" {
+			c.StoreClients = append(c.StoreClients, s)
+			ownKey := "HOP_STORE_SECRET_" + strings.ToUpper(strings.ReplaceAll(s, "-", "_"))
+			if own := os.Getenv(ownKey); len(own) >= 32 {
+				c.storeSecrets[s] = own
+			}
+		}
+	}
 	c.LinkURL = strings.TrimRight(env("PIXELHOP_LINK_URL", c.BaseURL), "/")
 	if c.LinkURL != c.BaseURL {
 		lu, err := url.Parse(c.LinkURL)
@@ -260,6 +277,24 @@ func (c *Config) MediaClientSecrets(app string) []string {
 		return append(s, own)
 	}
 	return append(s, c.HelinkSecrets()...)
+}
+
+// StoreClientsConfigured reports whether any app may store files for members.
+func (c *Config) StoreClientsConfigured() bool { return len(c.storeSecrets) > 0 }
+
+// StoreClient reports whether app may store files on a member's behalf: it is
+// listed in PIXELHOP_STORE_CLIENTS and has its own secret.
+func (c *Config) StoreClient(app string) bool {
+	_, ok := c.storeSecrets[app]
+	return ok
+}
+
+// StoreClientSecrets is the one secret that verifies a store client's calls.
+func (c *Config) StoreClientSecrets(app string) []string {
+	if s, ok := c.storeSecrets[app]; ok {
+		return []string{s}
+	}
+	return nil
 }
 
 // TurnstileEnabled reports whether forms carry a Cloudflare Turnstile check.

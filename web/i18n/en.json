@@ -1093,5 +1093,18 @@
   "Unavailable For Legal Reasons": "Unavailable For Legal Reasons",
   "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.": "That address opens an encrypted note, and the part after the # is its key. Share the note link directly instead of putting it on a profile.",
   "The QR code could not be made. The text may be too long.": "The QR code could not be made. The text may be too long.",
-  "The delete links saved in this browser are dropped. The images stay online.": "The delete links saved in this browser are dropped. The images stay online."
+  "The delete links saved in this browser are dropped. The images stay online.": "The delete links saved in this browser are dropped. The images stay online.",
+  "claim.title": "You uploaded {n} images before signing in",
+  "claim.title_one": "You uploaded 1 image before signing in",
+  "claim.desc": "Move them into your library to keep them and manage them here. They stay online either way.",
+  "claim.button": "Claim",
+  "claim.later": "Not now",
+  "claim.done_title": "Added to your library",
+  "claim.done": "{n} images are now in your library. The old delete links no longer work; you manage them here.",
+  "claim.done_some": "{n} images are now in your library. {k} could not be moved yet and stay in this browser.",
+  "claim.none_title": "Nothing to claim",
+  "claim.none": "These images can no longer be claimed: they were removed, are under review, or belong to someone else.",
+  "claim.view": "View my library",
+  "claim.error": "Could not claim them right now. Please try again in a moment.",
+  "You're doing this very fast. Please wait a while.": "You're doing this very fast. Please wait a while."
 }

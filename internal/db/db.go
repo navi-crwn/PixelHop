@@ -243,6 +243,8 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	// 16: when HOP ID last vouched for a session (unix seconds; 0 = never, -1 = signed in some
 	// other way and not tied to a hub browser session), so a browser whose hub account changed is caught
 	`ALTER TABLE sessions ADD COLUMN verified_at INTEGER NOT NULL DEFAULT 0;`,
+	// 17: when a guest upload was claimed into a member's library (unix seconds; 0 = never claimed)
+	`ALTER TABLE images ADD COLUMN claimed_at INTEGER NOT NULL DEFAULT 0;`,
 }
 
 func (d *DB) migrate() error {

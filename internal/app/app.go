@@ -143,6 +143,7 @@ func (a *App) Handler() http.Handler {
 	// member area
 	mux.HandleFunc("GET /dashboard", a.member(a.dashboard))
 	mux.HandleFunc("POST /dashboard/download", a.member(a.downloadZip))
+	mux.HandleFunc("POST /dashboard/claim", a.member(a.claimUploads))
 	mux.HandleFunc("GET /dashboard/albums", a.member(a.myAlbums))
 	mux.HandleFunc("GET /dashboard/trash", a.member(a.trashPage))
 	mux.HandleFunc("POST /dashboard/trash/{id}/restore", a.member(a.trashRestore))
