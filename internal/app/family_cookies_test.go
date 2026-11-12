@@ -66,6 +66,14 @@ func TestFamilyLanguageCookie(t *testing.T) {
 	if sc := setCookie(rec, "hop_lang"); !strings.HasPrefix(sc, "hop_lang=id;") || !strings.Contains(sc, "Domain=hel.ink") {
 		t.Errorf("pixel_lang was not carried into hop_lang: %q", sc)
 	}
+	// A hop_lang this app cannot read is left alone: no copy from the old cookie over it.
+	rec = get("https://pixel.hel.ink/about", &http.Cookie{Name: "hop_lang", Value: "xx"}, &http.Cookie{Name: "pixel_lang", Value: "id"})
+	if !strings.Contains(rec.Body.String(), `<html lang="id"`) {
+		t.Error("hop_lang=xx with pixel_lang=id: the page should still read in Indonesian")
+	}
+	if sc := setCookie(rec, "hop_lang"); sc != "" {
+		t.Errorf("hop_lang=xx was overwritten from pixel_lang: %q", sc)
+	}
 	// The URL still beats both cookies.
 	if body := get("http://localhost:8104/about?lang=fr", &http.Cookie{Name: "hop_lang", Value: "ja"}).Body.String(); !strings.Contains(body, `<html lang="fr"`) {
 		t.Error("?lang=fr did not win over hop_lang")

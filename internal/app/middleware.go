@@ -247,6 +247,16 @@ func (l *limiter) allow(key string, max int, per time.Duration) bool {
 	return l.allowAt(key, max, per, time.Now())
 }
 
+// give takes back one event counted at or after since, for an action that did not happen after all
+// (the AI service failed). It never goes below zero and leaves a window that started later alone.
+func (l *limiter) give(key string, since time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if w := l.m[key]; w != nil && !w.start.After(since) && w.n > 0 {
+		w.n--
+	}
+}
+
 func (l *limiter) allowAt(key string, max int, per time.Duration, now time.Time) bool {
 	if max <= 0 {
 		return true
@@ -258,8 +268,11 @@ func (l *limiter) allowAt(key string, max int, per time.Duration, now time.Time)
 		w = &window{start: now, per: per}
 		l.m[key] = w
 	}
+	if w.n >= max { // a refusal is not counted, so a give() makes room again
+		return false
+	}
 	w.n++
-	return w.n <= max
+	return true
 }
 
 // seen remembers (ip, image) pairs so one visitor refreshing a page counts

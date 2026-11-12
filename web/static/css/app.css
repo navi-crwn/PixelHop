@@ -751,6 +751,9 @@ footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr
 .start-list .done .tick { background: var(--lime); border-color: transparent; } .start-list .done .tick::after { content: "✓"; font-size: .7rem; color: #0b1020; font-weight: 700; }
 @media (max-width: 900px) { .dash-start { grid-template-columns: auto minmax(0, 1fr); } .start-list { grid-column: 1 / -1; } }
 @media (max-width: 520px) { .start-list { grid-template-columns: minmax(0, 1fr); } }
+/* hop-ui's "Hide" sits in the top corner and asks for 220px on the right from 640px up, which squeezed the
+   steps; here it gets a strip on top instead, so the card keeps its full width. */
+@media (min-width: 640px) { .dash-start.hop-remind[data-hop-remind] { padding-right: 20px; padding-top: 52px; } }
 
 /* language menu: native name on the left, short code on the right */
 .lang-menu .menu-list a { display: flex; align-items: center; justify-content: space-between; gap: 18px; }

@@ -40,6 +40,7 @@
       srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = blob.type; srcSize = blob.size;
       out.type = null;
       show(); busy(false);
+      $('#st-export').classList.remove('hide');
       $('#st-uploaded').classList.add('hide');
       if (!tool) pick(location.hash.slice(1) || 'compress'); else pick(tool.id);
     }).catch(function () { busy(false); toast('This image could not be opened', true); });
@@ -80,16 +81,18 @@
   }
   // Download and Upload result appear once there is a result to save: an image tool after a change,
   // or Compress and Convert, whose result is made when saving. Never for tools that make no image.
+  // Only the buttons: the size and format line and the link of an upload stay.
   function exportPanel() {
     var on = !!cur && !!tool && !tool.noResult && (undo.length > 0 || !!tool.atExport);
-    $('#st-export').classList.toggle('hide', !on);
+    $('#st-actions').classList.toggle('hide', !on);
   }
   function commit(next) {
     undo.push(cur); if (undo.length > 12) undo.shift();
     cur = next; show();
   }
   $('#st-undo').addEventListener('click', function () { if (undo.length) { cur = undo.pop(); show(); if (tool) pick(tool.id); } });
-  $('#st-reset').addEventListener('click', function () { if (original) { undo.push(cur); cur = clone(original); show(); if (tool) pick(tool.id); } });
+  // Start over on an untouched image changes nothing, so it adds no step (and no Download).
+  $('#st-reset').addEventListener('click', function () { if (original && undo.length) { undo.push(cur); cur = clone(original); show(); if (tool) pick(tool.id); } });
 
   function busy(text) {
     busyEl.classList.toggle('hide', !text);

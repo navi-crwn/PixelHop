@@ -308,19 +308,22 @@ func (a *App) setLangCookie(w http.ResponseWriter, r *http.Request, code string)
 
 // requestLang is the language a request asks for, in the family's order:
 // ?lang= → hop_lang → PixelHop's old pixel_lang → English (Accept-Language is
-// not used per owner decision). old reports that only pixel_lang said so.
+// not used per owner decision). old reports that pixel_lang decided and hop_lang is absent.
 func requestLang(r *http.Request) (code string, fromQuery, old bool) {
 	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
 		return q, true, false
 	}
-	if c, err := r.Cookie(langCookie); err == nil {
-		if resolved, ok := i18n.Resolve(c.Value); ok {
+	family, err := r.Cookie(langCookie)
+	if err == nil {
+		if resolved, ok := i18n.Resolve(family.Value); ok {
 			return resolved, false, false
 		}
 	}
 	if c, err := r.Cookie(oldLangCookie); err == nil {
 		if resolved, ok := i18n.Resolve(c.Value); ok {
-			return resolved, false, true
+			// Copied into hop_lang only when the family cookie is absent: one this app cannot read
+			// (another app's newer value) is never overwritten from PixelHop's old store.
+			return resolved, false, family == nil
 		}
 	}
 	return i18n.Default, false, false

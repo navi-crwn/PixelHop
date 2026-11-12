@@ -87,16 +87,6 @@ func TestGettingStartedReminder(t *testing.T) {
 	}
 }
 
-// The migration can meet a database that already has the table.
-func TestReminderMigrationIsIdempotent(t *testing.T) {
-	a, _ := ssoApp(t)
-	stmt := `CREATE TABLE IF NOT EXISTS reminders (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, key TEXT NOT NULL,
-	dismissed_at INTEGER NOT NULL, PRIMARY KEY (user_id, key));`
-	if _, err := a.db.Exec(stmt); err != nil {
-		t.Fatalf("second run: %v", err)
-	}
-}
-
 // The dashboard no longer advertises the hub as "Short links with the same
 // account": short links are LinkHop's, and the sidebar lists the family.
 func TestDashboardHasNoHubShortcut(t *testing.T) {

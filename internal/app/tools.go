@@ -64,15 +64,6 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusTooManyRequests, a.tr(r, "one moment: too many in a row"))
 		return
 	}
-	perDay := tool.perDay
-	if name == "remove-background" {
-		perDay = a.cfg.RembgPerDay
-	}
-	if !a.limits.allow("ai-day:"+name+":"+strconv.FormatInt(u.ID, 10), perDay, 24*time.Hour) {
-		apiError(w, http.StatusTooManyRequests, a.tr(r, "you've used today's {n} of this tool; try again tomorrow", "n", perDay))
-		return
-	}
-
 	r.Body = http.MaxBytesReader(w, r.Body, 2*a.cfg.MaxUploadBytes+(1<<20))
 	img, err := formBytes(r, "file", a.cfg.MaxUploadBytes)
 	if err != nil {
@@ -97,12 +88,27 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// The day's share counts only what gets a result: it is taken here, after the checks above, and given
+	// back below when the queue or the AI service fails. Taking it first keeps racing requests from going
+	// over the number; giving back only touches the window it was taken from.
+	perDay := tool.perDay
+	if name == "remove-background" {
+		perDay = a.cfg.RembgPerDay
+	}
+	dayKey, takenAt := "ai-day:"+name+":"+strconv.FormatInt(u.ID, 10), time.Now()
+	if !a.limits.allowAt(dayKey, perDay, 24*time.Hour, takenAt) {
+		apiError(w, http.StatusTooManyRequests, a.tr(r, "you've used today's {n} of this tool; try again tomorrow", "n", perDay))
+		return
+	}
+	giveBack := func() { a.limits.give(dayKey, takenAt) }
+
 	wait, cancel := context.WithTimeout(r.Context(), tool.wait)
 	defer cancel()
 	select {
 	case aiSlot <- struct{}{}:
 		defer func() { <-aiSlot }()
 	case <-wait.Done():
+		giveBack()
 		apiError(w, http.StatusServiceUnavailable, "the server is busy with other images; please try again in a minute")
 		return
 	}
@@ -122,13 +128,15 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 	req, _ := http.NewRequestWithContext(r.Context(), http.MethodPost, a.cfg.RembgURL+tool.path, body)
 	req.Header.Set("Content-Type", ctype)
 	resp, err := aiClient.Do(req)
-	if err != nil {
+	if err != nil { // service down, timeout, or the caller went away
+		giveBack()
 		a.log.Error("ai tool", "tool", name, "err", err)
 		apiError(w, http.StatusBadGateway, "this tool is unavailable right now")
 		return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		giveBack()
 		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 300))
 		a.log.Error("ai tool", "tool", name, "status", resp.Status, "body", string(msg))
 		if resp.StatusCode == http.StatusUnprocessableEntity {
