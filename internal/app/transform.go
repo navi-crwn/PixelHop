@@ -117,6 +117,7 @@ func (a *App) serveTransformed(w http.ResponseWriter, r *http.Request, im *db.Im
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
 	if im.Hidden || im.Locked() || a.mediaHasWarning(r, im) {
 		h.Set("Cache-Control", "private, no-store")
+		h.Set("X-Robots-Tag", "noindex")
 	} else {
 		h.Set("Cache-Control", "public, max-age=2592000, immutable")
 	}
