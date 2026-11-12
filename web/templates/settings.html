@@ -87,7 +87,6 @@
     <a class="btn" href="{{.Helink}}/settings">{{$.L.T "settings.helink_open"}}</a>
   </div>
   {{end}}
-  {{if not (and .SSO $u.HelinkID.Valid)}}
 
   <div class="card" id="webhooks">
     <h2>{{$.L.T "settings.webhooks"}}</h2>
@@ -104,6 +103,8 @@
     {{if $d.Webhooks}}<form method="post" action="/settings/webhooks/test" style="margin-top:8px"><button class="btn sm ghost" type="submit">{{$.L.T "settings.wh_test"}}</button></form>{{end}}
   </div>
 
+  {{/* The password of a HOP ID member belongs to the hub (see the card above). */}}
+  {{if not (and .SSO $u.HelinkID.Valid)}}
   <div class="card">
     <h2>{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set_h"}}{{end}}</h2>
     {{if not $d.HasPass}}<p class="muted small">{{$.L.T "settings.pw_google"}}</p>{{end}}
