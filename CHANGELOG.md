@@ -4,6 +4,23 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+## [3.11.1] - 2026-11-12
+
+### Fixed
+- The AI tools' daily limit lasted about an hour: the limiter's cleaner dropped every count older than an hour, including the 24-hour ones. Each count now lives for its own length, and the cleaner still frees the short ones. The two limit messages ("too many in a row", "you've used today's N") are in the nine languages.
+- Settings showed no Webhooks card to HOP ID members (everyone on hel.ink), although `/docs` sends people there. The card is back for them; only the password form stays hidden, because that password belongs to the hub.
+- Studio, Watermark: a "Remove logo" button goes back to the text after a logo was chosen.
+- Studio: Download and Upload result appear only when there is a result: after a change in an image tool, or in Compress and Convert, whose result is made when saving. Never in Color palette, Image to text or QR code.
+- Studio, Magic eraser: no longer promises "about 10 seconds"; it runs on the server, one image at a time, and says it can take longer when the server is busy.
+
+### Added
+- Studio, Image to text: a short note that machine-read text can be wrong and should be checked.
+- The dashboard's "Get the most out of PixelHop" card can be hidden for a week, like the reminder cards of the other HOP apps (hop-ui.js "Hide", `POST /api/me/reminders/dismiss`, per account). It comes back while steps are open and is gone once all four are done. Schema migration 18 adds the `reminders` table.
+- Theme and language follow you across the HOP family: the cookies `hop_theme` and `hop_lang` (for `.hel.ink` on hel.ink, host-only elsewhere). The old `localStorage` theme key and the `pixel_lang` cookie are still read and copied into the new cookies once.
+
+### Removed
+- The dashboard shortcut "HEL.ink · Short links with the same account": short links are LinkHop's, and the sidebar already lists the HOP family.
+
 ## [3.11.0] - 2026-11-12
 
 ### Added
