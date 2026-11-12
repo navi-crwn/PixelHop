@@ -1106,5 +1106,7 @@
   "claim.none": "Diese Bilder können nicht mehr übernommen werden: Sie wurden entfernt, werden geprüft oder gehören jemand anderem.",
   "claim.view": "Meine Bibliothek ansehen",
   "claim.error": "Das Übernehmen hat gerade nicht geklappt. Bitte versuche es gleich noch einmal.",
-  "You're doing this very fast. Please wait a while.": "Das geht zu schnell. Bitte warte eine Weile."
+  "You're doing this very fast. Please wait a while.": "Das geht zu schnell. Bitte warte eine Weile.",
+  "one moment: too many in a row": "Einen Moment: zu viele hintereinander",
+  "you've used today's {n} of this tool; try again tomorrow": "Du hast die {n} Nutzungen dieses Werkzeugs für heute aufgebraucht. Versuche es morgen wieder."
 }

@@ -1106,5 +1106,7 @@
   "claim.none": "These images can no longer be claimed: they were removed, are under review, or belong to someone else.",
   "claim.view": "View my library",
   "claim.error": "Could not claim them right now. Please try again in a moment.",
-  "You're doing this very fast. Please wait a while.": "You're doing this very fast. Please wait a while."
+  "You're doing this very fast. Please wait a while.": "You're doing this very fast. Please wait a while.",
+  "one moment: too many in a row": "one moment: too many in a row",
+  "you've used today's {n} of this tool; try again tomorrow": "you've used today's {n} of this tool; try again tomorrow"
 }

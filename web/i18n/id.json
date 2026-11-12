@@ -1106,5 +1106,7 @@
   "claim.none": "Gambar ini tidak bisa diklaim lagi: sudah dihapus, sedang ditinjau, atau milik orang lain.",
   "claim.view": "Lihat pustakaku",
   "claim.error": "Belum bisa mengklaim sekarang. Coba lagi sebentar lagi.",
-  "You're doing this very fast. Please wait a while.": "Terlalu cepat. Tunggu beberapa saat."
+  "You're doing this very fast. Please wait a while.": "Terlalu cepat. Tunggu beberapa saat.",
+  "one moment: too many in a row": "Tunggu sebentar: terlalu banyak berturut-turut",
+  "you've used today's {n} of this tool; try again tomorrow": "Jatah {n} kali alat ini untuk hari ini sudah habis. Coba lagi besok."
 }

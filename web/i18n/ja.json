@@ -1106,5 +1106,7 @@
   "claim.none": "これらの画像は引き継げません。削除された、確認中、または他の人のものです。",
   "claim.view": "ライブラリを見る",
   "claim.error": "いまは引き継げませんでした。少し待ってからもう一度お試しください。",
-  "You're doing this very fast. Please wait a while.": "操作が早すぎます。しばらくお待ちください。"
+  "You're doing this very fast. Please wait a while.": "操作が早すぎます。しばらくお待ちください。",
+  "one moment: too many in a row": "少しお待ちください：連続でのご利用が多すぎます",
+  "you've used today's {n} of this tool; try again tomorrow": "このツールの本日分（{n} 回）を使い切りました。明日もう一度お試しください。"
 }

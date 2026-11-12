@@ -61,7 +61,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.limits.allow("ai-min:"+clientIP(r), 8, time.Minute) {
-		apiError(w, http.StatusTooManyRequests, "one moment: too many in a row")
+		apiError(w, http.StatusTooManyRequests, a.tr(r, "one moment: too many in a row"))
 		return
 	}
 	perDay := tool.perDay
@@ -69,7 +69,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		perDay = a.cfg.RembgPerDay
 	}
 	if !a.limits.allow("ai-day:"+name+":"+strconv.FormatInt(u.ID, 10), perDay, 24*time.Hour) {
-		apiError(w, http.StatusTooManyRequests, fmt.Sprintf("you've used today's %d of this tool; try again tomorrow", perDay))
+		apiError(w, http.StatusTooManyRequests, a.tr(r, "you've used today's {n} of this tool; try again tomorrow", "n", perDay))
 		return
 	}
 

@@ -1106,5 +1106,7 @@
   "claim.none": "Estas imágenes ya no se pueden reclamar: se eliminaron, están en revisión o son de otra persona.",
   "claim.view": "Ver mi biblioteca",
   "claim.error": "No se pudo reclamar ahora. Inténtalo de nuevo en un momento.",
-  "You're doing this very fast. Please wait a while.": "Vas demasiado rápido. Espera un rato."
+  "You're doing this very fast. Please wait a while.": "Vas demasiado rápido. Espera un rato.",
+  "one moment: too many in a row": "Un momento: demasiadas seguidas",
+  "you've used today's {n} of this tool; try again tomorrow": "Ya usaste las {n} veces de hoy de esta herramienta. Vuelve a intentarlo mañana."
 }

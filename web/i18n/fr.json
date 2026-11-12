@@ -1106,5 +1106,7 @@
   "claim.none": "Ces images ne peuvent plus être récupérées : elles ont été supprimées, sont en cours d’examen ou appartiennent à quelqu’un d’autre.",
   "claim.view": "Voir ma bibliothèque",
   "claim.error": "Impossible de les récupérer pour le moment. Réessayez dans un instant.",
-  "You're doing this very fast. Please wait a while.": "Vous allez trop vite. Patientez un moment."
+  "You're doing this very fast. Please wait a while.": "Vous allez trop vite. Patientez un moment.",
+  "one moment: too many in a row": "Un instant : trop de demandes d’affilée",
+  "you've used today's {n} of this tool; try again tomorrow": "Vous avez utilisé les {n} essais du jour pour cet outil. Réessayez demain."
 }

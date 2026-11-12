@@ -212,6 +212,7 @@ type limiter struct {
 
 type window struct {
 	start time.Time
+	per   time.Duration // the window's own length: a day for the AI tools, a minute for uploads
 	n     int
 }
 
@@ -219,28 +220,39 @@ func newLimiter() *limiter {
 	l := &limiter{m: map[string]*window{}}
 	go func() {
 		for range time.Tick(5 * time.Minute) {
-			l.mu.Lock()
-			for k, w := range l.m {
-				if time.Since(w.start) > time.Hour {
-					delete(l.m, k)
-				}
-			}
-			l.mu.Unlock()
+			l.sweep(time.Now())
 		}
 	}()
 	return l
 }
 
+// sweep frees the windows that have run their own length. A fixed hour here
+// once dropped the AI tools' daily counts after an hour, so "per day" became
+// "per hour".
+func (l *limiter) sweep(now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for k, w := range l.m {
+		if now.Sub(w.start) > w.per {
+			delete(l.m, k)
+		}
+	}
+}
+
 // allow counts one event and reports whether key is still under max per per.
 func (l *limiter) allow(key string, max int, per time.Duration) bool {
+	return l.allowAt(key, max, per, time.Now())
+}
+
+func (l *limiter) allowAt(key string, max int, per time.Duration, now time.Time) bool {
 	if max <= 0 {
 		return true
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	w := l.m[key]
-	if w == nil || time.Since(w.start) > per {
-		w = &window{start: time.Now()}
+	if w == nil || now.Sub(w.start) > per {
+		w = &window{start: now, per: per}
 		l.m[key] = w
 	}
 	w.n++
