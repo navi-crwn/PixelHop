@@ -245,6 +245,10 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	`ALTER TABLE sessions ADD COLUMN verified_at INTEGER NOT NULL DEFAULT 0;`,
 	// 17: when a guest upload was claimed into a member's library (unix seconds; 0 = never claimed)
 	`ALTER TABLE images ADD COLUMN claimed_at INTEGER NOT NULL DEFAULT 0;`,
+	// 18: reminder cards a member has hidden (one row per account and card), as in NoteHop.
+	// IF NOT EXISTS: running it against a database that already has the table changes nothing.
+	`CREATE TABLE IF NOT EXISTS reminders (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, key TEXT NOT NULL,
+	dismissed_at INTEGER NOT NULL, PRIMARY KEY (user_id, key));`,
 }
 
 func (d *DB) migrate() error {

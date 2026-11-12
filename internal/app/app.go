@@ -193,6 +193,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/images/{id}/restore", a.apiRestoreImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/me/media", a.apiMyMedia)
+	mux.HandleFunc("POST /api/me/reminders/dismiss", a.apiDismissReminder) // reminder cards (reminders.go)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
 	mux.HandleFunc("GET /api/v1/albums", a.apiAlbums)
 	mux.HandleFunc("POST /api/v1/albums", a.apiCreateAlbum)

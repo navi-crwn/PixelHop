@@ -11,7 +11,8 @@ import (
 // the rows already there count as never claimed.
 func TestClaimedAtMigration(t *testing.T) {
 	dir := t.TempDir()
-	// Make a complete database, then take it back to schema 16 without the column.
+	// Make a complete database, then take it back to schema 16 without the column (later
+	// migrations run again on reopen; they are written to allow that).
 	d, err := Open(dir)
 	if err != nil {
 		t.Fatal(err)
@@ -19,7 +20,7 @@ func TestClaimedAtMigration(t *testing.T) {
 	if _, err := d.Exec(`ALTER TABLE images DROP COLUMN claimed_at`); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := d.Exec(`DELETE FROM schema_version WHERE v=17`); err != nil {
+	if _, err := d.Exec(`DELETE FROM schema_version WHERE v>=17`); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := d.Exec(`INSERT INTO images (id, owner_token, mime, ext, size, width, height, sha256, backend, key_full, key_thumb, created_at)
