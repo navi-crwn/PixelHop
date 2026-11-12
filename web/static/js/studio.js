@@ -40,7 +40,6 @@
       srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = blob.type; srcSize = blob.size;
       out.type = null;
       show(); busy(false);
-      $('#st-export').classList.remove('hide');
       $('#st-uploaded').classList.add('hide');
       if (!tool) pick(location.hash.slice(1) || 'compress'); else pick(tool.id);
     }).catch(function () { busy(false); toast('This image could not be opened', true); });
@@ -76,7 +75,14 @@
     $('#st-reset').disabled = !original;
     if ($('#st-compare')) $('#st-compare').disabled = !original;
     info();
+    exportPanel();
     if (overlay && overlay.refresh) overlay.refresh();
+  }
+  // Download and Upload result appear once there is a result to save: an image tool after a change,
+  // or Compress and Convert, whose result is made when saving. Never for tools that make no image.
+  function exportPanel() {
+    var on = !!cur && !!tool && !tool.noResult && (undo.length > 0 || !!tool.atExport);
+    $('#st-export').classList.toggle('hide', !on);
   }
   function commit(next) {
     undo.push(cur); if (undo.length > 12) undo.shift();
@@ -163,6 +169,7 @@
     $$('.tool-list [data-tool]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tool === id); });
     if (location.hash.slice(1) !== id) window.history.replaceState(null, '', '#' + id);
     toolBox.innerHTML = '';
+    exportPanel();
     var h = document.createElement('h2'); h.textContent = T(tool.title); toolBox.appendChild(h);
     var p = document.createElement('p'); p.className = 'desc'; p.textContent = T(tool.desc); toolBox.appendChild(p);
     if (!cur && !tool.noImage) { var e = document.createElement('p'); e.className = 'small muted'; e.textContent = T('Open an image to start.'); toolBox.appendChild(e); return; }
@@ -226,6 +233,7 @@
   // ---------- compress ----------
   tools.compress = {
     title: 'Compress', desc: 'Make the file smaller. Lower quality means a smaller file; around 75–85 looks the same to most eyes.',
+    atExport: true,
     ui: function (p) {
       if (!out.type && srcType === 'image/png') out.type = canEncode('image/webp') ? 'image/webp' : 'image/jpeg';
       p.appendChild(field('Format', seg(formats(true), out.type, function (t) { out.type = t; info(); })));
@@ -347,6 +355,7 @@
   // ---------- convert ----------
   tools.convert = {
     title: 'Convert', desc: 'Save in another format. WebP and AVIF are much smaller than JPG and PNG and work in all modern browsers.',
+    atExport: true,
     ui: function (p) {
       if (!out.type) out.type = srcType;
       p.appendChild(field('Save as', seg(formats(false), outType(), function (t) { out.type = t; info(); qrow.classList.toggle('hide', t === 'image/png'); })));
@@ -486,9 +495,13 @@
       txt.addEventListener('input', function () { o.text = txt.value; draw(); });
       var logoIn = el('input', { type: 'file', accept: 'image/*', class: 'hide' });
       var logoBtn = btn('Use a logo instead', function () { logoIn.click(); }, 'sm');
+      // Back to the text: drop the logo, so the Text field counts again.
+      var logoRm = btn('Remove logo', function () {
+        o.logo = null; logoIn.value = ''; logoBtn.textContent = T('Use a logo instead'); logoRm.classList.add('hide'); draw();
+      }, 'sm ghost hide');
       logoIn.addEventListener('change', function () {
         var f = logoIn.files[0]; if (!f) return;
-        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); draw(); }, function () { toast('That logo could not be opened', true); });
+        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); logoRm.classList.remove('hide'); draw(); }, function () { toast('That logo could not be opened', true); });
       });
       function render(c) {
         var x = c.getContext('2d'), W = c.width, H = c.height, m = Math.round(Math.min(W, H) * 0.03);
@@ -514,7 +527,7 @@
       function draw() { var c = clone(cur); render(c); view.getContext('2d').drawImage(c, 0, 0); }
       overlay = { off: function () { view.getContext('2d').drawImage(cur, 0, 0); }, refresh: draw };
       p.appendChild(field('Text', txt));
-      p.appendChild(el('div', { style: 'margin:-6px 0 12px' }, [logoBtn, logoIn]));
+      p.appendChild(el('div', { class: 'btn-row', style: 'margin:-6px 0 12px' }, [logoBtn, logoRm, logoIn]));
       p.appendChild(field('Position', seg([['tl', '↖'], ['tc', '↑'], ['tr', '↗'], ['cc', '•'], ['bl', '↙'], ['bc', '↓'], ['br', '↘'], ['tile', 'Tile']], o.pos, function (v) { o.pos = v; draw(); })));
       p.appendChild(field('Size', range(1, 20, o.size, 1, function (v) { o.size = v; draw(); }, function (v) { return v + '%'; })));
       p.appendChild(field('Opacity', range(10, 100, o.opacity, 5, function (v) { o.opacity = v; draw(); }, function (v) { return v + '%'; })));
@@ -541,6 +554,7 @@
 
   tools.palette = {
     title: 'Color palette', desc: 'The main colors in your image. Click a color to copy its code.',
+    noResult: true,
     ui: function (p) {
       var n = 6, grid = el('div', { class: 'palette' });
       function run() {
@@ -655,6 +669,7 @@
 
   tools.ocr = {
     title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.',
+    noResult: true,
     ui: function (p) {
       p.appendChild(field('Languages in the image', ocrLangPicker(), T('pick up to {n}', { n: OCR_MAX })));
       var outBox = el('textarea', { class: 'ocr-out', placeholder: 'The text will appear here.' });
@@ -675,6 +690,7 @@
         btn('Copy text', function () { window.phCopy(outBox.value); }, 'sm'),
         btn('Save .txt', function () { window.phSave(new Blob([outBox.value], { type: 'text/plain' }), srcName + '.txt'); }, 'sm')
       ]));
+      p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.' }));
     }
   };
 
@@ -836,7 +852,7 @@
       p.appendChild(el('div', { class: 'btn-row' }, [
         btn('Erase', function () {
           if (!any) { toast('Paint over what to erase first', true); return; }
-          busy('Erasing… this takes about 10 seconds');
+          busy('Erasing on the server… this can take a while, longer when the server is busy.');
           canvasBlob(mask).then(function (m) { return serverTool('erase', { mask: m }); })
             .then(function (r) { return applyResult(r, 'erase'); })
             .catch(function (e) { busy(false); toast(e.message, true); });
@@ -871,7 +887,7 @@
   // ---------- QR code ----------
   tools.qr = {
     title: 'QR code', desc: 'Make a QR code for any link or text. Download it, or open it here to edit further.',
-    noImage: true,
+    noImage: true, noResult: true,
     ui: function (p) {
       var text = el('textarea', { placeholder: 'https://example.com', rows: 3, maxlength: 1500 });
       var fg = el('input', { type: 'color', value: '#000000' }), bg = el('input', { type: 'color', value: '#ffffff' });

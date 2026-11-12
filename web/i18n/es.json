@@ -992,7 +992,6 @@
   "Brush size": "Tamaño del pincel",
   "Erase": "Borrar",
   "Paint over what to erase first": "Pinta primero lo que quieras borrar",
-  "Erasing… this takes about 10 seconds": "Borrando… tarda unos 10 segundos",
   "Clear": "Limpiar",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "Funciona mejor con cosas pequeñas sobre un fondo sencillo. Haz varios borrados pequeños en lugar de uno grande.",
   "HD upscale": "Ampliación HD",
@@ -1108,5 +1107,8 @@
   "claim.error": "No se pudo reclamar ahora. Inténtalo de nuevo en un momento.",
   "You're doing this very fast. Please wait a while.": "Vas demasiado rápido. Espera un rato.",
   "one moment: too many in a row": "Un momento: demasiadas seguidas",
-  "you've used today's {n} of this tool; try again tomorrow": "Ya usaste las {n} veces de hoy de esta herramienta. Vuelve a intentarlo mañana."
+  "you've used today's {n} of this tool; try again tomorrow": "Ya usaste las {n} veces de hoy de esta herramienta. Vuelve a intentarlo mañana.",
+  "Remove logo": "Quitar logo",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "El texto leído por una máquina puede tener errores, sobre todo con letra a mano, fotos inclinadas y letra pequeña. Revísalo antes de usarlo.",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "Borrando en el servidor… puede tardar un rato, más cuando el servidor está ocupado."
 }

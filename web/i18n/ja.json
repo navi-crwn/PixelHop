@@ -994,7 +994,6 @@
   "Brush size": "ブラシのサイズ",
   "Erase": "消去",
   "Paint over what to erase first": "先に消したい部分をなぞってください",
-  "Erasing… this takes about 10 seconds": "消去中…約10秒かかります",
   "Clear": "クリア",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "単純な背景の上の小さなものに最適です。1回で大きく消すより、何度かに分けて小さく消してください。",
   "HD upscale": "HD アップスケール",
@@ -1108,5 +1107,8 @@
   "claim.error": "いまは引き継げませんでした。少し待ってからもう一度お試しください。",
   "You're doing this very fast. Please wait a while.": "操作が早すぎます。しばらくお待ちください。",
   "one moment: too many in a row": "少しお待ちください：連続でのご利用が多すぎます",
-  "you've used today's {n} of this tool; try again tomorrow": "このツールの本日分（{n} 回）を使い切りました。明日もう一度お試しください。"
+  "you've used today's {n} of this tool; try again tomorrow": "このツールの本日分（{n} 回）を使い切りました。明日もう一度お試しください。",
+  "Remove logo": "ロゴを外す",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "機械で読み取った文字は間違っていることがあります。特に手書き、傾いた写真、小さな文字は注意してください。使う前に確認してください。",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "サーバーで消去しています… しばらくかかります。サーバーが混み合っているときはさらに時間がかかります。"
 }

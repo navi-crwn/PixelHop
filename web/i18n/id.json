@@ -987,7 +987,6 @@
   "Brush size": "Ukuran kuas",
   "Erase": "Hapus",
   "Paint over what to erase first": "Warnai dulu bagian yang ingin dihapus",
-  "Erasing… this takes about 10 seconds": "Menghapus… butuh sekitar 10 detik",
   "Clear": "Bersihkan",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "Paling baik untuk benda kecil pada latar sederhana. Lakukan beberapa penghapusan kecil, bukan satu yang besar.",
   "HD upscale": "Perbesar HD",
@@ -1108,5 +1107,8 @@
   "claim.error": "Belum bisa mengklaim sekarang. Coba lagi sebentar lagi.",
   "You're doing this very fast. Please wait a while.": "Terlalu cepat. Tunggu beberapa saat.",
   "one moment: too many in a row": "Tunggu sebentar: terlalu banyak berturut-turut",
-  "you've used today's {n} of this tool; try again tomorrow": "Jatah {n} kali alat ini untuk hari ini sudah habis. Coba lagi besok."
+  "you've used today's {n} of this tool; try again tomorrow": "Jatah {n} kali alat ini untuk hari ini sudah habis. Coba lagi besok.",
+  "Remove logo": "Hapus logo",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "Teks yang dibaca mesin bisa keliru, terutama tulisan tangan, foto miring, dan huruf kecil. Periksa dulu sebelum dipakai.",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "Sedang dihapus di server… ini bisa makan waktu, lebih lama bila server sedang sibuk."
 }

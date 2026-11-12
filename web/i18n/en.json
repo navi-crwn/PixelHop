@@ -995,7 +995,6 @@
   "Brush size": "Brush size",
   "Erase": "Erase",
   "Paint over what to erase first": "Paint over what to erase first",
-  "Erasing… this takes about 10 seconds": "Erasing… this takes about 10 seconds",
   "Clear": "Clear",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "Works best on small things against a simple background. Do several small erases rather than one big one.",
   "HD upscale": "HD upscale",
@@ -1108,5 +1107,8 @@
   "claim.error": "Could not claim them right now. Please try again in a moment.",
   "You're doing this very fast. Please wait a while.": "You're doing this very fast. Please wait a while.",
   "one moment: too many in a row": "one moment: too many in a row",
-  "you've used today's {n} of this tool; try again tomorrow": "you've used today's {n} of this tool; try again tomorrow"
+  "you've used today's {n} of this tool; try again tomorrow": "you've used today's {n} of this tool; try again tomorrow",
+  "Remove logo": "Remove logo",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "Erasing on the server… this can take a while, longer when the server is busy."
 }
