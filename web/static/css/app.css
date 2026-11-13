@@ -127,7 +127,7 @@ main { flex: 1; padding: 28px 0 64px; }
 .menu { position: relative; }
 .menu > button { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
 .menu > .icon-btn { border: 1px solid var(--line); border-radius: var(--hop-ctl-radius); }
-.menu-list { position: absolute; right: 0; top: 44px; min-width: 210px; background: var(--panel); border: 1px solid var(--line-2);
+.menu-list { position: absolute; right: 0; top: 44px; min-width: 210px; background: var(--panel); border: 1px solid var(--line-2); z-index: 30;
   border-radius: 12px; box-shadow: var(--shadow); padding: 6px; display: none; }
 .menu.open .menu-list { display: block; }
 
@@ -426,6 +426,7 @@ a.owner[href]:hover { text-decoration: none; border-color: var(--accent); }
 .tile .badge { position: absolute; top: 8px; left: 8px; }
 .tile .tick { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; opacity: 0; }
 .selecting .tile .tick, .tile .tick:checked { opacity: 1; }
+.sel-actions { display: inline-flex; align-items: center; gap: 6px; }
 .masonry { columns: 4 240px; column-gap: 12px; }
 .masonry a { position: relative; display: block; margin-bottom: 12px; break-inside: avoid; border-radius: 14px; overflow: hidden; background: var(--panel-2); }
 .masonry img { width: 100%; height: auto; }
