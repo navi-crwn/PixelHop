@@ -48,7 +48,7 @@
       {{end}}
     </ol>
   </div>
-  <p class="center" style="margin-top:22px"><a class="btn" href="/"><svg><use href="#i-upload"/></svg>{{$.L.T "uploaded.more"}}</a> {{if $.User}}<a class="btn ghost" href="/dashboard">{{$.L.T "nav.dashboard"}}</a>{{end}}</p>
+  <p class="center" style="margin-top:22px"><a class="btn" href="{{if $.User}}/dashboard#upload{{else}}/{{end}}"><svg><use href="#i-upload"/></svg>{{$.L.T "uploaded.more"}}</a></p>
   {{end}}
 </div>
 {{end}}

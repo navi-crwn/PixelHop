@@ -87,8 +87,6 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /{$}", a.home)
 	mux.HandleFunc("GET /tools", a.tools)
 	mux.HandleFunc("GET /tools/batch", a.batch)
-	mux.HandleFunc("GET /tools/qr.png", a.qrTool)
-	mux.HandleFunc("GET /tools/qr.svg", a.qrTool)
 	mux.HandleFunc("GET /docs", a.docs)
 	mux.HandleFunc("GET /help", a.help)
 	mux.HandleFunc("GET /legal", a.legal)
@@ -101,7 +99,6 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /a/{id}", a.album)
 	mux.HandleFunc("GET /a/{id}/embed", a.albumEmbed)
 	mux.HandleFunc("GET /u/{username}", a.profile)
-	mux.HandleFunc("GET /explore", a.explore)
 	mux.HandleFunc("GET /sitemap.xml", a.sitemap)
 	mux.HandleFunc("GET /avatar/{id}", a.serveAvatar)
 	mux.HandleFunc("GET /{id}", a.view)
@@ -209,6 +206,8 @@ func (a *App) Handler() http.Handler {
 	for from, to := range legacyPages {
 		mux.Handle("GET "+from, http.RedirectHandler(to, http.StatusMovedPermanently))
 	}
+
+	mux.HandleFunc("GET /qr", a.qrMoved)
 
 	mux.HandleFunc("/", a.notFound)
 

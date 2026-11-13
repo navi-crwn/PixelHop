@@ -155,10 +155,10 @@ func TestSilentRecheckSameAccountCarriesOn(t *testing.T) {
 	b := newBrowser(t, h)
 	b.signIn("42", "a@example.com")
 	b.age(10*time.Minute, a)
-	rec := b.page("/explore?x=1")
+	rec := b.page("/about?x=1")
 	state := b.silent(rec.Header().Get("Location"))
 	rec = b.page(hubAnswer(state, "42", "a@example.com"))
-	if rec.Header().Get("Location") != "/explore?x=1" || b.email() != "a@example.com" {
+	if rec.Header().Get("Location") != "/about?x=1" || b.email() != "a@example.com" {
 		t.Fatalf("same account: %s %q", rec.Header().Get("Location"), b.email())
 	}
 	// Vouched for again: no new trip.
@@ -176,16 +176,16 @@ func TestSilentRecheckLoginRequiredEndsTheSession(t *testing.T) {
 	b.age(10*time.Minute, a)
 
 	// A public page: the visitor carries on as a guest.
-	rec := b.page("/explore")
+	rec := b.page("/about")
 	state := b.silent(rec.Header().Get("Location"))
 	rec = b.page("/auth/helink/callback?error=login_required&state=" + url.QueryEscape(state))
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/explore" {
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/about" {
 		t.Fatalf("login_required: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
 	if b.cookies[sessionCookie] != nil || b.email() != "" {
 		t.Fatal("session survived login_required")
 	}
-	if rec := b.page("/explore"); rec.Code != 200 {
+	if rec := b.page("/about"); rec.Code != 200 {
 		t.Fatalf("public page as guest: %d", rec.Code)
 	}
 	// The dashboard goes to the sign-in flow.

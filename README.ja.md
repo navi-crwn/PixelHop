@@ -121,7 +121,7 @@ PixelHop はファイルの構造を操作し、圧縮された画像データ�
 - タグ、検索、ダッシュボードでのタグによる絞り込み。削除したファイルはごみ箱に 7 日間残ります。
 - 日ごとの閲覧数と、ファイルにリンクしているサイト。参照元はホスト名だけを保存します。
 - 要求に応じたリサイズ版（例: `/i/photo.jpg?w=800`）。一度作ればキャッシュされます。
-- `/u/username` の公開プロフィール、公開を選んだファイルの Explore フィード、oEmbed、サイトマップ。
+- `/u/username` の公開プロフィール、oEmbed、サイトマップ。
 
 アカウント:
 - ゲストもアップロードできます（既定ではファイルごとに 20 MB まで、アドレスごとに 1 日 25 ファイルまで、アルバムごとに 10 枚まで）。ファイルごとに非公開の削除リンクが発行され、ブラウザーも覚えています。
@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | サーバーの AI ツール（サインイン済み。`file`、消去には `mask` も） |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | リサイズ版。一度作ればキャッシュされます。`format=webp` と `avif` には AI サービスが必要です |
 | `GET /oembed?url=...` | 画像ページの oEmbed |
-| `GET /tools/qr.png`, `/tools/qr.svg` | `text` の QR コード（`size`、`level`、`fg`、`bg`） |
 
 どの応答も `{"success": true, "data": ...}` か `{"success": false, "error": "..."}` の形です。完全なリファレンスは、どの PixelHop サーバーでも [`/docs`](https://pixel.hel.ink/docs) にあります。
 

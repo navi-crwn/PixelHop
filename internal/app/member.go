@@ -93,13 +93,25 @@ type settingsData struct {
 	BlockHotlinks    bool
 	Sessions         []sessionView
 	Google           bool
+	Start            string // the tab a page that answers a form opens first ("" = the first tab)
+}
+
+// settingsStartTabs names, for each Settings form that is answered with a page instead of a
+// redirect (a new key, a refusal), the tab it lives in: such an address has no #card, so the
+// page itself says which tab to open.
+var settingsStartTabs = map[string]string{
+	"/settings/keys":           "api",
+	"/settings/webhooks":       "api",
+	"/settings/webhooks/test":  "api",
+	"/settings/password":       "sessions",
+	"/settings/delete-account": "delete",
 }
 
 func (a *App) settingsData(r *http.Request) settingsData {
 	u := currentUser(r)
 	keys, _ := a.db.APIKeys(r.Context(), u.ID)
 	hooks, _ := a.db.Webhooks(r.Context(), u.ID)
-	return settingsData{Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", BlockHotlinks: a.db.BlockHotlinks(r.Context(), u.ID), Sessions: a.sessionViews(r), Google: u.GoogleID.Valid, Notice: a.tr(r, settingsNotices[r.URL.Query().Get("ok")])}
+	return settingsData{Start: settingsStartTabs[r.URL.Path], Keys: keys, Webhooks: hooks, HasPass: u.PassHash != "", BlockHotlinks: a.db.BlockHotlinks(r.Context(), u.ID), Sessions: a.sessionViews(r), Google: u.GoogleID.Valid, Notice: a.tr(r, settingsNotices[r.URL.Query().Get("ok")])}
 }
 
 func (a *App) settingsPage(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +138,7 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	// Sign out everywhere else, then start a fresh session here.
 	a.db.DeleteUserSessions(r.Context(), u.ID)
 	a.startSession(w, r, u)
-	http.Redirect(w, r, "/settings?ok=password", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=password#sessions", http.StatusSeeOther)
 }
 
 func (a *App) createKey(w http.ResponseWriter, r *http.Request) {
@@ -296,7 +308,7 @@ func (a *App) saveHotlinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.hotlinks.set(u.ID, on)
-	http.Redirect(w, r, "/settings?ok=hotlinks#profile", http.StatusSeeOther)
+	http.Redirect(w, r, "/settings?ok=hotlinks#embedding", http.StatusSeeOther)
 }
 
 type sessionView struct {

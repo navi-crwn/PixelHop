@@ -109,7 +109,7 @@
         <h2>Get, rename or delete one image</h2>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}</div>
         <div class="endpoint"><span class="method patch">PATCH</span>/api/v1/images/{id}</div>
-        <p>Body, any of: <code>{"title": "New name", "alt": "Describe it for screen readers", "tags": ["beach", "2026"], "listed": true}</code>. <code>tags</code> (up to 12) are for finding your own files: the dashboard searches them and filters by them. <code>listed</code> shows it on your public profile (<code>/u/you</code>) and Explore.</p>
+        <p>Body, any of: <code>{"title": "New name", "alt": "Describe it for screen readers", "tags": ["beach", "2026"], "listed": true}</code>. <code>tags</code> (up to 12) are for finding your own files: the dashboard searches them and filters by them. <code>listed</code> shows it on your public profile (<code>/u/you</code>).</p>
         <div class="endpoint"><span class="method del">DELETE</span>/api/v1/images/{id}</div>
 <pre><code>curl -X DELETE -H "Authorization: Bearer ph_yourkey" {{.Base}}/api/v1/images/holiday-x7Kp2Q</code></pre>
         <p>Deleting moves the file to the <b>trash</b>: its links stop working at once and you can bring it back for 7 days. Delete it again (or add <code>?permanent=1</code>) to remove it for good. Webhooks <code>image.deleted</code> fire when it is removed for good.</p>
@@ -123,7 +123,7 @@
 <pre><code>{"visibility": "private"}                               // only you (and admins)
 {"visibility": "password", "password": "open-sesame"}  // a password page; the file itself is locked too
 {"visibility": "unlisted"}                              // back to normal</code></pre>
-        <p>Locked images never appear on profiles, Explore, oEmbed or the sitemap, and hotlinks to them stop working.</p>
+        <p>Locked images never appear on profiles, oEmbed or the sitemap, and hotlinks to them stop working.</p>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/images/{id}/stats</div>
         <p>Views per day for the last 30 days and the sites that sent visitors (<code>referrers</code>, by host name only).</p>
       </section>

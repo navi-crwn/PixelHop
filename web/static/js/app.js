@@ -316,7 +316,7 @@
     var okTypes = /^image\/(jpeg|png|gif|webp|bmp|heic|heif|avif)$/, okExt = /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i;
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
-    $$('[data-pick-files]').forEach(function (b) { b.addEventListener('click', function () { fileInput.click(); }); });
+    $$('[data-pick-files]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); fileInput.click(); }); });
     $('#drop-in').addEventListener('click', function (e) {
       if (e.target.closest('#opts,#url-form,#paste-box,#chips,#ticket-box,button,select,input,textarea,label,details')) return;
       fileInput.click();
@@ -438,11 +438,24 @@
       return { el: el, img: img, meta: meta, bar: bar.firstChild, act: act, name: n };
     }
 
-    // A few results stay here; a bigger batch gets a page of its own.
+    // A few results stay here; a bigger batch gets a page of its own. On the dashboard the page
+    // never moves: the files are already under "My files", so the results page is linked instead.
     function settle(r, id) {
       var b = r.batch; if (!b) return;
       if (id) b.ids.push(id);
       if (--b.left > 0 || b.ids.length <= 3) return;
+      if ($('#my-gallery')) {
+        var done = $('#up-done');
+        if (done) {
+          done.innerHTML = '';
+          var a = document.createElement('a');
+          a.href = '/uploaded?id=' + b.ids.join(',');
+          a.textContent = T('upload.done_see', { n: b.ids.length });
+          done.appendChild(a);
+          done.classList.remove('hide');
+        }
+        return;
+      }
       setTimeout(function () { location.href = '/uploaded?id=' + b.ids.join(','); }, 500);
     }
 
@@ -531,6 +544,29 @@
     var mediaRe = /^(video\/|application\/pdf$)/, mediaExt = /\.(mp4|mov|m4v|webm|3gp|mkv|pdf)$/i;
     function isMedia(f) { return mediaRe.test(f.type) || (!f.type && mediaExt.test(f.name)); }
 
+    // One global progress line for the whole batch: bytes sent over the running jobs (one multipart
+    // request for the images, one job per big file), so the file count for images only lands when
+    // their request does.
+    var upJobs = [];
+    function upTick() {
+      var box = $('#up-global'); if (!box) return;
+      var total = 0, done = 0, live = 0, files = 0, doneFiles = 0, active = 0;
+      upJobs.forEach(function (j) {
+        total += j.bytes; files += j.files;
+        if (j.done) { done += j.bytes; doneFiles += j.files; } else { live += j.live; active++; }
+      });
+      if (!active) { box.classList.add('hide'); return; }
+      var pct = total ? Math.min(100, Math.round((done + live) / total * 100)) : 0;
+      box.classList.remove('hide');
+      $('#up-global-bar').style.width = pct + '%';
+      $('#up-global-text').textContent = T('upload.progress', { done: doneFiles, total: files, pct: pct });
+    }
+    function upJob(bytes, files) {
+      var j = { bytes: bytes || 1, files: files || 1, live: 0, done: false };
+      upJobs.push(j); upTick();
+      return j;
+    }
+
     function send(files, url) {
       files = files.filter(function (f) {
         if (isMedia(f)) {
@@ -584,11 +620,13 @@
       if (url) rows.push(row(url, ''));
       rows.forEach(function (r) { r.batch = batch; });
 
+      var job = upJob(files.reduce(function (s, f) { return s + (f.size || 0); }, url ? 300000 : 0), files.length + (url ? 1 : 0));
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/v1/upload');
       xhr.setRequestHeader('Accept', 'application/json');
       xhr.upload.onprogress = function (e) {
         if (!e.lengthComputable) return;
+        job.live = e.loaded; upTick();
         var p = Math.min(96, e.loaded / e.total * 100) + '%';
         rows.forEach(function (r) { r.bar.style.width = p; });
       };
@@ -610,8 +648,9 @@
         if (used === 1 && rows.length === 1 && !ticket) copy(imgs[0].view_url);
         else if (res.data.album_url && imgs.length > 1 && !ticket) copy(res.data.album_url); // several files: the album link is the one to paste
         renderHistory();
+        job.done = true; upTick();
       };
-      xhr.onerror = function () { rows.forEach(function (r) { fail(r, T('Network error. Check your connection and try again.')); }); };
+      xhr.onerror = function () { rows.forEach(function (r) { fail(r, T('Network error. Check your connection and try again.')); }); job.done = true; upTick(); };
       xhr.send(fd);
     }
 
@@ -633,12 +672,12 @@
     }
 
     function sendMedia(f, r, albumId) {
-      var size = f.size, tries = 0;
+      var size = f.size, tries = 0, job = upJob(f.size, 1);
       return api('POST', '/api/v1/uploads', { name: f.name, size: size }).then(function (start) {
         var cs = start.chunk_size;
         function from(off) {
           if (off >= size) return Promise.resolve();
-          return putChunk(start.id, off, f.slice(off, off + cs), function (n) { r.bar.style.width = Math.min(97, (off + n) / size * 100) + '%'; })
+          return putChunk(start.id, off, f.slice(off, off + cs), function (n) { job.live = Math.min(job.bytes, off + n); upTick(); r.bar.style.width = Math.min(97, (off + n) / size * 100) + '%'; })
             .then(function (got) { tries = 0; return from(got); }, function (e) {
               if (e.fatal || ++tries > 6) throw e;
               r.name.textContent = f.name + ' · ' + T('connection lost, retrying…');
@@ -658,7 +697,8 @@
       }).then(function (j) {
         if (!j.success) throw new Error(j.error || T('Upload failed'));
         done(r, j.data);
-      }).catch(function (e) { fail(r, e.message || T('Upload failed')); });
+        job.done = true; upTick();
+      }).catch(function (e) { fail(r, e.message || T('Upload failed')); job.done = true; upTick(); });
     }
   }
 
@@ -820,7 +860,7 @@
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
       phConfirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }), {
-        danger: true, anchor: delSelected
+        danger: true, anchor: selMenu ? selMenu.querySelector(':scope > button') : delSelected
       }).then(function (ok) {
         if (!ok) return;
         Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
@@ -828,6 +868,40 @@
       });
     });
   }
+
+  // The selection menu closes once an action is chosen. This runs before the action's own handler
+  // (capture phase) so the keyboard is already on the visible Actions button when a dialog opens:
+  // the dialog hands focus back to the element that was focused when it opened, and a button inside
+  // the closed menu is hidden.
+  var selMenu = $('#sel-menu');
+  if (selMenu) selMenu.addEventListener('click', function (e) {
+    if (!e.target.closest('.menu-list button')) return;
+    closeMenus();
+    var trigger = selMenu.querySelector(':scope > button'); if (trigger) trigger.focus();
+  }, true);
+
+  // ---------- settings subtabs ----------
+  // One card group at a time, chosen by the address (#api, #profile, #webhooks ...), so every old
+  // link and server redirect still lands on the right card. Without the script all groups stay.
+  (function () {
+    var tabs = $$('#set-tabs [data-settab]');
+    if (!tabs.length) return;
+    function show() {
+      var id = location.hash.slice(1);
+      var target = id && document.getElementById(id);
+      var panel = target && target.closest('[data-setpanel]');
+      // A page that answers a form (a new API key, a refusal) has no #card; the server names the tab.
+      if (!panel) panel = $('[data-setpanel="' + (tabs[0].parentNode.dataset.start || '') + '"]');
+      if (!panel) panel = $('[data-setpanel]');
+      $$('[data-setpanel]').forEach(function (p) { p.hidden = p !== panel; });
+      tabs.forEach(function (t) {
+        if (t.dataset.settab === panel.dataset.setpanel) t.setAttribute('aria-current', 'true');
+        else t.removeAttribute('aria-current');
+      });
+    }
+    window.addEventListener('hashchange', show);
+    show();
+  })();
 
   // ---------- album editor ----------
   var ae = $('#album-edit');

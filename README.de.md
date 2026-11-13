@@ -121,7 +121,7 @@ Teilen:
 - Tags, Suche und ein Tag-Filter im Dashboard. Gelöschte Dateien liegen 7 Tage im Papierkorb.
 - Aufrufe pro Tag und die Websites, die auf eine Datei verlinken. Referrer werden nur als Hostname gespeichert.
 - Skalierte Kopien auf Abruf, zum Beispiel `/i/photo.jpg?w=800`, einmal erzeugt und dann zwischengespeichert.
-- Öffentliche Profile unter `/u/username`, ein Explore-Feed mit Dateien, die Leute zeigen wollen, oEmbed und eine Sitemap.
+- Öffentliche Profile unter `/u/username`, oEmbed und eine Sitemap.
 
 Konten:
 - Gäste können hochladen (standardmäßig bis 20 MB pro Datei, 25 Dateien am Tag pro Adresse und 10 Bilder pro Album) und bekommen für jede Datei einen privaten Löschlink, den sich auch der Browser merkt.
@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server-KI-Werkzeuge (angemeldet; `file`, bei erase zusätzlich `mask`) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Skalierte Kopien, einmal erzeugt und dann zwischengespeichert. `format=webp` und `avif` brauchen den KI-Dienst |
 | `GET /oembed?url=...` | oEmbed für Bildseiten |
-| `GET /tools/qr.png`, `/tools/qr.svg` | QR-Code für `text` (`size`, `level`, `fg`, `bg`) |
 
 Jede Antwort sieht aus wie `{"success": true, "data": ...}` oder `{"success": false, "error": "..."}`. Die vollständige Referenz liegt auf jedem PixelHop-Server unter [`/docs`](https://pixel.hel.ink/docs).
 

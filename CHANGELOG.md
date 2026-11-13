@@ -4,6 +4,21 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+## [3.11.2] - 2026-11-13
+
+### Added
+- One global upload progress line above the results: "Uploading N of M files · X%" over the whole batch (the images travel in one request, every big file is its own job), in the nine languages.
+- Settings has subtabs — Profile, Security & sessions, API & integrations, Data, Delete. Every link the app hands out (`#profile`, `#sessions`, `#api`, `#webhooks`, `#embedding`, `#export`) opens the tab that holds the card, and the API tab links the documentation. A page that answers a form (a new API key, a new webhook secret, a refusal such as the 20-key limit, a bad webhook address or a wrong password) opens the tab where that form is, so the one-time key is on screen when it is made. After saving, the hotlink setting returns to the Data tab and a password change to Security & sessions. On a phone the tabs wrap onto two rows and the key forms stack.
+
+### Changed
+- The dashboard is never left after an upload: a batch of more than three files shows a banner that links the results page instead of moving the browser there. "Upload more" brings a member back to the dashboard uploader (guests go home), and the top bar Upload button is on every signed-in page, the dashboard included (there it opens the file picker, or jumps to the uploader without JavaScript; the second Upload button in the dashboard header is gone).
+- The dashboard's seven selection buttons are one quiet "Actions" menu: copy links, ZIP, make album, show/hide on profile, delete.
+- The signed-in pages drop the duplicate member tab row; the sidebar is the menu. The Settings top bar and the public top bar are solid and stick to the very top edge, so nothing shows through or above them while scrolling. The selection menu hands its focus back to the Actions button.
+
+### Removed
+- The studio QR tool and its `/tools/qr.png` and `/tools/qr.svg` endpoints: QR codes are LinkHop's job now. A copy connected to HEL.ink lists one quiet link to `link.hel.ink/qr` in the studio and sends the old `/qr` address there; a stand-alone copy shows no link and sends `/qr` to its own studio (a temporary redirect both ways). The per-image QR on image pages stays.
+- The Explore page, its navigation links and its sitemap entry (`/explore` redirects home). The "Show on my profile" flag, public profiles and the public gallery API are unchanged.
+
 ## [3.11.1] - 2026-11-12
 
 ### Fixed

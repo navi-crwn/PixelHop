@@ -9,7 +9,7 @@ import (
 // Fixed public pages carry the site's social image, so a pasted link shows a card.
 func TestFixedPagesHaveASocialImage(t *testing.T) {
 	h := newTestApp(t)
-	for _, path := range []string{"/", "/changelog", "/legal", "/about", "/features", "/faq", "/help", "/tools", "/tools/batch", "/contact", "/status", "/explore", "/login", "/register"} {
+	for _, path := range []string{"/", "/changelog", "/legal", "/about", "/features", "/faq", "/help", "/tools", "/tools/batch", "/contact", "/status", "/login", "/register"} {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, httptest.NewRequest("GET", path, nil))
 		if rec.Code != 200 {

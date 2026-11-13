@@ -1,10 +1,18 @@
 {{define "content"}}{{$d := .Data}}{{$u := .User}}
 <div class="wrap narrow">
   <div class="page-head"><h1>{{$.L.T "mytabs.settings"}}</h1></div>
-  {{template "mytabs" .}}
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
 
+  <nav class="set-tabs" id="set-tabs"{{with $d.Start}} data-start="{{.}}"{{end}} aria-label="{{$.L.T "mytabs.settings"}}">
+    <a href="#profile" data-settab="profile">{{$.L.T "mytabs.profile"}}</a>
+    <a href="#sessions" data-settab="sessions">{{$.L.T "settings.tab_security"}}</a>
+    <a href="#api" data-settab="api">{{$.L.T "settings.tab_api"}}</a>
+    <a href="#data" data-settab="data">{{$.L.T "settings.tab_data"}}</a>
+    <a href="#delete-account" data-settab="delete">{{$.L.T "settings.tab_delete"}}</a>
+  </nav>
+
+  <div data-setpanel="profile">
   <div class="card" id="profile">
     <h2>{{$.L.T "mytabs.profile"}}</h2>
     <p class="muted small">{{$.L.T "settings.profile_intro"}}{{if and $u.Username.Valid $u.ShowOwner}} {{$.L.H "settings.profile_page" "name" $u.Username.String "base" .Base}}{{end}}</p>
@@ -31,6 +39,16 @@
     </form>
   </div>
 
+  {{if and .SSO $u.HelinkID.Valid}}
+  <div class="card">
+    <h2>{{$.L.T "settings.helink_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.helink_text" "site" .Site}}</p>
+    <a class="btn" href="{{.Helink}}/settings">{{$.L.T "settings.helink_open"}}</a>
+  </div>
+  {{end}}
+  </div>
+
+  <div data-setpanel="sessions">
   <div class="card" id="sessions">
     <h2>{{$.L.T "settings.sessions_h"}}</h2>
     <p class="muted small">{{$.L.T "settings.sessions_sub"}}</p>
@@ -38,21 +56,22 @@
     <form method="post" action="/settings/sessions/revoke" style="margin-top:8px"><button class="btn sm" type="submit">{{$.L.T "settings.sessions_revoke"}}</button></form>
   </div>
 
-  <div class="card" id="export">
-    <h2>{{$.L.T "settings.export_h"}}</h2>
-    <p class="muted small">{{$.L.T "settings.export_sub"}}</p>
-    <form method="post" action="/settings/export"><button class="btn" type="submit"><svg><use href="#i-down"/></svg>{{$.L.T "settings.export_btn"}}</button></form>
-  </div>
-
-  <div class="card" id="embedding">
-    <h2>{{$.L.T "settings.hotlink_h"}}</h2>
-    <p class="muted small">{{$.L.T "settings.hotlink_sub"}}</p>
-    <form method="post" action="/settings/hotlinks">
-      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="block_hotlinks" {{if $d.BlockHotlinks}}checked{{end}}><span>{{$.L.T "settings.hotlink_label"}}</span></label>
-      <button class="btn" type="submit">{{$.L.T "settings.hotlink_save"}}</button>
+  {{/* The password of a HOP ID member belongs to the hub (see the card in the Profile tab). */}}
+  {{if not (and .SSO $u.HelinkID.Valid)}}
+  <div class="card">
+    <h2>{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set_h"}}{{end}}</h2>
+    {{if not $d.HasPass}}<p class="muted small">{{$.L.T "settings.pw_google"}}</p>{{end}}
+    <form method="post" action="/settings/password">
+      {{if $d.HasPass}}<div class="field"><label for="current">{{$.L.T "settings.pw_current"}}</label><input type="password" id="current" name="current" autocomplete="current-password" required></div>{{end}}
+      <div class="field"><label for="password">{{$.L.T "settings.pw_new"}}</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn" type="submit">{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set"}}{{end}}</button>
+      <p class="small faint" style="margin:10px 0 0">{{$.L.T "settings.pw_note"}}</p>
     </form>
   </div>
+  {{end}}
+  </div>
 
+  <div data-setpanel="api">
   <div class="card" id="api">
     <h2>{{$.L.T "settings.api_h"}}</h2>
     <p class="muted small">{{$.L.H "settings.api_sub"}}</p>
@@ -78,15 +97,8 @@
     </table></div>
     {{else}}<p class="small faint">{{$.L.T "settings.no_keys"}}</p>{{end}}
     <p class="small muted" style="margin:12px 0 0">{{$.L.H "settings.lost_key"}}</p>
+    <p class="small muted" style="margin:8px 0 0"><a href="/docs">{{$.L.T "settings.api_docs"}}</a></p>
   </div>
-
-  {{if and .SSO $u.HelinkID.Valid}}
-  <div class="card">
-    <h2>{{$.L.T "settings.helink_h"}}</h2>
-    <p class="muted small">{{$.L.T "settings.helink_text" "site" .Site}}</p>
-    <a class="btn" href="{{.Helink}}/settings">{{$.L.T "settings.helink_open"}}</a>
-  </div>
-  {{end}}
 
   <div class="card" id="webhooks">
     <h2>{{$.L.T "settings.webhooks"}}</h2>
@@ -102,22 +114,27 @@
     </form>
     {{if $d.Webhooks}}<form method="post" action="/settings/webhooks/test" style="margin-top:8px"><button class="btn sm ghost" type="submit">{{$.L.T "settings.wh_test"}}</button></form>{{end}}
   </div>
-
-  {{/* The password of a HOP ID member belongs to the hub (see the card above). */}}
-  {{if not (and .SSO $u.HelinkID.Valid)}}
-  <div class="card">
-    <h2>{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set_h"}}{{end}}</h2>
-    {{if not $d.HasPass}}<p class="muted small">{{$.L.T "settings.pw_google"}}</p>{{end}}
-    <form method="post" action="/settings/password">
-      {{if $d.HasPass}}<div class="field"><label for="current">{{$.L.T "settings.pw_current"}}</label><input type="password" id="current" name="current" autocomplete="current-password" required></div>{{end}}
-      <div class="field"><label for="password">{{$.L.T "settings.pw_new"}}</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required></div>
-      <button class="btn" type="submit">{{if $d.HasPass}}{{$.L.T "settings.pw_change"}}{{else}}{{$.L.T "settings.pw_set"}}{{end}}</button>
-      <p class="small faint" style="margin:10px 0 0">{{$.L.T "settings.pw_note"}}</p>
-    </form>
   </div>
 
-  {{end}}
-  <div class="card" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
+  <div data-setpanel="data" id="data">
+  <div class="card" id="export">
+    <h2>{{$.L.T "settings.export_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.export_sub"}}</p>
+    <form method="post" action="/settings/export"><button class="btn" type="submit"><svg><use href="#i-down"/></svg>{{$.L.T "settings.export_btn"}}</button></form>
+  </div>
+
+  <div class="card" id="embedding">
+    <h2>{{$.L.T "settings.hotlink_h"}}</h2>
+    <p class="muted small">{{$.L.T "settings.hotlink_sub"}}</p>
+    <form method="post" action="/settings/hotlinks">
+      <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="block_hotlinks" {{if $d.BlockHotlinks}}checked{{end}}><span>{{$.L.T "settings.hotlink_label"}}</span></label>
+      <button class="btn" type="submit">{{$.L.T "settings.hotlink_save"}}</button>
+    </form>
+  </div>
+  </div>
+
+  <div data-setpanel="delete">
+  <div class="card" id="delete-account" style="border-color:color-mix(in srgb,var(--red) 35%,transparent)">
     <h2>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_images_h"}}{{else}}{{$.L.T "settings.del_account_h"}}{{end}}</h2>
     <p class="muted small">{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_text_helink"}}{{else}}{{$.L.T "settings.del_text"}}{{end}} {{$.L.T "settings.del_links"}}</p>
     <form method="post" action="/settings/delete-account" data-confirm="{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_confirm_helink"}}{{else}}{{$.L.T "settings.del_confirm"}}{{end}}" data-confirm-danger>
@@ -128,6 +145,7 @@
       {{end}}
       <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_btn_helink"}}{{else}}{{$.L.T "settings.del_btn"}}{{end}}</button>
     </form>
+  </div>
   </div>
 </div>
 {{end}}

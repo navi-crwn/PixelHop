@@ -121,7 +121,7 @@ Berbagi:
 - Tag, pencarian, dan filter tag di dasbor. File yang dihapus menunggu di tempat sampah selama 7 hari.
 - Tayangan per hari dan situs yang menautkan ke sebuah file. Perujuk hanya disimpan sebagai nama host.
 - Salinan berukuran lain sesuai permintaan, misalnya `/i/photo.jpg?w=800`, dibuat sekali lalu disimpan di cache.
-- Profil publik di `/u/username`, umpan Jelajahi berisi file yang ingin ditampilkan orang, oEmbed, dan peta situs.
+- Profil publik di `/u/username`, oEmbed, dan sitemap.
 
 Akun:
 - Tamu bisa mengunggah (bawaan sampai 20 MB per file, 25 file per hari per alamat, dan 10 gambar per album) dan mendapat tautan hapus pribadi untuk setiap file, yang juga diingat browser.
@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Alat AI server (harus masuk; `file`, ditambah `mask` untuk erase) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Salinan berukuran lain, dibuat sekali lalu disimpan di cache. `format=webp` dan `avif` membutuhkan layanan AI |
 | `GET /oembed?url=...` | oEmbed untuk halaman gambar |
-| `GET /tools/qr.png`, `/tools/qr.svg` | Kode QR untuk `text` (`size`, `level`, `fg`, `bg`) |
 
 Setiap jawaban berbentuk `{"success": true, "data": ...}` atau `{"success": false, "error": "..."}`. Referensi lengkap ada di [`/docs`](https://pixel.hel.ink/docs) pada server PixelHop mana pun.
 

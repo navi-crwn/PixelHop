@@ -29,7 +29,7 @@ func TestDashboard(t *testing.T) {
 		t.Fatalf("dashboard: %d", rec.Code)
 	}
 	body := rec.Body.String()
-	for _, want := range []string{`id="drop"`, `id="my-gallery"`, `class="member-nav"`, `data-stat="files">2<`, `2 images · 0 videos · 0 PDFs`, `class="dash-start"`, `<b>3/4</b>`} {
+	for _, want := range []string{`id="drop"`, `id="my-gallery"`, `class="shell-nav"`, `data-stat="files">2<`, `2 images · 0 videos · 0 PDFs`, `class="dash-start"`, `<b>3/4</b>`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("dashboard is missing %s", want)
 		}
@@ -42,8 +42,8 @@ func TestDashboard(t *testing.T) {
 		t.Error("image filter should show the images")
 	}
 
-	// The member menu is on settings too, so every member page links back.
-	if body := fetch(h, "/settings", cookie).Body.String(); !strings.Contains(body, `class="member-nav"`) {
+	// The shell's sidebar is on settings too, so every member page links back.
+	if body := fetch(h, "/settings", cookie).Body.String(); !strings.Contains(body, `class="shell-nav"`) {
 		t.Error("settings has no member menu")
 	}
 }

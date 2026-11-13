@@ -51,10 +51,8 @@
       <a href="/dashboard/albums" {{if eq .Path "/dashboard/albums"}}aria-current="page"{{end}}><svg><use href="#i-album"/></svg>{{.L.T "nav.my_albums"}}</a>
       <a href="/dashboard/trash" {{if eq .Path "/dashboard/trash"}}aria-current="page"{{end}}><svg><use href="#i-trash"/></svg>{{.L.T "mytabs.trash"}}</a>
       {{if and .User.ShowOwner .User.Username.Valid}}<a href="/u/{{.User.Username.String}}"><svg><use href="#i-users"/></svg>{{.L.T "nav.my_profile"}}</a>{{end}}
-      <a href="/"><svg><use href="#i-upload"/></svg>{{.L.T "nav.upload"}}</a>
+      <a href="/dashboard#upload"><svg><use href="#i-upload"/></svg>{{.L.T "nav.upload"}}</a>
       <a href="/tools"><svg><use href="#i-adjust"/></svg>{{.L.T "nav.studio"}}</a>
-      <a href="/explore"><svg><use href="#i-link"/></svg>{{.L.T "nav.explore"}}</a>
-      <a href="/docs"><svg><use href="#i-code"/></svg>{{.L.T "nav.api"}}</a>
       <a href="/settings" {{if eq .Path "/settings"}}aria-current="page"{{end}}><svg><use href="#i-gear"/></svg>{{.L.T "nav.settings"}}</a>
       {{with .Control}}<a href="{{.}}"><svg><use href="#i-shield"/></svg>{{$.L.T "nav.control"}}</a>{{end}}
     </nav>
@@ -69,7 +67,7 @@
       <button class="icon-btn shell-burger" id="shell-burger" type="button" aria-label="{{.L.T "nav.menu"}}" aria-controls="shell-side" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
       <p class="shell-title">{{if .Title}}{{.Title}}{{else}}{{.L.T "nav.dashboard"}}{{end}}</p>
       <div class="shell-tools">
-        {{if ne .Path "/dashboard"}}<a class="btn primary sm" href="/"><svg><use href="#i-upload"/></svg><span>{{.L.T "nav.upload"}}</span></a>{{end}}
+        <a class="btn primary sm" {{if eq .Path "/dashboard"}}href="#upload" data-pick-files{{else}}href="/dashboard#upload"{{end}}><svg><use href="#i-upload"/></svg><span>{{.L.T "nav.upload"}}</span></a>
         <div class="menu lang-menu" id="lang-menu">
           <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
           <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}
@@ -105,7 +103,6 @@
     <nav class="nav-links" id="nav-links" aria-label="{{$.L.T "nav.main"}}">
       <a href="/" {{if eq .Path "/"}}aria-current="page"{{end}}>{{.L.T "nav.upload"}}</a>
       <a href="/tools" {{if eq .Path "/tools"}}aria-current="page"{{end}}>{{.L.T "nav.studio"}}</a>
-      <a href="/explore" {{if eq .Path "/explore"}}aria-current="page"{{end}}>{{.L.T "nav.explore"}}</a>
       {{if .User}}<a href="/dashboard" {{if eq .Path "/dashboard"}}aria-current="page"{{end}}>{{.L.T "nav.dashboard"}}</a>{{end}}
       <a href="/docs" {{if eq .Path "/docs"}}aria-current="page"{{end}}>{{.L.T "nav.api"}}</a>
       {{with .Control}}<a href="{{.}}">{{$.L.T "nav.control"}}</a>{{end}}

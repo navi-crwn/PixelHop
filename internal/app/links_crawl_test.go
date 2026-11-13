@@ -39,7 +39,7 @@ func TestPublicPagesHaveNoDeadInternalLinks(t *testing.T) {
 	}
 	for _, lang := range []string{"en", "zh-CN", "de", "id", "ja", "pt-BR", "es", "fr", "ru"} {
 		seen := map[string]bool{}
-		queue := []string{"/", "/tools", "/docs", "/help", "/legal", "/about", "/changelog", "/features", "/faq", "/contact", "/status", "/explore", "/login", "/register"}
+		queue := []string{"/", "/tools", "/docs", "/help", "/legal", "/about", "/changelog", "/features", "/faq", "/contact", "/status", "/login", "/register"}
 		for len(queue) > 0 {
 			page := queue[0]
 			queue = queue[1:]
