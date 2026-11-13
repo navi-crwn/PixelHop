@@ -578,7 +578,6 @@
   "dash.keys_many": "{n} Schlüssel eingerichtet",
   "dash.keys_one": "1 Schlüssel eingerichtet",
   "dash.sharex_sub": "Aus Screenshots und Skripten hochladen",
-  "dash.helink_sub": "Kurzlinks mit demselben Konto",
   "dash.my_files": "Meine Dateien",
   "dash.n_videos": "{n} Videos",
   "dash.n_pdfs": "{n} PDFs",
@@ -982,7 +981,6 @@
   "Brush size": "Pinselgröße",
   "Erase": "Löschen",
   "Paint over what to erase first": "Male zuerst über das, was gelöscht werden soll",
-  "Erasing… this takes about 10 seconds": "Wird gelöscht … das dauert etwa 10 Sekunden",
   "Clear": "Zurücksetzen",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "Funktioniert am besten bei kleinen Dingen vor einfachem Hintergrund. Lieber mehrere kleine Löschungen als eine große.",
   "HD upscale": "HD-Hochskalierung",
@@ -1106,5 +1104,10 @@
   "claim.none": "Diese Bilder können nicht mehr übernommen werden: Sie wurden entfernt, werden geprüft oder gehören jemand anderem.",
   "claim.view": "Meine Bibliothek ansehen",
   "claim.error": "Das Übernehmen hat gerade nicht geklappt. Bitte versuche es gleich noch einmal.",
-  "You're doing this very fast. Please wait a while.": "Das geht zu schnell. Bitte warte eine Weile."
+  "You're doing this very fast. Please wait a while.": "Das geht zu schnell. Bitte warte eine Weile.",
+  "one moment: too many in a row": "Einen Moment: zu viele hintereinander",
+  "you've used today's {n} of this tool; try again tomorrow": "Du hast die {n} Nutzungen dieses Werkzeugs für heute aufgebraucht. Versuche es morgen wieder.",
+  "Remove logo": "Logo entfernen",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "Maschinell gelesener Text kann Fehler enthalten, besonders bei Handschrift, schiefen Fotos und kleiner Schrift. Prüfe ihn, bevor du ihn verwendest.",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "Wird auf dem Server entfernt … das kann eine Weile dauern, länger, wenn der Server ausgelastet ist."
 }

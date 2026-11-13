@@ -82,13 +82,13 @@ func TestPageLanguages(t *testing.T) {
 	cookies := rec.Result().Cookies()
 	var foundCookie bool
 	for _, c := range cookies {
-		if c.Name == "pixel_lang" && c.Value == "id" {
+		if c.Name == "hop_lang" && c.Value == "id" {
 			foundCookie = true
 			break
 		}
 	}
 	if !foundCookie {
-		t.Errorf("pixel_lang=id cookie was not set")
+		t.Errorf("hop_lang=id cookie was not set")
 	}
 
 	// A retired language falls back to English and sets no cookie.
@@ -103,7 +103,7 @@ func TestPageLanguages(t *testing.T) {
 		t.Errorf("expected html lang=en dir=ltr, got: %s", body[:100])
 	}
 	for _, c := range rec.Result().Cookies() {
-		if c.Name == "pixel_lang" {
+		if c.Name == "hop_lang" || c.Name == "pixel_lang" {
 			t.Errorf("a retired language must not set the language cookie, got %q", c.Value)
 		}
 	}

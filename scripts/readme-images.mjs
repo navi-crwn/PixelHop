@@ -38,7 +38,8 @@ const newContext = (theme) => browser.newContext({
 });
 
 async function themed(ctx, theme) {
-  await ctx.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch (e) {} }, theme);
+  // the family cookie hop_theme decides first; the old key is kept for older builds
+  await ctx.addInitScript((t) => { try { document.cookie = 'hop_theme=' + t + '; Path=/'; localStorage.setItem('theme', t); } catch (e) {} }, theme);
 }
 
 // Turns a screenshot into WebP with the browser's own encoder (no extra tools).

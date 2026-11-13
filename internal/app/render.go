@@ -25,6 +25,8 @@ type page struct {
 	Title, Desc     string
 	OGImage, OGType string
 	NoIndex         bool
+	Alternates      []altLink   // the same page in each language (fixed public pages)
+	JSONLD          template.JS // schema.org block of the home and tool pages
 	Data            any
 
 	User          *db.User
@@ -182,9 +184,10 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 		p.OGImage = a.cfg.BaseURL + "/static/img/social.jpg"
 	}
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
-	if strings.HasPrefix(name, "admin") || name == "dashboard" || name == "settings" || name == "delete" || name == "trash" {
+	if strings.HasPrefix(name, "admin") || privatePages[name] || p.Dash {
 		p.NoIndex = true
 	}
+	a.seo(r, name, &p)
 	w.Header().Add("Vary", "Cookie") // the page differs with the hop_ui cookie
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "base", p); err != nil {
@@ -194,6 +197,9 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	h := w.Header()
 	h.Set("Content-Type", "text/html; charset=utf-8")
+	if p.NoIndex {
+		h.Set("X-Robots-Tag", "noindex")
+	}
 	formHelink := ""
 	if a.cfg.HelinkURL != "" {
 		formHelink = " " + a.cfg.HelinkURL

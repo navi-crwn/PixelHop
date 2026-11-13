@@ -9,11 +9,13 @@
 <meta name="theme-color" content="#08090c" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
 <meta property="og:site_name" content="{{.Site}}">
+<meta property="og:type" content="website">
 <meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}{{.Site}}{{end}}">
 {{with .Desc}}<meta property="og:description" content="{{.}}">{{end}}
 {{with .Canon}}<meta property="og:url" content="{{.}}">
 <link rel="canonical" href="{{.}}">{{else}}<meta property="og:url" content="{{.Base}}{{.Path}}">{{end}}
-{{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
+{{range .Alternates}}<link rel="alternate" hreflang="{{.Lang}}" href="{{.URL}}">
+{{end}}{{if .OGImage}}<meta property="og:image" content="{{.OGImage}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{{.OGImage}}">{{else}}<meta name="twitter:card" content="summary">{{end}}
 <link rel="icon" href="/static/img/logo.svg?v={{.Asset}}" type="image/svg+xml">
@@ -32,7 +34,8 @@
 {{if .Dash}}<link rel="stylesheet" href="/static/css/shell.css?v={{.Asset}}">{{end}}
 <link rel="stylesheet" href="/static/css/coss.css?v={{.Asset}}">
 <script src="/static/js/family-switcher.js?v={{.Asset}}" defer></script>
-{{block "head" .}}{{end}}
+{{with .JSONLD}}<script type="application/ld+json">{{.}}</script>
+{{end}}{{block "head" .}}{{end}}
 </head>
 <body>
 <a class="skip" href="#main">{{.L.T "nav.skip"}}</a>

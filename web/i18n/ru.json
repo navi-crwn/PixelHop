@@ -581,7 +581,6 @@
   "dash.keys_many": "Настроено ключей: {n}",
   "dash.keys_one": "Настроен 1 ключ",
   "dash.sharex_sub": "Загрузка из скриншотов и скриптов",
-  "dash.helink_sub": "Короткие ссылки с тем же аккаунтом",
   "dash.my_files": "Мои файлы",
   "dash.n_videos": "Видео: {n}",
   "dash.n_pdfs": "PDF: {n}",
@@ -993,7 +992,6 @@
   "Brush size": "Размер кисти",
   "Erase": "Стереть",
   "Paint over what to erase first": "Сначала закрасьте то, что нужно стереть",
-  "Erasing… this takes about 10 seconds": "Стираю… это займёт около 10 секунд",
   "Clear": "Очистить",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "Лучше всего работает с мелкими объектами на простом фоне. Стирайте несколько небольших участков, а не один большой.",
   "HD upscale": "HD-увеличение",
@@ -1106,5 +1104,10 @@
   "claim.none": "Эти изображения больше нельзя забрать: они удалены, на проверке или принадлежат другому человеку.",
   "claim.view": "Открыть мою библиотеку",
   "claim.error": "Сейчас не удалось забрать изображения. Попробуйте ещё раз чуть позже.",
-  "You're doing this very fast. Please wait a while.": "Слишком быстро. Подождите немного."
+  "You're doing this very fast. Please wait a while.": "Слишком быстро. Подождите немного.",
+  "one moment: too many in a row": "Минутку: слишком много запросов подряд",
+  "you've used today's {n} of this tool; try again tomorrow": "Вы уже использовали сегодняшние {n} раз для этого инструмента. Попробуйте завтра.",
+  "Remove logo": "Убрать логотип",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "Текст, распознанный машиной, может содержать ошибки, особенно рукописный, на наклонных фото и мелким шрифтом. Проверьте его перед использованием.",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "Стираем на сервере… это может занять время, дольше, если сервер занят."
 }

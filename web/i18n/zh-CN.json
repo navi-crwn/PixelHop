@@ -581,7 +581,6 @@
   "dash.keys_many": "已设置 {n} 个密钥",
   "dash.keys_one": "已设置 1 个密钥",
   "dash.sharex_sub": "通过截图工具和脚本上传",
-  "dash.helink_sub": "用同一账号创建短链接",
   "dash.my_files": "我的文件",
   "dash.n_videos": "{n} 个视频",
   "dash.n_pdfs": "{n} 个 PDF",
@@ -994,7 +993,6 @@
   "Brush size": "画笔大小",
   "Erase": "擦除",
   "Paint over what to erase first": "请先涂抹要擦除的部分",
-  "Erasing… this takes about 10 seconds": "正在擦除…大约需要 10 秒",
   "Clear": "清除",
   "Works best on small things against a simple background. Do several small erases rather than one big one.": "对简单背景上的小物体效果最好。多次小范围擦除，比一次大范围更好。",
   "HD upscale": "高清放大",
@@ -1106,5 +1104,10 @@
   "claim.none": "这些图片已无法认领：已被删除、正在审核，或属于其他人。",
   "claim.view": "查看我的图库",
   "claim.error": "暂时无法认领，请稍后再试。",
-  "You're doing this very fast. Please wait a while.": "操作太快了，请稍等一会儿。"
+  "You're doing this very fast. Please wait a while.": "操作太快了，请稍等一会儿。",
+  "one moment: too many in a row": "请稍等：连续请求太多了",
+  "you've used today's {n} of this tool; try again tomorrow": "今天这个工具的 {n} 次已用完，请明天再试",
+  "Remove logo": "移除标志",
+  "Text read by a machine can be wrong, especially handwriting, tilted photos and small print. Check it before you use it.": "机器识别的文字可能有误，尤其是手写、倾斜的照片和小字。使用前请先核对。",
+  "Erasing on the server… this can take a while, longer when the server is busy.": "正在服务器上擦除……这需要一些时间，服务器繁忙时会更久。"
 }

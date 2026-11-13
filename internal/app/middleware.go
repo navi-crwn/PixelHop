@@ -83,6 +83,9 @@ func securityHeaders(next http.Handler) http.Handler {
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		h.Set("X-Frame-Options", "SAMEORIGIN")
 		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()")
+		if noIndexPath(r.URL.Path) {
+			h.Set("X-Robots-Tag", "noindex")
+		}
 		next.ServeHTTP(w, r)
 	})
 }
@@ -212,6 +215,7 @@ type limiter struct {
 
 type window struct {
 	start time.Time
+	per   time.Duration // the window's own length: a day for the AI tools, a minute for uploads
 	n     int
 }
 
@@ -219,32 +223,56 @@ func newLimiter() *limiter {
 	l := &limiter{m: map[string]*window{}}
 	go func() {
 		for range time.Tick(5 * time.Minute) {
-			l.mu.Lock()
-			for k, w := range l.m {
-				if time.Since(w.start) > time.Hour {
-					delete(l.m, k)
-				}
-			}
-			l.mu.Unlock()
+			l.sweep(time.Now())
 		}
 	}()
 	return l
 }
 
+// sweep frees the windows that have run their own length. A fixed hour here
+// once dropped the AI tools' daily counts after an hour, so "per day" became
+// "per hour".
+func (l *limiter) sweep(now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for k, w := range l.m {
+		if now.Sub(w.start) > w.per {
+			delete(l.m, k)
+		}
+	}
+}
+
 // allow counts one event and reports whether key is still under max per per.
 func (l *limiter) allow(key string, max int, per time.Duration) bool {
+	return l.allowAt(key, max, per, time.Now())
+}
+
+// give takes back one event counted at or after since, for an action that did not happen after all
+// (the AI service failed). It never goes below zero and leaves a window that started later alone.
+func (l *limiter) give(key string, since time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if w := l.m[key]; w != nil && !w.start.After(since) && w.n > 0 {
+		w.n--
+	}
+}
+
+func (l *limiter) allowAt(key string, max int, per time.Duration, now time.Time) bool {
 	if max <= 0 {
 		return true
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	w := l.m[key]
-	if w == nil || time.Since(w.start) > per {
-		w = &window{start: time.Now()}
+	if w == nil || now.Sub(w.start) > per {
+		w = &window{start: now, per: per}
 		l.m[key] = w
 	}
+	if w.n >= max { // a refusal is not counted, so a give() makes room again
+		return false
+	}
 	w.n++
-	return w.n <= max
+	return true
 }
 
 // seen remembers (ip, image) pairs so one visitor refreshing a page counts

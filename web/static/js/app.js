@@ -69,6 +69,7 @@
     var root = document.documentElement;
     var dark = root.dataset.theme ? root.dataset.theme === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
     root.dataset.theme = dark ? 'light' : 'dark';
+    if (window.hopTheme) window.hopTheme(root.dataset.theme); // the family cookie hop_theme (theme.js)
     try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
   });
   // The phone navigation: the burger opens it, a tap outside, a chosen link or Escape closes it.

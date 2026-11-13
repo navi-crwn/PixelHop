@@ -32,6 +32,8 @@ type dashData struct {
 	Keys    int // API keys made, to nudge people towards ShareX
 	Tag     string
 	Tags    []db.TagCount
+	// Reminders are the reminder cards due now, by key (reminders.go).
+	Reminders map[string]bool
 }
 
 func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +62,9 @@ func (a *App) dashboard(w http.ResponseWriter, r *http.Request) {
 	if u.QuotaBytes > 0 {
 		d.Percent = int(min(100, used*100/u.QuotaBytes))
 	}
+	// The four getting-started steps, as the dashboard ticks them off.
+	startOpen := d.Sum.Images+d.Sum.Videos+d.Sum.PDFs == 0 || d.Sum.Albums == 0 || !(u.ShowOwner && u.Username.Valid) || d.Keys == 0
+	d.Reminders = map[string]bool{remindStart: a.reminderDue(r, u, remindStart, startOpen, time.Now())}
 	a.render(w, r, "dashboard", "Dashboard", d)
 }
 

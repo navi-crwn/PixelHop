@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -193,6 +194,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/v1/images/{id}/restore", a.apiRestoreImage)
 	mux.HandleFunc("GET /api/v1/me", a.apiMe)
 	mux.HandleFunc("GET /api/v1/me/media", a.apiMyMedia)
+	mux.HandleFunc("POST /api/me/reminders/dismiss", a.apiDismissReminder) // reminder cards (reminders.go)
 	mux.HandleFunc("GET /api/v1/stats", a.apiStats)
 	mux.HandleFunc("GET /api/v1/albums", a.apiAlbums)
 	mux.HandleFunc("POST /api/v1/albums", a.apiCreateAlbum)
@@ -266,46 +268,85 @@ func cacheForever(h http.Handler) http.Handler {
 	})
 }
 
-const langCookie = "pixel_lang"
+// langCookie is the HOP family's language cookie: one choice for every app on
+// *.hel.ink. oldLangCookie is where PixelHop kept it before; it is still read
+// when hop_lang is absent.
+const (
+	langCookie    = "hop_lang"
+	oldLangCookie = "pixel_lang"
+)
 
-// locale determines the visitor's language. Order of precedence:
-// 1. explicit ?lang= query (remembered in cookie),
-// 2. explicit pixel_lang cookie from previous selection,
-// 3. English (default; Accept-Language is not used per owner decision).
-func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
-	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
-		http.SetCookie(w, &http.Cookie{
-			Name:     langCookie,
-			Value:    q,
-			Path:     "/",
-			MaxAge:   365 * 24 * 3600,
-			Secure:   strings.HasPrefix(a.cfg.BaseURL, "https://"),
-			SameSite: http.SameSiteLaxMode,
-		})
-		return i18n.Locale{Lang: i18n.Get(q)}
+// familyCookieDomain is the Domain for the family's preference cookies: hel.ink
+// on hel.ink and its subdomains, none (host-only) anywhere else, so
+// self-hosted copies and localhost keep working without any setting.
+func familyCookieDomain(r *http.Request) string {
+	host := r.Host
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
 	}
-	code := i18n.Default
-	if c, err := r.Cookie(langCookie); err == nil {
-		if resolved, ok := i18n.Resolve(c.Value); ok {
-			code = resolved
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
+	if host == "hel.ink" || strings.HasSuffix(host, ".hel.ink") {
+		return "hel.ink"
+	}
+	return ""
+}
+
+// setLangCookie remembers a language choice in hop_lang for the whole family:
+// plain text, readable by scripts, a year long.
+func (a *App) setLangCookie(w http.ResponseWriter, r *http.Request, code string) {
+	domain := familyCookieDomain(r)
+	http.SetCookie(w, &http.Cookie{
+		Name:     langCookie,
+		Value:    code,
+		Path:     "/",
+		Domain:   domain,
+		MaxAge:   365 * 24 * 3600,
+		Secure:   domain != "" || strings.HasPrefix(a.cfg.BaseURL, "https://"),
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// requestLang is the language a request asks for, in the family's order:
+// ?lang= → hop_lang → PixelHop's old pixel_lang → English (Accept-Language is
+// not used per owner decision). old reports that pixel_lang decided and hop_lang is absent.
+func requestLang(r *http.Request) (code string, fromQuery, old bool) {
+	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
+		return q, true, false
+	}
+	family, err := r.Cookie(langCookie)
+	if err == nil {
+		if resolved, ok := i18n.Resolve(family.Value); ok {
+			return resolved, false, false
 		}
 	}
-	w.Header().Add("Vary", "Cookie")
+	if c, err := r.Cookie(oldLangCookie); err == nil {
+		if resolved, ok := i18n.Resolve(c.Value); ok {
+			// Copied into hop_lang only when the family cookie is absent: one this app cannot read
+			// (another app's newer value) is never overwritten from PixelHop's old store.
+			return resolved, false, family == nil
+		}
+	}
+	return i18n.Default, false, false
+}
+
+// locale determines the visitor's language (requestLang) and writes hop_lang
+// when the choice is new: picked with ?lang=, or still only in pixel_lang.
+func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
+	code, fromQuery, old := requestLang(r)
+	if fromQuery || old {
+		a.setLangCookie(w, r, code)
+	}
+	if !fromQuery {
+		w.Header().Add("Vary", "Cookie")
+	}
 	return i18n.Locale{Lang: i18n.Get(code)}
 }
 
 // tr translates a message for the language of this request. The English text
 // is its own key, so a message nobody translated yet still reads in English.
-// It only reads the cookie and the ?lang= choice; render writes them.
+// It only reads the cookies and the ?lang= choice; render writes them.
 func (a *App) tr(r *http.Request, key string, kv ...any) string {
-	code := i18n.Default
-	if q, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
-		code = q
-	} else if c, err := r.Cookie(langCookie); err == nil {
-		if resolved, ok := i18n.Resolve(c.Value); ok {
-			code = resolved
-		}
-	}
+	code, _, _ := requestLang(r)
 	return i18n.T(code, key, kv...)
 }
 

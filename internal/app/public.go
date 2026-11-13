@@ -13,8 +13,10 @@ import (
 	"github.com/navi-crwn/pixelhop/internal/db"
 )
 
-// Explore, sitemap, oEmbed and the public gallery API. Only images their
-// owners put on their profile ("listed") ever show up here.
+// Explore, sitemap, oEmbed and the public gallery API: only images their
+// owners put on their profile ("listed") ever show up here. The sitemap lists
+// the fixed public pages (sitePages, in seo.go), then the public profiles and
+// listed images, as before.
 
 func (a *App) explore(w http.ResponseWriter, r *http.Request) {
 	pg, _ := strconv.Atoi(r.URL.Query().Get("page"))
@@ -38,14 +40,26 @@ func (a *App) explore(w http.ResponseWriter, r *http.Request) {
 }
 
 type sitemapURL struct {
-	Loc     string `xml:"loc"`
-	LastMod string `xml:"lastmod,omitempty"`
+	Loc     string        `xml:"loc"`
+	LastMod string        `xml:"lastmod,omitempty"`
+	Alt     []sitemapLink `xml:"xhtml:link"`
+}
+
+// sitemapLink is one language alternate of a fixed page, as the hub's sitemap writes it.
+type sitemapLink struct {
+	Rel      string `xml:"rel,attr"`
+	HrefLang string `xml:"hreflang,attr"`
+	Href     string `xml:"href,attr"`
 }
 
 func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
-	urls := []sitemapURL{}
-	for _, p := range []string{"/", "/tools", "/tools/batch", "/explore", "/help", "/docs", "/legal", "/about", "/features", "/faq", "/contact"} {
-		urls = append(urls, sitemapURL{Loc: a.cfg.BaseURL + p})
+	urls := make([]sitemapURL, 0, len(sitePages))
+	for _, p := range sitePages {
+		u := sitemapURL{Loc: a.cfg.BaseURL + p}
+		for _, l := range alternates(u.Loc) {
+			u.Alt = append(u.Alt, sitemapLink{"alternate", l.Lang, l.URL})
+		}
+		urls = append(urls, u)
 	}
 	rows, err := a.db.QueryContext(r.Context(), `SELECT username FROM users WHERE username IS NOT NULL AND show_owner=1 AND status='active'
 		AND EXISTS (SELECT 1 FROM images WHERE user_id=users.id AND listed=1 AND hidden=0 AND private=0 AND pass_hash='')`)
@@ -57,6 +71,7 @@ func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 		}
 		rows.Close()
 	}
+	// Listed images live on the link host (pageURL): that is their canonical address.
 	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{Listed: true, PublicOwner: true, Limit: 5000})
 	for _, im := range ims {
 		urls = append(urls, sitemapURL{Loc: a.pageURL(im.ID), LastMod: time.Unix(im.CreatedAt, 0).UTC().Format("2006-01-02")})
@@ -67,8 +82,9 @@ func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 	enc.Encode(struct {
 		XMLName xml.Name     `xml:"urlset"`
 		NS      string       `xml:"xmlns,attr"`
+		XHTML   string       `xml:"xmlns:xhtml,attr"`
 		URLs    []sitemapURL `xml:"url"`
-	}{NS: "http://www.sitemaps.org/schemas/sitemap/0.9", URLs: urls})
+	}{NS: "http://www.sitemaps.org/schemas/sitemap/0.9", XHTML: "http://www.w3.org/1999/xhtml", URLs: urls})
 }
 
 // oembed lets sites like Discourse, WordPress and Notion embed an image page.
