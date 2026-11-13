@@ -25,6 +25,7 @@ type page struct {
 	Title, Desc     string
 	OGImage, OGType string
 	NoIndex         bool
+	Status          int         // the HTTP status to answer with (0 = 200); written here, after the headers are set
 	Alternates      []altLink   // the same page in each language (fixed public pages)
 	JSONLD          template.JS // schema.org block of the home and tool pages
 	Data            any
@@ -159,6 +160,13 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, name, title string,
 	a.renderPage(w, r, name, page{Title: title, Data: data})
 }
 
+// renderStatus is render with a status other than 200. The status goes through page.Status, not a WriteHeader
+// call before render: headers set after WriteHeader never reach the client, so such a page lost its
+// Cache-Control, Content-Security-Policy and Content-Type.
+func (a *App) renderStatus(w http.ResponseWriter, r *http.Request, code int, name, title string, data any) {
+	a.renderPage(w, r, name, page{Title: title, Data: data, Status: code})
+}
+
 // siteImagePages are the fixed public pages that share the site's social image when a link to them
 // is pasted somewhere (the home page sets its own; image and album pages use their picture).
 var siteImagePages = map[string]bool{"changelog": true, "legal": true, "tools": true, "batch": true, "help": true,
@@ -218,6 +226,13 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 		"font-src 'self' https://hel.ink; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {
 		h.Set("Cache-Control", "private, no-store")
+	} else if h.Get("Cache-Control") == "" {
+		// Rule 6 (SEO and language contract): the page follows the hop_lang cookie, so a shared cache must
+		// not keep one visitor's version for the next. A page that chose its own policy (/status) keeps it.
+		h.Set("Cache-Control", "private, no-cache")
+	}
+	if p.Status != 0 {
+		w.WriteHeader(p.Status)
 	}
 	buf.WriteTo(w)
 }
@@ -269,8 +284,7 @@ func (a *App) notFound(w http.ResponseWriter, r *http.Request) {
 		apiError(w, http.StatusNotFound, "not found")
 		return
 	}
-	w.WriteHeader(http.StatusNotFound)
-	a.renderPage(w, r, "error", page{Title: "Not found", NoIndex: true, Data: map[string]any{
+	a.renderPage(w, r, "error", page{Title: "Not found", NoIndex: true, Status: http.StatusNotFound, Data: map[string]any{
 		"Code": 404, "Message": a.tr(r, "This link doesn't lead anywhere. The image may have expired or been deleted.")}})
 }
 
@@ -279,8 +293,7 @@ func (a *App) fail(w http.ResponseWriter, r *http.Request, code int, msg string)
 		apiError(w, code, msg)
 		return
 	}
-	w.WriteHeader(code)
-	a.renderPage(w, r, "error", page{Title: a.tr(r, http.StatusText(code)), NoIndex: true, Data: map[string]any{"Code": code, "Message": msg}})
+	a.renderPage(w, r, "error", page{Title: a.tr(r, http.StatusText(code)), NoIndex: true, Status: code, Data: map[string]any{"Code": code, "Message": msg}})
 }
 
 func (a *App) serverError(w http.ResponseWriter, r *http.Request, err error) {

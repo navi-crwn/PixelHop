@@ -34,6 +34,9 @@ var aiTools = map[string]aiTool{
 	"upscale":           {path: "/upscale", perDay: 10, wait: 20 * time.Second, maxPix: 1_000_000},
 }
 
+// aiDay is the length of an AI tool's share window: from a member's first use of a tool, 24 hours.
+const aiDay = 24 * time.Hour
+
 // aiSlot lets one image through the models at a time; others wait in line.
 var aiSlot = make(chan struct{}, 1)
 
@@ -85,17 +88,35 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 
 	// The day's share counts only what gets a result: it is taken here, after the checks above, and given
 	// back below when the queue or the AI service fails. Taking it first keeps racing requests from going
-	// over the number; giving back only touches the window it was taken from.
+	// over the number; giving back only touches the window it was taken from. It is kept in the database,
+	// so a restart does not hand the day back.
 	perDay := tool.perDay
 	if name == "remove-background" {
 		perDay = a.cfg.RembgPerDay
 	}
-	dayKey, takenAt := "ai-day:"+name+":"+strconv.FormatInt(u.ID, 10), time.Now()
-	if !a.limits.allowAt(dayKey, perDay, 24*time.Hour, takenAt) {
-		apiError(w, http.StatusTooManyRequests, a.tr(r, "you've used today's {n} of this tool; try again tomorrow", "n", perDay))
+	takenAt := time.Now()
+	used, allowed, err := a.db.AITake(r.Context(), u.ID, name, perDay, aiDay, takenAt)
+	if err != nil {
+		a.log.Error("ai tool: day share", "tool", name, "err", err)
+		apiError(w, http.StatusInternalServerError, "couldn't check today's share; please try again")
 		return
 	}
-	giveBack := func() { a.limits.give(dayKey, takenAt) }
+	if !allowed {
+		_, resets, _ := a.db.AIUsed(r.Context(), u.ID, name, aiDay, takenAt)
+		extra := map[string]any{"limit": perDay, "remaining": 0}
+		if !resets.IsZero() {
+			extra["resets_at"] = resets.UTC().Format(time.RFC3339)
+		}
+		apiErrorWith(w, http.StatusTooManyRequests, a.tr(r, "you've used today's {n} of this tool; try again tomorrow", "n", perDay), extra)
+		return
+	}
+	giveBack := func() {
+		if perDay > 0 {
+			if err := a.db.AIGive(context.Background(), u.ID, name, takenAt); err != nil {
+				a.log.Error("ai tool: give back", "tool", name, "err", err)
+			}
+		}
+	}
 
 	wait, cancel := context.WithTimeout(r.Context(), tool.wait)
 	defer cancel()
@@ -142,6 +163,10 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.db.CountUsage(r.Context(), name)
+	if perDay > 0 { // what is left of today's share, for clients that want to show it
+		w.Header().Set("X-Day-Limit", strconv.Itoa(perDay))
+		w.Header().Set("X-Day-Remaining", strconv.Itoa(max(perDay-used, 0)))
+	}
 	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
 	w.Header().Set("Cache-Control", "no-store")
 	io.Copy(w, io.LimitReader(resp.Body, 300<<20))

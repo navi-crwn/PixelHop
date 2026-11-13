@@ -4,6 +4,17 @@ All notable changes to PixelHop will be documented in this file.
 
 ## [Unreleased]
 
+## [3.11.3] - 2026-11-14
+
+### Fixed
+- The AI tools' daily limit now survives a restart: the day's count is kept in the database (one row per member and tool), not in memory, so restarting PixelHop no longer gives the day back. It is taken in a single step, so several images sent at the same moment cannot go over the limit, and it is given back when the AI service fails, as before. The window is still 24 hours from the first use.
+- Changing the password by a hand-made request is refused for HOP ID members (the password belongs to the hub; the form was already hidden). The refusal opens the Security & sessions tab and changes nothing, and other browsers stay signed in.
+- Error pages and refused forms (a page that does not exist, a failed sign-in, a form with a wrong value, a locked image's password prompt) lost their `Cache-Control`, `Vary`, `Content-Security-Policy` and `Content-Type` headers because the status was written before the page. They now carry them.
+
+### Changed
+- Public pages answer `Cache-Control: private, no-cache`, so a shared cache or CDN cannot keep one visitor's language for the next visitor. Signed-in pages, the status page, files and images keep their own caching.
+- The AI tools tell how much of the day's share is left: `X-Day-Limit` and `X-Day-Remaining` headers on a result, `limit`, `remaining` and `resets_at` in the "used today's share" refusal, and an `ai_day` list in `GET /api/v1/me`. Existing fields are unchanged.
+
 ## [3.11.2] - 2026-11-13
 
 ### Added

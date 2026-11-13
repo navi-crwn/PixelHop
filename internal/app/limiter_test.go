@@ -2,6 +2,7 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
@@ -187,14 +188,14 @@ func TestAIToolDailyLimitLastsADay(t *testing.T) {
 	if code, msg := post("", good); code != http.StatusTooManyRequests || !strings.Contains(msg, "today's "+strconv.Itoa(perDay)) {
 		t.Fatalf("over the daily share: %d %q", code, msg)
 	}
-	a.limits.sweep(time.Now().Add(2 * time.Hour))
+	a.db.SweepAIDay(context.Background(), aiDay, time.Now().Add(2*time.Hour)) // the cleaner has run
 	if code, msg := post("id", good); code != http.StatusTooManyRequests || !strings.Contains(msg, "Coba lagi besok") {
 		t.Fatalf("two hours later, in Indonesian: %d %q", code, msg)
 	}
 	// The day is over: move the window's start back a day.
-	a.limits.mu.Lock()
-	a.limits.m["ai-day:upscale:"+strconv.FormatInt(u.ID, 10)].start = time.Now().Add(-24*time.Hour - time.Minute)
-	a.limits.mu.Unlock()
+	if _, err := a.db.Exec(`UPDATE ai_day SET start_at = ? WHERE user_id = ? AND tool = 'upscale'`, time.Now().Add(-24*time.Hour-time.Minute).Unix(), u.ID); err != nil {
+		t.Fatal(err)
+	}
 	if code, msg := post("", good); code != http.StatusOK {
 		t.Fatalf("the next day: %d %q", code, msg)
 	}
