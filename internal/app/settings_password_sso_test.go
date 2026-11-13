@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -20,6 +21,13 @@ func TestSavePasswordRefusedForHopIDMembers(t *testing.T) {
 	rec := post(h, "/settings/password", url.Values{"password": {"a-new-password-1"}}, s)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("HOP ID member's password POST: %d, want 400", rec.Code)
+	}
+	// The refusal is a Settings page that opens the Security & sessions tab, where the form would have been.
+	if body := rec.Body.String(); !strings.Contains(body, `data-start="sessions"`) || !strings.Contains(body, "managed in HOP ID") {
+		t.Error("the refusal page does not open the sessions tab or does not say why")
+	}
+	if cc := rec.Result().Header.Get("Cache-Control"); cc != "private, no-store" {
+		t.Errorf("the refusal page: Cache-Control %q, want private, no-store", cc)
 	}
 	if got, _ := a.db.UserByID(ctx, hop.ID); got.PassHash != "" {
 		t.Error("a local password was set on a HOP ID account")

@@ -47,8 +47,11 @@ func TestPublicPagesNotStorableByASharedCache(t *testing.T) {
 			rec := httptest.NewRecorder()
 			h.ServeHTTP(rec, req)
 			res := rec.Result()
+			if res.StatusCode >= 300 && res.StatusCode < 400 {
+				continue // a redirect (/explore goes home), not a page
+			}
 			if !strings.HasPrefix(res.Header.Get("Content-Type"), "text/html") && res.StatusCode < 400 {
-				continue // not an HTML page (a redirect or a file): other rules
+				continue // not an HTML page (a file): other rules
 			}
 			cc := res.Header.Get("Cache-Control")
 			if !strings.Contains(cc, "private") && !strings.Contains(cc, "no-store") {
