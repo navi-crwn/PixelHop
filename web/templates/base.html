@@ -67,7 +67,7 @@
       <button class="icon-btn shell-burger" id="shell-burger" type="button" aria-label="{{.L.T "nav.menu"}}" aria-controls="shell-side" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
       <p class="shell-title">{{if .Title}}{{.Title}}{{else}}{{.L.T "nav.dashboard"}}{{end}}</p>
       <div class="shell-tools">
-        {{if ne .Path "/dashboard"}}<a class="btn primary sm" href="/dashboard#upload"><svg><use href="#i-upload"/></svg><span>{{.L.T "nav.upload"}}</span></a>{{end}}
+        <a class="btn primary sm" href="{{if eq .Path "/dashboard"}}#upload{{else}}/dashboard#upload{{end}}"><svg><use href="#i-upload"/></svg><span>{{.L.T "nav.upload"}}</span></a>
         <div class="menu lang-menu" id="lang-menu">
           <button type="button" class="icon-btn" aria-haspopup="true" aria-label="{{.L.T "nav.language"}}" title="{{.L.T "nav.language"}}"><svg><use href="#i-globe"/></svg></button>
           <div class="menu-list">{{$cur := .L.Code}}{{range .Langs}}

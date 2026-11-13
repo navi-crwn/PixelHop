@@ -27,7 +27,7 @@
       <button role="tab" data-tool="erase"><svg><use href="#i-edit"/></svg>{{$.L.T "tools.erase"}}<small>AI</small></button>
       <button role="tab" data-tool="upscale"><svg><use href="#i-resize"/></svg>{{$.L.T "tools.upscale"}}<small>AI</small></button>
       <a class="tool-batch" href="/tools/batch"><svg><use href="#i-album"/></svg>{{$.L.T "tools.batch"}}</a>
-      <a class="tool-qr-link" href="https://link.hel.ink/qr" rel="noopener"><svg><use href="#i-qr"/></svg>{{$.L.T "tools.qr_link"}}</a>
+      {{if .Helink}}<a class="tool-qr-link" href="https://link.hel.ink/qr" rel="noopener"><svg><use href="#i-qr"/></svg>{{$.L.T "tools.qr_link"}}</a>{{end}}
     </div>
 
     <div class="canvas-box" id="st-box">

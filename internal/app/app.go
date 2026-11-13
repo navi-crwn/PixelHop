@@ -207,6 +207,8 @@ func (a *App) Handler() http.Handler {
 		mux.Handle("GET "+from, http.RedirectHandler(to, http.StatusMovedPermanently))
 	}
 
+	mux.HandleFunc("GET /qr", a.qrMoved)
+
 	mux.HandleFunc("/", a.notFound)
 
 	var h http.Handler = mux

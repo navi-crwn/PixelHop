@@ -860,7 +860,7 @@
       var ids = picked().map(function (c) { return c.value; });
       if (!ids.length) return toast(T('Select some images first'), true);
       phConfirm(T('Move {n} images to the trash? You can restore them for 7 days.', { n: ids.length }), {
-        danger: true, anchor: delSelected
+        danger: true, anchor: selMenu ? selMenu.querySelector(':scope > button') : delSelected
       }).then(function (ok) {
         if (!ok) return;
         Promise.all(ids.map(function (id) { return api('DELETE', '/api/v1/images/' + id).then(function () { return 'ok'; }, function () { return 'failed'; }); }))
@@ -872,7 +872,7 @@
   // The selection menu closes once an action is chosen.
   var selMenu = $('#sel-menu');
   if (selMenu) selMenu.addEventListener('click', function (e) {
-    if (e.target.closest('.menu-list button')) selMenu.classList.remove('open');
+    if (e.target.closest('.menu-list button')) closeMenus();
   });
 
   // ---------- settings subtabs ----------
@@ -885,6 +885,8 @@
       var id = location.hash.slice(1);
       var target = id && document.getElementById(id);
       var panel = target && target.closest('[data-setpanel]');
+      // A page that answers a form (a new API key, a refusal) has no #card; the server names the tab.
+      if (!panel) panel = $('[data-setpanel="' + (tabs[0].parentNode.dataset.start || '') + '"]');
       if (!panel) panel = $('[data-setpanel]');
       $$('[data-setpanel]').forEach(function (p) { p.hidden = p !== panel; });
       tabs.forEach(function (t) {

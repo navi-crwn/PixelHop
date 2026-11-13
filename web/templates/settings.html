@@ -4,7 +4,7 @@
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
   {{with $d.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
 
-  <nav class="set-tabs" id="set-tabs" aria-label="{{$.L.T "mytabs.settings"}}">
+  <nav class="set-tabs" id="set-tabs"{{with $d.Start}} data-start="{{.}}"{{end}} aria-label="{{$.L.T "mytabs.settings"}}">
     <a href="#profile" data-settab="profile">{{$.L.T "mytabs.profile"}}</a>
     <a href="#sessions" data-settab="sessions">{{$.L.T "settings.tab_security"}}</a>
     <a href="#api" data-settab="api">{{$.L.T "settings.tab_api"}}</a>
@@ -116,8 +116,8 @@
   </div>
   </div>
 
-  <div data-setpanel="data">
-  <div class="card" id="data">
+  <div data-setpanel="data" id="data">
+  <div class="card" id="export">
     <h2>{{$.L.T "settings.export_h"}}</h2>
     <p class="muted small">{{$.L.T "settings.export_sub"}}</p>
     <form method="post" action="/settings/export"><button class="btn" type="submit"><svg><use href="#i-down"/></svg>{{$.L.T "settings.export_btn"}}</button></form>

@@ -36,5 +36,26 @@ func TestUploadMoreLink(t *testing.T) {
 	if body := fetch(h, "/uploaded?id="+strings.Join(ids, ",")).Body.String(); !strings.Contains(body, `href="/"`) {
 		t.Error("a guest's Upload more no longer leads home")
 	}
-	_ = u
+}
+
+// The top bar carries the family's primary action on every signed-in page, the dashboard included
+// (there it jumps to the uploader on the page).
+func TestTopBarUploadOnEveryMemberPage(t *testing.T) {
+	a, h := ssoApp(t)
+	u, _ := member(t, a, "topbar@example.com")
+	c := sessionFor(t, a, u.ID)
+	for path, href := range map[string]string{"/dashboard": `href="#upload"`, "/settings": `href="/dashboard#upload"`, "/dashboard/albums": `href="/dashboard#upload"`, "/dashboard/trash": `href="/dashboard#upload"`} {
+		body := fetch(h, path, c).Body.String()
+		i := strings.Index(body, `class="shell-tools"`)
+		if i < 0 {
+			t.Errorf("%s: no top bar", path)
+			continue
+		}
+		if bar := body[i:min(len(body), i+400)]; !strings.Contains(bar, `btn primary sm" `+href) {
+			t.Errorf("%s: the top bar has no Upload button with %s", path, href)
+		}
+	}
+	if body := fetch(h, "/dashboard", c).Body.String(); !strings.Contains(body, `id="upload"`) {
+		t.Error(`the dashboard has no id="upload" for the top bar button to jump to`)
+	}
 }
