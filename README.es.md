@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Herramientas de IA del servidor (con sesión iniciada; `file`, más `mask` para borrar) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Copias redimensionadas, creadas una vez y guardadas en caché. `format=webp` y `avif` necesitan el servicio de IA |
 | `GET /oembed?url=...` | oEmbed para páginas de imagen |
-| `GET /tools/qr.png`, `/tools/qr.svg` | Código QR para `text` (`size`, `level`, `fg`, `bg`) |
 
 Cada respuesta tiene la forma `{"success": true, "data": ...}` o `{"success": false, "error": "..."}`. La referencia completa está en [`/docs`](https://pixel.hel.ink/docs) en cualquier servidor PixelHop.
 

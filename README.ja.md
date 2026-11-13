@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | サーバーの AI ツール（サインイン済み。`file`、消去には `mask` も） |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | リサイズ版。一度作ればキャッシュされます。`format=webp` と `avif` には AI サービスが必要です |
 | `GET /oembed?url=...` | 画像ページの oEmbed |
-| `GET /tools/qr.png`, `/tools/qr.svg` | `text` の QR コード（`size`、`level`、`fg`、`bg`） |
 
 どの応答も `{"success": true, "data": ...}` か `{"success": false, "error": "..."}` の形です。完全なリファレンスは、どの PixelHop サーバーでも [`/docs`](https://pixel.hel.ink/docs) にあります。
 

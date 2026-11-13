@@ -536,6 +536,9 @@ td select, td input { height: var(--hop-ctl-h-sm); font-size: .85rem; width: aut
 .tool-batch { display: flex; gap: 10px; align-items: center; padding: 10px 12px; margin-top: 6px; border-radius: 10px; border: 1px dashed var(--line-2); color: var(--text); font-weight: 600; font-size: .92rem; }
 .tool-batch:hover { text-decoration: none; border-color: var(--accent); }
 .tool-batch svg { width: 18px; height: 18px; color: var(--accent); }
+.tool-qr-link { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 10px; color: var(--faint); font-size: .82rem; }
+.tool-qr-link:hover { color: var(--text); background: var(--panel-2); text-decoration: none; }
+.tool-qr-link svg { width: 16px; height: 16px; }
 .batch { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
 @media (max-width: 900px) { .batch { grid-template-columns: 1fr; } }
 .batch-drop { border: 2px dashed var(--line-2); border-radius: 18px; text-align: center; padding: 30px 20px; }

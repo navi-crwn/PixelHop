@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Alat AI server (harus masuk; `file`, ditambah `mask` untuk erase) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Salinan berukuran lain, dibuat sekali lalu disimpan di cache. `format=webp` dan `avif` membutuhkan layanan AI |
 | `GET /oembed?url=...` | oEmbed untuk halaman gambar |
-| `GET /tools/qr.png`, `/tools/qr.svg` | Kode QR untuk `text` (`size`, `level`, `fg`, `bg`) |
 
 Setiap jawaban berbentuk `{"success": true, "data": ...}` atau `{"success": false, "error": "..."}`. Referensi lengkap ada di [`/docs`](https://pixel.hel.ink/docs) pada server PixelHop mana pun.
 

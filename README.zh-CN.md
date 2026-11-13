@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | 服务器 AI 工具（需登录；`file`，擦除还需要 `mask`） |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | 缩放后的副本，生成一次后缓存。`format=webp` 和 `avif` 需要 AI 服务 |
 | `GET /oembed?url=...` | 图片页的 oEmbed |
-| `GET /tools/qr.png`, `/tools/qr.svg` | `text` 的二维码（`size`、`level`、`fg`、`bg`） |
 
 每个响应的形式都是 `{"success": true, "data": ...}` 或 `{"success": false, "error": "..."}`。完整参考见任何 PixelHop 服务器上的 [`/docs`](https://pixel.hel.ink/docs)。
 

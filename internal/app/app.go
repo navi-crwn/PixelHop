@@ -87,8 +87,6 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /{$}", a.home)
 	mux.HandleFunc("GET /tools", a.tools)
 	mux.HandleFunc("GET /tools/batch", a.batch)
-	mux.HandleFunc("GET /tools/qr.png", a.qrTool)
-	mux.HandleFunc("GET /tools/qr.svg", a.qrTool)
 	mux.HandleFunc("GET /docs", a.docs)
 	mux.HandleFunc("GET /help", a.help)
 	mux.HandleFunc("GET /legal", a.legal)

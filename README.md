@@ -244,7 +244,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Resized copies, made once and cached. `format=webp` and `avif` need the AI service |
 | `GET /oembed?url=...` | oEmbed for image pages |
-| `GET /tools/qr.png`, `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
 
 Every answer looks like `{"success": true, "data": ...}` or `{"success": false, "error": "..."}`. The full reference is at [`/docs`](https://pixel.hel.ink/docs) on any PixelHop server.
 

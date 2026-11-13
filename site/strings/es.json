@@ -56,7 +56,7 @@
  "<b>Blur &amp; pixelate</b> faces, plates and names before you share.": "<b>Desenfocar y pixelar</b> caras, matrículas y nombres antes de compartir.",
  "<b>Image to text</b> (OCR) in 30 languages, several at once in the same image.": "<b>Imagen a texto</b> (OCR) en 30 idiomas, varios a la vez en la misma imagen.",
  "<b>Remove background</b> with an AI model that runs in the browser.": "<b>Quitar el fondo</b> con un modelo de IA que se ejecuta en el navegador.",
- "<b>Color palette</b> and a <b>QR code generator</b> (PNG or SVG).": "<b>Paleta de colores</b> y un <b>generador de códigos QR</b> (PNG o SVG).",
+ "<b>Color palette</b>; QR codes are made in <b>LinkHop</b>.": "<b>Paleta de colores</b>; los códigos QR se crean en <b>LinkHop</b>.",
  "<b>On the server, for members:</b> background removal in a second, automatic face blur, a magic eraser and HD upscale 2×. Processed in memory, never stored.": "<b>En el servidor, para miembros:</b> quitar el fondo en un segundo, desenfoque automático de caras, una goma mágica y ampliación HD 2×. Se procesa en memoria y nunca se guarda.",
  "<b>Batch:</b> run the same steps on many images, then get one ZIP or one album.": "<b>Por lotes:</b> aplica los mismos pasos a muchas imágenes y obtén un ZIP o un álbum.",
  "The PixelHop studio with the color palette tool open": "El estudio de PixelHop con la herramienta de paleta de colores abierta",

@@ -32,7 +32,8 @@ var legacyPages = map[string]string{
 	"/erase":           "/tools#erase",
 	"/faceblur":        "/tools#faces",
 	"/palette":         "/tools#palette",
-	"/qr":              "/tools#qr",
+	// The studio's QR tool is gone (its work moved to LinkHop's QR page).
+	"/qr": "https://link.hel.ink/qr",
 	"/member/":         "/dashboard",
 	"/member/upload":   "/",
 	"/member/tools":    "/tools",
