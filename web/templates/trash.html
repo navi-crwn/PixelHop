@@ -2,7 +2,6 @@
 <div class="wrap">
   <div class="page-head"><div><h1>{{$.L.T "mytabs.trash"}}</h1><p class="muted" style="margin:4px 0 0">{{$.L.T "trash.sub" "days" $d.Days}}</p></div>
     {{if $d.Items}}<form method="post" action="/dashboard/trash/empty" data-confirm="{{$.L.T "trash.empty_confirm"}}" data-confirm-danger><button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{$.L.T "trash.empty_btn"}}</button></form>{{end}}</div>
-  {{template "mytabs" .}}
   {{if $d.Items}}
   <p class="small muted">{{$.L.T "trash.note"}}</p>
   <div class="gallery">

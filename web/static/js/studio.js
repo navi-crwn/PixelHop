@@ -887,43 +887,6 @@
     }
   };
 
-  // ---------- QR code ----------
-  tools.qr = {
-    title: 'QR code', desc: 'Make a QR code for any link or text. Download it, or open it here to edit further.',
-    noImage: true, noResult: true,
-    ui: function (p) {
-      var text = el('textarea', { placeholder: 'https://example.com', rows: 3, maxlength: 1500 });
-      var fg = el('input', { type: 'color', value: '#000000' }), bg = el('input', { type: 'color', value: '#ffffff' });
-      var trans = el('label', { class: 'check' }, [el('input', { type: 'checkbox' }), ' Transparent background']);
-      var level = 'M', img = el('img', { alt: 'QR code preview', class: 'qr', style: 'width:200px;height:200px;margin:14px auto;display:none' });
-      function url(fmt) {
-        var q = new URLSearchParams({ text: text.value.trim(), size: 1024, level: level, fg: fg.value.slice(1), bg: trans.firstChild.checked ? 'transparent' : bg.value.slice(1) });
-        return '/tools/qr.' + fmt + '?' + q;
-      }
-      function update() { var ok = text.value.trim() !== ''; img.style.display = ok ? 'block' : 'none'; if (ok) img.src = url('png'); }
-      var t; text.addEventListener('input', function () { clearTimeout(t); t = setTimeout(update, 300); });
-      [fg, bg, trans.firstChild].forEach(function (x) { x.addEventListener('change', update); });
-      p.appendChild(field('Link or text', text));
-      p.appendChild(el('div', { class: 'grid-2', style: 'gap:10px' }, [field('Color', fg), field('Background', bg)]));
-      p.appendChild(trans);
-      p.appendChild(field('Error correction', seg([['L', 'Low'], ['M', 'Medium'], ['Q', 'High'], ['H', 'Max']], level, function (l) { level = l; update(); }), 'higher survives logos & damage'));
-      p.appendChild(img);
-      // The server refuses text it cannot encode (1500 bytes, or too long for the level): say so instead of saving its error text as a picture.
-      function qrDo(fmt, done) {
-        if (!text.value.trim()) return;
-        fetch(url(fmt)).then(function (r) {
-          if (!r.ok) throw new Error(T('The QR code could not be made. The text may be too long.'));
-          return r.blob();
-        }).then(done).catch(function (e) { toast(e.message, true); });
-      }
-      p.appendChild(el('div', { class: 'btn-row' }, [
-        btn('PNG', function () { qrDo('png', function (b) { window.phSave(b, 'qr-code.png'); }); }, 'primary'),
-        btn('SVG', function () { qrDo('svg', function (b) { window.phSave(b, 'qr-code.svg'); }); }),
-        btn('Open in studio', function () { qrDo('png', function (b) { load(b, 'qr-code'); }); })
-      ]));
-    }
-  };
-
   var legacyOpen = { faceblur: 'faces' }[new URLSearchParams(location.search).get('open')] || new URLSearchParams(location.search).get('open');
   pick(location.hash.slice(1) || (tools[legacyOpen] ? legacyOpen : 'compress'));
 })();

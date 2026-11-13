@@ -117,7 +117,7 @@ Sharing:
 - Tags, search and a tag filter on the dashboard. Deleted files wait in the trash for 7 days.
 - Views per day and the sites that link to a file. Referrers are stored by host name only.
 - Resized copies on the fly, for example `/i/photo.jpg?w=800`, made once and cached.
-- Public profiles at `/u/username`, an Explore feed of files people chose to show, oEmbed and a sitemap.
+- Public profiles at `/u/username`, oEmbed and a sitemap.
 
 Accounts:
 - Guests can upload (up to 20 MB per file, 25 files a day per address and 10 images per album by default) and get a private delete link for each file, which the browser also remembers.
@@ -244,7 +244,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Server AI tools (signed in; `file`, plus `mask` for erase) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Resized copies, made once and cached. `format=webp` and `avif` need the AI service |
 | `GET /oembed?url=...` | oEmbed for image pages |
-| `GET /tools/qr.png`, `/tools/qr.svg` | QR code for `text` (`size`, `level`, `fg`, `bg`) |
 
 Every answer looks like `{"success": true, "data": ...}` or `{"success": false, "error": "..."}`. The full reference is at [`/docs`](https://pixel.hel.ink/docs) on any PixelHop server.
 

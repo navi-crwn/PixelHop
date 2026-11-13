@@ -121,7 +121,7 @@ Partage :
 - Étiquettes, recherche et filtre par étiquette dans le tableau de bord. Les fichiers supprimés restent 7 jours dans la corbeille.
 - Les vues par jour et les sites qui renvoient vers un fichier. Les référents ne sont conservés que par nom d'hôte.
 - Des copies redimensionnées à la demande, par exemple `/i/photo.jpg?w=800`, créées une fois puis mises en cache.
-- Des profils publics sur `/u/username`, un fil Explorer avec les fichiers que les gens ont choisi d'afficher, oEmbed et un plan du site.
+- Des profils publics sur `/u/username`, oEmbed et un plan du site.
 
 Comptes :
 - Les invités peuvent téléverser (jusqu'à 20 Mo par fichier, 25 fichiers par jour et par adresse et 10 images par album par défaut) et reçoivent pour chaque fichier un lien de suppression privé, que le navigateur retient aussi.
@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | Outils d'IA du serveur (connecté ; `file`, plus `mask` pour erase) |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | Copies redimensionnées, créées une fois puis mises en cache. `format=webp` et `avif` demandent le service d'IA |
 | `GET /oembed?url=...` | oEmbed pour les pages d'images |
-| `GET /tools/qr.png`, `/tools/qr.svg` | Code QR pour `text` (`size`, `level`, `fg`, `bg`) |
 
 Chaque réponse a la forme `{"success": true, "data": ...}` ou `{"success": false, "error": "..."}`. La référence complète se trouve sur [`/docs`](https://pixel.hel.ink/docs) de n'importe quel serveur PixelHop.
 

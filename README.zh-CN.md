@@ -121,7 +121,7 @@ PixelHop 只处理文件结构，压缩后的图像数据原样复制，所以�
 - 标签、搜索，以及仪表盘上的标签筛选。删除的文件会在回收站里保留 7 天。
 - 每日浏览量和链到该文件的网站。来源只保存主机名。
 - 即时缩放，例如 `/i/photo.jpg?w=800`，生成一次后缓存。
-- 位于 `/u/username` 的公开主页、公开展示文件的“探索”页、oEmbed 和站点地图。
+- `/u/username` 的公开主页、oEmbed 和站点地图。
 
 账户：
 - 访客可以上传（默认每个文件最大 20 MB，每个地址每天 25 个文件，每个相册 10 张图片），每个文件都有一个私密删除链接，浏览器也会记住它。
@@ -236,7 +236,6 @@ curl -H "Authorization: Bearer ph_yourkey" -F "file=@holiday.jpg" https://pixel.
 | `POST /api/v1/tools/{remove-background,faces,erase,upscale}` | 服务器 AI 工具（需登录；`file`，擦除还需要 `mask`） |
 | `GET /i/{id}.jpg?w=&h=&fit=&format=&q=` | 缩放后的副本，生成一次后缓存。`format=webp` 和 `avif` 需要 AI 服务 |
 | `GET /oembed?url=...` | 图片页的 oEmbed |
-| `GET /tools/qr.png`, `/tools/qr.svg` | `text` 的二维码（`size`、`level`、`fg`、`bg`） |
 
 每个响应的形式都是 `{"success": true, "data": ...}` 或 `{"success": false, "error": "..."}`。完整参考见任何 PixelHop 服务器上的 [`/docs`](https://pixel.hel.ink/docs)。
 

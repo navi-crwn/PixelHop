@@ -5,16 +5,11 @@ import (
 	"context"
 	"fmt"
 	"image"
-	"image/color"
-	"image/png"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
-
-	"rsc.io/qr"
 
 	"github.com/navi-crwn/pixelhop/internal/imaging"
 )
@@ -188,87 +183,4 @@ func formBytes(r *http.Request, field string, limit int64) ([]byte, error) {
 		return nil, fmt.Errorf("images up to %d MB", limit>>20)
 	}
 	return data, nil
-}
-
-// ---- QR codes for any text or link ----
-
-// qrTool draws a QR code: /tools/qr.png or /tools/qr.svg
-// ?text=…&size=512&level=M&fg=000000&bg=ffffff (bg "transparent" allowed)
-func (a *App) qrTool(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query()
-	text := q.Get("text")
-	if text == "" || len(text) > 1500 {
-		http.Error(w, "text must be 1 to 1500 characters", http.StatusBadRequest)
-		return
-	}
-	level := map[string]qr.Level{"L": qr.L, "M": qr.M, "Q": qr.Q, "H": qr.H}[q.Get("level")]
-	if q.Get("level") == "" {
-		level = qr.M
-	}
-	code, err := qr.Encode(text, level)
-	if err != nil {
-		http.Error(w, "that text is too long for a QR code", http.StatusBadRequest)
-		return
-	}
-	fg, ok1 := hexColor(q.Get("fg"), color.RGBA{0, 0, 0, 255})
-	bg, ok2 := hexColor(q.Get("bg"), color.RGBA{255, 255, 255, 255})
-	if !ok1 || !ok2 {
-		http.Error(w, "colors are 6-digit hex like 1a2b3c", http.StatusBadRequest)
-		return
-	}
-	const quiet = 4
-	n := code.Size + 2*quiet
-	w.Header().Set("Cache-Control", "public, max-age=86400")
-	if strings.HasSuffix(r.URL.Path, ".svg") {
-		var b strings.Builder
-		fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" shape-rendering="crispEdges">`, n, n)
-		if bg.A > 0 {
-			fmt.Fprintf(&b, `<rect width="%d" height="%d" fill="#%02x%02x%02x"/>`, n, n, bg.R, bg.G, bg.B)
-		}
-		fmt.Fprintf(&b, `<path fill="#%02x%02x%02x" d="`, fg.R, fg.G, fg.B)
-		for y := 0; y < code.Size; y++ {
-			for x := 0; x < code.Size; x++ {
-				if code.Black(x, y) {
-					fmt.Fprintf(&b, "M%d %dh1v1h-1z", x+quiet, y+quiet)
-				}
-			}
-		}
-		b.WriteString(`"/></svg>`)
-		w.Header().Set("Content-Type", "image/svg+xml")
-		w.Write([]byte(b.String()))
-		return
-	}
-	size, _ := strconv.Atoi(q.Get("size"))
-	size = min(max(size, 128), 2048)
-	scale := max(1, size/n)
-	img := image.NewNRGBA(image.Rect(0, 0, n*scale, n*scale))
-	for y := 0; y < n*scale; y++ {
-		for x := 0; x < n*scale; x++ {
-			mx, my := x/scale-quiet, y/scale-quiet
-			if mx >= 0 && my >= 0 && mx < code.Size && my < code.Size && code.Black(mx, my) {
-				img.Set(x, y, fg)
-			} else {
-				img.Set(x, y, bg)
-			}
-		}
-	}
-	w.Header().Set("Content-Type", "image/png")
-	png.Encode(w, img)
-}
-
-func hexColor(s string, def color.RGBA) (color.RGBA, bool) {
-	s = strings.TrimPrefix(s, "#")
-	switch {
-	case s == "":
-		return def, true
-	case s == "transparent":
-		return color.RGBA{}, true
-	case len(s) != 6:
-		return def, false
-	}
-	v, err := strconv.ParseUint(s, 16, 32)
-	if err != nil {
-		return def, false
-	}
-	return color.RGBA{uint8(v >> 16), uint8(v >> 8), uint8(v), 255}, true
 }
