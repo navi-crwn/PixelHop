@@ -29,7 +29,7 @@ func TestUploadMoreLink(t *testing.T) {
 	a, h := ssoApp(t)
 	u, key := member(t, a, "more@example.com")
 	ids := upload(t, h, key, 1)
-	body := fetch(h, "/uploaded?id="+strings.Join(ids, ",")).Body.String()
+	body := fetch(h, "/uploaded?id="+strings.Join(ids, ","), sessionFor(t, a, u.ID)).Body.String()
 	if !strings.Contains(body, `href="/dashboard#upload"`) {
 		t.Error("a member's Upload more does not lead to the dashboard uploader")
 	}
