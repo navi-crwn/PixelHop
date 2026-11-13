@@ -869,11 +869,16 @@
     });
   }
 
-  // The selection menu closes once an action is chosen.
+  // The selection menu closes once an action is chosen. This runs before the action's own handler
+  // (capture phase) so the keyboard is already on the visible Actions button when a dialog opens:
+  // the dialog hands focus back to the element that was focused when it opened, and a button inside
+  // the closed menu is hidden.
   var selMenu = $('#sel-menu');
   if (selMenu) selMenu.addEventListener('click', function (e) {
-    if (e.target.closest('.menu-list button')) closeMenus();
-  });
+    if (!e.target.closest('.menu-list button')) return;
+    closeMenus();
+    var trigger = selMenu.querySelector(':scope > button'); if (trigger) trigger.focus();
+  }, true);
 
   // ---------- settings subtabs ----------
   // One card group at a time, chosen by the address (#api, #profile, #webhooks ...), so every old

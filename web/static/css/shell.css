@@ -16,7 +16,8 @@
 .shell-side-foot a { color: inherit; }
 .shell-side-foot a:hover { color: var(--text); }
 .shell-body { margin-inline-start: var(--side); min-height: 100vh; display: flex; flex-direction: column; min-width: 0; }
-.shell-top { position: sticky; top: 12px; z-index: 40; display: flex; align-items: center; gap: 10px; height: 56px; margin: 12px 12px 0; padding: 0 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+/* Sticks at the very top (the 12px margin only floats it at rest), so nothing scrolls into a gap above it. */
+.shell-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 10px; height: 56px; margin: 12px 12px 0; padding: 0 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
 .shell-title { margin: 0 0 0 4px; font-weight: 700; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shell-tools { margin-inline-start: auto; display: flex; align-items: center; gap: 6px; }
 .shell-tools .menu-list { top: 46px; }
