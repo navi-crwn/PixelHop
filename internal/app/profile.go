@@ -346,6 +346,5 @@ func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
 func (a *App) settingsError(w http.ResponseWriter, r *http.Request, msg string) {
 	d := a.settingsData(r)
 	d.Error = msg
-	w.WriteHeader(http.StatusBadRequest)
-	a.render(w, r, "settings", "Settings", d)
+	a.renderStatus(w, r, http.StatusBadRequest, "settings", "Settings", d)
 }

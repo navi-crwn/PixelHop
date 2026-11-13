@@ -66,10 +66,11 @@ func (a *App) unlock(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) renderLocked(w http.ResponseWriter, r *http.Request, im *db.Image, msg string) {
+	status := 0
 	if msg != "" {
-		w.WriteHeader(http.StatusUnauthorized)
+		status = http.StatusUnauthorized
 	}
-	a.renderPage(w, r, "locked", page{Title: "Password required", NoIndex: true, Data: map[string]any{"ID": im.ID, "Error": msg}})
+	a.renderPage(w, r, "locked", page{Title: "Password required", NoIndex: true, Status: status, Data: map[string]any{"ID": im.ID, "Error": msg}})
 }
 
 // ---- editing an image's details ----

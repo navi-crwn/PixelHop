@@ -240,14 +240,12 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	if !a.limits.allow("login:"+clientIP(r), 10, 15*time.Minute) {
 		f.Error = a.tr(r, "Too many attempts. Please wait a few minutes and try again.")
-		w.WriteHeader(http.StatusTooManyRequests)
-		a.render(w, r, "login", "Sign in", f)
+		a.renderStatus(w, r, http.StatusTooManyRequests, "login", "Sign in", f)
 		return
 	}
 	if !a.turnstileOK(r) {
 		f.Error = a.tr(r, "The security check didn't pass. Please try again.")
-		w.WriteHeader(http.StatusBadRequest)
-		a.render(w, r, "login", "Sign in", f)
+		a.renderStatus(w, r, http.StatusBadRequest, "login", "Sign in", f)
 		return
 	}
 	u, err := a.db.UserByEmail(r.Context(), f.Email)
@@ -265,22 +263,19 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		}
 		if hu == nil {
 			f.Error = msg
-			w.WriteHeader(http.StatusUnauthorized)
-			a.render(w, r, "login", "Sign in", f)
+			a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
 			return
 		}
 		u, local = hu, true
 	}
 	if !local {
 		f.Error = a.tr(r, "That email and password don't match.")
-		w.WriteHeader(http.StatusUnauthorized)
-		a.render(w, r, "login", "Sign in", f)
+		a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
 		return
 	}
 	if msg := a.statusMessage(r, u); msg != "" {
 		f.Error = msg
-		w.WriteHeader(http.StatusForbidden)
-		a.render(w, r, "login", "Sign in", f)
+		a.renderStatus(w, r, http.StatusForbidden, "login", "Sign in", f)
 		return
 	}
 	// Upgrade old hashes to the current parameters while we have the password.
@@ -359,8 +354,7 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.WriteHeader(http.StatusBadRequest)
-	a.render(w, r, "register", "Create account", f)
+	a.renderStatus(w, r, http.StatusBadRequest, "register", "Create account", f)
 }
 
 func validEmail(s string) bool {

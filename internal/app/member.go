@@ -119,8 +119,7 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 		d.Error = a.tr(r, "Use 8 to 200 characters for your new password.")
 	}
 	if d.Error != "" {
-		w.WriteHeader(http.StatusBadRequest)
-		a.render(w, r, "settings", "Settings", d)
+		a.renderStatus(w, r, http.StatusBadRequest, "settings", "Settings", d)
 		return
 	}
 	u.PassHash = HashPassword(pw)
@@ -182,8 +181,7 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	if u.PassHash != "" && !CheckPassword(u.PassHash, r.FormValue("password")) {
 		d := a.settingsData(r)
 		d.Error = a.tr(r, "Type your password to confirm deleting your account.")
-		w.WriteHeader(http.StatusBadRequest)
-		a.render(w, r, "settings", "Settings", d)
+		a.renderStatus(w, r, http.StatusBadRequest, "settings", "Settings", d)
 		return
 	}
 	if u.PassHash == "" && r.FormValue("confirm") != u.Email {
@@ -192,8 +190,7 @@ func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		if u.HelinkID.Valid { // a HOP ID member loses their images and profile here; the account lives at the hub
 			d.Error = a.tr(r, "Type your email address to confirm deleting your images and profile.")
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		a.render(w, r, "settings", "Settings", d)
+		a.renderStatus(w, r, http.StatusBadRequest, "settings", "Settings", d)
 		return
 	}
 	if _, err := a.purgeUser(r.Context(), u); err != nil {
