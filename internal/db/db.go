@@ -249,6 +249,10 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	// IF NOT EXISTS: running it against a database that already has the table changes nothing.
 	`CREATE TABLE IF NOT EXISTS reminders (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, key TEXT NOT NULL,
 	dismissed_at INTEGER NOT NULL, PRIMARY KEY (user_id, key));`,
+	// 19: the AI tools' share for the day, one row per member and tool: when the window began (unix
+	// seconds) and how many results it has given. In the database so a restart does not hand the day back.
+	`CREATE TABLE IF NOT EXISTS ai_day (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, tool TEXT NOT NULL,
+	start_at INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (user_id, tool));`,
 }
 
 func (d *DB) migrate() error {

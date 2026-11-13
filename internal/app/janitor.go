@@ -46,6 +46,7 @@ func (a *App) sweep(ctx context.Context) {
 		a.log.Info("janitor: removed expired images", "count", removed)
 	}
 	a.db.PurgeSessions(ctx)
+	a.db.SweepAIDay(ctx, aiDay, time.Now())
 	a.db.PruneGuestUploads(ctx, time.Now().Add(-2*guestDay).Unix())
 }
 

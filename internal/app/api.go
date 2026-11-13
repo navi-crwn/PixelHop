@@ -1,12 +1,14 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"maps"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 )
@@ -23,6 +25,17 @@ func apiError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(map[string]any{"success": false, "error": msg})
+}
+
+// apiErrorWith is apiError plus extra fields; clients that only read "error" are not affected.
+func apiErrorWith(w http.ResponseWriter, code int, msg string, extra map[string]any) {
+	body := map[string]any{"success": false, "error": msg}
+	for k, v := range extra {
+		body[k] = v
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(body)
 }
 
 func (a *App) imageJSON(im *db.Image) map[string]any {
@@ -220,7 +233,29 @@ func (a *App) apiMe(w http.ResponseWriter, r *http.Request) {
 		"images": count, "storage_used": used, "storage_quota": u.QuotaBytes,
 		// what the dashboard shows: live files by kind (the trash left out) and albums
 		"files": sum.Images + sum.Videos + sum.PDFs, "kinds": map[string]int{"image": sum.Images, "video": sum.Videos, "pdf": sum.PDFs},
-		"albums": sum.Albums})
+		"albums": sum.Albums, "ai_day": a.aiDayJSON(r.Context(), u.ID)})
+}
+
+// aiDayJSON is what is left of today's share for each server tool: {"upscale": {"limit":10,"used":3,"remaining":7,
+// "resets_at":"..."}}. resets_at is absent until the member has used the tool in the current window.
+func (a *App) aiDayJSON(ctx context.Context, userID int64) map[string]any {
+	out := map[string]any{}
+	for name, tool := range aiTools {
+		limit := tool.perDay
+		if name == "remove-background" {
+			limit = a.cfg.RembgPerDay
+		}
+		if limit <= 0 { // no limit set for this tool
+			continue
+		}
+		used, resets, _ := a.db.AIUsed(ctx, userID, name, aiDay, time.Now())
+		m := map[string]any{"limit": limit, "used": used, "remaining": max(limit-used, 0)}
+		if !resets.IsZero() {
+			m["resets_at"] = resets.UTC().Format(time.RFC3339)
+		}
+		out[name] = m
+	}
+	return out
 }
 
 func (a *App) apiStats(w http.ResponseWriter, r *http.Request) {
