@@ -111,6 +111,8 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	d := a.settingsData(r)
 	cur, pw := r.FormValue("current"), r.FormValue("password")
 	switch {
+	case a.cfg.SSOEnabled() && u.HelinkID.Valid: // the same test as the template that hides the form: the password belongs to the hub
+		d.Error = a.tr(r, "Your password is managed in HOP ID, not here.")
 	case u.PassHash != "" && !CheckPassword(u.PassHash, cur):
 		d.Error = a.tr(r, "Your current password isn't right.")
 	case len(pw) < 8 || len(pw) > 200:
