@@ -55,7 +55,19 @@ func TestTopBarUploadOnEveryMemberPage(t *testing.T) {
 			t.Errorf("%s: the top bar has no Upload button with %s", path, href)
 		}
 	}
-	if body := fetch(h, "/dashboard", c).Body.String(); !strings.Contains(body, `id="upload"`) {
+	body := fetch(h, "/dashboard", c).Body.String()
+	if !strings.Contains(body, `id="upload"`) {
 		t.Error(`the dashboard has no id="upload" for the top bar button to jump to`)
+	}
+	// One Upload button in the corner, not two: the top bar's opens the file picker when the script
+	// runs (data-pick-files) and stays a link to #upload without it; the page head has none.
+	if n := strings.Count(body, "data-pick-files"); n != 1 {
+		t.Errorf("the dashboard has %d Upload buttons that open the file picker, want 1 (the top bar's)", n)
+	}
+	if head := body[strings.Index(body, `class="dash-head"`):strings.Index(body, `class="dash-stats"`)]; strings.Contains(head, `i-upload`) {
+		t.Error("the dashboard page head still has its own Upload button")
+	}
+	if !strings.Contains(body, `href="#upload" data-pick-files`) {
+		t.Error("the top bar's Upload button is not the one that opens the file picker")
 	}
 }

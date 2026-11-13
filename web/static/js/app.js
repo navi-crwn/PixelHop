@@ -316,7 +316,7 @@
     var okTypes = /^image\/(jpeg|png|gif|webp|bmp|heic|heif|avif)$/, okExt = /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i;
 
     $('#pick').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
-    $$('[data-pick-files]').forEach(function (b) { b.addEventListener('click', function () { fileInput.click(); }); });
+    $$('[data-pick-files]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); fileInput.click(); }); });
     $('#drop-in').addEventListener('click', function (e) {
       if (e.target.closest('#opts,#url-form,#paste-box,#chips,#ticket-box,button,select,input,textarea,label,details')) return;
       fileInput.click();
