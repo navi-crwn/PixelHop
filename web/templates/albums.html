@@ -2,7 +2,6 @@
 <div class="wrap">
   <div class="page-head"><div><h1>{{$.L.T "nav.my_albums"}}</h1><p class="muted" style="margin:4px 0 0">{{$.L.T "albums.sub"}}</p></div>
     <a class="btn primary" href="/dashboard?select=1"><svg><use href="#i-album"/></svg>{{$.L.T "albums.new"}}</a></div>
-  {{template "mytabs" .}}
   {{if $d.Albums}}
   <div class="gallery albums">
     {{range $d.Albums}}

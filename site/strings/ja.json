@@ -44,7 +44,7 @@
  "Installable app, HEIC, watermark": "アプリとしてインストール、HEIC、透かし",
  "Add it to your home screen and share photos to it. iPhone HEIC converts itself. Watermark one image or a whole batch.": "ホーム画面に追加すれば、写真をそのまま共有できます。iPhone の HEIC は自動で変換。1 枚にもまとめてにも透かしを入れられます。",
  "Webhooks, oEmbed, CLI": "Webhook、oEmbed、CLI",
- "Signed webhooks, embeds for WordPress and Notion, an Explore feed, and <code>pixelhop push</code> from the terminal.": "署名付き Webhook、WordPress や Notion への埋め込み、Explore フィード、そしてターミナルからの <code>pixelhop push</code>。",
+ "Signed webhooks, embeds for WordPress and Notion, and <code>pixelhop push</code> from the terminal.": "署名付き Webhook、WordPress や Notion への埋め込み、そしてターミナルからの <code>pixelhop push</code>。",
  "One account with HEL.ink": "HEL.ink とアカウントを共通化",
  "On p.hel.ink you sign in with your HEL.ink account: the same login for short links, bio pages and images, with Google sign-in and two-factor codes. Self-hosters can leave it off.": "p.hel.ink では HEL.ink のアカウントでサインインします。短縮リンク、プロフィールページ、画像で同じログインを使え、Google ログインと 2 段階認証にも対応。セルフホストではオフにできます。",
  "Old links keep working": "古いリンクもそのまま動作",

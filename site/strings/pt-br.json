@@ -44,7 +44,7 @@
  "Installable app, HEIC, watermark": "App instalável, HEIC, marca d’água",
  "Add it to your home screen and share photos to it. iPhone HEIC converts itself. Watermark one image or a whole batch.": "Adicione à tela inicial e compartilhe fotos direto para ele. O HEIC do iPhone é convertido sozinho. Coloque marca d’água em uma imagem ou em um lote inteiro.",
  "Webhooks, oEmbed, CLI": "Webhooks, oEmbed, CLI",
- "Signed webhooks, embeds for WordPress and Notion, an Explore feed, and <code>pixelhop push</code> from the terminal.": "Webhooks assinados, incorporações para WordPress e Notion, um feed Explore e <code>pixelhop push</code> no terminal.",
+ "Signed webhooks, embeds for WordPress and Notion, and <code>pixelhop push</code> from the terminal.": "Webhooks assinados, incorporações para WordPress e Notion e <code>pixelhop push</code> no terminal.",
  "One account with HEL.ink": "Uma conta com o HEL.ink",
  "On p.hel.ink you sign in with your HEL.ink account: the same login for short links, bio pages and images, with Google sign-in and two-factor codes. Self-hosters can leave it off.": "No p.hel.ink você entra com sua conta HEL.ink: o mesmo login para links curtos, páginas de bio e imagens, com login do Google e códigos de dois fatores. Quem hospeda por conta própria pode desativar.",
  "Old links keep working": "Links antigos continuam funcionando",

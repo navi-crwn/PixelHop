@@ -121,7 +121,7 @@ Teilen:
 - Tags, Suche und ein Tag-Filter im Dashboard. Gelöschte Dateien liegen 7 Tage im Papierkorb.
 - Aufrufe pro Tag und die Websites, die auf eine Datei verlinken. Referrer werden nur als Hostname gespeichert.
 - Skalierte Kopien auf Abruf, zum Beispiel `/i/photo.jpg?w=800`, einmal erzeugt und dann zwischengespeichert.
-- Öffentliche Profile unter `/u/username`, ein Explore-Feed mit Dateien, die Leute zeigen wollen, oEmbed und eine Sitemap.
+- Öffentliche Profile unter `/u/username`, oEmbed und eine Sitemap.
 
 Konten:
 - Gäste können hochladen (standardmäßig bis 20 MB pro Datei, 25 Dateien am Tag pro Adresse und 10 Bilder pro Album) und bekommen für jede Datei einen privaten Löschlink, den sich auch der Browser merkt.

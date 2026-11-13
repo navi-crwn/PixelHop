@@ -99,7 +99,6 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /a/{id}", a.album)
 	mux.HandleFunc("GET /a/{id}/embed", a.albumEmbed)
 	mux.HandleFunc("GET /u/{username}", a.profile)
-	mux.HandleFunc("GET /explore", a.explore)
 	mux.HandleFunc("GET /sitemap.xml", a.sitemap)
 	mux.HandleFunc("GET /avatar/{id}", a.serveAvatar)
 	mux.HandleFunc("GET /{id}", a.view)

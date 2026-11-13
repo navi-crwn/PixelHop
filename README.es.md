@@ -121,7 +121,7 @@ Compartir:
 - Etiquetas, búsqueda y un filtro por etiqueta en el panel. Los archivos borrados esperan 7 días en la papelera.
 - Visitas por día y los sitios que enlazan a un archivo. Los referentes se guardan solo por nombre de host.
 - Copias redimensionadas al momento, por ejemplo `/i/photo.jpg?w=800`, que se crean una vez y se guardan en caché.
-- Perfiles públicos en `/u/username`, un feed Explorar con los archivos que la gente eligió mostrar, oEmbed y un mapa del sitio.
+- Perfiles públicos en `/u/username`, oEmbed y un sitemap.
 
 Cuentas:
 - Los invitados pueden subir archivos (por defecto hasta 20 MB cada uno, 25 archivos al día por dirección y 10 imágenes por álbum) y reciben un enlace privado para borrar cada archivo, que el navegador también recuerda.

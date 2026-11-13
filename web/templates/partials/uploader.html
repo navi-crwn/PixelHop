@@ -55,6 +55,8 @@
 
     <aside class="results hide" id="results" data-copy-all-root aria-label="{{.L.T "upload.your_links"}}">
       <div class="results-head"><h2>{{.L.T "upload.your_links"}}</h2><button class="btn sm ghost" type="button" id="results-clear">{{.L.T "upload.clear"}}</button></div>
+      <div class="up-global hide" id="up-global"><div class="up-global-row"><span id="up-global-text"></span></div><div class="bar"><i id="up-global-bar"></i></div></div>
+      <div class="alert ok up-done hide" id="up-done"></div>
       <div class="album-banner hide" id="album-banner">
         <svg width="18" height="18"><use href="#i-album"/></svg><b>{{.L.T "upload.album"}}</b>
         <input type="text" readonly id="album-link" aria-label="{{.L.T "upload.album"}}">

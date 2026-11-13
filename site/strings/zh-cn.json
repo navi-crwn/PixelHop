@@ -44,7 +44,7 @@
  "Installable app, HEIC, watermark": "可安装应用、HEIC、水印",
  "Add it to your home screen and share photos to it. iPhone HEIC converts itself. Watermark one image or a whole batch.": "添加到主屏幕后，可直接把照片分享给它。iPhone 的 HEIC 照片会自动转换。可为单张或整批图片添加水印。",
  "Webhooks, oEmbed, CLI": "Webhook、oEmbed、命令行",
- "Signed webhooks, embeds for WordPress and Notion, an Explore feed, and <code>pixelhop push</code> from the terminal.": "带签名的 Webhook，WordPress 和 Notion 嵌入，Explore 动态，以及终端里的 <code>pixelhop push</code>。",
+ "Signed webhooks, embeds for WordPress and Notion, and <code>pixelhop push</code> from the terminal.": "带签名的 Webhook，WordPress 和 Notion 嵌入，以及终端里的 <code>pixelhop push</code>。",
  "One account with HEL.ink": "与 HEL.ink 共用一个账号",
  "On p.hel.ink you sign in with your HEL.ink account: the same login for short links, bio pages and images, with Google sign-in and two-factor codes. Self-hosters can leave it off.": "在 p.hel.ink 上，你用 HEL.ink 账号登录：短链接、个人主页和图片使用同一个登录，支持 Google 登录和两步验证。自行托管时可以关闭此功能。",
  "Old links keep working": "旧链接继续可用",

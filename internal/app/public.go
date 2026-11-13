@@ -13,31 +13,10 @@ import (
 	"github.com/navi-crwn/pixelhop/internal/db"
 )
 
-// Explore, sitemap, oEmbed and the public gallery API: only images their
+// Sitemap, oEmbed and the public gallery API: only images their
 // owners put on their profile ("listed") ever show up here. The sitemap lists
 // the fixed public pages (sitePages, in seo.go), then the public profiles and
 // listed images, as before.
-
-func (a *App) explore(w http.ResponseWriter, r *http.Request) {
-	pg, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	if pg < 1 {
-		pg = 1
-	}
-	const per = 48
-	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{Listed: true, PublicOwner: true, Limit: per, Offset: (pg - 1) * per})
-	if err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	owners := map[int64]*owner{}
-	for _, im := range ims {
-		if _, ok := owners[im.UserID.Int64]; !ok {
-			owners[im.UserID.Int64] = a.ownerOf(r.Context(), im.UserID)
-		}
-	}
-	a.renderPage(w, r, "explore", page{Title: "Explore", Desc: a.tr(r, "Images people chose to share publicly on {site}.", "site", a.cfg.SiteName),
-		Data: map[string]any{"Images": ims, "Owners": owners, "Page": pg, "Pages": (total + per - 1) / per, "Total": total}})
-}
 
 type sitemapURL struct {
 	Loc     string        `xml:"loc"`

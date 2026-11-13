@@ -121,7 +121,7 @@ Compartilhamento:
 - Tags, busca e filtro por tag no painel. Os arquivos apagados ficam 7 dias na lixeira.
 - Visualizações por dia e os sites que apontam para um arquivo. Os referenciadores são guardados só pelo nome do host.
 - Cópias redimensionadas sob demanda, por exemplo `/i/photo.jpg?w=800`, geradas uma vez e guardadas em cache.
-- Perfis públicos em `/u/username`, um feed Explorar com os arquivos que as pessoas escolheram mostrar, oEmbed e um sitemap.
+- Perfis públicos em `/u/username`, oEmbed e um sitemap.
 
 Contas:
 - Visitantes podem enviar arquivos (por padrão, até 20 MB cada, 25 arquivos por dia por endereço e 10 imagens por álbum) e recebem um link de exclusão privado para cada um, que o navegador também lembra.

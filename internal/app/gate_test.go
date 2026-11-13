@@ -301,12 +301,12 @@ func TestContentWarningGateImage(t *testing.T) {
 		t.Fatalf("expected gate overlay to not appear after cookie verification")
 	}
 
-	// 5. Explore page excludes adult content
-	reqExplore := httptest.NewRequest("GET", "/explore", nil)
-	recExplore := httptest.NewRecorder()
-	h.ServeHTTP(recExplore, reqExplore)
-	if strings.Contains(recExplore.Body.String(), "/nsfw123") {
-		t.Fatalf("adult content should not be listed on explore")
+	// 5. Adult content never shows in a public listing (the sitemap lists the listed images)
+	reqSite := httptest.NewRequest("GET", "/sitemap.xml", nil)
+	recSite := httptest.NewRecorder()
+	h.ServeHTTP(recSite, reqSite)
+	if strings.Contains(recSite.Body.String(), "nsfw123") {
+		t.Fatalf("adult content should not be listed in the sitemap")
 	}
 }
 

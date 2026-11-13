@@ -14,7 +14,6 @@
     </div>
   </header>
 
-  {{template "mytabs" .}}
   {{template "claimnotice" .}}
 
   <section class="dash-stats" aria-label="{{$.L.T "dash.numbers"}}">
@@ -80,12 +79,17 @@
         <button class="btn ghost" type="button" id="select-mode"><svg><use href="#i-check"/></svg>{{$.L.T "dash.select"}}</button>
         <span class="sel-actions hide" id="sel-actions">
           <button class="btn ghost" type="button" id="select-all">{{$.L.T "dash.select_all"}}</button>
-          <button class="btn" type="button" id="copy-selected"><svg><use href="#i-link"/></svg>{{$.L.T "dash.copy_links"}}</button>
-          <button class="btn" type="button" id="zip-selected"><svg><use href="#i-down"/></svg>ZIP</button>
-          <button class="btn" type="button" id="album-selected"><svg><use href="#i-album"/></svg>{{$.L.T "dash.make_album"}}</button>
-          <button class="btn" type="button" id="list-selected"><svg><use href="#i-users"/></svg>{{$.L.T "dash.show_profile"}}</button>
-          <button class="btn ghost" type="button" id="unlist-selected">{{$.L.T "dash.hide_profile"}}</button>
-          <button class="btn danger" type="button" id="delete-selected"><svg><use href="#i-trash"/></svg>{{$.L.T "view.delete"}} <span id="sel-count">0</span></button>
+          <div class="menu" id="sel-menu">
+            <button class="btn" type="button" aria-haspopup="true">{{$.L.T "dash.actions"}} <svg><use href="#i-grid"/></svg></button>
+            <div class="menu-list">
+              <button type="button" id="copy-selected"><svg width="16" height="16"><use href="#i-link"/></svg>{{$.L.T "dash.copy_links"}}</button>
+              <button type="button" id="zip-selected"><svg width="16" height="16"><use href="#i-down"/></svg>ZIP</button>
+              <button type="button" id="album-selected"><svg width="16" height="16"><use href="#i-album"/></svg>{{$.L.T "dash.make_album"}}</button>
+              <button type="button" id="list-selected"><svg width="16" height="16"><use href="#i-users"/></svg>{{$.L.T "dash.show_profile"}}</button>
+              <button type="button" id="unlist-selected">{{$.L.T "dash.hide_profile"}}</button>
+              <button type="button" id="delete-selected" style="color:var(--red)"><svg width="16" height="16"><use href="#i-trash"/></svg>{{$.L.T "view.delete"}} <span id="sel-count">0</span></button>
+            </div>
+          </div>
         </span>
         <form method="post" action="/dashboard/download" id="zip-form" hidden></form>
       </div>

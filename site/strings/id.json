@@ -44,7 +44,7 @@
  "Installable app, HEIC, watermark": "Bisa di-install, HEIC, watermark",
  "Add it to your home screen and share photos to it. iPhone HEIC converts itself. Watermark one image or a whole batch.": "Pasang di layar utama dan bagikan foto langsung ke sana. HEIC iPhone otomatis dikonversi. Beri watermark satu gambar atau sekaligus banyak.",
  "Webhooks, oEmbed, CLI": "Webhook, oEmbed, CLI",
- "Signed webhooks, embeds for WordPress and Notion, an Explore feed, and <code>pixelhop push</code> from the terminal.": "Webhook bertanda tangan, embed untuk WordPress dan Notion, feed Explore, dan <code>pixelhop push</code> dari terminal.",
+ "Signed webhooks, embeds for WordPress and Notion, and <code>pixelhop push</code> from the terminal.": "Webhook bertanda tangan, embed untuk WordPress dan Notion, dan <code>pixelhop push</code> dari terminal.",
  "One account with HEL.ink": "Satu akun dengan HEL.ink",
  "On p.hel.ink you sign in with your HEL.ink account: the same login for short links, bio pages and images, with Google sign-in and two-factor codes. Self-hosters can leave it off.": "Di p.hel.ink kamu login dengan akun HEL.ink: login yang sama untuk short link, halaman bio dan gambar, lengkap dengan Google dan kode 2FA. Yang self-host bisa mematikannya.",
  "Old links keep working": "Link lama tetap jalan",

@@ -18,7 +18,7 @@ import (
 // name themselves in every language. Account pages, one-time links and the API stay out of any index.
 
 // sitePages are the fixed public pages, in sitemap order.
-var sitePages = []string{"/", "/tools", "/tools/batch", "/explore", "/features", "/faq", "/help", "/docs",
+var sitePages = []string{"/", "/tools", "/tools/batch", "/features", "/faq", "/help", "/docs",
 	"/about", "/contact", "/legal", "/changelog", "/status"}
 
 var isSitePage = func() map[string]bool {

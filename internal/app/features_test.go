@@ -149,7 +149,7 @@ func TestPasswordProtectedImage(t *testing.T) {
 	if rec := fetch(h, "/i/"+id+".png", rec.Result().Cookies()...); rec.Code != 200 {
 		t.Fatalf("unlocked file: %d", rec.Code)
 	}
-	// oEmbed and Explore never show locked images
+	// oEmbed never shows locked images
 	if rec := fetch(h, "/oembed?url="+url.QueryEscape("https://p.example.com/"+id)); rec.Code != 404 {
 		t.Fatalf("oembed of a locked image: %d", rec.Code)
 	}
@@ -218,7 +218,6 @@ func TestPublicPages(t *testing.T) {
 	call(t, h, "PATCH", "/api/v1/images/"+id, key, map[string]any{"listed": true})
 
 	for path, want := range map[string]string{
-		"/explore":                    id,
 		"/sitemap.xml":                "/" + id,
 		"/manifest.webmanifest":       "share_target",
 		"/sw.js":                      "caches",

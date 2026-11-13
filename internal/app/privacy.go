@@ -140,7 +140,7 @@ func (a *App) apiUpdateImage(w http.ResponseWriter, r *http.Request) {
 		im.Listed = *body.Listed
 	}
 	if im.Locked() {
-		im.Listed = false // locked images never appear on profiles or Explore
+		im.Listed = false // locked images never appear on profiles or public listings
 	}
 	if err := a.db.UpdateImageMeta(r.Context(), im); err != nil {
 		apiError(w, http.StatusInternalServerError, "couldn't save")

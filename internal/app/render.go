@@ -162,7 +162,7 @@ func (a *App) render(w http.ResponseWriter, r *http.Request, name, title string,
 // siteImagePages are the fixed public pages that share the site's social image when a link to them
 // is pasted somewhere (the home page sets its own; image and album pages use their picture).
 var siteImagePages = map[string]bool{"changelog": true, "legal": true, "tools": true, "batch": true, "help": true,
-	"features": true, "faq": true, "docs": true, "contact": true, "about": true, "status": true, "explore": true,
+	"features": true, "faq": true, "docs": true, "contact": true, "about": true, "status": true,
 	"login": true, "register": true}
 
 func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p page) {
