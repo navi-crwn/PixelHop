@@ -18,12 +18,11 @@ func (d *DB) AITake(ctx context.Context, userID int64, tool string, max int, per
 	if max <= 0 {
 		return 0, true, nil
 	}
-	if _, err = d.ExecContext(ctx, `INSERT OR IGNORE INTO ai_day (user_id, tool, start_at, n) VALUES (?, ?, 0, 0)`, userID, tool); err != nil {
-		return 0, false, err
-	}
-	// The window has run out (or never began): start a new one with this use.
-	err = d.QueryRowContext(ctx, `UPDATE ai_day SET start_at = ?, n = 1 WHERE user_id = ? AND tool = ? AND start_at < ? RETURNING n`,
-		at.Unix(), userID, tool, at.Add(-per).Unix()).Scan(&used)
+	// One statement opens the window: a new row, or the old one when its window has run out. No row comes
+	// back while a window is still running. No half-made row is ever left for the sweep to delete in between.
+	err = d.QueryRowContext(ctx, `INSERT INTO ai_day (user_id, tool, start_at, n) VALUES (?, ?, ?, 1)
+		ON CONFLICT (user_id, tool) DO UPDATE SET start_at = excluded.start_at, n = 1 WHERE ai_day.start_at < ? RETURNING n`,
+		userID, tool, at.Unix(), at.Add(-per).Unix()).Scan(&used)
 	if err == nil {
 		return used, true, nil
 	}

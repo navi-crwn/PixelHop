@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -116,4 +117,43 @@ func TestAIDayTakesAreAtomicAndDurable(t *testing.T) {
 	if used, _, _ := d.AIUsed(ctx, uid, "erase", 24*time.Hour, now); used != 7 {
 		t.Fatalf("after reopening: %d, want 7", used)
 	}
+}
+
+// The janitor's sweep must never turn a member's first use of the day into a refusal: with the sweep running
+// flat out, takes on an empty table (a new window each time) under the limit all go through.
+func TestAIDaySweepNeverRefusesAFreshWindow(t *testing.T) {
+	ctx := context.Background()
+	d, err := Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	uid := aiUser(t, d, "sweep@example.com")
+	stop := make(chan struct{})
+	var wg sync.WaitGroup
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					d.SweepAIDay(ctx, 24*time.Hour, time.Now())
+				}
+			}
+		}()
+	}
+	now := time.Now()
+	for i := 0; i < 1500; i++ {
+		tool := "t" + strconv.Itoa(i)
+		if used, ok, err := d.AITake(ctx, uid, tool, 5, 24*time.Hour, now); err != nil || !ok || used != 1 {
+			close(stop)
+			wg.Wait()
+			t.Fatalf("first use of %s: used=%d ok=%v err=%v", tool, used, ok, err)
+		}
+	}
+	close(stop)
+	wg.Wait()
 }
