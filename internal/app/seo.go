@@ -11,7 +11,8 @@ import (
 
 // What search engines read from the pages. Every indexable page names one canonical address on the app
 // host (PIXELHOP_BASE_URL), whatever host the request came in on and whatever query it carried; only a
-// valid ?lang= stays, because that is the address of the page in that language (the hub does the same).
+// valid non-English ?lang= stays, because that is the address of the page in that language. English lives
+// at the bare address, so ?lang=en has the bare canonical (the hub does the same).
 // App pages are never served on the link host (links.go answers 301 to the app host). Shared image and
 // album pages keep the address their handler gives them, on the link host (PIXELHOP_LINK_URL): the app
 // host sends guests there (toLinkHost), so it is where crawlers find them. The fixed public pages also
@@ -59,7 +60,8 @@ func (a *App) seo(r *http.Request, name string, p *page) {
 	}
 	// The family rule (KONTRAK-SEO-BAHASA.md): ?lang=<code> always renders that language, whatever the
 	// cookie says (requestLang, app.go), so it is the page's address in that language. The canonical keeps
-	// it when the request named one of the nine codes; nine alternates plus x-default on the bare address.
+	// it when the request named one of the eight non-English codes (English is the bare address); nine
+	// alternates plus x-default, which is the same address as the English one.
 	p.Alternates = alternates(plain)
 	if code, ok := i18n.Resolve(r.URL.Query().Get("lang")); ok {
 		p.Canon = langURL(plain, code)
@@ -69,7 +71,8 @@ func (a *App) seo(r *http.Request, name string, p *page) {
 	}
 }
 
-// alternates are the nine language addresses of a fixed public page, then x-default (the bare address).
+// alternates are the nine language addresses of a fixed public page, then x-default. English and
+// x-default are the bare address; the other eight carry ?lang=<code>.
 func alternates(plain string) []altLink {
 	out := make([]altLink, 0, len(i18n.Langs)+1)
 	for _, l := range i18n.Langs {
@@ -78,7 +81,14 @@ func alternates(plain string) []altLink {
 	return append(out, altLink{"x-default", plain})
 }
 
-func langURL(plain, code string) string { return plain + "?lang=" + code }
+// langURL is the address of a page in one language: the bare address for English (the default language),
+// ?lang=<code> for the others.
+func langURL(plain, code string) string {
+	if code == i18n.Default {
+		return plain
+	}
+	return plain + "?lang=" + code
+}
 
 // studioTools are the catalog keys of the studio's tools, which share one address (/tools#name).
 var studioTools = []string{"home.tool_compress", "home.tool_resize", "home.tool_crop", "home.tool_convert",

@@ -33,7 +33,8 @@ func indexable(rec interface {
 }
 
 // Every fixed public page names its absolute canonical address on the app host, without the query it was
-// asked with (a valid ?lang= excepted: that is the page in that language, as on the hub), lists its nine
+// asked with (a valid non-English ?lang= excepted: that is the page in that language; English is the bare
+// address, as on the hub), lists its nine
 // languages and x-default, and carries og:url, an absolute og:image and twitter:card. On the link host the
 // same paths answer 301 to the app host, so they are never served there.
 func TestSEOFixedPages(t *testing.T) {
@@ -64,16 +65,23 @@ func TestSEOFixedPages(t *testing.T) {
 			t.Errorf("%s: alternates %v", p, alts)
 		} else {
 			for i, c := range codes {
-				if alts[i][1] != c || strings.ReplaceAll(alts[i][2], "&amp;", "&") != want+"?lang="+c {
+				wantAlt := want + "?lang=" + c
+				if c == "en" { // English lives at the bare address: the same one as x-default
+					wantAlt = want
+				}
+				if alts[i][1] != c || strings.ReplaceAll(alts[i][2], "&amp;", "&") != wantAlt {
 					t.Errorf("%s: alternate %d = %v", p, i, alts[i])
 				}
+			}
+			if alts[0][2] != alts[9][2] {
+				t.Errorf("%s: en alternate %q differs from x-default %q", p, alts[0][2], alts[9][2])
 			}
 		}
 		// ?lang= is the page's address in that language (family rule): kept, everything else dropped;
 		// a language that is not one of the nine gives the bare address; a hop_lang cookie changes nothing.
 		for q, wantC := range map[string]string{
 			"?lang=de": want + "?lang=de", "?lang=de&utm_source=x": want + "?lang=de", "?utm_source=x&lang=pt": want + "?lang=pt-BR",
-			"?lang=en": want + "?lang=en", "?lang=xx": want, "?lang=ar": want,
+			"?lang=en": want, "?lang=xx": want, "?lang=ar": want,
 		} {
 			body := hostGet(h, "pixel.example", p+q, &http.Cookie{Name: "hop_lang", Value: "ja"}).Body.String()
 			if c := first(canonRe, body); c != wantC {
@@ -150,7 +158,11 @@ func TestSEOPrivatePagesAndSitemap(t *testing.T) {
 			t.Errorf("sitemap lists %s not exactly once", p)
 		}
 		for _, c := range []string{"en", "zh-CN", "de", "id", "ja", "pt-BR", "es", "fr", "ru"} {
-			if !strings.Contains(sm, `<xhtml:link rel="alternate" hreflang="`+c+`" href="`+loc+`?lang=`+c+`"></xhtml:link>`) {
+			href := loc + "?lang=" + c
+			if c == "en" { // English is the bare address, the same as x-default
+				href = loc
+			}
+			if !strings.Contains(sm, `<xhtml:link rel="alternate" hreflang="`+c+`" href="`+href+`"></xhtml:link>`) {
 				t.Errorf("sitemap %s lacks the %s alternate", p, c)
 			}
 		}
