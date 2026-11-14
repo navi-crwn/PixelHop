@@ -34,13 +34,13 @@
       <li class="result-item" data-link data-id="{{.ID}}" data-page="{{.Page}}" data-direct="{{.Direct}}" data-title="{{.Name}}">
         <a class="result-thumb" href="{{.Page}}"><img src="{{.Thumb}}" alt="" loading="lazy">{{if eq .Kind "video"}}<span class="kind-badge">▶ {{$.L.T "kind.video"}}</span>{{else if eq .Kind "pdf"}}<span class="kind-badge">PDF</span>{{end}}</a>
         <div class="result-meta">
-          <b>{{.Name}}</b>
+          {{if and (eq .Kind "image") (gt (len $d.Items) 3)}}<div class="result-title"><b>{{.Name}}</b><a class="btn sm ghost" href="/tools?src={{.ID}}" title="{{$.L.T "Edit in studio"}}" aria-label="{{$.L.T "Edit in studio"}}"><svg><use href="#i-adjust"/></svg></a></div>{{else}}<b>{{.Name}}</b>{{end}}
           <input type="text" readonly value="{{.Page}}" aria-label="{{$.L.T "home2.f_link"}}">
           <div class="result-btns">
             <button class="btn sm primary" type="button" data-copy-text="{{.Page}}">{{$.L.T "uploaded.copy_link"}}</button>
             <button class="btn sm" type="button" data-copy-text="{{.Direct}}">{{$.L.T "album.direct"}}</button>
             <a class="btn sm ghost" href="{{.Page}}">{{$.L.T "upload.open"}}</a>
-            {{if eq .Kind "image"}}<a class="btn sm ghost" href="/tools?src={{.ID}}"><svg><use href="#i-adjust"/></svg>{{$.L.T "Edit in studio"}}</a>{{end}}
+            {{if and (eq .Kind "image") (le (len $d.Items) 3)}}<a class="btn sm ghost" href="/tools?src={{.ID}}"><svg><use href="#i-adjust"/></svg>{{$.L.T "Edit in studio"}}</a>{{end}}
           </div>
           <a class="small del-link {{if not .Delete}}hide{{end}}" href="{{.Delete}}">{{$.L.T "uploaded.delete_link"}}</a>
         </div>

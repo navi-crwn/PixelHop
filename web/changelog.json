@@ -18,7 +18,7 @@
         {
           "type": "added",
           "where": "Upload results, home page and dashboard",
-          "text": "Every picture you upload, as a guest or signed in, now has an Edit in studio button next to its links, and each picture tile in your dashboard has a small pencil that does the same. Videos and PDFs do not get one because the studio only opens pictures. Before, you had to open the picture's own page to find Edit. The button asks the server for the file directly, so it also works when files live on an outside storage service."
+          "text": "Every picture you upload, as a guest or signed in, now has an Edit in studio button next to its links, and each picture tile in your dashboard has a small pencil that does the same. On a long list of results the button is a small pencil beside each picture's name, so the list stays short. Videos and PDFs do not get one because the studio only opens pictures. Before, you had to open the picture's own page to find Edit. The button asks the server for the file directly, so it also works when files live on an outside storage service."
         },
         {
           "type": "added",

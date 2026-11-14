@@ -372,6 +372,10 @@ a.owner[href]:hover { text-decoration: none; border-color: var(--accent); }
 .result-meta b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result-meta input { height: var(--hop-ctl-h-sm); max-width: var(--hop-field-max-wide); font: .82rem var(--mono); }
 .result-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+/* a long list of results: the pencil sits on the title line, so a row keeps its three buttons on one line */
+.result-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.result-title b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-title .btn { flex: none; padding-inline: 9px; }
 .del-link { color: var(--muted); }
 @media (min-width: 761px) { .result-actions { display: flex; flex-wrap: wrap; } }
 .paste-box { margin: 14px auto 0; max-width: 420px; min-height: 64px; padding: 18px; border: 2px dashed var(--accent); border-radius: 12px; color: var(--text); text-align: center; outline: none; cursor: text; }

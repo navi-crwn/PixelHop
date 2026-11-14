@@ -121,3 +121,26 @@ func TestStudioLoadsTheFileWithoutARedirect(t *testing.T) {
 		t.Error("studio.js does not ask for ?download")
 	}
 }
+
+// A long list of results keeps its three buttons on one line: the pencil moves to the title line (its name
+// stays as the tooltip and the accessible name), while up to three results show the words.
+func TestBulkResultsPutAPencilOnTheTitleLine(t *testing.T) {
+	a, h := ssoApp(t)
+	_, key := member(t, a, "bulk-edit@example.com")
+	four := strings.Join(upload(t, h, key, 4), ",")
+	page := fetch(h, "/uploaded?id="+four).Body.String()
+	if n := strings.Count(page, `class="result-title"`); n != 4 {
+		t.Fatalf("title lines with a pencil: %d, want 4", n)
+	}
+	if n := strings.Count(page, `aria-label="Edit in studio"`); n != 4 {
+		t.Fatalf("pencils with an accessible name: %d, want 4", n)
+	}
+	if strings.Contains(page, "</svg>Edit in studio</a>") {
+		t.Error("the long list still spells the button out on every row")
+	}
+	three := strings.Join(upload(t, h, key, 3), ",")
+	short := fetch(h, "/uploaded?id="+three).Body.String()
+	if strings.Count(short, "</svg>Edit in studio</a>") != 3 || strings.Contains(short, `class="result-title"`) {
+		t.Error("a short list lost the words on its buttons")
+	}
+}
