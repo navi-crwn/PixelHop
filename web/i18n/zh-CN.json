@@ -1109,5 +1109,6 @@
   "changelog.t_fixed": "修复",
   "changelog.t_security": "安全",
   "changelog.t_removed": "移除",
-  "changelog.t_deprecated": "已弃用"
+  "changelog.t_deprecated": "已弃用",
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "此账号通过 HOP ID 登录。请改用本页的“使用 HEL.ink 继续”按钮。"
 }

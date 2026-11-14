@@ -1109,5 +1109,6 @@
   "changelog.t_fixed": "Исправлено",
   "changelog.t_security": "Безопасность",
   "changelog.t_removed": "Удалено",
-  "changelog.t_deprecated": "Устарело"
+  "changelog.t_deprecated": "Устарело",
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Этот аккаунт входит через HOP ID. Используйте на этой странице кнопку «Продолжить через HEL.ink»."
 }

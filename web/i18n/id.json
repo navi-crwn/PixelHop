@@ -1109,5 +1109,6 @@
   "changelog.t_fixed": "Diperbaiki",
   "changelog.t_security": "Keamanan",
   "changelog.t_removed": "Dihapus",
-  "changelog.t_deprecated": "Usang"
+  "changelog.t_deprecated": "Usang",
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Akun ini masuk lewat HOP ID. Pakai tombol “Lanjutkan dengan HEL.ink” di halaman ini."
 }

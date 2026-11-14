@@ -254,6 +254,14 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		CheckPassword(dummyHash, pw)
 	}
 	local := err == nil && CheckPassword(u.PassHash, pw)
+	if local && a.cfg.SSOEnabled() && u.HelinkID.Valid {
+		// A HOP ID member signs in at the hub, where the 2FA code and the account's status are checked;
+		// the old password kept here would walk around both. Only someone who typed the right password is
+		// told this, so the message does not reveal which e-mails have an account.
+		f.Error = a.tr(r, "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.")
+		a.renderStatus(w, r, http.StatusForbidden, "login", "Sign in", f)
+		return
+	}
 	if !local && a.cfg.SSOEnabled() {
 		// Not a password kept here: ask HEL.ink, where the account may live.
 		hu, msg, redirect := a.helinkLogin(r, f.Email, pw)
@@ -415,6 +423,12 @@ func hopURL(u, helink string) bool {
 
 const googleState = "ph_oauth"
 
+// Google's endpoints; variables so a test can answer in their place.
+var (
+	googleTokenURL    = "https://oauth2.googleapis.com/token"
+	googleUserinfoURL = "https://openidconnect.googleapis.com/v1/userinfo"
+)
+
 func (a *App) googleStart(w http.ResponseWriter, r *http.Request) {
 	if !a.cfg.GoogleEnabled() {
 		a.notFound(w, r)
@@ -455,6 +469,11 @@ func (a *App) googleCallback(w http.ResponseWriter, r *http.Request) {
 		if u, err = a.db.UserByEmail(ctx, info.Email); err == nil {
 			u.GoogleID = sql.NullString{String: info.Sub, Valid: true}
 		}
+	}
+	if err == nil && a.cfg.SSOEnabled() && u.HelinkID.Valid {
+		// Same rule as the password form: a HOP ID member signs in through the hub.
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead."))
+		return
 	}
 	if errors.Is(err, db.ErrNotFound) {
 		first := a.db.CountUsers(ctx) == 0
@@ -501,7 +520,7 @@ func (a *App) googleExchange(r *http.Request, code string) (*googleInfo, error) 
 	defer cancel()
 	form := url.Values{"code": {code}, "client_id": {a.cfg.GoogleID}, "client_secret": {a.cfg.GoogleKey},
 		"redirect_uri": {a.cfg.GoogleRedirect}, "grant_type": {"authorization_code"}}
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "https://oauth2.googleapis.com/token", strings.NewReader(form.Encode()))
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, googleTokenURL, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -515,7 +534,7 @@ func (a *App) googleExchange(r *http.Request, code string) (*googleInfo, error) 
 	if err := json.NewDecoder(resp.Body).Decode(&tok); err != nil || tok.AccessToken == "" {
 		return nil, fmt.Errorf("token exchange: %v %s", err, tok.Error)
 	}
-	req, _ = http.NewRequestWithContext(ctx, http.MethodGet, "https://openidconnect.googleapis.com/v1/userinfo", nil)
+	req, _ = http.NewRequestWithContext(ctx, http.MethodGet, googleUserinfoURL, nil)
 	req.Header.Set("Authorization", "Bearer "+tok.AccessToken)
 	resp2, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -1109,5 +1109,6 @@
   "changelog.t_fixed": "Behoben",
   "changelog.t_security": "Sicherheit",
   "changelog.t_removed": "Entfernt",
-  "changelog.t_deprecated": "Veraltet"
+  "changelog.t_deprecated": "Veraltet",
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Dieses Konto meldet sich mit HOP ID an. Nutze stattdessen auf dieser Seite „Weiter mit HEL.ink“."
 }
