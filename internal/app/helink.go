@@ -379,7 +379,10 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 		return nil, err
 	}
 	if firstLink {
+		// Whatever could act for the row without the hub (sessions, API keys, webhooks) ends with the link.
 		a.db.DeleteUserSessions(ctx, u.ID)
+		a.db.DeleteUserAPIKeys(ctx, u.ID)
+		a.db.DeleteUserWebhooks(ctx, u.ID)
 	}
 	return u, nil
 }
