@@ -279,7 +279,7 @@ deploy/           contoh nginx dan systemd
 
 <details><summary>Apakah studio benar-benar privat?</summary>
 
-Penyuntingan berlangsung di perangkatmu dengan Canvas dan WebAssembly. Saat pertama kali memakai pengenalan teks atau penghapusan latar belakang, browser mengunduh [tesseract.js](https://github.com/naptha/tesseract.js) dan [@imgly/background-removal](https://github.com/imgly/background-removal-js) dari jsDelivr, serta data bahasa dan modelnya dari tessdata.projectnaptha.com dan staticimgly.com. Gambarmu tidak dikirim ke mana pun kecuali kamu menekan Unggah hasil. Server yang di-host sendiri dan menetapkan Content Security Policy yang lebih ketat perlu mengizinkan alamat-alamat itu.
+Penyuntingan berlangsung di perangkatmu dengan Canvas dan WebAssembly. Pengenalan teks ([tesseract.js](https://github.com/naptha/tesseract.js), disertakan di PixelHop) juga berjalan di perangkatmu dan membaca bahasa Inggris tanpa pengaturan; untuk bahasa lain, taruh berkas modelnya di `PIXELHOP_DATA/tessdata` dengan `scripts/ocr-language.sh deu fra jpn` (mengunduhnya dari sumber resmi tessdata; studio lalu menawarkan tepat bahasa yang terpasang). Penghapus latar, pengaburan wajah, penghapus objek, dan pembesaran berjalan di layanan AI servermu (`PIXELHOP_REMBG_URL`) dan butuh akun yang sudah masuk, jadi gambar itu dikirim ke servermu. Selain itu gambarmu tidak dikirim ke mana pun kecuali kamu menekan Unggah hasil, dan studio tidak memuat apa pun dari situs lain.
 </details>
 
 <details><summary>Bisakah saya mematikan unggahan tamu atau pendaftaran?</summary>
@@ -331,6 +331,6 @@ PixelHop adalah bagian dari keluarga HOP, aplikasi open source yang menghargai p
 
 - [MIT](LICENSE.md), hak cipta Ivan Novskies (navi-crwn). Komponen pihak ketiga tercantum di [CREDITS.md](CREDITS.md).
 - Dibangun dengan [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image), dan [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- Studio memuat [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) dan [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, tanpa modifikasi, dari jsDelivr) saat dibutuhkan.
+- Studio menyertakan [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). Penghapus latar berjalan di server (rembg, MIT); tidak ada kode AGPL yang dipakai atau dimuat.
 
 Karya lain dari penulis yang sama: [Amnesia](https://github.com/navi-crwn/amnesia), Mac yang lupa semuanya saat keluar.

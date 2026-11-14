@@ -279,7 +279,7 @@ deploy/           примеры для nginx и systemd
 
 <details><summary>Студия действительно приватна?</summary>
 
-Редактирование идёт на вашем устройстве с помощью Canvas и WebAssembly. При первом использовании распознавания текста или удаления фона браузер скачивает [tesseract.js](https://github.com/naptha/tesseract.js) и [@imgly/background-removal](https://github.com/imgly/background-removal-js) с jsDelivr, а языковые данные и модели с tessdata.projectnaptha.com и staticimgly.com. Изображение никуда не отправляется, пока вы не нажмёте «Загрузить результат». Если на собственном сервере задана более строгая политика Content Security Policy, эти адреса нужно разрешить.
+Редактирование идёт на вашем устройстве с помощью Canvas и WebAssembly. Распознавание текста ([tesseract.js](https://github.com/naptha/tesseract.js), входит в PixelHop) тоже работает на вашем устройстве и читает английский сразу; для других языков положите файлы моделей в `PIXELHOP_DATA/tessdata` командой `scripts/ocr-language.sh deu fra jpn` (она скачивает их из официального источника tessdata; студия тогда предлагает ровно установленные языки). Удаление фона, размытие лиц, ластик и увеличение работают в ИИ-сервисе вашего сервера (`PIXELHOP_REMBG_URL`) и требуют входа в аккаунт, поэтому эти изображения отправляются на ваш сервер. В остальном изображение никуда не отправляется, пока вы не нажмёте «Загрузить результат», и студия ничего не загружает с других сайтов.
 </details>
 
 <details><summary>Можно ли отключить загрузки от гостей или регистрацию?</summary>
@@ -331,6 +331,6 @@ PixelHop входит в семейство HOP: открытых приложе
 
 - [MIT](LICENSE.md), авторские права принадлежат Ivan Novskies (navi-crwn). Сторонние компоненты перечислены в [CREDITS.md](CREDITS.md).
 - Построен на [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) и [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- Студия по необходимости загружает [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) и [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, без изменений, с jsDelivr).
+- Студия включает [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). Удаление фона работает на сервере (rembg, MIT); код под AGPL не используется и не загружается.
 
 Ещё от того же автора: [Amnesia](https://github.com/navi-crwn/amnesia), Mac, который забывает всё при выходе.

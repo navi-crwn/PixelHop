@@ -1,7 +1,7 @@
 // PixelHop Studio — image tools that run entirely in the browser.
-// Canvas does the pixel work; OCR (tesseract.js, Apache-2.0) and background
-// removal (@imgly/background-removal, AGPL-3.0, loaded unmodified from a CDN)
-// are fetched only when someone opens those tools.
+// Canvas does the pixel work; OCR (tesseract.js, Apache-2.0) is part of this site.
+// Background removal and the other AI tools run on the server (sign-in required).
+// Nothing is loaded from other websites.
 (function () {
   'use strict';
   var $ = function (s, el) { return (el || document).querySelector(s); };
@@ -13,7 +13,6 @@
   // Tesseract is part of this site (web/static/vendor/tesseract), never loaded from another one.
   var TESSERACT = '/static/vendor/tesseract/tesseract.min.js?v=5.1.1';
   var TESSERACT_OPTS = { workerPath: '/static/vendor/tesseract/worker.min.js?v=5.1.1', corePath: '/static/vendor/tesseract/tesseract-core-simd-lstm.wasm.js', langPath: '/tessdata', gzip: true };
-  var REMBG = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
 
   var box = $('#st-box'), view = $('#st-canvas'), empty = $('#st-empty'), toolBox = $('#st-tool');
   var cropEl = $('#st-crop'), busyEl = $('#st-busy');
@@ -731,12 +730,12 @@
   function noteRefused(tool, j) { if (j && typeof j.remaining === 'number') setLeft(tool, j.remaining); }
 
   // ---------- remove background ----------
-  var rembgLib = null;
   var studioEl = $('#studio');
   var serverRembg = studioEl && studioEl.dataset.rembgServer === '1';
   var signedIn = studioEl && studioEl.dataset.signedIn === '1';
-  var rembgWhere = serverRembg && signedIn ? 'server' : 'device';
 
+  // Background removal runs on the server only: with no AI service on this site, or for a guest, the panel says
+  // so (needServer) and offers no button that could not work.
   function rembgOnServer() {
     busy('Removing the background on the server…');
     return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
@@ -752,46 +751,16 @@
   tools.rembg = {
     title: 'Remove background', desc: 'Cut out the subject and make the background transparent.',
     ui: function (p) {
-      if (serverRembg) {
-        p.appendChild(field('Where', seg([['server', 'On our server · fast'], ['device', 'On this device · private']], rembgWhere, function (w) {
-          rembgWhere = w; note.textContent = whereNote(); left.dataset.off = w === 'server' ? '0' : '1'; showLeft(left);
-        })));
-      }
-      var note = el('p', { class: 'small muted', style: 'margin:-6px 0 14px' });
-      var left = aiLine('remove-background'); left.dataset.off = rembgWhere === 'server' && signedIn ? '0' : '1'; showLeft(left);
-      function whereNote() {
-        if (rembgWhere === 'server') return signedIn
-          ? 'About a second. Your image is sent to this server, processed and discarded; it is not stored.'
-          : 'Sign in to use the server. “On this device” works without an account.';
-        return 'Nothing leaves your device. The AI model (about 40 MB) downloads once, then it is cached by your browser.';
-      }
-      note.textContent = whereNote();
-      p.appendChild(note);
+      if (!needServer(p)) return;
+      p.appendChild(el('p', { class: 'small muted', style: 'margin:-6px 0 14px', text: 'About a second. Your image is sent to this server, processed and discarded; it is not stored.' }));
       p.appendChild(btn('Remove background', function () {
-        if (rembgWhere === 'server') {
-          if (!signedIn) { location.href = '/login?next=' + encodeURIComponent('/tools#rembg'); return; }
-          rembgOnServer()
-            .then(function (b) { return createImageBitmap(b); })
-            .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
-            .catch(function (e) { busy(false); toast(e.message, true); });
-          return;
-        }
-        busy('Loading the AI model…');
-        (rembgLib ? Promise.resolve(rembgLib) : import(REMBG).then(function (m) { return (rembgLib = m); }))
-          .then(function (m) {
-            return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
-              return m.removeBackground(blob, { progress: function (key, done, total) {
-                busy((/fetch/.test(key) ? T('Downloading model') : T('Working')) + ' ' + (total ? Math.round(done / total * 100) + '%' : '…'));
-              } });
-            });
-          })
+        rembgOnServer()
           .then(function (b) { return createImageBitmap(b); })
           .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
           .catch(function (e) { busy(false); toast((e && e.message) || T('Background removal failed'), true); });
       }, 'primary'));
-      p.appendChild(left);
+      p.appendChild(aiLine('remove-background'));
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Saved as PNG to keep the transparency. Works best on people, products and animals.' }));
-      p.appendChild(el('p', { class: 'small faint', text: 'On this device: @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr. On the server: rembg (MIT).' }));
     }
   };
 

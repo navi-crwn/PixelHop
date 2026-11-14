@@ -20,11 +20,7 @@
 
 The licence texts sit next to the files.
 
-### Loaded in the browser on demand (not bundled)
-
-| Library | License | Used for |
-|---|---|---|
-| [@imgly/background-removal](https://github.com/imgly/background-removal-js) | AGPL-3.0 | Background removal; loaded unmodified from jsDelivr |
+Nothing is loaded from other websites any more. Background removal runs on the server (rembg, MIT); the AGPL-licensed @imgly/background-removal is no longer used.
 
 Icons and the pixel-bunny logo were drawn for PixelHop. The GitHub mark is from Octicons (MIT).
 

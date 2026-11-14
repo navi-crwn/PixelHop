@@ -57,7 +57,7 @@ Background removal and OCR start a Python process per request. Each one loads hu
 
 In PixelHop 3 these tools run in the browser:
 - **OCR:** tesseract.js and tesseract.js-core (Apache-2.0), bundled under `web/static/vendor/tesseract`; English model built in, other languages from `PIXELHOP_DATA/tessdata`; no external host.
-- **Background removal:** @imgly/background-removal (AGPL-3.0, loaded unmodified from jsDelivr).
+- **Background removal:** on the server only (rembg, MIT, via `PIXELHOP_REMBG_URL`). The AGPL-licensed @imgly/background-removal is no longer used and no AGPL code is loaded.
 
 The server only ever hosts the results, and private images never have to be uploaded to be edited.
 
@@ -77,7 +77,7 @@ Upscaling and object erasing were dropped: they need a GPU-class model to be wor
 - **Content Security Policy**
   - No inline scripts on any page.
   - Images are served with `sandbox` and `default-src 'none'`.
-  - The studio page alone allows `unsafe-eval`, which the background-removal runtime needs.
+  - No page allows `unsafe-eval` any more (only `wasm-unsafe-eval`, which the bundled text reader needs); nothing is loaded from other websites except the HOP family assets on hel.ink.
 - **Passwords**
   - Argon2id.
   - PixelHop 2's PHP hashes still verify and are upgraded on the next sign-in.

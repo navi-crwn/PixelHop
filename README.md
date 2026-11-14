@@ -284,7 +284,7 @@ deploy/           nginx and systemd examples
 
 <details><summary>Is the studio really private?</summary>
 
-Editing happens on your device with Canvas and WebAssembly. Text recognition ([tesseract.js](https://github.com/naptha/tesseract.js), bundled) reads English out of the box; to read other languages, put their model files in `PIXELHOP_DATA/tessdata` with `scripts/ocr-language.sh deu fra jpn` (it downloads them from the official tessdata source; the studio then offers exactly the languages you installed). The first time someone uses background removal on their device, the browser downloads [@imgly/background-removal](https://github.com/imgly/background-removal-js) from jsDelivr and its model from staticimgly.com. Your image is not sent anywhere unless you press Upload result. A self-hosted server that sets a stricter Content Security Policy needs to allow those addresses.
+Editing happens on your device with Canvas and WebAssembly. Text recognition ([tesseract.js](https://github.com/naptha/tesseract.js), bundled with PixelHop) also runs on your device and reads English out of the box; to read other languages, put their model files in `PIXELHOP_DATA/tessdata` with `scripts/ocr-language.sh deu fra jpn` (it downloads them from the official tessdata source; the studio then offers exactly the languages you installed). Background removal, face blur, the eraser and upscaling run on your server's AI service (`PIXELHOP_REMBG_URL`) and need a signed-in account, so those images are sent to your server. Otherwise your image is not sent anywhere unless you press Upload result, and the studio loads nothing from other websites.
 </details>
 
 <details><summary>Can I turn off guest uploads or sign-ups?</summary>
@@ -336,6 +336,6 @@ PixelHop is part of the HOP family of privacy-respecting, self-hostable open-sou
 
 - [MIT](LICENSE.md), copyright Ivan Novskies (navi-crwn). Third-party parts are listed in [CREDITS.md](CREDITS.md).
 - Built with [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) and [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- The studio bundles [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) and loads [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, unmodified, from jsDelivr) on demand.
+- The studio bundles [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). Background removal runs on the server (rembg, MIT); no AGPL code is used or loaded.
 
 More by the same author: [Amnesia](https://github.com/navi-crwn/amnesia), a Mac that forgets at logout.

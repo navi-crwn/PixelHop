@@ -279,7 +279,7 @@ deploy/           ejemplos de nginx y systemd
 
 <details><summary>¿El estudio es de verdad privado?</summary>
 
-La edición ocurre en tu dispositivo con Canvas y WebAssembly. La primera vez que usas el reconocimiento de texto o la eliminación de fondo, el navegador descarga [tesseract.js](https://github.com/naptha/tesseract.js) y [@imgly/background-removal](https://github.com/imgly/background-removal-js) desde jsDelivr, y sus datos de idioma y modelos desde tessdata.projectnaptha.com y staticimgly.com. Tu imagen no se envía a ningún sitio a menos que pulses Subir resultado. Un servidor propio que establezca una Content Security Policy más estricta tiene que permitir esas direcciones.
+La edición ocurre en tu dispositivo con Canvas y WebAssembly. El reconocimiento de texto ([tesseract.js](https://github.com/naptha/tesseract.js), incluido en PixelHop) también funciona en tu dispositivo y lee inglés de serie; para leer otros idiomas, pon sus archivos de modelo en `PIXELHOP_DATA/tessdata` con `scripts/ocr-language.sh deu fra jpn` (los descarga de la fuente oficial de tessdata; el estudio ofrece entonces exactamente los idiomas instalados). La eliminación de fondo, el desenfoque de caras, el borrador y el escalado funcionan en el servicio de IA de tu servidor (`PIXELHOP_REMBG_URL`) y requieren una cuenta con sesión iniciada, así que esas imágenes se envían a tu servidor. Por lo demás, tu imagen no se envía a ningún sitio salvo que pulses Subir resultado, y el estudio no carga nada de otros sitios web.
 </details>
 
 <details><summary>¿Puedo desactivar las subidas de invitados o los registros?</summary>
@@ -331,6 +331,6 @@ PixelHop forma parte de la familia HOP de apps de código abierto que respetan l
 
 - [MIT](LICENSE.md), copyright de Ivan Novskies (navi-crwn). Los componentes de terceros se enumeran en [CREDITS.md](CREDITS.md).
 - Hecho con [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) y [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- El estudio carga, cuando hace falta, [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) y [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, sin modificar, desde jsDelivr).
+- El estudio incluye [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). La eliminación de fondo funciona en el servidor (rembg, MIT); no se usa ni se carga código AGPL.
 
 Más del mismo autor: [Amnesia](https://github.com/navi-crwn/amnesia), un Mac que lo olvida todo al cerrar sesión.
