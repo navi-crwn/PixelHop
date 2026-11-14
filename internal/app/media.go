@@ -449,7 +449,7 @@ func (a *App) optimizeVideo(ctx context.Context, id string) error {
 		b.Delete(ctx, key)
 		return err
 	}
-	if a.db.CountKeyRefs(ctx, im.KeyFull) == 0 {
+	if n, err := a.db.CountKeyRefs(ctx, im.KeyFull); err == nil && n == 0 {
 		b.Delete(ctx, im.KeyFull)
 	}
 	a.log.Info("video optimised", "id", im.ID, "from", im.Size, "to", newSize)

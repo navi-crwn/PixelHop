@@ -124,10 +124,12 @@ func (d *DB) ImageForSharing(ctx context.Context, sha, backend string) (*Image, 
 
 // CountKeyRefs reports how many images point at a storage key; dedupe across
 // users can share one stored object, which must outlive all its references.
-func (d *DB) CountKeyRefs(ctx context.Context, key string) int {
+// A failed count is an error, never 0: a caller that deletes the object on "nobody points at it" must not
+// do so because the question could not be answered.
+func (d *DB) CountKeyRefs(ctx context.Context, key string) (int, error) {
 	var n int
-	d.QueryRowContext(ctx, `SELECT COUNT(*) FROM images WHERE key_full=?`, key).Scan(&n)
-	return n
+	err := d.QueryRowContext(ctx, `SELECT COUNT(*) FROM images WHERE key_full=?`, key).Scan(&n)
+	return n, err
 }
 
 type ImageQuery struct {

@@ -564,7 +564,15 @@ func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
 			return fmt.Errorf("delete variant: %w", err)
 		}
 	}
-	if b := a.backends[im.Backend]; b != nil && a.db.CountKeyRefs(ctx, im.KeyFull) <= 1 {
+	b := a.backends[im.Backend]
+	refs := 0
+	if b != nil {
+		var err error
+		if refs, err = a.db.CountKeyRefs(ctx, im.KeyFull); err != nil {
+			return fmt.Errorf("count references: %w", err) // cannot tell whether others share the file: keep it
+		}
+	}
+	if b != nil && refs <= 1 {
 		if err := b.Delete(ctx, im.KeyFull); err != nil {
 			return fmt.Errorf("delete original: %w", err)
 		}
@@ -579,6 +587,8 @@ func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
 
 // removeImage deletes an image's row and its stored files.
 func (a *App) removeImage(ctx context.Context, im *db.Image) error {
+	// A dropped connection must not cut the removal in the middle (objects gone, row left, or the reverse).
+	ctx = context.WithoutCancel(ctx)
 	a.shareMu.Lock() // counting who still points at the file, deleting it and dropping the row are one step
 	defer a.shareMu.Unlock()
 	if err := a.deleteImageObjects(ctx, im); err != nil {

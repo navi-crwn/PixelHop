@@ -81,7 +81,7 @@ func TestSameFileFromDifferentUploadersIsStoredOnce(t *testing.T) {
 	if keyOf(t, a, idb) != key || keyOf(t, a, idg) != key {
 		t.Fatalf("the same bytes were stored more than once: %q %q %q", key, keyOf(t, a, idb), keyOf(t, a, idg))
 	}
-	if n := a.db.CountKeyRefs(ctx, key); n != 3 {
+	if n, err := a.db.CountKeyRefs(ctx, key); err != nil || n != 3 {
 		t.Fatalf("rows pointing at the file: %d, want 3", n)
 	}
 	// Each row is its own: owner, delete token (guest), thumbnail key, and the quota counts the whole file for each member.
