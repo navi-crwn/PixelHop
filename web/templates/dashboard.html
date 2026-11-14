@@ -1,5 +1,10 @@
 {{define "content"}}{{$d := .Data}}{{$files := add (add $d.Sum.Images $d.Sum.Videos) $d.Sum.PDFs}}
 <div class="wrap dash">
+  {{with .Announcement}}<section class="alert info dash-announce" id="announce" data-id="{{$.AnnounceID}}" aria-labelledby="announce-h">
+    <svg aria-hidden="true"><use href="#i-spark"/></svg>
+    <div class="dash-announce-body"><b id="announce-h">{{$.L.T "announce.title"}}</b><p>{{.}}</p></div>
+    <button type="button" class="icon-btn sm" id="announce-close" aria-label="{{$.L.T "Close"}}" title="{{$.L.T "Close"}}"><svg><use href="#i-x"/></svg></button>
+  </section>{{end}}
   {{if $d.Welcome}}<div class="alert ok">{{$.L.H "dash.welcome" "site" .Site}}</div>{{end}}
 
   <header class="dash-head">

@@ -209,10 +209,10 @@
   "legal.takedown_button": " menggunakan tombol Lapor dan memilih “Hak cipta saya”",
   "legal.runs": "{site} menjalankan <a href=\"https://github.com/navi-crwn/pixelhop\">PixelHop</a>, perangkat lunak open source berlisensi MIT.",
   "changelog.title": "Riwayat perubahan",
-  "changelog.lead": "Commit, rilis, dan pull request yang sudah digabungkan, dari yang terbaru.",
+  "changelog.lead": "Apa yang berubah di PixelHop, yang terbaru di atas.",
   "changelog.newer": "Lebih baru",
   "changelog.older": "Lebih lama",
-  "changelog.sources": "Revisi sumber",
+  "changelog.sources": "Rilis terbaru",
   "changelog.commit": "Commit",
   "changelog.pr": "Pull request digabungkan",
   "changelog.tag": "Rilis",
@@ -1101,5 +1101,13 @@
   "settings.api_docs": "Dokumentasi API",
   "dash.actions": "Aksi",
   "upload.done_see": "{n} terunggah · Lihat semua tautan",
-  "upload.progress": "Mengunggah {done} dari {total} berkas · {pct}%"
+  "upload.progress": "Mengunggah {done} dari {total} berkas · {pct}%",
+  "announce.title": "Pengumuman",
+  "changelog.details": "Detail teknis",
+  "changelog.t_added": "Ditambahkan",
+  "changelog.t_changed": "Diubah",
+  "changelog.t_fixed": "Diperbaiki",
+  "changelog.t_security": "Keamanan",
+  "changelog.t_removed": "Dihapus",
+  "changelog.t_deprecated": "Usang"
 }

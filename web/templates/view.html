@@ -36,7 +36,7 @@
                   {{.L.T "Remember for 24 hours on this device"}}
                 </label>
                 <div style="display:flex;gap:10px;justify-content:center;">
-                  <a href="/" class="btn ghost sm">{{.L.T "Go Back"}}</a>
+                  <a href="{{if $.User}}/dashboard{{else}}/{{end}}" class="btn ghost sm">{{.L.T "Go Back"}}</a>
                   <button type="submit" class="btn primary sm">
                     {{if $im.IsAdult}}{{.L.T "I am 18+ — Continue"}}{{else}}{{.L.T "I understand — Continue"}}{{end}}
                   </button>

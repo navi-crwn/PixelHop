@@ -209,10 +209,10 @@
   "legal.takedown_button": " через кнопку «Пожаловаться» с выбором «Мои авторские права»",
   "legal.runs": "{site} работает на <a href=\"https://github.com/navi-crwn/pixelhop\">PixelHop</a> — программном обеспечении с открытым кодом под лицензией MIT.",
   "changelog.title": "История изменений",
-  "changelog.lead": "Коммиты, выпуски и объединённые запросы на слияние — от новых к старым.",
+  "changelog.lead": "Что изменилось в PixelHop, сначала новое.",
   "changelog.newer": "Новее",
   "changelog.older": "Старее",
-  "changelog.sources": "Ревизии исходного кода",
+  "changelog.sources": "Последний выпуск",
   "changelog.commit": "Коммит",
   "changelog.pr": "Объединённый запрос",
   "changelog.tag": "Выпуск",
@@ -1101,5 +1101,13 @@
   "settings.api_docs": "Документация API",
   "dash.actions": "Действия",
   "upload.done_see": "{n} загружено · Все ссылки",
-  "upload.progress": "Загрузка {done} из {total} файлов · {pct}%"
+  "upload.progress": "Загрузка {done} из {total} файлов · {pct}%",
+  "announce.title": "Объявление",
+  "changelog.details": "Технические подробности",
+  "changelog.t_added": "Добавлено",
+  "changelog.t_changed": "Изменено",
+  "changelog.t_fixed": "Исправлено",
+  "changelog.t_security": "Безопасность",
+  "changelog.t_removed": "Удалено",
+  "changelog.t_deprecated": "Устарело"
 }

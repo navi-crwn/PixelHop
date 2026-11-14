@@ -42,6 +42,7 @@
   --lime: #65a30d; --cyan: #0891b2; --violet: #7c3aed; --pink: #db2777;
   --red: #dc2626; --amber: #d97706; --green: #059669;
   --on-accent: #ffffff;
+  --grad-btn: linear-gradient(120deg, var(--lime), var(--cyan) 45%, color-mix(in srgb, var(--violet) 75%, #fff)); /* light theme: the violet end lightened so the dark text on it reaches 4.5:1 */
   --shadow: 0 20px 50px rgba(30, 30, 80, .12);
   --dot: rgba(15, 18, 40, .07);
   color-scheme: light;
@@ -55,6 +56,7 @@
     --lime: #65a30d; --cyan: #0891b2; --violet: #7c3aed; --pink: #db2777;
     --red: #dc2626; --amber: #d97706; --green: #059669;
     --on-accent: #ffffff;
+    --grad-btn: linear-gradient(120deg, var(--lime), var(--cyan) 45%, color-mix(in srgb, var(--violet) 75%, #fff)); /* light theme: the violet end lightened so the dark text on it reaches 4.5:1 */
     --shadow: 0 20px 50px rgba(30, 30, 80, .12);
     --dot: rgba(15, 18, 40, .07);
     color-scheme: light;
@@ -122,7 +124,7 @@ main { flex: 1; padding: 28px 0 64px; }
 .t-sun { display: none; }
 :root[data-theme="light"] .t-sun { display: block; } :root[data-theme="light"] .t-moon { display: none; }
 @media (prefers-color-scheme: light) { :root:not([data-theme]) .t-sun { display: block; } :root:not([data-theme]) .t-moon { display: none; } }
-.avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #071016; font-weight: 800; font-size: .8rem; overflow: hidden; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad-btn, var(--grad)); color: #071016; font-weight: 800; font-size: .8rem; overflow: hidden; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .menu { position: relative; }
 .menu > button { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
@@ -137,9 +139,10 @@ main { flex: 1; padding: 28px 0 64px; }
 .menu-list .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .burger { display: none; }
 @media (max-width: 760px) {
-  .nav .wrap { height: auto; min-height: 60px; flex-wrap: wrap; row-gap: 0; }
-  .nav-links { display: none; order: 10; flex: 1 1 100%; flex-direction: column; background: var(--panel);
-    border-top: 1px solid var(--line); padding: 10px 16px 14px; margin: 0 -20px; }
+  /* The bar stays one 60px row (it used to wrap to two rows on a 375px phone); the opened menu hangs below it. */
+  .nav .wrap { flex-wrap: nowrap; }
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: var(--panel);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 10px 16px 14px; }
   .nav.open .nav-links { display: flex; }
   .nav-links a { padding: 10px 12px; }
   .burger { display: inline-grid; }
@@ -152,7 +155,8 @@ main { flex: 1; padding: 28px 0 64px; }
   white-space: nowrap; transition: transform .08s, background .15s, border-color .15s; }
 .btn:hover { text-decoration: none; border-color: color-mix(in srgb, var(--text) 30%, transparent); }
 .btn:active { transform: scale(.97); }
-.btn.primary { background: var(--grad); color: #061016; border: 0; }
+/* The gradient is laid out once over the whole button (no tiling), so no sliver of its start can show at the right edge. */
+.btn.primary { background: var(--grad-btn, var(--grad)); background-repeat: no-repeat; background-size: 100% 100%; color: #061016; border: 0; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.ghost { background: transparent; }
 .btn.danger { color: var(--red); }
@@ -182,6 +186,12 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .alert { padding: 11px 14px; border-radius: 11px; border: 1px solid; margin-bottom: 16px; font-size: .92rem; }
 .alert.err { border-color: color-mix(in srgb, var(--red) 40%, transparent); background: color-mix(in srgb, var(--red) 10%, transparent); }
 .alert.ok { border-color: color-mix(in srgb, var(--green) 40%, transparent); background: color-mix(in srgb, var(--green) 10%, transparent); }
+.dash-announce { display: flex; gap: 10px; align-items: flex-start; }
+.dash-announce[hidden] { display: none; }
+.dash-announce > svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--cyan); }
+.dash-announce-body { flex: 1; min-width: 0; }
+.dash-announce-body p { margin: 2px 0 0; color: var(--muted); overflow-wrap: anywhere; }
+.dash-announce .icon-btn { margin: -4px -6px 0 0; flex: none; }
 .alert.info { border-color: color-mix(in srgb, var(--cyan) 40%, transparent); background: color-mix(in srgb, var(--cyan) 8%, transparent); }
 
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
@@ -198,7 +208,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .hero .lead { color: var(--muted); font-size: 1.12rem; max-width: 600px; margin: 0 auto 28px; }
 .eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 5px 12px 5px 6px; border-radius: 999px; border: 1px solid var(--line-2);
   background: var(--panel); font-size: .82rem; color: var(--muted); margin-bottom: 20px; }
-.eyebrow b { background: var(--grad); color: #061016; padding: 1px 8px; border-radius: 999px; font-size: .74rem; }
+.eyebrow b { background: var(--grad-btn, var(--grad)); color: #061016; padding: 1px 8px; border-radius: 999px; font-size: .74rem; }
 
 .hero-intro { margin-bottom: 26px; }
 .hero-intro .lead { margin-bottom: 0; }
@@ -678,7 +688,8 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
   .stat-sub { font-size: .74rem; }
   .dash-shortcuts { grid-template-columns: 1fr 1fr; }
   .shortcut { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .toolbar form { min-width: 0; width: 100%; }
+  .toolbar form { min-width: 0; width: 100%; flex-wrap: wrap; }
+  .toolbar form input[type=search] { flex: 1 1 140px; min-width: 0; }
 }
 @media (max-width: 560px) {
   .kind-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100%; }
@@ -740,7 +751,6 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
 .part-of img { width: 20px; height: 20px; display: block; }
 .part-of b { font-weight: 400; color: var(--text); }
 .part-of:hover b { text-decoration: underline; }
-.shell-foot .part-of { margin: 0 auto 10px; padding: 0; }
 footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr) repeat(4, minmax(0, 1fr)); align-items: start; gap: 28px 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
 .foot-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 @media (max-width: 960px) { footer .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } footer .foot-brand { grid-column: 1 / -1; } }
@@ -786,6 +796,12 @@ footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr
 @media (max-width: 760px) {
   .menu-list { right: auto; left: 0; max-width: calc(100vw - 24px); }
   .nav .wrap .menu:last-child .menu-list { right: 0; left: auto; }
+  /* In the top bars every drop-down hangs from the bar's right edge, not from its own button: a panel
+     anchored to a button in the middle of the bar ran off the screen (it is 210px wide). */
+  .nav .wrap, .shell-top { position: relative; }
+  .nav .menu, .shell-tools .menu { position: static; }
+  .nav .menu .menu-list, .shell-tools .menu .menu-list { left: auto; right: 20px; top: calc(100% + 4px); }
+  .shell-tools .menu .menu-list { right: 0; top: calc(100% + 6px); }
 }
 /* control standard: 16px text on phones (no iOS zoom); last so per-component font rules cannot undo it */
 @media (max-width: 640px) { input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]), select, textarea { font-size: 16px; max-width: none; } }

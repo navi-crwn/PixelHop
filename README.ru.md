@@ -272,7 +272,7 @@ tools/            необязательный ИИ-сервис
 deploy/           примеры для nginx и systemd
 ```
 
-`make test` запускает `go vet` и тесты, а `make build` собирает `./pixelhop`. `scripts/readme-images.mjs` заново делает скриншоты для README на работающем экземпляре (см. комментарий в начале файла). `python3 scripts/build-changelog.py --repo PixelHop` пересоздаёт `web/changelog.json`, данные страницы `/changelog`, по слитым pull request; для этого нужен авторизованный `gh`.
+`make test` запускает `go vet` и тесты, а `make build` собирает `./pixelhop`. `scripts/readme-images.mjs` заново делает скриншоты для README на работающем экземпляре (см. комментарий в начале файла). `python3 scripts/build-changelog.py --repo PixelHop` пересоздаёт `web/changelog.json`, данные страницы `/changelog`, из `CHANGELOG.md` (понятным языком, одна запись на версию); ему не нужны ни сеть, ни `gh`, а `make check-changelog` завершается ошибкой, если файл непонятен или устарел.
 
 ## Вопросы и ответы
 

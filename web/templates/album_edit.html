@@ -1,5 +1,6 @@
 {{define "content"}}{{$d := .Data}}{{$al := $d.Album}}
 <div class="wrap" id="album-edit" data-id="{{$al.ID}}">
+  <div class="back-row"><a class="back" href="/dashboard/albums"><span aria-hidden="true">&larr;</span> {{$.L.T "nav.my_albums"}}</a></div>
   <div class="page-head"><div><h1>{{$.L.T "album.edit"}}</h1><p class="muted" style="margin:4px 0 0"><a href="/a/{{$al.ID}}">{{.Link}}/a/{{$al.ID}}</a></p></div>
     <div class="btn-row"><a class="btn" href="/a/{{$al.ID}}">{{$.L.T "albumedit.view"}}</a><button class="btn primary" type="button" id="ae-save"><svg><use href="#i-check"/></svg>{{$.L.T "common.save"}}</button></div></div>
   <div class="grid-2" style="align-items:start">

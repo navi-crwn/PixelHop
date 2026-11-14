@@ -880,6 +880,19 @@
     var trigger = selMenu.querySelector(':scope > button'); if (trigger) trigger.focus();
   }, true);
 
+  // ---------- the site announcement card on the dashboard ----------
+  // Shown unless this person closed this very text in the last 7 days; a new text has a new id and shows again.
+  (function () {
+    var card = $('#announce'); if (!card) return;
+    var key = 'ph_announce_' + card.dataset.id, week = 7 * 86400000, at = 0;
+    try { at = +localStorage.getItem(key) || 0; } catch (e) {}
+    if (at && Date.now() - at < week) card.hidden = true;
+    $('#announce-close').addEventListener('click', function () {
+      card.hidden = true;
+      try { localStorage.setItem(key, String(Date.now())); } catch (e) {}
+    });
+  })();
+
   // ---------- settings subtabs ----------
   // One card group at a time, chosen by the address (#api, #profile, #webhooks ...), so every old
   // link and server redirect still lands on the right card. Without the script all groups stay.
@@ -996,7 +1009,7 @@
       if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]') && e.key !== '?') return;
       switch (e.key) {
         case '?': e.preventDefault(); help(); break;
-        case 'u': var pick = $('[data-pick-files]') || $('#drop-in'); if (pick) { e.preventDefault(); if (pick.click) pick.click(); } else location.href = '/'; break;
+        case 'u': var pick = $('[data-pick-files]') || $('#drop-in'); if (pick) { e.preventDefault(); if (pick.click) pick.click(); } else location.href = document.body.dataset.member ? '/dashboard#upload' : '/'; break;
         case 's': location.href = '/tools'; break;
         case 'd': location.href = '/dashboard'; break;
         case '/': var q = $('input[type=search]'); if (q) { e.preventDefault(); q.focus(); } break;

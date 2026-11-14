@@ -4,6 +4,6 @@
   <p class="mono grad" style="font-size:3rem;font-weight:800;margin:0">{{.Data.Code}}</p>
   <h1 style="font-size:1.8rem">{{.Title}}</h1>
   <p class="muted">{{.Data.Message}}</p>
-  <div class="btn-row" style="justify-content:center;margin-top:20px"><a class="btn primary" href="/">{{$.L.T "error.upload"}}</a><a class="btn" href="/tools">{{$.L.T "home.studio_open"}}</a></div>
+  <div class="btn-row" style="justify-content:center;margin-top:20px"><a class="btn primary" href="{{if $.User}}/dashboard{{else}}/{{end}}">{{$.L.T "error.upload"}}</a><a class="btn" href="/tools">{{$.L.T "home.studio_open"}}</a></div>
 </div>
 {{end}}

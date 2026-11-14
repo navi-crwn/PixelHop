@@ -16,5 +16,6 @@ release:        ## cross-compile into dist/
 	done
 clean:
 	rm -rf pixelhop dist
-check-changelog: ## fail when merged PRs are missing from web/changelog.json (needs gh)
-	python3 scripts/check-changelog.py
+check-changelog: ## CHANGELOG.md is plain language and web/changelog.json is built from it (no network)
+	python3 scripts/build-changelog.py --repo PixelHop --check
+	python3 -m unittest scripts/test_build_changelog.py

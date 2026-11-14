@@ -272,7 +272,7 @@ tools/            任意の AI サービス
 deploy/           nginx と systemd の例
 ```
 
-`make test` は `go vet` とテストを実行し、`make build` は `./pixelhop` を作ります。`scripts/readme-images.mjs` は、動いているインスタンスから README のスクリーンショットを作り直します（ファイル冒頭のコメントを参照）。`python3 scripts/build-changelog.py --repo PixelHop` は、マージ済みのプルリクエストから `/changelog` ページの元データ `web/changelog.json` を作り直します。認証済みの `gh` が必要です。
+`make test` は `go vet` とテストを実行し、`make build` は `./pixelhop` を作ります。`scripts/readme-images.mjs` は、動いているインスタンスから README のスクリーンショットを作り直します（ファイル冒頭のコメントを参照）。`python3 scripts/build-changelog.py --repo PixelHop` は、`CHANGELOG.md`（分かりやすい言葉で、リリースごとに1項目）から `/changelog` ページの元データ `web/changelog.json` を作り直します。ネットワークも `gh` も不要で、ファイルが分かりやすくない、または最新でない場合は `make check-changelog` が失敗します。
 
 ## よくある質問
 

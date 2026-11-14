@@ -1,5 +1,6 @@
 {{define "content"}}{{$d := .Data}}
 <div class="wrap">
+  {{if $d.Own}}<div class="back-row"><a class="back" href="/dashboard/albums"><span aria-hidden="true">&larr;</span> {{$.L.T "nav.my_albums"}}</a></div>{{end}}
   <div class="page-head">
     <div>
       <span class="pill acc"><svg width="12" height="12"><use href="#i-album"/></svg>{{if $d.Album.ID}}{{$.L.T "upload.album"}}{{else}}{{$.L.T "album.uploads"}}{{end}}</span>

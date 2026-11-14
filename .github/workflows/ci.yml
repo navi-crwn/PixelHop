@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Changelog is plain and current
+        run: python3 scripts/build-changelog.py --repo PixelHop --check && python3 -m unittest scripts/test_build_changelog.py
       - run: go vet ./...
       - run: go test -race ./...
       - run: make build && ./pixelhop version

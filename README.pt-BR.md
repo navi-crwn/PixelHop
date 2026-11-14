@@ -272,7 +272,7 @@ tools/            o serviço de IA opcional
 deploy/           exemplos de nginx e systemd
 ```
 
-`make test` roda `go vet` e os testes, e `make build` gera `./pixelhop`. O `scripts/readme-images.mjs` refaz as capturas do README a partir de uma instância em execução (veja o comentário no início do arquivo). O `python3 scripts/build-changelog.py --repo PixelHop` refaz o `web/changelog.json`, os dados por trás da página `/changelog`, a partir dos pull requests já mesclados; ele precisa de um `gh` autenticado.
+`make test` roda `go vet` e os testes, e `make build` gera `./pixelhop`. O `scripts/readme-images.mjs` refaz as capturas do README a partir de uma instância em execução (veja o comentário no início do arquivo). O `python3 scripts/build-changelog.py --repo PixelHop` refaz o `web/changelog.json`, os dados por trás da página `/changelog`, a partir de `CHANGELOG.md` (linguagem clara, uma entrada por versão); não precisa de rede nem de `gh`, e `make check-changelog` falha se o arquivo não estiver claro ou atualizado.
 
 ## Perguntas frequentes
 
