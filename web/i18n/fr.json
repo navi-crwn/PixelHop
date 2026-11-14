@@ -1110,5 +1110,6 @@
   "changelog.t_security": "Sécurité",
   "changelog.t_removed": "Supprimé",
   "changelog.t_deprecated": "Obsolète",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Ce compte se connecte avec HOP ID. Utilisez plutôt le bouton « Continuer avec HEL.ink » de cette page."
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Ce compte se connecte avec HOP ID. Utilisez plutôt le bouton « Continuer avec HEL.ink » de cette page.",
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Ce HOP ID ne peut pas être lié à PixelHop, car son e-mail appartient déjà à un autre compte PixelHop. Contactez le propriétaire du site."
 }

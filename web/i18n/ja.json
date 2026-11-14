@@ -1110,5 +1110,6 @@
   "changelog.t_security": "セキュリティ",
   "changelog.t_removed": "削除",
   "changelog.t_deprecated": "非推奨",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "このアカウントは HOP ID でログインします。このページの「HEL.ink で続ける」を使ってください。"
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "このアカウントは HOP ID でログインします。このページの「HEL.ink で続ける」を使ってください。",
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "この HOP ID のメールアドレスは別の PixelHop アカウントですでに使われているため、PixelHop に連携できません。サイトの管理者に連絡してください。"
 }

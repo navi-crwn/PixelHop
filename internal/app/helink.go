@@ -217,6 +217,10 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u, err := a.linkHelinkUser(r.Context(), t)
+	if errors.Is(err, errLinkConflict) {
+		a.fail(w, r, http.StatusConflict, a.tr(r, linkConflictMsg))
+		return
+	}
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -233,14 +237,33 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeNext(next), http.StatusSeeOther)
 }
 
+// errLinkConflict means the HOP ID cannot be linked without touching a PixelHop account that is not
+// its own: its e-mail belongs to a row linked to another HOP ID, or to another row altogether.
+var errLinkConflict = errors.New("this HOP ID's e-mail belongs to another PixelHop account")
+
+const linkConflictMsg = "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner."
+
 // linkHelinkUser finds the PixelHop profile for a HEL.ink account: by HEL.ink
 // id, then by email (HEL.ink only sends verified addresses), else a new one.
+//
+// Linking an older account by e-mail is the one moment a local row changes hands. That row never had a
+// verified e-mail, so whoever knows its old password or Google login must not come along: both are
+// cleared and every session of the row ends (the new one is started by the caller), and what the person
+// filled in here (bio, website) is not wiped by an empty profile on the hub. A row already
+// linked to a different HOP ID is never taken over, and a hub e-mail that another row holds changes nothing.
 func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, error) {
 	u, err := a.db.UserByHelink(ctx, t.Sub)
+	firstLink := false
 	if errors.Is(err, db.ErrNotFound) {
 		u, err = a.db.UserByEmail(ctx, t.Email)
 		if err == nil {
+			if u.HelinkID.Valid {
+				return nil, errLinkConflict // another HOP ID already owns this row
+			}
 			u.HelinkID = sql.NullString{String: t.Sub, Valid: true}
+			u.PassHash = ""
+			u.GoogleID = sql.NullString{}
+			firstLink = true
 		}
 	}
 	if errors.Is(err, db.ErrNotFound) {
@@ -266,9 +289,12 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	if err != nil {
 		return nil, err
 	}
-	// HEL.ink owns the email; the public name and photo are edited here, so
-	// HEL.ink's only fill them in when they're empty.
+	// HEL.ink owns the email. Another row holding it would break the unique index: say so, change nothing.
+	if !strings.EqualFold(u.Email, t.Email) && a.db.EmailTaken(ctx, t.Email, u.ID) {
+		return nil, errLinkConflict
+	}
 	u.Email = t.Email
+	// The public name and photo were edited here, so HEL.ink's only fill them in when they're empty.
 	if strings.TrimSpace(u.Name) == "" && t.Name != "" {
 		u.Name = trim(netsafe.ScrubNoteKeys(t.Name), 60)
 	}
@@ -280,8 +306,24 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 	} else if t.Admin {
 		u.Role = "admin" // v1 ticket: HEL.ink's owner runs PixelHop too; never demoted from here
 	}
+	bio, website := u.Bio, u.Website
 	a.applyHopProfile(ctx, u, t.Username, t.Bio, t.Website, t.ShowOwner)
-	return u, a.db.UpdateUser(ctx, u)
+	if firstLink {
+		// An empty profile on the hub does not erase what this person wrote here before linking.
+		if u.Bio == "" {
+			u.Bio = bio
+		}
+		if u.Website == "" {
+			u.Website = website
+		}
+	}
+	if err := a.db.UpdateUser(ctx, u); err != nil {
+		return nil, err
+	}
+	if firstLink {
+		a.db.DeleteUserSessions(ctx, u.ID)
+	}
+	return u, nil
 }
 
 // ---- Cloudflare Turnstile ----

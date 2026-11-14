@@ -1110,5 +1110,6 @@
   "changelog.t_security": "Keamanan",
   "changelog.t_removed": "Dihapus",
   "changelog.t_deprecated": "Usang",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Akun ini masuk lewat HOP ID. Pakai tombol “Lanjutkan dengan HEL.ink” di halaman ini."
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Akun ini masuk lewat HOP ID. Pakai tombol “Lanjutkan dengan HEL.ink” di halaman ini.",
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "HOP ID ini tidak bisa dihubungkan ke PixelHop karena e-mailnya sudah dipakai akun PixelHop lain. Hubungi pemilik situs."
 }

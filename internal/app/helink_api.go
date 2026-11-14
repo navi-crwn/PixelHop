@@ -125,6 +125,9 @@ func (a *App) helinkLogin(r *http.Request, email, password string) (u *db.User, 
 		if errors.Is(err, errNeedsVerifiedEmail) {
 			return nil, a.confirmEmailMsg(r, ans.Account.Email), false
 		}
+		if errors.Is(err, errLinkConflict) {
+			return nil, a.tr(r, linkConflictMsg), false
+		}
 		a.log.Error("helink login", "err", err)
 		return nil, a.tr(r, "Sign-in failed on our side. Please try again."), false
 	}

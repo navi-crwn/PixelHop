@@ -1110,5 +1110,6 @@
   "changelog.t_security": "安全",
   "changelog.t_removed": "移除",
   "changelog.t_deprecated": "已弃用",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "此账号通过 HOP ID 登录。请改用本页的“使用 HEL.ink 继续”按钮。"
+  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "此账号通过 HOP ID 登录。请改用本页的“使用 HEL.ink 继续”按钮。",
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "此 HOP ID 无法关联到 PixelHop，因为它的电子邮箱已属于另一个 PixelHop 账号。请联系站点所有者。"
 }
