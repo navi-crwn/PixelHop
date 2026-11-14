@@ -1111,5 +1111,12 @@
   "changelog.t_removed": "移除",
   "changelog.t_deprecated": "已弃用",
   "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "此账号通过 HOP ID 登录。请改用本页的“使用 HEL.ink 继续”按钮。",
-  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "此 HOP ID 无法关联到 PixelHop，因为它的电子邮箱已属于另一个 PixelHop 账号。请联系站点所有者。"
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "此 HOP ID 无法关联到 PixelHop，因为它的电子邮箱已属于另一个 PixelHop 账号。请联系站点所有者。",
+  "Your profile is managed in HOP ID, not here.": "你的个人资料由 HOP ID 管理，请在那里修改。",
+  "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "这次 HOP ID 登录与你在此使用的账号不是同一个，所以没有删除任何内容。",
+  "HOP ID did not confirm that you just signed in, so nothing was deleted. Please try again.": "HOP ID 没有确认你刚刚登录过，所以没有删除任何内容。请重试。",
+  "settings.hub_profile_note": "你的姓名、头像、用户名、简介和网站保存在 HOP ID 中，因此在每个 HOP 应用里都一致。如需修改，请到 HOP ID 编辑。",
+  "settings.hub_edit": "在 HOP ID 编辑",
+  "settings.del_reauth": "在删除任何内容之前，HOP ID 会要求你再登录一次。",
+  "settings.del_hub_link": "改为删除我的 HOP ID 账号"
 }

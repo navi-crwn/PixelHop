@@ -383,6 +383,14 @@ func (a *App) logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, next, http.StatusSeeOther)
 }
 
+// endSession ends this browser's PixelHop session only; the hub and the other HOP apps are not told.
+func (a *App) endSession(w http.ResponseWriter, r *http.Request) {
+	if c, err := r.Cookie(sessionCookie); err == nil {
+		a.db.DeleteSession(r.Context(), hashToken(c.Value))
+	}
+	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies()})
+}
+
 // helinkLogout is a step of HOP ID's chained logout: signing out at the hub (or
 // at any HOP app) sends the browser through every app's logout address in turn,
 // so nobody stays signed in to one app after leaving another. It ends this

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,6 +25,9 @@ import (
 // the HEL.ink user id.
 
 const helinkCookie = "ph_helink"
+
+// helinkModeDelete marks the trip that asks the hub for a fresh sign-in before an account's data is deleted.
+const helinkModeDelete = "delete"
 
 type helinkTicket struct {
 	Sub    string `json:"sub"`
@@ -48,6 +52,24 @@ type helinkTicket struct {
 	Website        *string  `json:"website,omitempty"`
 	ShowOwner      *bool    `json:"show_owner,omitempty"`
 	ProfileVersion int      `json:"profile_version,omitempty"`
+
+	// AuthTime is when the person last typed their credentials at the hub (unix seconds); 0 = the hub
+	// does not say (an older hub, or a session restored from a "remember me" cookie).
+	AuthTime int64 `json:"auth_time,omitempty"`
+}
+
+// deleteMaxAge is how recent the sign-in must be for the hub account's owner to delete their data here.
+const deleteMaxAge = 300 * time.Second
+
+// signedInRecently is the check a sign-in made with max_age must pass: the hub states when the person
+// signed in, and it is no older than maxAge (plus a minute of clock drift). A browser can drop max_age
+// from the address, but it cannot forge the signed auth_time; no auth_time at all never passes.
+func signedInRecently(authTime int64, now time.Time, maxAge time.Duration) bool {
+	if authTime <= 0 {
+		return false
+	}
+	age := now.Unix() - authTime
+	return age >= -60 && age <= int64((maxAge+time.Minute).Seconds())
 }
 
 // adminRoles are the HOP ID roles that make someone a PixelHop admin.
@@ -173,6 +195,38 @@ func (a *App) helinkStart(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, a.cfg.HelinkURL+"/sso/pixelhop?"+q.Encode(), http.StatusFound)
 }
 
+// helinkReauth sends a signed-in HOP ID member to the hub to sign in again just now (max_age), on the way
+// to deleting their data here. The cookie says this trip is for that and nothing else.
+func (a *App) helinkReauth(w http.ResponseWriter, r *http.Request) {
+	state := randomToken(24)
+	http.SetCookie(w, &http.Cookie{Name: helinkCookie, Value: state + "|" + helinkModeDelete + "|/settings", Path: "/auth/",
+		HttpOnly: true, Secure: a.cfg.SecureCookies(), SameSite: http.SameSiteLaxMode, MaxAge: 900})
+	q := url.Values{"state": {state}, "return_to": {a.cfg.BaseURL + "/auth/helink/callback"},
+		"max_age": {strconv.Itoa(int(deleteMaxAge.Seconds()))}}
+	http.Redirect(w, r, a.cfg.HelinkURL+"/sso/pixelhop?"+q.Encode(), http.StatusFound)
+}
+
+// confirmedDelete finishes the trip helinkReauth began: the ticket must be for the account signed in
+// here and must say the person signed in at the hub within the last few minutes. Otherwise nothing is deleted.
+func (a *App) confirmedDelete(w http.ResponseWriter, r *http.Request, t *helinkTicket) {
+	http.SetCookie(w, &http.Cookie{Name: helinkCookie, Path: "/auth/", MaxAge: -1})
+	u := currentUser(r)
+	if u == nil || !u.HelinkID.Valid || u.HelinkID.String != t.Sub {
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted."))
+		return
+	}
+	if !signedInRecently(t.AuthTime, time.Now(), deleteMaxAge) {
+		a.fail(w, r, http.StatusForbidden, a.tr(r, "HOP ID did not confirm that you just signed in, so nothing was deleted. Please try again."))
+		return
+	}
+	if _, err := a.purgeUser(r.Context(), u); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	a.endSession(w, r)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 	if !a.cfg.SSOEnabled() {
 		a.notFound(w, r)
@@ -214,6 +268,10 @@ func (a *App) helinkCallback(w http.ResponseWriter, r *http.Request) {
 	// before any local account is made or linked (older servers send no status).
 	if t.Status != "" && t.Status != "active" {
 		a.fail(w, r, http.StatusForbidden, a.tr(r, "This account is suspended."))
+		return
+	}
+	if mode == helinkModeDelete {
+		a.confirmedDelete(w, r, t)
 		return
 	}
 	u, err := a.linkHelinkUser(r.Context(), t)

@@ -1111,5 +1111,12 @@
   "changelog.t_removed": "Удалено",
   "changelog.t_deprecated": "Устарело",
   "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Этот аккаунт входит через HOP ID. Используйте на этой странице кнопку «Продолжить через HEL.ink».",
-  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Этот HOP ID нельзя связать с PixelHop: его e-mail уже принадлежит другому аккаунту PixelHop. Обратитесь к владельцу сайта."
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Этот HOP ID нельзя связать с PixelHop: его e-mail уже принадлежит другому аккаунту PixelHop. Обратитесь к владельцу сайта.",
+  "Your profile is managed in HOP ID, not here.": "Ваш профиль управляется в HOP ID, а не здесь.",
+  "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Этот вход в HOP ID относился к другому аккаунту, не к тому, которым вы пользуетесь здесь, поэтому ничего не удалено.",
+  "HOP ID did not confirm that you just signed in, so nothing was deleted. Please try again.": "HOP ID не подтвердил, что вы только что вошли, поэтому ничего не удалено. Попробуйте ещё раз.",
+  "settings.hub_profile_note": "Имя, фото, имя пользователя, описание и сайт хранятся в вашем HOP ID, поэтому одинаковы во всех приложениях HOP. Чтобы изменить их, редактируйте там.",
+  "settings.hub_edit": "Изменить в HOP ID",
+  "settings.del_reauth": "Перед удалением HOP ID попросит вас войти ещё раз.",
+  "settings.del_hub_link": "Удалить мой аккаунт HOP ID"
 }

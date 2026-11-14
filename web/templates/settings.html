@@ -1,4 +1,4 @@
-{{define "content"}}{{$d := .Data}}{{$u := .User}}
+{{define "content"}}{{$d := .Data}}{{$u := .User}}{{$hub := and .SSO $u.HelinkID.Valid}}
 <div class="wrap narrow">
   <div class="page-head"><h1>{{$.L.T "mytabs.settings"}}</h1></div>
   {{with $d.Notice}}<div class="alert ok">{{.}}</div>{{end}}
@@ -13,8 +13,23 @@
   </nav>
 
   <div data-setpanel="profile">
+  {{/* HOP ID owns the profile of a member who has one: shown here, edited there. */}}
   <div class="card" id="profile">
     <h2>{{$.L.T "mytabs.profile"}}</h2>
+    {{if $hub}}
+    <p class="muted small">{{$.L.T "settings.hub_profile_note"}}</p>
+    <div class="profile-photo">
+      <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="{{$.L.T "settings.photo_alt"}}" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
+    </div>
+    <div class="grid-2" style="gap:12px">
+      <div class="field"><label for="name">{{$.L.T "settings.display_name"}}</label><input type="text" id="name" value="{{$u.Name}}" readonly></div>
+      <div class="field"><label for="username">{{$.L.T "settings.username"}}</label><div class="input-prefix"><span>@</span><input type="text" id="username" value="{{$u.Username.String}}" readonly></div></div>
+    </div>
+    <div class="field"><label for="bio">{{$.L.T "settings.bio"}}</label><textarea id="bio" rows="3" readonly>{{$u.Bio}}</textarea></div>
+    <div class="field"><label for="website">{{$.L.T "settings.website"}}</label><input type="text" id="website" value="{{$u.Website}}" readonly></div>
+    <label class="check" style="margin:4px 0 16px"><input type="checkbox" {{if $u.ShowOwner}}checked{{end}} disabled><span>{{$.L.T "settings.show_owner"}}</span></label>
+    <a class="btn primary" href="{{.Helink}}/settings#account">{{$.L.T "settings.hub_edit"}}</a>
+    {{else}}
     <p class="muted small">{{$.L.T "settings.profile_intro"}}{{if and $u.Username.Valid $u.ShowOwner}} {{$.L.H "settings.profile_page" "name" $u.Username.String "base" .Base}}{{end}}</p>
     <div class="profile-photo">
       <span class="avatar xl">{{with avatar $u}}<img src="{{.}}" alt="{{$.L.T "settings.photo_alt"}}" referrerpolicy="no-referrer">{{else}}{{initial $u}}{{end}}</span>
@@ -37,15 +52,9 @@
       <label class="check" style="margin:4px 0 16px"><input type="checkbox" name="show_owner" {{if $u.ShowOwner}}checked{{end}}><span>{{$.L.T "settings.show_owner"}}<br><span class="small muted">{{$.L.T "settings.show_owner_off"}}</span></span></label>
       <button class="btn primary" type="submit">{{$.L.T "settings.save_profile"}}</button>
     </form>
+    {{end}}
   </div>
 
-  {{if and .SSO $u.HelinkID.Valid}}
-  <div class="card">
-    <h2>{{$.L.T "settings.helink_h"}}</h2>
-    <p class="muted small">{{$.L.T "settings.helink_text" "site" .Site}}</p>
-    <a class="btn" href="{{.Helink}}/settings">{{$.L.T "settings.helink_open"}}</a>
-  </div>
-  {{end}}
   </div>
 
   <div data-setpanel="sessions">
@@ -138,13 +147,15 @@
     <h2>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_images_h"}}{{else}}{{$.L.T "settings.del_account_h"}}{{end}}</h2>
     <p class="muted small">{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_text_helink"}}{{else}}{{$.L.T "settings.del_text"}}{{end}} {{$.L.T "settings.del_links"}}</p>
     <form method="post" action="/settings/delete-account" data-confirm="{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_confirm_helink"}}{{else}}{{$.L.T "settings.del_confirm"}}{{end}}" data-confirm-danger>
-      {{if $d.HasPass}}
+      {{if and $d.HasPass (not $hub)}}
       <div class="field"><label for="del-pw">{{$.L.T "settings.del_pw"}}</label><input type="password" id="del-pw" name="password" autocomplete="current-password" required></div>
       {{else}}
       <div class="field"><label for="del-confirm">{{$.L.T "settings.del_email"}}</label><input type="text" id="del-confirm" name="confirm" required></div>
       {{end}}
+      {{if $hub}}<p class="small faint" style="margin:0 0 10px">{{$.L.T "settings.del_reauth"}}</p>{{end}}
       <button class="btn danger" type="submit"><svg><use href="#i-trash"/></svg>{{if $u.HelinkID.Valid}}{{$.L.T "settings.del_btn_helink"}}{{else}}{{$.L.T "settings.del_btn"}}{{end}}</button>
     </form>
+    {{if $hub}}<p class="small muted" style="margin:14px 0 0"><a href="{{.Helink}}/settings#delete-account">{{$.L.T "settings.del_hub_link"}}</a></p>{{end}}
   </div>
   </div>
 </div>

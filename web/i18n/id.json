@@ -1111,5 +1111,12 @@
   "changelog.t_removed": "Dihapus",
   "changelog.t_deprecated": "Usang",
   "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Akun ini masuk lewat HOP ID. Pakai tombol “Lanjutkan dengan HEL.ink” di halaman ini.",
-  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "HOP ID ini tidak bisa dihubungkan ke PixelHop karena e-mailnya sudah dipakai akun PixelHop lain. Hubungi pemilik situs."
+  "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "HOP ID ini tidak bisa dihubungkan ke PixelHop karena e-mailnya sudah dipakai akun PixelHop lain. Hubungi pemilik situs.",
+  "Your profile is managed in HOP ID, not here.": "Profil Anda dikelola di HOP ID, bukan di sini.",
+  "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Masuk HOP ID tadi untuk akun yang berbeda dari yang Anda pakai di sini, jadi tidak ada yang dihapus.",
+  "HOP ID did not confirm that you just signed in, so nothing was deleted. Please try again.": "HOP ID tidak memastikan bahwa Anda baru saja masuk, jadi tidak ada yang dihapus. Silakan coba lagi.",
+  "settings.hub_profile_note": "Nama, foto, username, bio, dan situs web Anda disimpan di HOP ID, jadi sama di setiap aplikasi HOP. Untuk mengubahnya, edit di sana.",
+  "settings.hub_edit": "Edit di HOP ID",
+  "settings.del_reauth": "HOP ID akan meminta Anda masuk sekali lagi sebelum apa pun dihapus.",
+  "settings.del_hub_link": "Hapus akun HOP ID saya"
 }
