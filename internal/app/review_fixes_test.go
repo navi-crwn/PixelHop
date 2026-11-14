@@ -7,6 +7,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 	"testing"
@@ -155,5 +157,34 @@ func TestUploadRefusalStatusDoesNotDependOnTheLanguage(t *testing.T) {
 	}
 	if c := post(key); c != http.StatusTooManyRequests {
 		t.Errorf("rate refusal in Indonesian: %d, want 429", c)
+	}
+}
+
+// "Edit profile" on one's own public page goes to HOP ID for a member whose profile it keeps, and to
+// Settings for everyone else; the trip cookie of the delete confirmation lives five minutes.
+func TestEditProfileLinkFollowsWhoKeepsTheProfile(t *testing.T) {
+	a, h := ssoApp(t)
+	ctx := t.Context()
+	hop := linked(t, a, "81", "edit-hop@example.com")
+	hop.ShowOwner = true
+	a.db.UpdateUser(ctx, hop)
+	plain, _ := member(t, a, "edit-plain@example.com")
+	plain.Username = sql.NullString{String: "plainone", Valid: true}
+	plain.ShowOwner = true
+	a.db.UpdateUser(ctx, plain)
+
+	body := fetch(h, "/u/user81", sessionFor(t, a, hop.ID)).Body.String()
+	if !strings.Contains(body, `href="https://hel.example.com/settings#account"`) {
+		t.Error("a HOP ID member's Edit profile does not go to HOP ID")
+	}
+	body = fetch(h, "/u/plainone", sessionFor(t, a, plain.ID)).Body.String()
+	if !strings.Contains(body, `href="/settings#profile"`) {
+		t.Error("a member without HOP ID lost the Settings link")
+	}
+	rec := post(h, "/settings/delete-account", url.Values{"confirm": {hop.Email}}, sessionFor(t, a, hop.ID))
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == helinkCookie && c.MaxAge != 300 {
+			t.Errorf("trip cookie lives %d s, want 300", c.MaxAge)
+		}
 	}
 }

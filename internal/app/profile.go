@@ -189,6 +189,7 @@ type profileData struct {
 	Total   int
 	Website string
 	Mine    bool
+	EditURL string // where "Edit profile" goes: the hub for a member whose profile HOP ID keeps
 }
 
 func (a *App) profile(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +206,10 @@ func (a *App) profile(w http.ResponseWriter, r *http.Request) {
 	ims, total, _ := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Listed: true, Limit: 120})
 	me := currentUser(r)
 	d := profileData{Owner: a.ownerOf(r.Context(), sql.NullInt64{Int64: u.ID, Valid: true}), User: u, Images: ims, Total: total,
-		Mine: me != nil && me.ID == u.ID}
+		Mine: me != nil && me.ID == u.ID, EditURL: "/settings#profile"}
+	if d.Mine && a.hubOwnsProfile(me) {
+		d.EditURL = a.cfg.HelinkURL + "/settings#account"
+	}
 	if site, err := url.Parse(shownWebsite(u.Website)); err == nil && site.Host != "" {
 		d.Website = strings.TrimPrefix(strings.TrimPrefix(u.Website, "https://"), "http://")
 	}

@@ -200,7 +200,7 @@ func (a *App) helinkStart(w http.ResponseWriter, r *http.Request) {
 func (a *App) helinkReauth(w http.ResponseWriter, r *http.Request) {
 	state := randomToken(24)
 	http.SetCookie(w, &http.Cookie{Name: helinkCookie, Value: state + "|" + helinkModeDelete + "|/settings", Path: "/auth/",
-		HttpOnly: true, Secure: a.cfg.SecureCookies(), SameSite: http.SameSiteLaxMode, MaxAge: 900})
+		HttpOnly: true, Secure: a.cfg.SecureCookies(), SameSite: http.SameSiteLaxMode, MaxAge: 300})
 	q := url.Values{"state": {state}, "return_to": {a.cfg.BaseURL + "/auth/helink/callback"},
 		"max_age": {strconv.Itoa(int(deleteMaxAge.Seconds()))}}
 	http.Redirect(w, r, a.cfg.HelinkURL+"/sso/pixelhop?"+q.Encode(), http.StatusFound)
