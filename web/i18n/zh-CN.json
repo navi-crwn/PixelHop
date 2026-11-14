@@ -1155,5 +1155,9 @@
   "login.hub_sub": "用你的 HOP ID 登录，查看图库、相册和 API 密钥。",
   "register.hub_text": "一个账号通用于所有 HOP 应用。用它登录，或在下一屏免费创建，只需一分钟。",
   "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "读取照片或截图中的文字，可同时识别一种或多种语言。一切都在你的设备上运行，不会从其他网站加载任何内容。",
-  "Only English is installed on this server. The site owner can add more reading languages.": "此服务器只安装了英语。站点所有者可以添加更多识别语言。"
+  "Only English is installed on this server. The site owner can add more reading languages.": "此服务器只安装了英语。站点所有者可以添加更多识别语言。",
+  "palette.label": "配色",
+  "palette.classic": "经典",
+  "palette.mist": "薄雾",
+  "palette.sand": "沙色"
 }

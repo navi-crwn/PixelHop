@@ -63,6 +63,29 @@
   }
 }
 
+/* ---------- colour palettes (family contract: classic = nothing below applies) ----------
+   Mist and Sand change the accent and the surfaces; text and status colours stay. The same values in every
+   HOP app. They only apply on the dashboard shell (html[data-palette] is set by theme.js there).
+   light-dark() picks by color-scheme, which the light and dark rules above set. */
+:root[data-palette="mist"] {
+  --btn-bg: linear-gradient(135deg, light-dark(#4f5bd5, #9aaeff), light-dark(#2f74b8, #86c8f3));
+  --btn-fg: light-dark(#ffffff, #0a1022);
+  --grad: var(--btn-bg); --grad-btn: var(--btn-bg);
+  --accent: light-dark(#3f4fc4, #9aaeff); --on-accent: var(--btn-fg);
+  --lime: light-dark(#3f7d6a, #9ed4c0); --cyan: light-dark(#2f74b8, #86c8f3); --violet: light-dark(#4f5bd5, #9aaeff);
+  --bg: light-dark(#f4f6fc, #0d1120); --panel: light-dark(#ffffff, #141a2e); --panel-2: light-dark(#eef1fa, #1a2138); --bg-2: var(--panel-2);
+  --line: light-dark(#dde2f1, #262e4a); --line-2: color-mix(in srgb, var(--line), var(--text) 14%);
+}
+:root[data-palette="sand"] {
+  --btn-bg: linear-gradient(135deg, light-dark(#b4532a, #f3b48c), light-dark(#a2406f, #ea9fb0));
+  --btn-fg: light-dark(#ffffff, #1b0f0a);
+  --grad: var(--btn-bg); --grad-btn: var(--btn-bg);
+  --accent: light-dark(#a8481f, #f3b48c); --on-accent: var(--btn-fg);
+  --lime: light-dark(#8a6a1f, #e6cf8f); --cyan: light-dark(#a2406f, #ea9fb0); --violet: light-dark(#b4532a, #f3b48c);
+  --bg: light-dark(#faf6f1, #17110d); --panel: light-dark(#ffffff, #1f1814); --panel-2: light-dark(#f5eee6, #271f19); --bg-2: var(--panel-2);
+  --line: light-dark(#ece2d6, #3a2e25); --line-2: color-mix(in srgb, var(--line), var(--text) 14%);
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
@@ -124,7 +147,7 @@ main { flex: 1; padding: 28px 0 64px; }
 .t-sun { display: none; }
 :root[data-theme="light"] .t-sun { display: block; } :root[data-theme="light"] .t-moon { display: none; }
 @media (prefers-color-scheme: light) { :root:not([data-theme]) .t-sun { display: block; } :root:not([data-theme]) .t-moon { display: none; } }
-.avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad-btn, var(--grad)); color: #071016; font-weight: 800; font-size: .8rem; overflow: hidden; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad-btn, var(--grad)); color: var(--btn-fg, #071016); font-weight: 800; font-size: .8rem; overflow: hidden; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .menu { position: relative; }
 .menu > button { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
@@ -156,7 +179,7 @@ main { flex: 1; padding: 28px 0 64px; }
 .btn:hover { text-decoration: none; border-color: color-mix(in srgb, var(--text) 30%, transparent); }
 .btn:active { transform: scale(.97); }
 /* The gradient is laid out once over the whole button (no tiling), so no sliver of its start can show at the right edge. */
-.btn.primary { background: var(--grad-btn, var(--grad)); background-repeat: no-repeat; background-size: 100% 100%; color: #061016; border: 0; }
+.btn.primary { background: var(--grad-btn, var(--grad)); background-repeat: no-repeat; background-size: 100% 100%; color: var(--btn-fg, #061016); border: 0; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.ghost { background: transparent; }
 .btn.danger { color: var(--red); }
@@ -210,7 +233,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); width: 16
 .hero .lead { color: var(--muted); font-size: 1.12rem; max-width: 600px; margin: 0 auto 28px; }
 .eyebrow { display: inline-flex; gap: 8px; align-items: center; padding: 5px 12px 5px 6px; border-radius: 999px; border: 1px solid var(--line-2);
   background: var(--panel); font-size: .82rem; color: var(--muted); margin-bottom: 20px; }
-.eyebrow b { background: var(--grad-btn, var(--grad)); color: #061016; padding: 1px 8px; border-radius: 999px; font-size: .74rem; }
+.eyebrow b { background: var(--grad-btn, var(--grad)); color: var(--btn-fg, #061016); padding: 1px 8px; border-radius: 999px; font-size: .74rem; }
 
 .hero-intro { margin-bottom: 26px; }
 .hero-intro .lead { margin-bottom: 0; }

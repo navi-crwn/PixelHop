@@ -1,5 +1,5 @@
 {{define "base"}}<!doctype html>
-<html lang="{{.L.Code}}" dir="{{.L.Dir}}"{{if .UIClean}} data-ui="clean"{{end}}>
+<html lang="{{.L.Code}}" dir="{{.L.Dir}}"{{if .UIClean}} data-ui="clean"{{end}}{{if .Dash}} data-shell{{end}}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -60,7 +60,24 @@
     <nav class="shell-nav shell-family" aria-label="{{.L.T "dash.family"}}">
       {{range hopFamily}}<a href="{{if $.SSO}}{{$.Helink}}/{{if eq .Slug "hub"}}dashboard{{else}}apps/{{.Slug}}{{end}}{{else}}{{.URL}}{{end}}"><img src="{{(index .Icons "mark").URL}}" alt="" width="18" height="18" loading="lazy">{{if eq .Slug "hub"}}HOP ID{{else}}{{.Name}}{{end}}<svg class="out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></svg></a>{{end}}
     </nav>
-    <p class="shell-side-foot"><a href="/changelog">{{.L.T "changelog.title"}}</a> · <a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a></p>
+    <div class="shell-pal" role="group" aria-label="{{.L.T "palette.label"}}">
+      <p class="shell-label">{{.L.T "palette.label"}}</p>
+      <div class="pal-row">
+        <button type="button" data-palette="" aria-pressed="true"><i class="sw-classic"></i><span>{{.L.T "palette.classic"}}</span></button>
+        <button type="button" data-palette="mist" aria-pressed="false"><i class="sw-mist"></i><span>{{.L.T "palette.mist"}}</span></button>
+        <button type="button" data-palette="sand" aria-pressed="false"><i class="sw-sand"></i><span>{{.L.T "palette.sand"}}</span></button>
+      </div>
+    </div>
+    <nav class="shell-side-foot" aria-label="{{.Site}}">
+      <ul class="foot-list">
+        <li><a href="/help">{{.L.T "footer.help"}}</a></li>
+        <li><a href="/legal#terms">{{.L.T "footer.terms"}}</a></li>
+        <li><a href="/legal#privacy">{{.L.T "legal.privacy_title"}}</a></li>
+        <li><a href="/changelog">{{.L.T "changelog.title"}}</a></li>
+        <li><a href="https://github.com/navi-crwn/pixelhop" rel="noopener">GitHub</a></li>
+        <li><a href="https://hel.ink/announcements" rel="noopener">{{.L.T "announce.title"}}</a></li>
+      </ul>
+    </nav>
     <a class="part-of" href="https://hel.ink" rel="noopener">{{with hubMark}}<img src="{{.}}" alt="" width="20" height="20" loading="lazy">{{end}}<span>{{partOf (.L.T "footer.part_of")}}</span></a>
   </aside>
   <div class="shell-body">

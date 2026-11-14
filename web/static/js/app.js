@@ -72,6 +72,21 @@
     if (window.hopTheme) window.hopTheme(root.dataset.theme); // the family cookie hop_theme (theme.js)
     try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
   });
+  // Colour palette: one choice for the whole family, kept in the hop_palette cookie (theme.js reads it before paint).
+  (function () {
+    var btns = $$('button[data-palette]'); if (!btns.length) return;
+    var root = document.documentElement;
+    function mark(v) { btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.palette === v)); }); }
+    mark(root.dataset.palette || '');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.dataset.palette;
+        if (v) root.dataset.palette = v; else root.removeAttribute('data-palette');
+        if (window.hopPref) window.hopPref('hop_palette', v || 'classic');
+        mark(v);
+      });
+    });
+  })();
   // The phone navigation: the burger opens it, a tap outside, a chosen link or Escape closes it.
   var nav = $('#nav'), burger = $('#burger');
   function setNav(open) {

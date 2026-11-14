@@ -1155,5 +1155,9 @@
   "login.hub_sub": "Connectez-vous avec votre HOP ID pour voir votre galerie, vos albums et vos clés d’API.",
   "register.hub_text": "Un compte pour toutes les apps HOP. Connectez-vous avec lui ou créez-le sur l’écran suivant : c’est gratuit et rapide.",
   "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "Lit le texte d’une photo ou d’une capture, dans une langue ou plusieurs mélangées. Tout s’exécute sur votre appareil ; rien n’est chargé depuis d’autres sites.",
-  "Only English is installed on this server. The site owner can add more reading languages.": "Seul l’anglais est installé sur ce serveur. Le propriétaire du site peut ajouter d’autres langues de lecture."
+  "Only English is installed on this server. The site owner can add more reading languages.": "Seul l’anglais est installé sur ce serveur. Le propriétaire du site peut ajouter d’autres langues de lecture.",
+  "palette.label": "Couleurs",
+  "palette.classic": "Classique",
+  "palette.mist": "Brume",
+  "palette.sand": "Sable"
 }
