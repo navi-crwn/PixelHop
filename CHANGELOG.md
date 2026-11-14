@@ -15,6 +15,8 @@ What changed in PixelHop, newest release first. Each entry says what changed, wh
 - **Dashboard sidebar.** The links at the bottom are now one list going down: Help, Terms, Privacy, Changelog, GitHub and Announcement, then "Part of Hop Easy Link". On a short screen the sidebar scrolls so the last line can always be reached.
 - **Studio, Image to text.** The text-reading engine and the English reading model now come with PixelHop itself, so using it no longer downloads anything from other websites and works the same way for everyone. Other reading languages are offered only when the site owner has installed them; the owner adds a language with one command, and the studio then lists exactly the languages that are installed. Before, the first use downloaded the engine and about 2 to 15 MB per language from outside sites, and the language list showed 30 languages whether they worked or not. The program file grows by about 7 MB.
 
+- **Studio, Remove background.** Background removal now always runs on the server, as the other AI tools already do, so nothing is downloaded from other websites any more and no browser permission for running downloaded code is needed. If you are not signed in, the panel asks you to sign in; on a site without an AI service it says the tool is not set up there, instead of showing a button that cannot work. The "On this device" choice is gone. Why: it needed a 40 MB download from an outside site and an AGPL-licensed library, and it made the studio's security rules weaker.
+
 ### Removed
 - **Project files.** The old seven-language website builder is gone. It was no longer used and running it by mistake would have overwritten the current website with an outdated one.
 
