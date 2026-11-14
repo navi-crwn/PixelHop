@@ -121,6 +121,14 @@ func (a *App) publicRedirectAllowed(r *http.Request, im *db.Image) bool {
 	return !im.Hidden && !im.Locked() && im.ExpiresAt == 0 && !r.URL.Query().Has("download") && !a.mediaHasWarning(r, im)
 }
 
+// ownsItsObject reports whether no other row stores the same file. A file several uploads share has the
+// public address of the first uploader's link id in its name; sending anyone else's visitors there would
+// hand out that id, so those are served by the app. When it cannot be told, the app serves it too.
+func (a *App) ownsItsObject(r *http.Request, im *db.Image) bool {
+	n, err := a.db.CountKeyRefs(r.Context(), im.KeyFull)
+	return err == nil && n <= 1
+}
+
 func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, key, mime string) {
 	b := a.backends[im.Backend]
 	if b == nil {
@@ -159,7 +167,7 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 		h.Set("Content-Disposition", `attachment; filename="`+name+`"`)
 	}
 
-	if s3, ok := b.(*storage.S3); ok && a.publicRedirectAllowed(r, im) {
+	if s3, ok := b.(*storage.S3); ok && a.publicRedirectAllowed(r, im) && a.ownsItsObject(r, im) {
 		if pub := s3.PublicURL(key); pub != "" {
 			http.Redirect(w, r, pub, http.StatusFound)
 			return

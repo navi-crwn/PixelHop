@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
@@ -68,5 +69,33 @@ func TestLinkingByEmailRevokesKeysAndWebhooks(t *testing.T) {
 	callback(h, c2, signTicket(ticketFor(st2), testSecret))
 	if keys, _ := a.db.APIKeys(ctx, old.ID); len(keys) != 1 {
 		t.Fatalf("a later sign-in revoked the member's new key: %d", len(keys))
+	}
+}
+
+// On S3 with a public address, a file shared by several rows is served by the app: the redirect would carry
+// the first uploader's link id in its address.
+func TestSharedS3FileIsNotRedirectedToAnotherUploadersAddress(t *testing.T) {
+	a := s3App(t)
+	h := a.Handler()
+	ctx := t.Context()
+	ua, _ := member(t, a, "s3share-a@example.com")
+	ub, _ := member(t, a, "s3share-b@example.com")
+	mk := func(id string, uid int64, key string) {
+		im := &db.Image{ID: id, UserID: sql.NullInt64{Int64: uid, Valid: true}, Mime: "image/jpeg", Ext: "jpg", Backend: "s3", KeyFull: key, KeyThumb: key + "_t"}
+		if err := a.db.InsertImage(ctx, im); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mk("alone", ua.ID, "2026/11/14/alone.jpg")
+	if rec := fetch(h, "/i/alone.jpg"); rec.Code != http.StatusFound {
+		t.Fatalf("a file only one row stores should still redirect: %d", rec.Code)
+	}
+	mk("first", ua.ID, "2026/11/14/first.jpg")
+	mk("second", ub.ID, "2026/11/14/first.jpg")
+	for _, id := range []string{"first", "second"} {
+		rec := fetch(h, "/i/"+id+".jpg")
+		if rec.Code != http.StatusOK || rec.Header().Get("Location") != "" || rec.Body.String() != "synthetic" {
+			t.Fatalf("/i/%s: %d %q location=%q, want the app to serve it", id, rec.Code, rec.Body.String(), rec.Header().Get("Location"))
+		}
 	}
 }
