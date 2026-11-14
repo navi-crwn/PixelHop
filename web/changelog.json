@@ -1,9 +1,82 @@
 {
   "schema": 2,
   "sources": {
-    "PixelHop": "3.11.4"
+    "PixelHop": "3.12.0"
   },
   "entries": [
+    {
+      "kind": "tag",
+      "date": "2026-11-14T00:00:00Z",
+      "title": "HOP ID accounts, Edit in studio and shared files",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.12.0",
+      "id": "v3.12.0",
+      "app": "PixelHop",
+      "repo": "PixelHop",
+      "version": "3.12.0",
+      "summary": "",
+      "items": [
+        {
+          "type": "added",
+          "where": "Upload results, home page and dashboard",
+          "text": "Every picture you upload, as a guest or signed in, now has an Edit in studio button next to its links, and each picture tile in your dashboard has a small pencil that does the same. Videos and PDFs do not get one because the studio only opens pictures. Before, you had to open the picture's own page to find Edit. The button asks the server for the file directly, so it also works when files live on an outside storage service."
+        },
+        {
+          "type": "added",
+          "where": "Photo studio",
+          "text": "The four tools that run on the server (background removal, face blur, magic eraser and HD upscale) now show a small line such as \"7 left today\" under their button. The number comes from the server, so a site with other limits shows its own, and it updates after every result. Before, only a fixed note said \"10 per day\" and nobody could tell what was left."
+        },
+        {
+          "type": "added",
+          "where": "Batch page",
+          "text": "The note about the AI steps now also says how many uses of each step are left today and warns you when the day's share is smaller than the number of pictures in a step you chose, so a long batch does not stop halfway without warning."
+        },
+        {
+          "type": "added",
+          "where": "Developer documentation",
+          "text": "The API page and the machine-readable description now explain the daily share of the AI tools: what is left of it on your account and the headers that come with each result."
+        },
+        {
+          "type": "added",
+          "where": "Site settings",
+          "text": "A new setting lets the site owner decide whether the same picture uploaded by different people is stored once. It is on by default. People who run PixelHop themselves can turn it off with the setting named PIXELHOP_SHARE_STORAGE."
+        },
+        {
+          "type": "changed",
+          "where": "Settings, Profile",
+          "text": "If you have a HOP ID, your name, photo, username, bio and website are now only shown here, with one Edit at HOP ID button that opens your account settings. Before, you could change them here and your HOP ID changed them back the next time you signed in. People without a HOP ID, and sites that run without HOP ID, edit their profile here as before. The photo you uploaded to PixelHop earlier is no longer shown for HOP ID members, but the file is not deleted."
+        },
+        {
+          "type": "changed",
+          "where": "Settings, Delete",
+          "text": "For people with a HOP ID, the card now deletes your PixelHop pictures and profile only, and it no longer signs you out of every HOP app. It asks you to type your e-mail and then to sign in once more at HOP ID before anything is deleted. If HOP ID cannot confirm that you just signed in, nothing is deleted and you are told so. A link to delete the whole HOP ID account is added. Before, deleting here also signed you out of every HOP app and the next visit created an empty account."
+        },
+        {
+          "type": "changed",
+          "where": "Uploads",
+          "text": "When different people upload exactly the same picture, PixelHop now keeps one stored file and gives each person their own link, owner, expiry and delete link. Nobody is told that someone else had the file, and each member's storage still counts the full picture. Deleting one link leaves the others working, and the file goes away with the last one. This saves disk space. Pictures that are already stored are not merged. Taking down one link for moderation still only removes that link."
+        },
+        {
+          "type": "security",
+          "where": "Sign in",
+          "text": "A member who has a HOP ID can no longer sign in to PixelHop with an old PixelHop password or with the direct Google button. Before, the old password skipped the two-step code and the account checks at HOP ID. They are sent to the HOP ID button instead. Members without a HOP ID sign in exactly as before."
+        },
+        {
+          "type": "security",
+          "where": "Linking an older account to HOP ID",
+          "text": "When an older PixelHop account is linked to a HOP ID with the same e-mail address, its old password and Google link are now removed and every browser that was signed in to it is signed out, because that account never proved who owned the e-mail address. The bio, website and username written here are no longer wiped by an empty HOP ID profile on that first link. A HOP ID whose e-mail belongs to an account linked to a different HOP ID, or to another account, is refused with a clear message and nothing is changed or moved. Before, the first case silently moved the account and the second case showed a server error."
+        },
+        {
+          "type": "security",
+          "where": "Sessions",
+          "text": "Browsers that signed in to PixelHop with a password before this release, for accounts that have a HOP ID, are now checked with HOP ID again on their next visit, like any other HOP ID session."
+        },
+        {
+          "type": "fixed",
+          "where": "Messages in your language",
+          "text": "Several messages were shown in English whatever the language: the notice that a password is managed in HOP ID, the messages of the AI tools, the \"file too large\", \"cannot read this photo\", \"damaged file\", \"link could not be downloaded\" and \"picture too large\" messages of uploads, and a few messages of the picture API. They are now translated into all nine languages."
+        }
+      ]
+    },
     {
       "kind": "tag",
       "date": "2026-11-14T00:00:00Z",
