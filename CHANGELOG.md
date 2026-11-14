@@ -4,6 +4,20 @@ What changed in PixelHop, newest release first. Each entry says what changed, wh
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-11-14 - Family announcements, colour choice and text reading that stays on this site
+
+### Added
+- **Dashboard.** When the HOP family has an announcement for PixelHop, it now appears as one card at the top of your dashboard, below the site owner's own notice if there is one. You can close it for a week; an urgent one has no close button. If the announcement service is down or slow the dashboard simply shows no card and loads as fast as ever. Why: one place to announce things to everyone, in every HOP app.
+- **Dashboard sidebar.** A new Colours picker at the bottom of the sidebar lets you choose Classic, Mist or Sand. The choice is remembered in your browser and shared with the other HOP apps on the same account domain, and Classic looks exactly as before. It applies to the dashboard only for now.
+- **Studio and Batch.** You can now open SVG drawings. They are turned into a normal picture in your browser and carry on as a PNG, so nothing in the drawing can run. The server still does not accept SVG files, so only the PNG you make is ever uploaded.
+
+### Changed
+- **Dashboard sidebar.** The links at the bottom are now one list going down: Help, Terms, Privacy, Changelog, GitHub and Announcement, then "Part of Hop Easy Link". On a short screen the sidebar scrolls so the last line can always be reached.
+- **Studio, Image to text.** The text-reading engine and the English reading model now come with PixelHop itself, so using it no longer downloads anything from other websites and works the same way for everyone. Other reading languages are offered only when the site owner has installed them; the owner adds a language with one command, and the studio then lists exactly the languages that are installed. Before, the first use downloaded the engine and about 2 to 15 MB per language from outside sites, and the language list showed 30 languages whether they worked or not. The program file grows by about 7 MB.
+
+### Removed
+- **Project files.** The old seven-language website builder is gone. It was no longer used and running it by mistake would have overwritten the current website with an outdated one.
+
 ## [3.12.0] - 2026-11-14 - HOP ID accounts, Edit in studio and shared files
 
 ### Added
