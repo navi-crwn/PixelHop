@@ -37,7 +37,7 @@
 {{with .JSONLD}}<script type="application/ld+json">{{.}}</script>
 {{end}}{{block "head" .}}{{end}}
 </head>
-<body>
+<body{{if .User}} data-member="1"{{end}}>
 <a class="skip" href="#main">{{.L.T "nav.skip"}}</a>
 {{template "icons"}}
 {{if not .Dash}}{{with .Announcement}}<div class="announce">{{.}}</div>{{end}}{{end}}

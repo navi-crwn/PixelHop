@@ -1009,7 +1009,7 @@
       if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]') && e.key !== '?') return;
       switch (e.key) {
         case '?': e.preventDefault(); help(); break;
-        case 'u': var pick = $('[data-pick-files]') || $('#drop-in'); if (pick) { e.preventDefault(); if (pick.click) pick.click(); } else location.href = '/'; break;
+        case 'u': var pick = $('[data-pick-files]') || $('#drop-in'); if (pick) { e.preventDefault(); if (pick.click) pick.click(); } else location.href = document.body.dataset.member ? '/dashboard#upload' : '/'; break;
         case 's': location.href = '/tools'; break;
         case 'd': location.href = '/dashboard'; break;
         case '/': var q = $('input[type=search]'); if (q) { e.preventDefault(); q.focus(); } break;

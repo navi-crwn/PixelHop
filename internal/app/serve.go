@@ -377,6 +377,7 @@ type albumData struct {
 	Album      *db.Album
 	Images     []*db.Image
 	Owner      bool
+	Own        bool // the person looking is the album's owner (not just a moderator): they get a link back to My albums
 	Link       string
 	GatePassed bool
 }
@@ -432,7 +433,7 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, r, "album", page{Title: title, Canon: a.albumURL(al.ID), OGImage: og,
 		Desc: desc, NoIndex: al.HasWarning() || anyWarning(live),
-		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: mine, By: by, GatePassed: gatePassed}})
+		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: mine, Own: u != nil && al.UserID.Valid && al.UserID.Int64 == u.ID, By: by, GatePassed: gatePassed}})
 }
 
 // anyWarning reports whether any of the images carries a content warning.
