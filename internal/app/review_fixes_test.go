@@ -99,3 +99,24 @@ func TestSharedS3FileIsNotRedirectedToAnotherUploadersAddress(t *testing.T) {
 		}
 	}
 }
+
+// A row whose file is gone is not a source to share: the new upload stores its own file and works.
+func TestUploadDoesNotShareAFileThatIsGone(t *testing.T) {
+	a, h := ssoApp(t)
+	ctx := t.Context()
+	_, ka := member(t, a, "gone-a@example.com")
+	_, kb := member(t, a, "gone-b@example.com")
+	png := testPNG(77, 55)
+	first, _, _ := uploadAs(t, h, ka, png)
+	im, _ := a.db.Image(ctx, first)
+	if err := a.store.Delete(ctx, im.KeyFull); err != nil {
+		t.Fatal(err)
+	}
+	second, _, _ := uploadAs(t, h, kb, png)
+	if keyOf(t, a, second) == im.KeyFull {
+		t.Fatal("the upload was pointed at a file that no longer exists")
+	}
+	if rec := fetch(h, "/i/"+second+".png"); rec.Code != 200 {
+		t.Fatalf("the new upload does not open: %d", rec.Code)
+	}
+}

@@ -429,8 +429,8 @@ func (a *App) shareStoredImage(ctx context.Context, in uploadInput, sha string, 
 	a.shareMu.Lock()
 	defer a.shareMu.Unlock()
 	src, err := a.db.ImageForSharing(ctx, sha, a.store.Name())
-	if err != nil {
-		return nil, "", false, nil
+	if err != nil || !a.objectsExist(ctx, src) {
+		return nil, "", false, nil // nothing to share, or its file is gone: store this upload as a new file
 	}
 	im = &db.Image{
 		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
@@ -488,6 +488,22 @@ func (a *App) localizedError(ctx context.Context, msg string) string {
 		}
 	}
 	return a.trc(ctx, msg)
+}
+
+// objectsExist reports whether the stored file and thumbnail of a row are really there.
+func (a *App) objectsExist(ctx context.Context, im *db.Image) bool {
+	b := a.backends[im.Backend]
+	if b == nil {
+		return false
+	}
+	for _, k := range []string{im.KeyFull, im.KeyThumb} {
+		obj, err := b.Get(ctx, k, "")
+		if err != nil {
+			return false
+		}
+		obj.Body.Close()
+	}
+	return true
 }
 
 // normalize converts HEIC/AVIF to JPEG/PNG through the AI service and
