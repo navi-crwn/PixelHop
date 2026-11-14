@@ -253,6 +253,10 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	// seconds) and how many results it has given. In the database so a restart does not hand the day back.
 	`CREATE TABLE IF NOT EXISTS ai_day (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, tool TEXT NOT NULL,
 	start_at INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (user_id, tool));`,
+	// 20: sessions of members who have a HOP ID that were opened with a local password or Google (-1,
+	// never checked with the hub) become "never verified" (0), so the hub vouches for them on the next
+	// visit like any other HOP ID session. Sessions of accounts without a HOP ID are left alone.
+	`UPDATE sessions SET verified_at=0 WHERE verified_at=-1 AND user_id IN (SELECT id FROM users WHERE helink_id IS NOT NULL);`,
 }
 
 func (d *DB) migrate() error {
