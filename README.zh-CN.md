@@ -279,7 +279,7 @@ deploy/           nginx 和 systemd 示例
 
 <details><summary>工坊真的是私密的吗？</summary>
 
-编辑在你的设备上用 Canvas 和 WebAssembly 完成。第一次使用文字识别或去除背景时，浏览器会从 jsDelivr 下载 [tesseract.js](https://github.com/naptha/tesseract.js) 和 [@imgly/background-removal](https://github.com/imgly/background-removal-js)，并从 tessdata.projectnaptha.com 和 staticimgly.com 下载语言数据和模型。除非你按下“上传结果”，图片不会发送到任何地方。如果自托管的服务器设置了更严格的内容安全策略，需要放行这些地址。
+编辑在你的设备上用 Canvas 和 WebAssembly 完成。文字识别（PixelHop 自带的 [tesseract.js](https://github.com/naptha/tesseract.js)）同样在你的设备上运行，开箱即可识别英文；要识别其他语言，用 `scripts/ocr-language.sh deu fra jpn` 把模型文件放进 `PIXELHOP_DATA/tessdata`（它从 tessdata 官方来源下载；工坊随后只提供已安装的语言）。去除背景、人脸模糊、橡皮擦和放大在你服务器的 AI 服务（`PIXELHOP_REMBG_URL`）上运行，并需要登录账号，所以这些图片会发送到你的服务器。除此之外，除非你点击上传结果，图片不会被发送到任何地方，工坊也不会从其他网站加载任何内容。
 </details>
 
 <details><summary>可以关闭访客上传或注册吗？</summary>
@@ -331,6 +331,6 @@ PixelHop 属于 HOP 家族：注重隐私、可自托管的开源应用。
 
 - [MIT](LICENSE.md)，版权归 Ivan Novskies (navi-crwn) 所有。第三方组件列在 [CREDITS.md](CREDITS.md) 中。
 - 基于 [Go](https://go.dev)、[modernc.org/sqlite](https://gitlab.com/cznic/sqlite)、[golang.org/x/image](https://pkg.go.dev/golang.org/x/image) 和 [rsc.io/qr](https://pkg.go.dev/rsc.io/qr) 构建。
-- 工坊按需加载 [tesseract.js](https://github.com/naptha/tesseract.js)（Apache-2.0）和 [@imgly/background-removal](https://github.com/imgly/background-removal-js)（AGPL-3.0，未修改，来自 jsDelivr）。
+- 工坊自带 [tesseract.js](https://github.com/naptha/tesseract.js)（Apache-2.0）。去除背景在服务器上运行（rembg，MIT）；不使用也不加载任何 AGPL 代码。
 
 同一作者的其他项目：[Amnesia](https://github.com/navi-crwn/amnesia)，一台在注销时会遗忘一切的 Mac。

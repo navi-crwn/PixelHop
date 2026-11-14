@@ -14,3 +14,19 @@ window.hopTheme = function (t) {
   }
   if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
 })();
+
+// The colour palette (classic | mist | sand) is one family setting in the cookie hop_palette, written like
+// hop_theme. It is applied as <html data-palette> before the page paints, and only on the dashboard shell
+// (the page marks itself data-shell); anything else, or no cookie, is classic (no attribute).
+window.hopPref = function (name, value) {
+  try {
+    document.cookie = name + '=' + encodeURIComponent(value) + '; Path=/; Max-Age=31536000; SameSite=Lax' +
+      (/(^|\.)hel\.ink$/.test(location.hostname) ? '; domain=.hel.ink; Secure' : '');
+  } catch (e) {}
+};
+(function () {
+  try {
+    var m = /(?:^|;\s*)hop_palette=([^;]*)/.exec(document.cookie), p = m ? decodeURIComponent(m[1]) : '';
+    if ((p === 'mist' || p === 'sand') && document.documentElement.hasAttribute('data-shell')) document.documentElement.dataset.palette = p;
+  } catch (e) {}
+})();

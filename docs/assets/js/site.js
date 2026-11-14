@@ -1,5 +1,5 @@
 // PixelHop website: theme, language menu, tabs, copy buttons, nav shadow, reveal on scroll.
-// Each language is its own page (built by site/build.py); the theme is picked before paint in <head>.
+// Each language is its own page (rendered by docs/.render.mjs); the theme is picked before paint in <head>.
 (function () {
   var root = document.documentElement;
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }

@@ -14,6 +14,24 @@
 .shell-label { margin: 14px 12px 6px; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
 .shell-side-foot { margin: auto 0 0; padding: 12px 12px 4px; border-top: 1px solid var(--line); font-size: .78rem; color: var(--faint); }
 .shell-side-foot a { color: inherit; }
+/* The foot is a list going down (Help, Terms, Privacy, Changelog, GitHub, Announcement), then "Part of". The sidebar
+   scrolls by itself when a short screen cannot show it all, so the last line can always be reached. */
+.shell-side-foot .foot-list { list-style: none; margin: 0; padding: 0; }
+.shell-side-foot .foot-list a { display: block; line-height: 28px; }
+/* The family colour picker, above the foot. */
+.shell-pal { padding: 12px 12px 2px; margin-top: auto; }
+.shell-pal + .shell-side-foot { margin-top: 8px; }
+.shell-pal .shell-label { margin: 0 0 6px; }
+.pal-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pal-row button { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; padding: 6px 4px; border: 1px solid var(--line-2); border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-size: .72rem; cursor: pointer; }
+.pal-row button:hover { color: var(--text); background: var(--panel-2); }
+.pal-row button[aria-pressed="true"] { color: var(--text); border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+.pal-row button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pal-row i { width: 18px; height: 18px; border-radius: 50%; flex: none; }
+.pal-row span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sw-classic { background: linear-gradient(135deg, #a3e635, #22d3ee, #8b5cf6); }
+.sw-mist { background: linear-gradient(135deg, #4f5bd5, #86c8f3); }
+.sw-sand { background: linear-gradient(135deg, #b4532a, #ea9fb0); }
 /* "Part of Hop Easy Link": the last line of the sidebar, left-aligned with the menu items. */
 .shell-side .part-of { margin: 0; padding: 10px 12px 4px; }
 .shell-side-foot a:hover { color: var(--text); }

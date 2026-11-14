@@ -279,7 +279,7 @@ deploy/           nginx- und systemd-Beispiele
 
 <details><summary>Ist das Studio wirklich privat?</summary>
 
-Die Bearbeitung läuft auf deinem Gerät mit Canvas und WebAssembly. Wenn du Texterkennung oder Hintergrundentfernung zum ersten Mal benutzt, lädt der Browser [tesseract.js](https://github.com/naptha/tesseract.js) und [@imgly/background-removal](https://github.com/imgly/background-removal-js) von jsDelivr und deren Sprachdaten und Modelle von tessdata.projectnaptha.com und staticimgly.com. Dein Bild wird nirgendwohin gesendet, solange du nicht „Ergebnis hochladen“ drückst. Ein selbst gehosteter Server, der eine strengere Content Security Policy setzt, muss diese Adressen erlauben.
+Die Bearbeitung läuft auf deinem Gerät mit Canvas und WebAssembly. Die Texterkennung ([tesseract.js](https://github.com/naptha/tesseract.js), in PixelHop enthalten) läuft ebenfalls auf deinem Gerät und liest Englisch von Haus aus; für weitere Sprachen legst du die Modelldateien mit `scripts/ocr-language.sh deu fra jpn` in `PIXELHOP_DATA/tessdata` ab (das Skript lädt sie aus der offiziellen tessdata-Quelle; das Studio bietet dann genau die installierten Sprachen an). Hintergrundentfernung, Gesichtsunkenntlichmachung, Radierer und Hochskalierung laufen im KI-Dienst deines Servers (`PIXELHOP_REMBG_URL`) und brauchen ein angemeldetes Konto, diese Bilder gehen also an deinen Server. Sonst wird dein Bild nirgendwohin gesendet, solange du nicht „Ergebnis hochladen“ drückst, und das Studio lädt nichts von anderen Websites.
 </details>
 
 <details><summary>Kann ich Gast-Uploads oder Registrierungen abschalten?</summary>
@@ -331,6 +331,6 @@ PixelHop gehört zur HOP-Familie datenschutzfreundlicher, selbst hostbarer Open-
 
 - [MIT](LICENSE.md), Copyright Ivan Novskies (navi-crwn). Teile von Drittanbietern stehen in [CREDITS.md](CREDITS.md).
 - Gebaut mit [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) und [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- Das Studio lädt bei Bedarf [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) und [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, unverändert, von jsDelivr).
+- Das Studio enthält [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). Die Hintergrundentfernung läuft auf dem Server (rembg, MIT); es wird kein AGPL-Code verwendet oder geladen.
 
 Mehr vom selben Autor: [Amnesia](https://github.com/navi-crwn/amnesia), ein Mac, der beim Abmelden alles vergisst.

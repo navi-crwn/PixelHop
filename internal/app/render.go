@@ -40,7 +40,8 @@ type page struct {
 	UIClean       bool // optional "Clean" style: cookie hop_ui=clean puts data-ui="clean" on <html>
 	Dash          bool // the signed-in dashboard shell (sidebar, settings-type top bar)
 	Announcement  string
-	AnnounceID    string // names this wording, so a closed card comes back when the text changes
+	FamAnn        *FamilyAnnouncement // the hub's family announcement (dashboard card)
+	AnnounceID    string              // names this wording, so a closed card comes back when the text changes
 	Version       string
 	Asset         string // cache-busting query for /static files
 	Google        bool
@@ -49,6 +50,7 @@ type page struct {
 	Control       string // HOP control center, shown to admins when configured
 	Turnstile     string // Turnstile site key, when forms are protected
 	RembgServer   bool   // background removal can run on the server
+	OCRLangs      string // reading languages this server has, comma separated (studio)
 	GuestUploads  bool
 	GuestTTLDays  int // lifetime of a new guest upload, shown to guests (0 = none)
 	MaxMB         int64
@@ -197,6 +199,9 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/") ||
 		p.Path == "/tools" || p.Path == "/tools/batch") // the studio is part of the dashboard for a signed-in member
+	if p.Dash {
+		p.FamAnn = a.familyAnnouncement()
+	}
 	if strings.HasPrefix(name, "admin") || privatePages[name] || p.Dash {
 		p.NoIndex = true
 	}
@@ -217,17 +222,11 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	if a.cfg.HelinkURL != "" {
 		formHelink = " " + a.cfg.HelinkURL
 	}
-	// The studio's background remover (onnxruntime-web) compiles code at run
-	// time, so only that page may use eval. It shows no other people's content.
-	eval := ""
-	if name == "tools" || name == "batch" {
-		eval = " 'unsafe-eval'"
-	}
 	// https://hel.ink serves the HOP family fonts (style-src, font-src) and app marks (img-src https:), and one
 	// script: the family's hop-ui.js (base.html), always with its SRI hash.
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline' https://hel.ink; "+
-		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://hel.ink https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
-		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
+		"script-src 'self' 'wasm-unsafe-eval' https://hel.ink https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; "+
+		"connect-src 'self' blob: data:; "+
 		"font-src 'self' https://hel.ink; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {
 		h.Set("Cache-Control", "private, no-store")
@@ -257,7 +256,7 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) tools(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "tools", page{Title: "Photo studio",
+	a.renderPage(w, r, "tools", page{Title: "Photo studio", OCRLangs: joinLangs(a.ocrLanguages()),
 		Desc: "Compress, resize, crop, convert, read text (OCR), remove backgrounds, blur faces and pick colors, privately in your browser."})
 }
 

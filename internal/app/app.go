@@ -52,7 +52,9 @@ type App struct {
 	hopMediaSlots hopSlots
 	quota         quotaLocks
 	space         func(string) (int64, int64)
-	hubUp         func() bool // is HEL.ink reachable (cached); replaced in tests
+	famAnn        famAnnCache  // the hub's family announcement, kept five minutes
+	annClient     *http.Client // replaced in tests
+	hubUp         func() bool  // is HEL.ink reachable (cached); replaced in tests
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
@@ -120,6 +122,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /t/{file}", a.serveThumb)
 	mux.HandleFunc("GET /qr/{id}", a.qr)
 	mux.Handle("GET /static/", a.static)
+	mux.HandleFunc("GET /tessdata/{file}", a.tessdata)
 	mux.HandleFunc("GET /favicon.ico", a.favicon)
 	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
 	mux.HandleFunc("GET /sw.js", a.serviceWorker)

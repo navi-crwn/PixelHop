@@ -27,7 +27,7 @@
 
   function add(files) {
     Array.prototype.forEach.call(files, function (f) {
-      if (!/^image\//.test(f.type) || items.length >= 200) return;
+      if (!(/^image\//.test(f.type) || window.phIsSvg(f)) || items.length >= 200) return;
       var row = document.createElement('div'); row.className = 'up';
       var img = document.createElement('img'); img.className = 'thumb'; img.alt = ''; img.src = URL.createObjectURL(f);
       var meta = document.createElement('div'); meta.className = 'meta';
@@ -146,7 +146,7 @@
     if (it.out) return Promise.resolve(it);
     var size = +$('#b-size').value, fmt = $('#b-format').value, q = +$('#b-quality').value / 100;
     state(it, T('Working…'));
-    return createImageBitmap(it.file, { imageOrientation: 'from-image' }).then(function (bmp) {
+    return window.phBitmap(it.file, { imageOrientation: 'from-image' }).then(function (bmp) {
       var c = toCanvas(bmp), step = Promise.resolve(c);
       if ($('#b-upscale').checked) step = step.then(function (c) { var mp = c.width * c.height / 1e6; state(it, T('Upscaling…')); return ai('upscale', mp > 1 ? shrink(c, Math.floor(Math.max(c.width, c.height) / Math.sqrt(mp))) : c); });
       if ($('#b-rembg').checked) step = step.then(function (c) { state(it, T('Removing background…')); return ai('remove-background', c); });
@@ -154,7 +154,7 @@
       if (size) step = step.then(function (c) { return shrink(c, size); });
       if ($('#b-wm').value.trim()) step = step.then(function (c) { return watermark(c, $('#b-wm').value.trim(), $('#b-wm-pos').value); });
       return step.then(function (c) {
-        var type = fmt || it.file.type;
+        var type = fmt || (window.phIsSvg(it.file) ? 'image/png' : it.file.type);
         if ($('#b-rembg').checked && (type === 'image/jpeg' || !fmt)) type = 'image/png'; // keep the transparency
         if (!EXT[type] || !canEncode(type) || type === 'image/gif') type = 'image/png';
         return blob(c, type, q).then(function (b) {

@@ -11,7 +11,7 @@
         <div class="drop-icon" aria-hidden="true">{{range seq 16}}<i></i>{{end}}</div>
         <h2 style="font-size:1.15rem">{{$.L.T "batch.drop"}}</h2>
         <p class="muted small">{{$.L.T "form.or"}} <button class="btn sm" type="button" id="b-pick">{{$.L.T "batch.choose"}}</button> · {{$.L.T "batch.stay"}}</p>
-        <input type="file" id="b-file" accept="image/*" multiple hidden>
+        <input type="file" id="b-file" accept="image/*,.svg" multiple hidden>
       </div>
       <div class="batch-list" id="b-list"></div>
     </div>
@@ -43,4 +43,4 @@
   </div>
 </div>
 {{end}}
-{{define "scripts"}}<script src="/static/js/batch.js?v={{.Asset}}" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/js/svg.js?v={{.Asset}}" defer></script><script src="/static/js/batch.js?v={{.Asset}}" defer></script>{{end}}

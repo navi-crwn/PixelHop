@@ -279,7 +279,7 @@ deploy/           exemples nginx et systemd
 
 <details><summary>Le studio est-il vraiment privé ?</summary>
 
-L'édition se fait sur votre appareil avec Canvas et WebAssembly. La première fois que vous utilisez la reconnaissance de texte ou la suppression d'arrière-plan, le navigateur télécharge [tesseract.js](https://github.com/naptha/tesseract.js) et [@imgly/background-removal](https://github.com/imgly/background-removal-js) depuis jsDelivr, ainsi que leurs données de langue et leurs modèles depuis tessdata.projectnaptha.com et staticimgly.com. Votre image n'est envoyée nulle part tant que vous n'appuyez pas sur Téléverser le résultat. Un serveur auto-hébergé qui impose une Content Security Policy plus stricte doit autoriser ces adresses.
+L'édition se fait sur votre appareil avec Canvas et WebAssembly. La reconnaissance de texte ([tesseract.js](https://github.com/naptha/tesseract.js), incluse dans PixelHop) s'exécute aussi sur votre appareil et lit l'anglais d'emblée ; pour d'autres langues, placez leurs fichiers de modèle dans `PIXELHOP_DATA/tessdata` avec `scripts/ocr-language.sh deu fra jpn` (il les télécharge depuis la source officielle de tessdata ; le studio propose alors exactement les langues installées). La suppression d'arrière-plan, le floutage des visages, la gomme et l'agrandissement s'exécutent sur le service d'IA de votre serveur (`PIXELHOP_REMBG_URL`) et demandent un compte connecté : ces images sont donc envoyées à votre serveur. Sinon, votre image n'est envoyée nulle part tant que vous n'appuyez pas sur Téléverser le résultat, et le studio ne charge rien depuis d'autres sites.
 </details>
 
 <details><summary>Puis-je désactiver les téléversements d'invités ou les inscriptions ?</summary>
@@ -331,6 +331,6 @@ PixelHop fait partie de la famille HOP d'applications open source, respectueuses
 
 - [MIT](LICENSE.md), copyright Ivan Novskies (navi-crwn). Les composants tiers sont listés dans [CREDITS.md](CREDITS.md).
 - Construit avec [Go](https://go.dev), [modernc.org/sqlite](https://gitlab.com/cznic/sqlite), [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) et [rsc.io/qr](https://pkg.go.dev/rsc.io/qr).
-- Le studio charge à la demande [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0) et [@imgly/background-removal](https://github.com/imgly/background-removal-js) (AGPL-3.0, non modifié, depuis jsDelivr).
+- Le studio inclut [tesseract.js](https://github.com/naptha/tesseract.js) (Apache-2.0). La suppression d'arrière-plan s'exécute sur le serveur (rembg, MIT) ; aucun code AGPL n'est utilisé ni chargé.
 
 Du même auteur : [Amnesia](https://github.com/navi-crwn/amnesia), un Mac qui oublie tout à la déconnexion.

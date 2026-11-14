@@ -1,7 +1,7 @@
 // PixelHop Studio — image tools that run entirely in the browser.
-// Canvas does the pixel work; OCR (tesseract.js, Apache-2.0) and background
-// removal (@imgly/background-removal, AGPL-3.0, loaded unmodified from a CDN)
-// are fetched only when someone opens those tools.
+// Canvas does the pixel work; OCR (tesseract.js, Apache-2.0) is part of this site.
+// Background removal and the other AI tools run on the server (sign-in required).
+// Nothing is loaded from other websites.
 (function () {
   'use strict';
   var $ = function (s, el) { return (el || document).querySelector(s); };
@@ -10,8 +10,9 @@
   var T = window.phT || function (k, v) { return v ? k.replace(/\{(\w+)\}/g, function (m, n) { return n in v ? v[n] : m; }) : k; };
   var tx = function (v) { return typeof v === 'string' ? T(v) : v; };
 
-  var TESSERACT = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
-  var REMBG = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
+  // Tesseract is part of this site (web/static/vendor/tesseract), never loaded from another one.
+  var TESSERACT = '/static/vendor/tesseract/tesseract.min.js?v=5.1.1';
+  var TESSERACT_OPTS = { workerPath: '/static/vendor/tesseract/worker.min.js?v=5.1.1', corePath: '/static/vendor/tesseract/tesseract-core-simd-lstm.wasm.js', langPath: '/tessdata', gzip: true };
 
   var box = $('#st-box'), view = $('#st-canvas'), empty = $('#st-empty'), toolBox = $('#st-tool');
   var cropEl = $('#st-crop'), busyEl = $('#st-busy');
@@ -33,11 +34,11 @@
   function clone(c) { return canvasFrom(c); }
 
   function load(blob, name) {
-    if (!blob || !/^image\//.test(blob.type)) { toast('That is not an image', true); return; }
+    if (!blob || !(/^image\//.test(blob.type) || window.phIsSvg(blob, name))) { toast('That is not an image', true); return; }
     busy('Opening…');
-    createImageBitmap(blob, { imageOrientation: 'from-image' }).then(function (bmp) {
+    window.phBitmap(blob, { imageOrientation: 'from-image' }, name).then(function (bmp) {
       cur = canvasFrom(bmp); original = clone(cur); undo = [];
-      srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = blob.type; srcSize = blob.size;
+      srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = window.phIsSvg(blob, name) ? 'image/png' : blob.type; srcSize = blob.size;
       out.type = null;
       show(); busy(false);
       $('#st-export').classList.remove('hide');
@@ -504,7 +505,7 @@
       }, 'sm ghost hide');
       logoIn.addEventListener('change', function () {
         var f = logoIn.files[0]; if (!f) return;
-        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); logoRm.classList.remove('hide'); draw(); }, function () { toast('That logo could not be opened', true); });
+        window.phBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); logoRm.classList.remove('hide'); draw(); }, function () { toast('That logo could not be opened', true); });
       });
       function render(c) {
         var x = c.getContext('2d'), W = c.width, H = c.height, m = Math.round(Math.min(W, H) * 0.03);
@@ -627,6 +628,12 @@
     ['swe', 'Svenska', 'Swedish'], ['tha', 'ไทย', 'Thai'], ['tur', 'Türkçe', 'Turkish'], ['ukr', 'Українська', 'Ukrainian'],
     ['urd', 'اردو', 'Urdu'], ['vie', 'Tiếng Việt', 'Vietnamese']
   ];
+  // Only the languages this server has the reading model for are offered (English is always there).
+  var OCR_HAVE = (function () {
+    var st = $('#studio'), have = ((st && st.dataset.ocrLangs) || 'eng').split(',').filter(Boolean);
+    return have.indexOf('eng') < 0 ? ['eng'].concat(have) : have;
+  })();
+  OCR_LANGS = OCR_LANGS.filter(function (l) { return OCR_HAVE.indexOf(l[0]) >= 0; });
   var OCR_COMMON = ['eng', 'chi_sim', 'deu', 'spa', 'fra', 'jpn', 'kor', 'por'];
   var OCR_MAX = 5;
   // browser language -> tesseract code, for a sensible first choice
@@ -660,18 +667,20 @@
         });
         grid.appendChild(b);
       });
+      more.hidden = OCR_LANGS.length <= 1 || OCR_LANGS.every(function (l) { return OCR_COMMON.indexOf(l[0]) >= 0 || ocrLangs.indexOf(l[0]) >= 0; });
       more.textContent = showAll ? T('Fewer languages') : T('More languages ({n})', { n: OCR_LANGS.length });
       summary.textContent = T('Reading:') + ' ' + ocrLangs.map(function (c) { var l = OCR_LANGS.filter(function (x) { return x[0] === c; })[0]; return l[2] || l[1]; }).join(' + ') +
         (ocrLangs.length > 2 ? ' · ' + T('more languages read a little slower') : '');
     }
     var more = btn('', function () { showAll = !showAll; draw(); }, 'sm ghost');
     wrap.appendChild(grid); wrap.appendChild(el('div', { style: 'margin-top:6px' }, [more])); wrap.appendChild(summary);
+    if (OCR_LANGS.length <= 1) wrap.appendChild(el('p', { class: 'small muted', style: 'margin:6px 0 0', text: 'Only English is installed on this server. The site owner can add more reading languages.' }));
     draw();
     return wrap;
   }
 
   tools.ocr = {
-    title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.',
+    title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.',
     noResult: true,
     ui: function (p) {
       p.appendChild(field('Languages in the image', ocrLangPicker(), T('pick up to {n}', { n: OCR_MAX })));
@@ -679,9 +688,9 @@
       p.appendChild(btn('Read text', function () {
         busy('Loading the reader…');
         script(TESSERACT).then(function () {
-          return window.Tesseract.recognize(cur, ocrLangs.join('+'), { logger: function (m) {
+          return window.Tesseract.recognize(cur, ocrLangs.join('+'), Object.assign({}, TESSERACT_OPTS, { logger: function (m) {
             if (m.status) busy(m.status.replace(/^\w/, function (c) { return c.toUpperCase(); }) + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
-          } });
+          } }));
         }).then(function (r) {
           // Tesseract spaces out Chinese and Japanese characters; join them again.
           var text = r.data.text.replace(/([\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])[ \t]+(?=[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])/g, '$1');
@@ -721,12 +730,12 @@
   function noteRefused(tool, j) { if (j && typeof j.remaining === 'number') setLeft(tool, j.remaining); }
 
   // ---------- remove background ----------
-  var rembgLib = null;
   var studioEl = $('#studio');
   var serverRembg = studioEl && studioEl.dataset.rembgServer === '1';
   var signedIn = studioEl && studioEl.dataset.signedIn === '1';
-  var rembgWhere = serverRembg && signedIn ? 'server' : 'device';
 
+  // Background removal runs on the server only: with no AI service on this site, or for a guest, the panel says
+  // so (needServer) and offers no button that could not work.
   function rembgOnServer() {
     busy('Removing the background on the server…');
     return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
@@ -742,46 +751,16 @@
   tools.rembg = {
     title: 'Remove background', desc: 'Cut out the subject and make the background transparent.',
     ui: function (p) {
-      if (serverRembg) {
-        p.appendChild(field('Where', seg([['server', 'On our server · fast'], ['device', 'On this device · private']], rembgWhere, function (w) {
-          rembgWhere = w; note.textContent = whereNote(); left.dataset.off = w === 'server' ? '0' : '1'; showLeft(left);
-        })));
-      }
-      var note = el('p', { class: 'small muted', style: 'margin:-6px 0 14px' });
-      var left = aiLine('remove-background'); left.dataset.off = rembgWhere === 'server' && signedIn ? '0' : '1'; showLeft(left);
-      function whereNote() {
-        if (rembgWhere === 'server') return signedIn
-          ? 'About a second. Your image is sent to this server, processed and discarded; it is not stored.'
-          : 'Sign in to use the server. “On this device” works without an account.';
-        return 'Nothing leaves your device. The AI model (about 40 MB) downloads once, then it is cached by your browser.';
-      }
-      note.textContent = whereNote();
-      p.appendChild(note);
+      if (!needServer(p)) return;
+      p.appendChild(el('p', { class: 'small muted', style: 'margin:-6px 0 14px', text: 'About a second. Your image is sent to this server, processed and discarded; it is not stored.' }));
       p.appendChild(btn('Remove background', function () {
-        if (rembgWhere === 'server') {
-          if (!signedIn) { location.href = '/login?next=' + encodeURIComponent('/tools#rembg'); return; }
-          rembgOnServer()
-            .then(function (b) { return createImageBitmap(b); })
-            .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
-            .catch(function (e) { busy(false); toast(e.message, true); });
-          return;
-        }
-        busy('Loading the AI model…');
-        (rembgLib ? Promise.resolve(rembgLib) : import(REMBG).then(function (m) { return (rembgLib = m); }))
-          .then(function (m) {
-            return new Promise(function (res) { cur.toBlob(res, 'image/png'); }).then(function (blob) {
-              return m.removeBackground(blob, { progress: function (key, done, total) {
-                busy((/fetch/.test(key) ? T('Downloading model') : T('Working')) + ' ' + (total ? Math.round(done / total * 100) + '%' : '…'));
-              } });
-            });
-          })
+        rembgOnServer()
           .then(function (b) { return createImageBitmap(b); })
           .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
           .catch(function (e) { busy(false); toast((e && e.message) || T('Background removal failed'), true); });
       }, 'primary'));
-      p.appendChild(left);
+      p.appendChild(aiLine('remove-background'));
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Saved as PNG to keep the transparency. Works best on people, products and animals.' }));
-      p.appendChild(el('p', { class: 'small faint', text: 'On this device: @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr. On the server: rembg (MIT).' }));
     }
   };
 

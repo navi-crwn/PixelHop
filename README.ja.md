@@ -279,7 +279,7 @@ deploy/           nginx と systemd の例
 
 <details><summary>スタジオは本当にプライベートですか。</summary>
 
-編集は Canvas と WebAssembly を使ってあなたのデバイス上で行われます。文字認識や背景除去を初めて使うときは、ブラウザーが jsDelivr から [tesseract.js](https://github.com/naptha/tesseract.js) と [@imgly/background-removal](https://github.com/imgly/background-removal-js) を、tessdata.projectnaptha.com と staticimgly.com から言語データとモデルをダウンロードします。「結果をアップロード」を押さない限り、画像はどこにも送られません。より厳しい Content Security Policy を設定したセルフホストのサーバーでは、これらのアドレスを許可する必要があります。
+編集は Canvas と WebAssembly を使ってあなたのデバイス上で行われます。文字認識（PixelHop に同梱の [tesseract.js](https://github.com/naptha/tesseract.js)）もデバイス上で動き、英語はそのまま読み取れます。他の言語は `scripts/ocr-language.sh deu fra jpn` でモデルファイルを `PIXELHOP_DATA/tessdata` に置いてください（公式の tessdata から取得します。スタジオにはインストール済みの言語だけが表示されます）。背景除去、顔ぼかし、消しゴム、拡大はサーバーの AI サービス（`PIXELHOP_REMBG_URL`）で動き、ログインが必要なため、それらの画像はサーバーに送られます。それ以外は「結果をアップロード」を押さない限り画像はどこにも送られず、スタジオは他のウェブサイトから何も読み込みません。
 </details>
 
 <details><summary>ゲストのアップロードや登録を無効にできますか。</summary>
@@ -331,6 +331,6 @@ PixelHop は、プライバシーを大切にするセルフホスト可能な�
 
 - [MIT](LICENSE.md)、著作権は Ivan Novskies (navi-crwn)。サードパーティの部品は [CREDITS.md](CREDITS.md) に載せています。
 - [Go](https://go.dev)、[modernc.org/sqlite](https://gitlab.com/cznic/sqlite)、[golang.org/x/image](https://pkg.go.dev/golang.org/x/image)、[rsc.io/qr](https://pkg.go.dev/rsc.io/qr) で作られています。
-- スタジオは、必要になったときに [tesseract.js](https://github.com/naptha/tesseract.js)（Apache-2.0）と [@imgly/background-removal](https://github.com/imgly/background-removal-js)（AGPL-3.0、無改変、jsDelivr から）を読み込みます。
+- スタジオには [tesseract.js](https://github.com/naptha/tesseract.js)（Apache-2.0）が同梱されています。背景除去はサーバーで動作し（rembg、MIT）、AGPL のコードは使用も読み込みもされません。
 
 同じ作者の別のプロジェクト: [Amnesia](https://github.com/navi-crwn/amnesia)。ログアウトすると全部忘れる Mac です。

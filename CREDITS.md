@@ -10,12 +10,17 @@
 | rsc.io/qr | BSD-3-Clause | [pkg.go.dev/rsc.io/qr](https://pkg.go.dev/rsc.io/qr) |
 | go-sql-driver/mysql (only for importing PixelHop 2) | MPL-2.0 | [github.com/go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) |
 
-### Loaded in the browser on demand (not bundled)
+### Bundled with the program (web/static/vendor/tesseract)
 
 | Library | License | Used for |
 |---|---|---|
-| [tesseract.js](https://github.com/naptha/tesseract.js) | Apache-2.0 | Image to text (OCR) |
-| [@imgly/background-removal](https://github.com/imgly/background-removal-js) | AGPL-3.0 | Background removal; loaded unmodified from jsDelivr |
+| [tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1 | Apache-2.0 | Image to text (OCR), unmodified |
+| [tesseract.js-core](https://github.com/naptha/tesseract.js-core) 5.1.0 | Apache-2.0 | The WebAssembly OCR engine, unmodified |
+| English model (tessdata 4.0.0_best_int, via @tesseract.js-data/eng 1.0.0) | Apache-2.0 | OCR for English |
+
+The licence texts sit next to the files.
+
+Nothing is loaded from other websites any more. Background removal runs on the server (rembg, MIT); the AGPL-licensed @imgly/background-removal is no longer used.
 
 Icons and the pixel-bunny logo were drawn for PixelHop. The GitHub mark is from Octicons (MIT).
 
