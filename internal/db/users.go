@@ -121,28 +121,101 @@ func (d *DB) UserByHelink(ctx context.Context, id string) (*User, error) {
 	return scanUser(d.QueryRowContext(ctx, `SELECT `+userCols+` FROM users WHERE helink_id=?`, id))
 }
 
-// MergeUsers moves everything from one account into another (images, albums,
-// API keys) and deletes the emptied account. Used to fold an old PixelHop-only
-// account into the person's HEL.ink-linked one.
-func (d *DB) MergeUsers(ctx context.Context, fromID, intoID int64) error {
+// MergePlan is what moving one account into another does (or did): the numbers the owner checks first.
+type MergePlan struct {
+	Images, Albums, APIKeys, Webhooks, Reminders int
+	StorageBytes                                 int64  // what the old account holds
+	Avatar                                       string // "moved", "kept: the new account has its own" or ""
+	Warning                                      bool   // a content warning on the old account moves along
+	QuotaBefore, QuotaAfter                      int64  // of the new account
+	UsedAfter                                    int64  // storage of the new account once merged
+}
+
+func (d *DB) count(ctx context.Context, q string, args ...any) (n int) {
+	d.QueryRowContext(ctx, q, args...).Scan(&n)
+	return
+}
+
+// PlanMerge reads what MergeUsers would move, changing nothing.
+func (d *DB) PlanMerge(ctx context.Context, from, into *User) MergePlan {
+	p := MergePlan{
+		Images:      d.count(ctx, `SELECT COUNT(*) FROM images WHERE user_id=?`, from.ID),
+		Albums:      d.count(ctx, `SELECT COUNT(*) FROM albums WHERE user_id=?`, from.ID),
+		APIKeys:     d.count(ctx, `SELECT COUNT(*) FROM api_keys WHERE user_id=?`, from.ID),
+		Webhooks:    d.count(ctx, `SELECT COUNT(*) FROM webhooks WHERE user_id=?`, from.ID),
+		Reminders:   d.count(ctx, `SELECT COUNT(*) FROM reminders WHERE user_id=? AND key NOT IN (SELECT key FROM reminders WHERE user_id=?)`, from.ID, into.ID),
+		QuotaBefore: into.QuotaBytes, Warning: from.Warning != "" && into.Warning == "",
+	}
+	p.StorageBytes, _ = d.UserStorage(ctx, from.ID)
+	own, _ := d.UserStorage(ctx, into.ID)
+	p.UsedAfter = own + p.StorageBytes
+	p.QuotaAfter = max(into.QuotaBytes, from.QuotaBytes, p.UsedAfter)
+	switch {
+	case from.AvatarKey == "":
+	case into.AvatarKey == "":
+		p.Avatar = "moved"
+	default:
+		p.Avatar = "kept: the new account has its own"
+	}
+	return p
+}
+
+// MergeUsers moves everything from one account into another in one step: images, albums, API keys,
+// webhooks, hidden reminder cards, the profile photo (when the new account has none), a content warning,
+// and the larger of the two quotas (never less than what the merged account now stores). The old account is
+// then deleted, which ends its sessions and removes its password and Google link with it. It refuses an
+// old account that is linked to a HOP ID of its own.
+func (d *DB) MergeUsers(ctx context.Context, fromID, intoID int64) (MergePlan, error) {
+	from, err := d.UserByID(ctx, fromID)
+	if err != nil {
+		return MergePlan{}, err
+	}
+	into, err := d.UserByID(ctx, intoID)
+	if err != nil {
+		return MergePlan{}, err
+	}
+	if from.HelinkID.Valid {
+		return MergePlan{}, errors.New("the old account is linked to a HOP ID of its own; nothing was moved")
+	}
+	plan := d.PlanMerge(ctx, from, into)
 	tx, err := d.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return MergePlan{}, err
 	}
 	defer tx.Rollback()
 	for _, q := range []string{
 		`UPDATE images SET user_id=? WHERE user_id=?`,
 		`UPDATE albums SET user_id=? WHERE user_id=?`,
 		`UPDATE api_keys SET user_id=? WHERE user_id=?`,
+		`UPDATE webhooks SET user_id=? WHERE user_id=?`,
+		`UPDATE OR IGNORE reminders SET user_id=? WHERE user_id=?`,
 	} {
 		if _, err := tx.ExecContext(ctx, q, intoID, fromID); err != nil {
-			return err
+			return MergePlan{}, err
 		}
 	}
-	if _, err := tx.ExecContext(ctx, `DELETE FROM users WHERE id=?`, fromID); err != nil {
-		return err
+	avatar, warning := into.AvatarKey, into.Warning
+	if avatar == "" {
+		avatar = from.AvatarKey
 	}
-	return tx.Commit()
+	if warning == "" {
+		warning = from.Warning
+	}
+	role := into.Role
+	if from.Role == "admin" {
+		role = "admin"
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE users SET avatar_key=?, warning=?, quota_bytes=?, role=? WHERE id=?`, avatar, warning, plan.QuotaAfter, role, intoID); err != nil {
+		return MergePlan{}, err
+	}
+	// The old photo now belongs to the new account: clear it so deleting the old row cannot be mistaken for a purge.
+	if _, err := tx.ExecContext(ctx, `UPDATE users SET avatar_key='' WHERE id=?`, fromID); err != nil {
+		return MergePlan{}, err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM users WHERE id=?`, fromID); err != nil {
+		return MergePlan{}, err
+	}
+	return plan, tx.Commit()
 }
 
 func (d *DB) Users(ctx context.Context, search string, limit, offset int) ([]*User, int, error) {

@@ -97,7 +97,9 @@ Usage:
   pixelhop user add EMAIL [--admin]    create an account (asks for a password)
   pixelhop user passwd EMAIL           set a new password
   pixelhop user admin EMAIL            make an account an admin
-  pixelhop user merge OLD NEW          move OLD's images into NEW, then delete OLD
+  pixelhop user merge OLD NEW [--dry-run]
+                                       move everything of OLD (images, albums, keys, webhooks,
+                                       photo) into NEW, then close OLD; --dry-run only prints numbers
   pixelhop import --images FILE [--mysql DSN]
                                        bring over images (and users) from PixelHop 2
   pixelhop version
@@ -126,31 +128,50 @@ func userCmd(cfg *config.Config, d *db.DB, args []string) error {
 		}
 		fmt.Printf("Created %s (%s)\n", email, u.Role)
 	case "merge":
-		// pixelhop user merge OLD_EMAIL NEW_EMAIL — move OLD's images into NEW.
-		if len(args) < 3 {
-			return errors.New("usage: pixelhop user merge OLD_EMAIL NEW_EMAIL")
+		// pixelhop user merge OLD_EMAIL NEW_EMAIL [--dry-run]
+		var rest []string
+		dry := false
+		for _, x := range args[2:] {
+			if x == "--dry-run" {
+				dry = true
+			} else {
+				rest = append(rest, x)
+			}
+		}
+		if len(rest) != 1 {
+			return errors.New("usage: pixelhop user merge OLD_EMAIL NEW_EMAIL [--dry-run]")
 		}
 		from, err := d.UserByEmail(ctx, email)
 		if err != nil {
 			return fmt.Errorf("no account with email %s", email)
 		}
-		into, err := d.UserByEmail(ctx, strings.TrimSpace(args[2]))
+		into, err := d.UserByEmail(ctx, strings.TrimSpace(rest[0]))
 		if err != nil {
-			return fmt.Errorf("no account with email %s (sign in once first)", args[2])
+			return fmt.Errorf("no account with email %s (sign in once first)", rest[0])
 		}
 		if from.ID == into.ID {
 			return errors.New("that is the same account")
 		}
-		if from.Role == "admin" {
-			into.Role = "admin"
-			if err := d.UpdateUser(ctx, into); err != nil {
-				return err
-			}
+		if from.HelinkID.Valid {
+			return fmt.Errorf("%s is linked to a HOP ID of its own; nothing was moved", email)
 		}
-		if err := d.MergeUsers(ctx, from.ID, into.ID); err != nil {
+		plan := d.PlanMerge(ctx, from, into)
+		verb := "Moved"
+		if dry {
+			verb = "Would move"
+		} else if plan, err = d.MergeUsers(ctx, from.ID, into.ID); err != nil {
 			return err
 		}
-		fmt.Printf("Moved everything from %s into %s and removed the old account.\n", email, into.Email)
+		fmt.Printf("%s from %s into %s:\n", verb, email, into.Email)
+		fmt.Printf("  images %d (%s), albums %d, API keys %d, webhooks %d, hidden reminder cards %d\n",
+			plan.Images, humanSize(plan.StorageBytes), plan.Albums, plan.APIKeys, plan.Webhooks, plan.Reminders)
+		fmt.Printf("  profile photo: %s; content warning moves: %v\n", orNone(plan.Avatar), plan.Warning)
+		fmt.Printf("  storage of %s after: %s; quota %s -> %s\n", into.Email, humanSize(plan.UsedAfter), humanSize(plan.QuotaBefore), humanSize(plan.QuotaAfter))
+		if dry {
+			fmt.Println("Nothing was changed (--dry-run). Run again without it to do it.")
+		} else {
+			fmt.Printf("The old account %s is closed: its password, Google link and sessions are gone.\n", email)
+		}
 	case "passwd", "admin":
 		u, err := d.UserByEmail(ctx, email)
 		if err != nil {
@@ -190,4 +211,21 @@ func askPassword() (string, error) {
 		return "", errors.New("password must be at least 8 characters")
 	}
 	return pw, nil
+}
+
+func orNone(s string) string {
+	if s == "" {
+		return "none"
+	}
+	return s
+}
+
+func humanSize(n int64) string {
+	switch {
+	case n >= 1<<30:
+		return fmt.Sprintf("%.1f GB", float64(n)/(1<<30))
+	case n >= 1<<20:
+		return fmt.Sprintf("%.1f MB", float64(n)/(1<<20))
+	}
+	return fmt.Sprintf("%d KB", n>>10)
 }
