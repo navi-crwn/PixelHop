@@ -137,9 +137,10 @@ main { flex: 1; padding: 28px 0 64px; }
 .menu-list .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; font-size: .85rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .burger { display: none; }
 @media (max-width: 760px) {
-  .nav .wrap { height: auto; min-height: 60px; flex-wrap: wrap; row-gap: 0; }
-  .nav-links { display: none; order: 10; flex: 1 1 100%; flex-direction: column; background: var(--panel);
-    border-top: 1px solid var(--line); padding: 10px 16px 14px; margin: 0 -20px; }
+  /* The bar stays one 60px row (it used to wrap to two rows on a 375px phone); the opened menu hangs below it. */
+  .nav .wrap { flex-wrap: nowrap; }
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: var(--panel);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 10px 16px 14px; }
   .nav.open .nav-links { display: flex; }
   .nav-links a { padding: 10px 12px; }
   .burger { display: inline-grid; }
@@ -684,7 +685,8 @@ a.stat:hover { text-decoration: none; border-color: color-mix(in srgb, var(--c) 
   .stat-sub { font-size: .74rem; }
   .dash-shortcuts { grid-template-columns: 1fr 1fr; }
   .shortcut { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .toolbar form { min-width: 0; width: 100%; }
+  .toolbar form { min-width: 0; width: 100%; flex-wrap: wrap; }
+  .toolbar form input[type=search] { flex: 1 1 140px; min-width: 0; }
 }
 @media (max-width: 560px) {
   .kind-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: 100%; }
@@ -791,6 +793,12 @@ footer .footer-grid { display: grid; grid-template-columns: minmax(180px, 1.35fr
 @media (max-width: 760px) {
   .menu-list { right: auto; left: 0; max-width: calc(100vw - 24px); }
   .nav .wrap .menu:last-child .menu-list { right: 0; left: auto; }
+  /* In the top bars every drop-down hangs from the bar's right edge, not from its own button: a panel
+     anchored to a button in the middle of the bar ran off the screen (it is 210px wide). */
+  .nav .wrap, .shell-top { position: relative; }
+  .nav .menu, .shell-tools .menu { position: static; }
+  .nav .menu .menu-list, .shell-tools .menu .menu-list { left: auto; right: 20px; top: calc(100% + 4px); }
+  .shell-tools .menu .menu-list { right: 0; top: calc(100% + 6px); }
 }
 /* control standard: 16px text on phones (no iOS zoom); last so per-component font rules cannot undo it */
 @media (max-width: 640px) { input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]), select, textarea { font-size: 16px; max-width: none; } }
