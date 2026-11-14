@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "Your name, photo, username, bio and website are kept in your HOP ID, so they are the same in every HOP app. To change them, edit them there.",
   "settings.hub_edit": "Edit at HOP ID",
   "settings.del_reauth": "HOP ID will ask you to sign in once more before anything is deleted.",
-  "settings.del_hub_link": "Delete my HOP ID account instead"
+  "settings.del_hub_link": "Delete my HOP ID account instead",
+  "Edit in studio": "Edit in studio"
 }

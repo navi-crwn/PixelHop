@@ -62,7 +62,7 @@
   });
   var src = new URLSearchParams(location.search).get('src');
   if (src && /^[A-Za-z0-9_-]+$/.test(src)) {
-    fetch('/i/' + src + '.img').then(function (r) { if (!r.ok) throw 0; return r.blob(); })
+    fetch('/i/' + src + '.img?download').then(function (r) { if (!r.ok) throw 0; return r.blob(); })
       .then(function (b) { load(b, src); }).catch(function () { toast('Could not open that image', true); });
   }
 

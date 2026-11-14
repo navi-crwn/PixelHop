@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "Tu nombre, foto, usuario, biografía y sitio web se guardan en tu HOP ID, así que son iguales en todas las apps HOP. Para cambiarlos, edítalos allí.",
   "settings.hub_edit": "Editar en HOP ID",
   "settings.del_reauth": "HOP ID te pedirá que inicies sesión una vez más antes de borrar nada.",
-  "settings.del_hub_link": "Borrar mi cuenta de HOP ID"
+  "settings.del_hub_link": "Borrar mi cuenta de HOP ID",
+  "Edit in studio": "Editar en el estudio"
 }

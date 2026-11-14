@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "名前・写真・ユーザー名・自己紹介・ウェブサイトは HOP ID に保存されており、どの HOP アプリでも同じです。変更は HOP ID で行ってください。",
   "settings.hub_edit": "HOP ID で編集",
   "settings.del_reauth": "削除の前に、HOP ID でもう一度ログインを求められます。",
-  "settings.del_hub_link": "代わりに HOP ID アカウントを削除"
+  "settings.del_hub_link": "代わりに HOP ID アカウントを削除",
+  "Edit in studio": "スタジオで編集"
 }

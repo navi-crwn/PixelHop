@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "你的姓名、头像、用户名、简介和网站保存在 HOP ID 中，因此在每个 HOP 应用里都一致。如需修改，请到 HOP ID 编辑。",
   "settings.hub_edit": "在 HOP ID 编辑",
   "settings.del_reauth": "在删除任何内容之前，HOP ID 会要求你再登录一次。",
-  "settings.del_hub_link": "改为删除我的 HOP ID 账号"
+  "settings.del_hub_link": "改为删除我的 HOP ID 账号",
+  "Edit in studio": "在工作室中编辑"
 }

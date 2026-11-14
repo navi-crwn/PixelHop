@@ -130,6 +130,7 @@
         {{if .Locked}}<span class="pill warn badge" style="left:auto;right:8px" title="{{if .Private}}{{$.L.T "dash.only_you"}}{{else}}{{$.L.T "form.password"}}{{end}}"><svg width="11" height="11"><use href="#i-lock"/></svg></span>{{end}}
         {{if .Listed}}<span class="pill acc badge" style="top:auto;bottom:8px" title="{{$.L.T "dash.listed_title"}}"><svg width="11" height="11"><use href="#i-users"/></svg>{{$.L.T "dash.profile_badge"}}</span>{{end}}
         <input class="tick" type="checkbox" value="{{.ID}}" aria-label="{{$.L.T "dash.select_title" "title" .Title}}">
+        {{if eq .Kind "image"}}<a class="tile-edit" href="/tools?src={{.ID}}" title="{{$.L.T "Edit in studio"}}" aria-label="{{$.L.T "Edit in studio"}}"><svg width="15" height="15"><use href="#i-edit"/></svg></a>{{end}}
         <div class="cap"><span>{{if .Title}}{{.Title}}{{else}}{{.ID}}{{end}}</span><span><svg width="11" height="11" style="vertical-align:-1px"><use href="#i-eye"/></svg> {{.Views}}</span></div>
       </div>
       {{end}}

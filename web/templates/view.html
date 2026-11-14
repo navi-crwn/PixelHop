@@ -73,7 +73,7 @@
         <div class="btn-row" style="margin-top:14px">
           <button class="btn primary sm" type="button" data-copy-text="{{$d.Links.Page}}"><svg><use href="#i-link"/></svg>{{$.L.T "uploaded.copy_link"}}</button>
           <a class="btn sm" href="{{$d.Links.Download}}"><svg><use href="#i-down"/></svg>{{$.L.T "tools.download"}}</a>
-          {{if $im.IsImage}}<a class="btn sm" href="/tools?src={{$im.ID}}"><svg><use href="#i-adjust"/></svg>{{$.L.T "common.edit"}}</a>{{end}}
+          {{if $im.IsImage}}<a class="btn sm" href="/tools?src={{$im.ID}}"><svg><use href="#i-adjust"/></svg>{{$.L.T "Edit in studio"}}</a>{{end}}
         </div>
         <div class="share" aria-label="{{$.L.T "home2.s4_t4"}}">
   <span class="small muted">{{$.L.T "home2.s4_t4"}}</span>

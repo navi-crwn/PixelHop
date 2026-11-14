@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "Имя, фото, имя пользователя, описание и сайт хранятся в вашем HOP ID, поэтому одинаковы во всех приложениях HOP. Чтобы изменить их, редактируйте там.",
   "settings.hub_edit": "Изменить в HOP ID",
   "settings.del_reauth": "Перед удалением HOP ID попросит вас войти ещё раз.",
-  "settings.del_hub_link": "Удалить мой аккаунт HOP ID"
+  "settings.del_hub_link": "Удалить мой аккаунт HOP ID",
+  "Edit in studio": "Редактировать в студии"
 }

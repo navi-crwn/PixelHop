@@ -40,6 +40,7 @@
             <button class="btn sm primary" type="button" data-copy-text="{{.Page}}">{{$.L.T "uploaded.copy_link"}}</button>
             <button class="btn sm" type="button" data-copy-text="{{.Direct}}">{{$.L.T "album.direct"}}</button>
             <a class="btn sm ghost" href="{{.Page}}">{{$.L.T "upload.open"}}</a>
+            {{if eq .Kind "image"}}<a class="btn sm ghost" href="/tools?src={{.ID}}"><svg><use href="#i-adjust"/></svg>{{$.L.T "Edit in studio"}}</a>{{end}}
           </div>
           <a class="small del-link {{if not .Delete}}hide{{end}}" href="{{.Delete}}">{{$.L.T "uploaded.delete_link"}}</a>
         </div>

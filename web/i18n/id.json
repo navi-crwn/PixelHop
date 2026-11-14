@@ -1118,5 +1118,6 @@
   "settings.hub_profile_note": "Nama, foto, username, bio, dan situs web Anda disimpan di HOP ID, jadi sama di setiap aplikasi HOP. Untuk mengubahnya, edit di sana.",
   "settings.hub_edit": "Edit di HOP ID",
   "settings.del_reauth": "HOP ID akan meminta Anda masuk sekali lagi sebelum apa pun dihapus.",
-  "settings.del_hub_link": "Hapus akun HOP ID saya"
+  "settings.del_hub_link": "Hapus akun HOP ID saya",
+  "Edit in studio": "Edit di studio"
 }
