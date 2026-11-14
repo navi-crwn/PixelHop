@@ -170,6 +170,7 @@ Settings are environment variables, and all of them are optional. [`.env.example
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Images in an album made by a guest (0 = no limit); also a control center setting |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Files one guest address may upload per 24 hours (0 = no limit); also a control center setting |
 | `PIXELHOP_GUEST_TTL_DAYS` | `30` | Days a new guest upload stays online (0 = until deleted); older files are not changed; also a control center setting |
+| `PIXELHOP_SHARE_STORAGE` | `true` | One stored file when different people upload the same picture; each keeps their own link, owner and expiry (false = every upload stores its own copy); files already stored are not changed; also a control center setting |
 | `PIXELHOP_MAX_BATCH` | `20` | Files per upload request |
 | `PIXELHOP_MAX_MEGAPIXELS` | `80` | Largest image accepted, by width times height |
 | `PIXELHOP_UPLOADS_PER_MINUTE` | `30` | Rate limit per address |

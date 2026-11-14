@@ -259,6 +259,7 @@ var hopSettingSchema = []map[string]any{
 	{"key": "guest_daily_max", "type": "int", "description": "Files one guest address may upload per 24 hours, 0 = no limit (PIXELHOP_GUEST_DAILY_MAX)", "restart_required": false},
 	{"key": "guest_ttl_days", "type": "int", "description": "Days a new guest upload stays online, 0 = until deleted; existing files are not changed (PIXELHOP_GUEST_TTL_DAYS)", "restart_required": false},
 	{"key": "registration", "type": "bool", "description": "Let people create accounts", "restart_required": false},
+	{"key": "share_storage", "type": "bool", "description": "Store one file when different people upload the same picture; each keeps their own link, owner and expiry. Off: every upload stores its own copy; files already shared stay shared (PIXELHOP_SHARE_STORAGE)", "restart_required": false},
 	{"key": "read_only", "type": "bool", "description": "Maintenance: pause uploads; everything already online keeps working", "restart_required": false},
 	{"key": "announcement", "type": "string", "description": "Banner shown on every page (empty = none)", "restart_required": false},
 	{"key": "seo_title", "type": "string", "description": "Title of the home page", "restart_required": false},
@@ -1048,7 +1049,7 @@ func (a *App) hopReportAction(w http.ResponseWriter, r *http.Request) {
 // ---- settings ----
 
 func (a *App) hopSettingRows(ctx context.Context) []map[string]any {
-	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration, "read_only": a.cfg.ReadOnly,
+	defaults := map[string]any{"guest_uploads": a.cfg.GuestUploads, "registration": a.cfg.Registration, "share_storage": a.cfg.ShareStorage, "read_only": a.cfg.ReadOnly,
 		"guest_album_max": a.cfg.GuestAlbumMax, "guest_daily_max": a.cfg.GuestDailyMax, "guest_ttl_days": a.cfg.GuestTTLDays,
 		"announcement": "", "seo_title": "", "seo_description": ""}
 	var out []map[string]any

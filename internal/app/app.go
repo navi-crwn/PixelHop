@@ -44,6 +44,10 @@ type App struct {
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
 	uploadMu  sync.Mutex
+	// shareMu orders "find the picture to share, then add the row that points at it" (an upload) against
+	// "count who points at a file, delete it, delete the row" (a removal), so a file is never deleted under a
+	// row that has just been given its address.
+	shareMu sync.Mutex
 	// hopMediaSlots bounds the /hop/media bodies held in memory before their signature is checked.
 	hopMediaSlots hopSlots
 	quota         quotaLocks

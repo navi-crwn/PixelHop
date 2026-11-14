@@ -37,6 +37,7 @@ type Config struct {
 	GuestTTLDays     int // days a new guest upload stays online (0 = keep until deleted)
 	GuestDailyMax    int // files one guest address may upload per rolling 24 hours (0 = no limit)
 	Registration     bool
+	ShareStorage     bool  // one stored file for the same picture uploaded by different people
 	DefaultQuota     int64 // bytes per new account
 	InactiveDays     int   // delete images not viewed for N days (0 = never)
 	TrustedProxies   []netip.Prefix
@@ -133,6 +134,7 @@ func Load() (*Config, error) {
 		GuestDailyMax:    envInt("PIXELHOP_GUEST_DAILY_MAX", 25),
 		GuestTTLDays:     envInt("PIXELHOP_GUEST_TTL_DAYS", 30),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),
+		ShareStorage:     envBool("PIXELHOP_SHARE_STORAGE", true),
 		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 128)) << 20,
 		InactiveDays:     envInt("PIXELHOP_INACTIVE_DAYS", 0),
 		UploadsPerMinute: envInt("PIXELHOP_UPLOADS_PER_MINUTE", 30),

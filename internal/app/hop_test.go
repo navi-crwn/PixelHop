@@ -202,7 +202,7 @@ func TestHopHealthManifestStats(t *testing.T) {
 		SettingsSchema []struct{ Key string }  `json:"settings_schema"`
 	}
 	decode(t, hopGet(t, h, "/hop/manifest").Data, &man)
-	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 9 {
+	if man.App != "pixelhop" || man.Base != "https://p.example.com" || len(man.Capabilities) != 4 || len(man.ContentTypes) != 2 || len(man.SettingsSchema) != 10 {
 		t.Fatalf("manifest: %+v", man)
 	}
 

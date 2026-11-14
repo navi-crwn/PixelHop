@@ -173,6 +173,7 @@ Pengaturan berupa variabel lingkungan, semuanya opsional. [`.env.example`](.env.
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Gambar dalam album buatan tamu (0 = tanpa batas); juga bisa diatur di pusat kendali |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | File yang boleh diunggah satu alamat tamu per 24 jam (0 = tanpa batas); juga bisa diatur di pusat kendali |
 | `PIXELHOP_GUEST_TTL_DAYS` | `30` | Hari sebuah unggahan tamu baru tetap daring (0 = sampai dihapus); file lama tidak berubah; juga bisa diatur di pusat kendali |
+| `PIXELHOP_SHARE_STORAGE` | `true` | Satu file tersimpan bila beberapa orang mengunggah gambar yang sama; masing-masing tetap punya tautan, pemilik, dan masa berlaku sendiri (false = tiap unggahan menyimpan salinannya sendiri); file yang sudah tersimpan tidak berubah; juga bisa diatur di pusat kendali |
 | `PIXELHOP_DEFAULT_QUOTA_MB` | `128` | Penyimpanan untuk setiap akun baru; akun yang sudah ada tetap dengan kuotanya |
 | `PIXELHOP_REGISTRATION` | `true` | Izinkan akun baru |
 | `PIXELHOP_READ_ONLY` | `false` | Hentikan unggahan untuk pemeliharaan |

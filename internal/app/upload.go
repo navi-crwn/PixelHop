@@ -348,6 +348,10 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		}
 	}
 
+	if im, token, ok, err := a.shareStoredImage(ctx, in, sha, u, uid, ip, albumID, expiresAt, useSlug, listed, alt); ok || err != nil {
+		return im, token, false, err
+	}
+
 	stripped := imaging.MetadataFound(in.data)
 	if kind := imaging.Container(in.data); kind != "" {
 		// iPhone (HEIC) and AVIF photos: the AI service turns them into JPEG/PNG.
@@ -407,6 +411,55 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		a.fireWebhooks(u.ID, "image.uploaded", a.imageJSON(im))
 	}
 	return im, token, false, nil
+}
+
+// shareStoredImage gives an upload its own row (link, owner, delete token, expiry, warning, album) that
+// points at the file somebody else's upload of the same bytes already stored. ok is false when there is
+// nothing to share (the setting is off, or no such file) and the upload is stored as usual. The uploader is
+// never told the file was already here: the answer looks like any other upload (duplicate stays for the
+// same owner only). The quota still counts the whole file for each owner.
+func (a *App) shareStoredImage(ctx context.Context, in uploadInput, sha string, u *db.User, uid sql.NullInt64, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (im *db.Image, token string, ok bool, err error) {
+	if !a.shareStorageOn(ctx) {
+		return nil, "", false, nil
+	}
+	slug := ""
+	if useSlug {
+		slug = slugify(strings.TrimSuffix(in.name, path.Ext(in.name)))
+	}
+	a.shareMu.Lock()
+	defer a.shareMu.Unlock()
+	src, err := a.db.ImageForSharing(ctx, sha, a.store.Name())
+	if err != nil {
+		return nil, "", false, nil
+	}
+	im = &db.Image{
+		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
+		Mime: src.Mime, Ext: src.Ext, Size: src.Size, Width: src.Width, Height: src.Height,
+		SHA256: sha, Color: src.Color, Backend: src.Backend, KeyFull: src.KeyFull, KeyThumb: src.KeyThumb,
+		IP: ip, ExpiresAt: expiresAt, Listed: listed,
+		Stripped: src.Stripped, Alt: alt, ContentWarning: in.contentWarning, WarningReason: in.warningReason,
+	}
+	if albumID != "" {
+		im.AlbumID = sql.NullString{String: albumID, Valid: true}
+	}
+	if u == nil {
+		token = randomToken(18)
+		im.OwnerToken = hashToken(token)
+	}
+	for attempt := 0; ; attempt++ {
+		im.ID = newID(slug)
+		err = a.db.InsertImage(ctx, im)
+		if err == nil {
+			break
+		}
+		if attempt >= 3 || !strings.Contains(err.Error(), "UNIQUE") {
+			return nil, "", false, err
+		}
+	}
+	if u != nil {
+		a.fireWebhooks(u.ID, "image.uploaded", a.imageJSON(im))
+	}
+	return im, token, true, nil
 }
 
 // normalize converts HEIC/AVIF to JPEG/PNG through the AI service and
@@ -498,6 +551,8 @@ func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
 
 // removeImage deletes an image's row and its stored files.
 func (a *App) removeImage(ctx context.Context, im *db.Image) error {
+	a.shareMu.Lock() // counting who still points at the file, deleting it and dropping the row are one step
+	defer a.shareMu.Unlock()
 	if err := a.deleteImageObjects(ctx, im); err != nil {
 		return err
 	}

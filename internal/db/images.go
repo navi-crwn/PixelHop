@@ -114,6 +114,14 @@ func (d *DB) ImageBySHA(ctx context.Context, sha string, userID sql.NullInt64) (
 		WHERE sha256=? AND user_id=? AND hidden=0 AND expires_at=0 LIMIT 1`, sha, userID.Int64))
 }
 
+// ImageForSharing finds a stored picture with the same bytes (SHA-256) in the same storage backend, whoever
+// owns it, so a new upload of those bytes can point at the file already stored instead of storing it again.
+// Pictures only (a video's file is replaced when it is optimised), and not one in the trash or hidden.
+func (d *DB) ImageForSharing(ctx context.Context, sha, backend string) (*Image, error) {
+	return scanImage(d.QueryRowContext(ctx, `SELECT `+imageCols+` FROM images
+		WHERE sha256=? AND backend=? AND hidden=0 AND mime LIKE 'image/%' ORDER BY created_at LIMIT 1`, sha, backend))
+}
+
 // CountKeyRefs reports how many images point at a storage key; dedupe across
 // users can share one stored object, which must outlive all its references.
 func (d *DB) CountKeyRefs(ctx context.Context, key string) int {

@@ -311,6 +311,11 @@ func (a *App) registrationOpen(ctx context.Context) bool {
 	return a.db.Setting(ctx, "registration", fmt.Sprint(a.cfg.Registration)) == "true"
 }
 
+// shareStorageOn reports whether uploads of the same picture by different people share one stored file.
+func (a *App) shareStorageOn(ctx context.Context) bool {
+	return a.db.Setting(ctx, "share_storage", fmt.Sprint(a.cfg.ShareStorage)) == "true"
+}
+
 func (a *App) registerPage(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "register", "Create account", a.authForm(r))
 }
