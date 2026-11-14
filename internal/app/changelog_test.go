@@ -3,6 +3,7 @@ package app
 import (
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -11,8 +12,8 @@ import (
 
 func TestChangelogHistoryAndPagination(t *testing.T) {
 	history := changes()
-	if len(history.Entries) <= 40 || len(history.Sources) != 1 {
-		t.Fatal("expected complete multi-page app history")
+	if len(history.Entries) < 20 || len(history.Sources) != 1 {
+		t.Fatal("expected the app's whole release history")
 	}
 	seen := map[string]bool{}
 	previous := time.Now().AddDate(1, 0, 0)
@@ -26,6 +27,15 @@ func TestChangelogHistoryAndPagination(t *testing.T) {
 			t.Fatalf("duplicate or wrong source: %+v", entry)
 		}
 		seen[entry.URL] = true
+		// every release is written in plain words: a title, a version, and items that each say where and what
+		if entry.Title == "" || entry.Version == "" || len(entry.Items) == 0 {
+			t.Fatalf("a release without plain text: %+v", entry)
+		}
+		for _, it := range entry.Items {
+			if it.Type == "" || it.Where == "" || it.Text == "" {
+				t.Fatalf("an item without its place or text in %s: %+v", entry.Version, it)
+			}
+		}
 	}
 	var visited int
 	for path := "/changelog?lang=id"; path != ""; {
@@ -55,7 +65,7 @@ func TestChangelogHistoryAndPagination(t *testing.T) {
 
 func TestChangelogRoute(t *testing.T) {
 	h := newTestApp(t)
-	for _, path := range []string{"/changelog?lang=id", "/changelog?page=2"} {
+	for _, path := range []string{"/changelog?lang=id", "/changelog?page=2"} { // page 2 is clamped to the last page
 		r := httptest.NewRecorder()
 		h.ServeHTTP(r, httptest.NewRequest("GET", path, nil))
 		if r.Code != 200 || !strings.Contains(r.Body.String(), "github.com/navi-crwn/PixelHop/") {
@@ -69,5 +79,28 @@ func TestChangelogRoute(t *testing.T) {
 	h.ServeHTTP(r, httptest.NewRequest("GET", "/changelog.php", nil))
 	if r.Header().Get("Location") != "/changelog" {
 		t.Fatal("legacy changelog must redirect to local history")
+	}
+}
+
+// The page shows releases in plain language, with its labels in the reader's language, and never a branch name,
+// a merge line or the word "train".
+func TestChangelogPageIsPlain(t *testing.T) {
+	h := newTestApp(t)
+	bad := regexp.MustCompile(`(?i)trains?|kereta|merge pull request|remote-tracking|(^|[^w/])(fix|feat|docs|chore|release|hotfix|refactor)/[w.-]+`)
+	for lang, label := range map[string]string{"en": "Technical details", "de": "Technische Details", "ru": "Технические подробности"} {
+		r := httptest.NewRecorder()
+		h.ServeHTTP(r, httptest.NewRequest("GET", "/changelog?lang="+lang, nil))
+		page := r.Body.String()
+		if !strings.Contains(page, label) || !strings.Contains(page, "Dashboard polish") || !strings.Contains(page, "<b>Dashboard.</b>") {
+			t.Errorf("%s: the page lacks the release text or its labels", lang)
+		}
+		if m := bad.FindString(page); m != "" {
+			t.Errorf("%s: the page shows %q", lang, m)
+		}
+	}
+	// an old snapshot (no items) still renders as a title
+	e := changeEntry{Kind: "pr", Date: "2026-01-01T00:00:00Z", Title: "Old", URL: "https://example.test/x", ID: "#1"}
+	if len(e.Groups()) != 0 {
+		t.Fatal("an entry without items has groups")
 	}
 }

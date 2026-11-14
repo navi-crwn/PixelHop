@@ -209,10 +209,10 @@
   "legal.takedown_button": " usando el botón de Reportar y seleccionando “Mis derechos de autor”",
   "legal.runs": "{site} funciona con <a href=\"https://github.com/navi-crwn/pixelhop\">PixelHop</a>, software de código abierto bajo licencia MIT.",
   "changelog.title": "Historial de cambios",
-  "changelog.lead": "Commits, versiones y solicitudes de incorporación fusionadas, de más reciente a más antiguo.",
+  "changelog.lead": "Qué ha cambiado en PixelHop, lo más reciente primero.",
   "changelog.newer": "Más recientes",
   "changelog.older": "Más antiguos",
-  "changelog.sources": "Revisiones del código",
+  "changelog.sources": "Última versión",
   "changelog.commit": "Commit",
   "changelog.pr": "Solicitud fusionada",
   "changelog.tag": "Versión",
@@ -1102,5 +1102,12 @@
   "dash.actions": "Acciones",
   "upload.done_see": "{n} subidos · Ver todos los enlaces",
   "upload.progress": "Subiendo {done} de {total} archivos · {pct} %",
-  "announce.title": "Anuncio"
+  "announce.title": "Anuncio",
+  "changelog.details": "Detalles técnicos",
+  "changelog.t_added": "Añadido",
+  "changelog.t_changed": "Cambiado",
+  "changelog.t_fixed": "Corregido",
+  "changelog.t_security": "Seguridad",
+  "changelog.t_removed": "Eliminado",
+  "changelog.t_deprecated": "Obsoleto"
 }

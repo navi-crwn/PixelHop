@@ -1,478 +1,342 @@
 # Changelog
 
-All notable changes to PixelHop will be documented in this file.
+What changed in PixelHop, newest release first. Each entry says what changed, where you see it, what it means for you and why it was done. Technical notes live in the GitHub release of each version.
 
 ## [Unreleased]
 
-## [3.11.3] - 2026-11-14
-
-### Fixed
-- The AI tools' daily limit now survives a restart: the day's count is kept in the database (one row per member and tool), not in memory, so restarting PixelHop no longer gives the day back. It is taken in a single step, so several images sent at the same moment cannot go over the limit, and it is given back when the AI service fails, as before. The window is still 24 hours from the first use.
-- Changing the password by a hand-made request is refused for HOP ID members (the password belongs to the hub; the form was already hidden). The refusal opens the Security & sessions tab and changes nothing, and other browsers stay signed in.
-- Error pages and refused forms (a page that does not exist, a failed sign-in, a form with a wrong value, a locked image's password prompt) lost their `Cache-Control`, `Vary`, `Content-Security-Policy` and `Content-Type` headers because the status was written before the page. They now carry them.
-
-### Changed
-- Public pages answer `Cache-Control: private, no-cache`, so a shared cache or CDN cannot keep one visitor's language for the next visitor. Signed-in pages, the status page, files and images keep their own caching.
-- The AI tools tell how much of the day's share is left: `X-Day-Limit` and `X-Day-Remaining` headers on a result, `limit`, `remaining` and `resets_at` in the "used today's share" refusal, and an `ai_day` list in `GET /api/v1/me`. Existing fields are unchanged.
-
-## [3.11.2] - 2026-11-13
+## [3.11.4] - 2026-11-14 - Dashboard polish
 
 ### Added
-- One global upload progress line above the results: "Uploading N of M files · X%" over the whole batch (the images travel in one request, every big file is its own job), in the nine languages.
-- Settings has subtabs — Profile, Security & sessions, API & integrations, Data, Delete. Every link the app hands out (`#profile`, `#sessions`, `#api`, `#webhooks`, `#embedding`, `#export`) opens the tab that holds the card, and the API tab links the documentation. A page that answers a form (a new API key, a new webhook secret, a refusal such as the 20-key limit, a bad webhook address or a wrong password) opens the tab where that form is, so the one-time key is on screen when it is made. After saving, the hotlink setting returns to the Data tab and a password change to Security & sessions. On a phone the tabs wrap onto two rows and the key forms stack.
+- **Dashboard.** When the site owner posts an announcement it now appears as a card at the top of your dashboard, with a Close button. A closed announcement stays hidden for a week, and comes back if the wording changes. Before, the announcement was a bar across the page that the sidebar covered, so people often missed it.
 
 ### Changed
-- The dashboard is never left after an upload: a batch of more than three files shows a banner that links the results page instead of moving the browser there. "Upload more" brings a member back to the dashboard uploader (guests go home), and the top bar Upload button is on every signed-in page, the dashboard included (there it opens the file picker, or jumps to the uploader without JavaScript; the second Upload button in the dashboard header is gone).
-- The dashboard's seven selection buttons are one quiet "Actions" menu: copy links, ZIP, make album, show/hide on profile, delete.
-- The signed-in pages drop the duplicate member tab row; the sidebar is the menu. The Settings top bar and the public top bar are solid and stick to the very top edge, so nothing shows through or above them while scrolling. The selection menu hands its focus back to the Actions button.
+- **Studio, Help, About, Changelog and other tool and information pages.** If you are signed in, the Back link, the logo and the Upload buttons now take you to your dashboard instead of the public home page. Visitors who are not signed in still go to the home page. People kept landing on the home page after using the sidebar, which was confusing.
+- **Studio.** Opened from the dashboard, the Photo studio now appears inside the dashboard, with the sidebar and top bar around it, so it feels like part of the dashboard. On medium screens its three columns become one so the picture area stays wide enough to work in.
+- **Dashboard sidebar.** The line "Part of Hop Easy Link" is now the last line at the bottom of the sidebar instead of the middle of the page footer, where it sometimes ended up in the wrong place.
+- **Top bar on phones.** On a 375 pixel wide phone the top bar no longer splits into two rows, and the language, account and family menus open fully on the screen instead of running off the right edge. Reported by the site owner.
+- **Changelog page.** The changelog now lists one plain-language entry per release, grouped as added, changed, fixed and so on, with a Technical details link to the full notes. Before, it listed raw code changes, which most people could not read. The page is written from this file and checked by the project's tests, so it stays readable.
+- **Dashboard search.** In German and Russian the search row no longer pushes the page sideways on a phone, because its buttons now wrap onto a second line when there is no room.
+
+## [3.11.3] - 2026-11-14 - Daily AI limit that sticks
+
+### Fixed
+- **AI tools in the Studio.** The daily limit now survives a restart of the server. Before, restarting PixelHop gave the whole day back, so the limit could be used twice. Several images sent at the same moment can no longer go over the limit, and the use is still given back when the AI service fails.
+- **Settings, Security and sessions.** Trying to change the password of a HOP ID account through a hand-made request is now refused. The password belongs to the HOP ID hub, and the form was already hidden. Nothing changes and other browsers stay signed in.
+- **Error pages and refused forms.** A page that does not exist, a failed sign-in or a form with a wrong value lost some of its safety and caching settings, because the answer was started too early. They now keep them.
+
+### Changed
+- **Public pages.** Visitors now always check back with PixelHop before a stored copy of a page is shown, so a shared cache can no longer show one visitor's language to the next visitor. Signed-in pages, images and the status page are unchanged.
+- **AI tools.** The tools tell how much of the day's share is left, both on the result and when the share is used up, so programs and scripts can show it.
+
+## [3.11.2] - 2026-11-13 - Settings tabs and a calmer dashboard
+
+### Added
+- **Upload progress.** One line above the results now says "Uploading 3 of 12 files, 40 percent" for the whole batch, in all nine languages. Before, only each single file showed progress.
+- **Settings.** Settings is split into tabs: Profile, Security and sessions, API and integrations, Data, and Delete. Every link PixelHop gives out opens the tab that holds its card. A page that answers a form, such as a new API key, a new webhook secret or an error, now opens the tab where that form is, so a one-time key is on screen when it is made. Before, that page opened on Profile and hid the key. On a phone the tabs wrap onto two rows.
+
+### Changed
+- **Dashboard.** After an upload you stay on the dashboard. A batch of more than three files shows a banner that links to the results page, instead of moving the browser there. "Upload more" brings a member back to the dashboard uploader.
+- **Dashboard.** The seven selection buttons became one quiet Actions menu: copy links, ZIP, make album, show or hide on profile, and delete. The menu returns the keyboard to its button when it closes.
+- **Dashboard.** The extra row of member tabs is gone, the sidebar is the menu, and the top bar always has an Upload button. The top bar is solid and sticks to the very top edge, so page text no longer shows through or above it while scrolling.
 
 ### Removed
-- The studio QR tool and its `/tools/qr.png` and `/tools/qr.svg` endpoints: QR codes are LinkHop's job now. A copy connected to HEL.ink lists one quiet link to `link.hel.ink/qr` in the studio and sends the old `/qr` address there; a stand-alone copy shows no link and sends `/qr` to its own studio (a temporary redirect both ways). The per-image QR on image pages stays.
-- The Explore page, its navigation links and its sitemap entry (`/explore` redirects home). The "Show on my profile" flag, public profiles and the public gallery API are unchanged.
+- **Studio.** The QR code tool is removed, because QR codes are now LinkHop's job. A copy connected to HEL.ink shows one quiet link to LinkHop's QR page. The QR code on each image page stays.
+- **Explore.** The Explore page, its menu links and its sitemap entry are gone, and the old address goes to the home page. Public profiles and the option to show a file on your profile are unchanged.
 
-## [3.11.1] - 2026-11-12
+## [3.11.1] - 2026-11-12 - Daily AI limit, reminders and search engines
 
 ### Fixed
-- The AI tools' daily limit lasted about an hour: the limiter's cleaner dropped every count older than an hour, including the 24-hour ones. Each count now lives for its own length, and the cleaner still frees the short ones. A call counts against the day only when it gives a result: calls refused for the file, its size or a missing mask, and calls the queue or the AI service fails, cost nothing. The two limit messages ("too many in a row", "you've used today's N") are in the nine languages.
-- Settings showed no Webhooks card to HOP ID members (everyone on hel.ink), although `/docs` sends people there. The card is back for them; only the password form stays hidden, because that password belongs to the hub.
-- Studio, Watermark: a "Remove logo" button goes back to the text after a logo was chosen.
-- Studio: Download and Upload result appear only when there is a result: after a change in an image tool, or in Compress and Convert, whose result is made when saving. Never in Color palette, Image to text or QR code. The size line and the link of an uploaded result stay; Start over on an untouched image is not a change.
-- Studio, Magic eraser: no longer promises "about 10 seconds"; it runs on the server, one image at a time, and says it can take longer when the server is busy.
+- **Studio, AI tools.** The daily limit used to last only about an hour, because old counts were cleaned away too early. It now lasts the full day, and calls that fail or are refused for the file itself no longer count against it.
+- **Settings, API and integrations.** HOP ID members could not see the Webhooks card although the documentation sends people there. It is back. Only the password form stays hidden, because that password belongs to the hub.
+- **Studio, Watermark.** A Remove logo button now brings back the text option after a logo was chosen.
+- **Studio.** Download and Upload result appear only when there is a result to save. Before they also showed in tools that make no picture, such as the color palette.
+- **Studio, Magic eraser.** It no longer promises about 10 seconds. It says it can take longer when the server is busy, because it works on the server one image at a time.
 
 ### Added
-- Studio, Image to text: a short note that machine-read text can be wrong and should be checked.
-- The dashboard's "Get the most out of PixelHop" card can be hidden for a week, like the reminder cards of the other HOP apps (hop-ui.js "Hide", `POST /api/me/reminders/dismiss`, per account). It comes back while steps are open and is gone once all four are done. Schema migration 18 adds the `reminders` table.
-- Theme and language follow you across the HOP family: the cookies `hop_theme` and `hop_lang` (for `.hel.ink` on hel.ink, host-only elsewhere). The old `localStorage` theme key and the `pixel_lang` cookie are still read and copied into the new cookies once, only when the new cookie is absent.
-- Search engines: every indexable page names an absolute canonical address on the app host (never the host the request came in on), with `og:url`, `og:type`, an absolute `og:image` and `twitter:card`. The fixed public pages list their nine language addresses and `x-default`, in the page and in the sitemap (English and `x-default` are the bare address, the other eight `?lang=<code>`); a valid non-English `?lang=` stays in the canonical, while `?lang=en` and any other query are dropped. Image and album pages keep their canonical on the link host, where guests are sent, without language links. JSON-LD `WebApplication` on the home and studio pages, published by the hub's Organization.
+- **Studio, Image to text.** A short note says that machine-read text can be wrong and should be checked.
+- **Dashboard.** The "Get the most out of PixelHop" card can be hidden for a week, like the reminder cards in the other HOP apps. It comes back while steps are open and is gone when all four are done.
+- **Theme and language.** Your theme and language now follow you across all HOP apps, so you choose them once.
+- **Search engines.** Pages now name their one true address and, for the fixed public pages, their nine language versions, so search results show the right page in the right language.
 
 ### Changed
-- Not indexable: sign-in, account, dashboard and trash pages, the API, sign-in round trips, delete links and upload results (`noindex` tag and `X-Robots-Tag`), none of them in the sitemap. Image pages and albums behind any content warning are now `noindex` too (before, only adult ones), and closed files (private, password, warning, removed) carry `X-Robots-Tag: noindex`. Public images, albums and profiles stay indexable and in the sitemap as before.
+- **Search engines.** Sign-in, account, dashboard, trash and upload result pages, and files behind a content warning, are now kept out of search results. Public images, albums and profiles stay findable.
 
 ### Removed
-- The dashboard shortcut "HEL.ink · Short links with the same account": short links are LinkHop's, and the sidebar already lists the HOP family.
+- **Dashboard.** The shortcut to HEL.ink short links is gone, because short links belong to LinkHop and the sidebar already lists the HOP family.
 
-## [3.11.0] - 2026-11-12
-
-### Added
-- Claim your guest uploads after signing in. A browser that uploaded while signed out keeps the delete link of each file; once you are signed in, the dashboard and the home page say "You uploaded N images before signing in" with a Claim button. Claiming (`POST /dashboard/claim`, tokens in the JSON body only, never in a URL or a log line, 10 calls an hour per member) moves the files that still have no owner into your library in one transaction, checks the secret of each one, respects your storage quota, skips removed, trashed, reported or expired files, forgets the old delete link and clears an expiry that only came from the guest limit (one the guest chose stays). A stolen image id without its token claims nothing. Schema migration 17 adds `images.claimed_at`. All new texts are in the nine languages.
-- `POST /hop/media`: a HOP app listed in `PIXELHOP_STORE_CLIENTS` (FileHop's "Save to PixelHop") can store one file in the library of the member whose HOP ID it names, signed with its own secret `HOP_STORE_SECRET_<APP>` (not the SSO or picker secret). Same size limit, types, safety checks, quota and webhooks as a normal upload; answers with the file's public address and id. Off until a client is configured; the manifest names the `media_store` capability when it is on. Calls are written to the audit trail.
-
-### Tests
-- Header tests pin what a cross-origin-isolated page (COEP `require-corp`) may fetch or embed from PixelHop: files and thumbnails send `Cross-Origin-Resource-Policy: cross-origin`, the JSON API sends CORS headers (also on errors). No header had to change.
-
-## [3.10.0] - 2026-11-11
+## [3.11.0] - 2026-11-12 - Claim your guest uploads
 
 ### Added
-- New guest uploads expire after 30 days by default (`PIXELHOP_GUEST_TTL_DAYS`, also the `guest_ttl_days` control center setting; 0 turns it off). A shorter choice is kept, a longer one is capped. Member and API-key uploads and every file already stored are unchanged. The upload form tells guests, in all nine languages.
+- **Dashboard and home page.** If you uploaded files before signing in, PixelHop now says so and offers a Claim button. Claiming moves those files into your library, checks the private delete link of each one, respects your storage space and skips files that were removed, reported or have expired. Before, files uploaded as a guest stayed separate from your account after you signed in.
+- **Saving from FileHop.** FileHop's "Save to PixelHop" button can now store a finished picture or PDF in the library of the signed-in person. It uses the same size limits, safety checks and storage space as a normal upload, and it stays off until the site owner switches it on.
+
+## [3.10.0] - 2026-11-11 - Guest uploads expire, safer account switching
+
+### Added
+- **Upload page.** New guest uploads are deleted after 30 days unless the guest chose a shorter time, and the upload form says so in all nine languages. Uploads by signed-in members and files already stored are not touched. This keeps the server from filling up with forgotten files.
 
 ### Changed
-- Switching HOP ID accounts at the hub no longer leaves PixelHop on the old account. Sessions started through HOP ID record when the hub last vouched for them (`sessions.verified_at`, added by an idempotent migration); after five minutes the next page the browser loads makes one quiet trip to the hub (`prompt=none`, no page shown): the same account carries on, another account replaces the session, and a browser with no hub session loses the PixelHop session (public pages carry on as a guest, the dashboard goes to sign-in). Nothing is redirected when the hub does not answer, a trip was made in the last minute, the request is an image, an API call, an API key or a prefetch, so uploads never get interrupted. Password, Google and local sessions are not touched, and a new sign-in ends the old session in that browser.
-- Fixed pages (changelog, legal, help, about, FAQ, features, tools, batch, contact, status, explore, sign-in, sign-up) now carry the site's social image, so a pasted link shows a card.
-- The project site (GitHub Pages) lists all seven HOP apps (FileHop and PayHop added) in the nine languages and loads the v8 brand fonts instead of v3; the font credits name every app's typeface, including Unbounded for PayHop.
-- The family follows hop-assets v9 (PayHop joins as the seventh app): the embedded manifest, the vendored home engine and every family picture are byte-identical copies from the hub, the footer and home family list, the README family table (all nine languages), the FAQ and features texts and the project site name it, and the family tests compare against the manifest (its version and public app count) instead of fixed numbers. `scripts/sync-hop-assets.sh` reads the asset version from the manifest, so the next release needs no edit.
-- The hub counts as reachable only when `<hub>/up` answers 2xx within 1.5 s (the answer kept for a minute); an open port is not enough, since the hub's web server can be up while its application is down. While it is not reachable a stale HOP ID session stays trusted: nobody is redirected, signed out or locked out.
-- The family changelog lists PayHop, and the brand stylesheet and fonts include PayHop's Unbounded name (byte-identical with hop-assets v9).
-- The home page no longer shows the small numbered section labels above its headings.
-- The embedded HOP asset manifest and `scripts/sync-hop-assets.sh` read hop-assets v8 (they pointed at v6 while the vendored home engine, motion and bento files were already the v8 copies), so the fonts, floating tiles and app marks, including the new BioHop mark, come from v8.
-- The home page grids use the hop-assets v8 bento (five family tiles in one row from 1100 px, no lone box, art capped at 160-200 px); the 3D engine, bento stylesheet and BioHop assets are byte-identical v8 copies.
-- The family tiles stay in one row of five down to 860 px (art capped at 160 px, 130 px on phones), a 3 + 2 bento below that and two columns on phones; the footer's HOP family list shows the mark left of the name on one line under the shared "HOP family" heading.
+- **Signing in with HOP ID.** If you switch accounts at the hub, PixelHop no longer stays on the old account. A few minutes later, it quietly checks with the hub: the same account carries on, a different account replaces the session, and someone signed out at the hub is signed out here. Uploads and downloads are never interrupted by this check.
+- **Public pages.** Fixed pages such as legal, help, about and the studio now carry the site's picture, so a pasted link shows a card.
+- **Home page.** The small numbered labels above the headings are gone, and the row of HOP family tiles keeps five tiles in a row down to tablet width, then wraps neatly on phones.
+- **HOP family.** PayHop joins the family list, the footer, the FAQ, the README and the project website, in all nine languages. The brand fonts and pictures now come from the family's shared set.
+- **Signing in with HOP ID.** The hub counts as reachable only when it really answers. While it does not, nobody is signed out or locked out.
 
-## [3.9.0] - 2026-11-10
+## [3.9.0] - 2026-11-10 - Shared footer, dialogs, trash and tougher safety
 
 ### Added
-- Every footer starts with the HOP ID mark and "Part of Hop Easy Link" (linking to hel.ink), for everyone and in both looks; the Clean-only brand strip is replaced by it.
-- HopUI dialogs: questions and notices use the family's shared dialog instead of the browser's own, with the question's title and its explanation said separately.
-- A ticket's private note is shown once on the upload result page, to its owner, and stays visible only to the owner and the moderators.
-- The trash has its own entry in the dashboard sidebar.
-- An optional Clean interface style (flat surfaces, solid bordered cards, quiet tables and tabs), chosen with the `hop_ui` cookie, which the server reads. The HOP look stays the default.
+- **Footer.** Every footer now starts with the HOP ID mark and "Part of Hop Easy Link" linking to hel.ink.
+- **Questions and notices.** Questions such as "Delete this file?" now use the family's shared dialog instead of the browser's own, with the question and its explanation shown separately.
+- **Upload result page.** A ticket's private note is shown once to its owner and stays visible only to the owner and the moderators.
+- **Dashboard.** The trash has its own entry in the sidebar.
+- **Interface style.** An optional Clean style with flat surfaces and quiet tables can be chosen. The usual HOP look stays the default.
+- **FileHop in the family.** FileHop is listed in the sidebar, the app switcher, the footer and the About page, with its texts in all nine languages.
+- **Picker for BioHop.** BioHop's "Choose from PixelHop" button can now list a member's own pictures and PDFs, leaving out anything private, protected, expiring, hidden or behind a content warning. The files stay here and the other app only keeps their address.
+- **Account export, API keys and sign-outs.** API keys can be limited to uploads only, owners can refuse embedding of their images on other websites, Settings lists where you are signed in and can sign out everywhere else, and everything you have can be exported as one ZIP.
+- **Albums.** An album can be embedded on another website, and the album page copies the code.
+- **Keyboard shortcuts.** Press the question mark key for shortcuts: upload, studio, dashboard, search and copy link.
+- **Trash and tags.** Deleted files go to a trash for 7 days first, and files can have tags that you can search and filter by.
+- **Installers.** The install script checks the computer, asks a few questions, builds PixelHop and can set it up as a service or in Docker. The update script makes a backup first, and the uninstall script keeps your data unless asked.
+- **Maintenance mode.** The site owner can pause uploads while everything else keeps working.
+- **Dashboard.** A "Get the most out of PixelHop" card shows four steps, with a progress ring.
+- **Home page.** The part of the home page below the upload box was rebuilt with scroll scenes that show an upload, the removal of location and camera data, an album turning into five link formats and a photo that disappears when its time runs out. Everything is complete without scripts or with reduced motion.
+- **Pages.** New About, Features, FAQ and Contact pages and a live Status page, all in the sitemap.
+- **Content warnings.** An upload or album can be marked sensitive or adult. Visitors see it blurred and confirm before it opens.
+- **Storage guard.** Uploads pause with a clear message while the server is almost out of disk space, and the upload pages check again every 30 seconds.
 
 ### Fixed
-- All five family tiles on the home page assemble: the 3D engine is the hop-assets v7 copy, which keeps drawing every unsettled scene (v6 animated only four).
-- The family section on the home page draws every other app, FileHop included, as the same 3D tile (hop-assets v6 engine, WebP before WebGL) with its name and host below; the numbered "10 · HOP" label is gone and the five tiles sit in one row, a 3 + 2 bento on tablets and two columns on phones. The footer's HOP family list shows each app's mark.
-- Signing out of a HOP ID account goes through the account server with `return=` set to this app, so the person ends up back on PixelHop.
-- The footer no longer repeats the language list (the language menu is in the top bar); the copyright line is right-aligned, centred on phones.
-- The changelog page lists every merged pull request again: the snapshot is rebuilt from a freshly fetched main, and `make check-changelog` fails when merged PRs are missing from it.
-- A file its owner put in the trash answers 404, not 451. Hidden media is no longer cached publicly or redirected.
-- The content gate stays on the host it was posted to.
-- The language menu stays on the screen at 375 px and closes with Escape.
+- **Home page.** All five family tiles now assemble, and the section draws every other app, FileHop included, with its name and host.
+- **Signing out.** Signing out of a HOP ID account now returns you to PixelHop, and signing out at HOP ID, LinkHop or BioHop ends the PixelHop session as well. Before, the next visit signed you straight back in.
+- **Changelog.** The page lists every merged change again.
+- **Trash.** A file its owner put in the trash now answers as not found, and hidden media is no longer cached publicly.
+- **Language menu.** It stays on the screen on a 375 pixel phone and closes with the Escape key.
+- **Profile photos.** A profile photo from HOP ID or Google now shows correctly, and someone who hides their profile still sees their own photo.
+- **Settings and pages.** The home page's Batch editing button opened a page that does not exist and now opens the batch page. Settings no longer offers a profile page link while the profile page is switched off. The image page no longer scrolls sideways on phones. The studio QR tool tells you when the server refuses its text.
+- **Install script.** The dry run no longer creates folders.
+- **GIF images.** The image page no longer says "Metadata: clean" for GIFs, which are stored as uploaded.
+- **Accounts.** An account is no longer deleted when its pictures could not be listed, deleting an account also deletes its profile photo and the pictures in its trash, and deleting a picture removes its stored files first. If something goes wrong, nothing is half-deleted and the action can be run again.
 
 ### Changed
-- The header and footer show the mark and the app name as real text in the app's own typeface (hop-assets v7 brand fonts: name-only subsets, vendored byte-identical, SIL OFL).
-- New LinkHop and BioHop marks from hop-assets v6 (the embedded manifest and, where the app carries them, the home art and floating-tile copies).
-- Controls follow the HOP control standard: one 8 px radius, 36 px controls (32 px in rows, 40 px on forms), capped field widths.
-- HOP family assets move to hop-assets v4: FileHop's new pixel mark in the family list, the app switcher, the footer and the About page (bundled manifest), and the copied home engine with FileHop's matching 3D map. `scripts/sync-hop-assets.sh` copies from v4.
+- **Header and footer.** The mark and the app name are now real text in the app's own typeface instead of a picture.
+- **Controls.** Buttons and fields follow the HOP control standard: one corner radius, 36 pixel controls and capped field widths.
+- **Translations.** The app, its documentation and its README come in nine languages: English, Chinese, German, Indonesian, Japanese, Portuguese (Brazil), Spanish, French and Russian. Arabic and right-to-left layout are gone, and old language codes still work.
+- **Dashboard.** The signed-in pages have the same sidebar and top bar as the other HOP dashboards.
+- **Speed.** Views are counted in memory and saved every ten seconds, so a popular image no longer slows the site down.
+- **Private files.** Private, password-protected and expiring files are served by PixelHop itself and never redirected to public storage.
 
 ### Security
-- `HOP_PICKER_SECRET` (32+ characters) verifies the media picker's calls (`GET /api/v1/me/media` signed by an app in `PIXELHOP_MEDIA_CLIENTS`) with a secret the hub never uses. Until now PixelHop had to hold BioHop's sign-in secret (`HOP_SSO_SECRET_BIOHOP`) for that, so a leak here could forge a hub ticket for BioHop. It is accepted next to the older secrets while the family moves; once BioHop signs with it (navi-crwn/BioHop `fix/picker-secret`), remove `HOP_SSO_SECRET_BIOHOP` from this server.
+- **Media picker.** The picker for BioHop now uses its own secret. Before, PixelHop had to hold BioHop's sign-in secret, so a leak here could have forged a BioHop sign-in.
+- **Profile website.** A website address that opens an encrypted NoteHop note, including its key, is refused and is never stored or shown, so a note key cannot leak through a profile.
+- **Sign-in.** A sign-in for an account that is not active is refused before any local account is made, and a return address with a hidden control character is no longer followed.
+- **Uploads and storage space.** A member's storage space is checked as one step, so uploads that arrive together cannot all pass the same check.
 
-
-### HOP family
-- FileHop (file.hel.ink), the sixth HOP app, is in the family list: the dashboard sidebar, the app switcher, the footer and the About page (from the bundled asset manifest), the FAQ and features text in all nine languages, and the README family table.
-- The HOP family assets move to hop-assets v3, which adds FileHop: the bundled manifest, the copied home engine (`web/static/hop-home/`, with the FileHop 3D mark), `scripts/sync-hop-assets.sh` and the documentation site's font link. In the HOP family section, an app the 3D engine has no block map for keeps its flat mark instead of falling back to the NoteHop logo.
-- `GET /api/v1/me/media` lists a member's own pictures (`type=image`) or PDFs (`type=pdf`) with their public address, thumbnail, size and album, newest first, with an opaque `cursor`. It leaves out what a page elsewhere could not show: private, password-protected, expiring, hidden (trash, moderation, suspension) and content-warning files. It also says whether the member blocks embedding on other sites. Besides a session or a full API key, a HOP app named in `PIXELHOP_MEDIA_CLIENTS` (default `biohop`, for BioHop's "Choose from PixelHop" picker) may call it server to server with a HOP App Protocol signature and `X-HOP-Actor` set to the member's HOP ID; the shared SSO secret verifies it, or that app's own secret in `HOP_SSO_SECRET_<APP>` when the family keeps one per app. Media clients are not admin clients: they cannot call `/hop/*`. The file stays here; the other app only keeps the address.
-
-### Documentation
-- `.env.example` names every variable the program reads: the free disk limits, read-only mode, the secret fallbacks and rotation, `HELINK_API_ADDR`, `HOP_ADMIN_CLIENTS` and the three the command line uses. A test keeps it that way.
-- README rewritten and checked against the code, in all nine languages. It now says exactly which metadata is removed from which file type: photos (JPEG, PNG, WebP) and videos lose their metadata, PDFs are compressed but keep their document properties, GIFs are stored as uploaded, and videos and PDFs are only processed when `ffmpeg` and Ghostscript are installed on the server (the Docker image has neither).
-- Fresh screenshots of the home page, image page, dashboard, album page and studio, in dark and light. `scripts/readme-images.mjs` now renders them from a running instance with generated demo pictures (`scripts/demo-images`); the old hero, features and studio pictures, and the unused `docs/media` screenshots (one showed the retired admin pages), are gone.
-- `docs/ARCHITECTURE.md` no longer says that sideways photos keep their pixels: a photo with an EXIF rotation is saved again as JPEG at quality 92.
-- `web/changelog.json`, the data behind the `/changelog` page, was regenerated with `scripts/build-changelog.py`; it had stopped at the content warning pull request.
-
-### Hardening
-- CI and release builds use Go 1.27.3 (`go` line in `go.mod`), which has the fixes the 1.27.2 toolchain lacks.
-- A member's storage quota is checked and used up as one step per member: uploads that arrive together can no longer all pass the same reading of "used so far". Uploads sent in pieces are checked again when they finish, so several big files started while there was room cannot all be kept.
-- Deleting an account (by the member, or by the control center) now removes the profile photo from storage as well. If storage refuses the delete, the account is kept and the purge can be run again.
-- Deleting an account also removes the pictures in its trash. They used to stay, without an owner, until the janitor cleared them up to a week later, although the settings page says every image is deleted.
-- An account is no longer deleted when its pictures could not be listed: the purge stops, reports the error and can be run again.
-- Private, password-protected and expiring files are no longer redirected to the public storage address (`S3_PUBLIC_URL`); PixelHop serves them itself, behind its own checks.
-- Deleting a picture now removes its stored files first and the database row last, and reports a storage error instead of ignoring it. Emptying the trash, deleting an account and deleting a reported picture from the control center stop at the first failure, keep the records, and can be run again.
-- A HOP ID event that fails (bad payload, storage error) no longer uses up its id, so the sender's retry is handled. Events that succeed are still handled once.
-- The image page no longer says "Metadata: clean" for GIFs, which are stored as uploaded.
-- Removed the unused `PIXELHOP_SECRET` setting; `install.sh` no longer writes it to `.env`. An existing value in `.env` is simply ignored.
-- A profile website that opens an encrypted NoteHop note (`https://note.hel.ink/ID#k=KEY`) is refused, and the same addresses are cut down to the part before the `#` in report notes, so PixelHop never stores or shows a note key. The rule follows hop-safety's `EncryptedNoteLink`; the hosts come from `PIXELHOP_NOTE_HOSTS` (default `note.hel.ink`, `n.hel.ink`).
-- The same rule now covers what the hub sends: a website with a note key in a profile push (`POST /hop/profile`, the `profile.updated` event) or a sign-in ticket is ignored and the earlier address stays, and a key in a name or bio is cut out, there and in the settings form. The form also refuses an escaped `%23k=` and an address hidden inside another one. A key stored earlier stays in the row until its owner changes it, but `/hop/users` and the profile page no longer hand it out.
-- A sign-in ticket whose `status` is not `active` is refused before any local account is made or linked.
-- The address after sign-in (`next`) is refused when it holds a control character: `/<TAB>/host` was read by browsers as `//host`.
-- A build from a clone (`make`, `install.sh`, `update.sh`) and the Docker image of a release report the version without the tag's `v` (`3.8.0`), like the release binaries; before, the same release showed as `v3.8.0` on the status page and in `/hop/health`.
-- A mistyped command (`pixelhop servee`) prints the usage and exits before the data folder and database are created.
-- The janitor no longer stops at the first picture whose files cannot be deleted: it logs that picture, removes the others and still clears old sessions. The same for the trash.
-
-### Fixes
-- `install.sh --dry-run` no longer creates the data folder and `bin/`. It said nothing would be executed, and now nothing is.
-- The home page "Batch editing" button opened a page that does not exist (`/batch`); it now opens `/tools/batch`.
-- Settings no longer shows "Your profile page" while the profile page is switched off (that address answered 404).
-- The image page no longer scrolls sideways on phones: the side column can shrink below the width of its tab row.
-- The studio QR tool says so when the server refuses the text (more than 1500 bytes, or too long for the level) instead of saving the error text as `qr-code.png`.
-
-### Translations
-- The 404 page and the error pages (titles and the 500 text) are translated; the profile website refusal and the QR error are new messages in all nine languages.
-- The interface, the sign-in and member pages, the home page, the documentation site and the READMEs come in nine languages: English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil), Español, Français and Русский. German and Russian are new; Arabic and right-to-left layout are gone. The old codes `zh` and `pt` still work in `?lang=` and in the cookie, and a retired language falls back to English. The browser's language setting is not used.
-- Copy edits in Chinese and German: dash connectors removed from the text.
-
-### Installers
-- `install.sh` checks the computer (Go 1.27 or newer, or Docker, git, curl, disk space), asks a few questions and builds PixelHop. It can run it in the foreground (`start.sh`), write a systemd unit or a Docker Compose file, connect to an existing HOP ID hub or install one next to it, and ends with a self-test against `/healthz`. It works from a clone or through `curl | bash`.
-- `update.sh` copies the database to `backups/` (with `sqlite3 .backup` when available), pulls and rebuilds (it restarts the Docker container, and tells you how to restart anything else); `uninstall.sh` removes the program and keeps your data unless you pass `--purge`. All three take `--yes` and `--dry-run`.
-
-### Safety, speed and ownership
-- Views are counted in memory and written every ten seconds in one transaction, so a viral image no longer means three database writes per visitor.
-- API keys can be limited to **Upload only** (they cannot list, rename or delete).
-- Owners can refuse embedding of their images on other websites (Settings → Embedding); links you share and direct visits still work.
-- Settings lists where you are signed in and can sign out everywhere else, and exports everything (every file in original quality plus `account.json`) as one ZIP.
-- Files taken down by the moderators (and files of banned uploaders) cannot be uploaded again: their SHA-256 is remembered.
-- Maintenance mode (`PIXELHOP_READ_ONLY=true`, or the control center) pauses uploads while everything online keeps working.
-- An album can be embedded on another website with an iframe (`/a/{id}/embed`); the album page copies the code.
-- Keyboard shortcuts (press `?`): upload, studio, dashboard, search, copy link. After a multi-file upload the album link is copied for you.
-- An OpenAPI 3 description of the API (`/static/openapi.json`) and an architecture page (`docs/ARCHITECTURE.md`).
-- Deleted files go to a **trash** for 7 days (restore them, delete for good, or empty it); the API follows (`DELETE` trashes, `POST /api/v1/images/{id}/restore`, `?permanent=1`). Files can have **tags** (search and a tag filter on the dashboard; `tags` in the API).
-- The terminal boxes on the home page keep their dark panel in light mode (the site-wide `code` and `pre` styles painted them pale).
-
-### Home v2
-- The home page below the upload box is rebuilt on the shared HOP scene engine (`hop-scenes`, HOP assets v2): a running line and numbers, then pinned scenes where the scroll plays an upload, the removal of a photo's location and camera data, an album turning into five link formats, and a photo that comes apart when its time runs out; a studio section with a live mini tool in each card; the API and self-host terminals; question cards; and the other HOP apps as four marks you can turn.
-- Everything is complete without script or with "reduce motion"; nothing loads from a CDN.
-- The shared copy of the HOP assets is now v2 (`scripts/sync-hop-assets.sh` follows it); new text is English in all catalogs until translated (`docs/pending-translation-home2.json`).
-
-### Dashboard
-- A "Get the most out of PixelHop" card shows four steps (first upload, an album, a public profile, an API key) with a progress ring, and goes away when all four are done.
-
-### Media addresses
-- The profile photo from HOP ID or Google is made absolute before it is shown: a bare path (`/storage/...`) was asked of PixelHop and gave a 404, an `http://` address was blocked on the https pages.
-- Photos are also served on the link host (`p.hel.ink/avatar/...`) instead of bouncing to the app, and carry `Cross-Origin-Resource-Policy: cross-origin` so the gallery API's `avatar` can be used on other sites.
-- Someone who hides their profile now sees their own photo in the top bar and settings (it answered 404 for them).
-- A profile's link preview uses a video's or PDF's poster instead of the file, and no picture when the first image has a content warning.
-- A video opened on its own is allowed to play (`media-src 'self'` in its policy); pages allow video from a storage CDN (`media-src ... https:`).
-
-### Dashboard chrome
-- The signed-in dashboard (dashboard, albums, settings) has the same chrome as the other HOP dashboards: a sidebar with this app's menu and the HOP family (HOP ID, LinkHop, BioHop, NoteHop, with their marks), a top bar of settings-type controls (upload, language, theme and an account menu with your HOP ID, settings and sign out), and a compact footer.
-- The footer on every page spreads its five columns evenly; a flex rule had packed them to the left.
-
-### Home page and storage guard
-- The home page was rebuilt as one long page: the uploader first, then what happens to a file during its life, on the shared HOP home frame with the 3D pixel logo.
-- Uploads pause with HTTP 507 and `Retry-After` while the data or temporary folder is below the free-space reserve (`PIXELHOP_MIN_FREE_MB`, default 1024, and `PIXELHOP_MIN_FREE_PERCENT`, default 5). Upload pages show the state and check again every 30 seconds; `GET /api/v1/upload-status` reports it. See `docs/UPLOAD-STORAGE.md`.
-
-### Content warnings
-- An upload or an album can carry a content warning: sensitive or adult. Visitors see the file blurred and confirm before it opens (adult files ask them to confirm they are 18 or older). Set it when uploading (`content_warning`, `warning_reason`) or afterwards through the API.
-
-### Pages on PixelHop's own domain
-- New `/about`, `/features`, `/faq`, `/contact` and a live `/status` page, all in the sitemap. `/contact` links to GitHub issues and private security advisories. `SECURITY.md` and issue templates were added to the repository.
-- On a link host (`PIXELHOP_LINK_URL`), app pages now answer with a permanent redirect (301, or 308 for other methods) to the app. Shared links, files, thumbnails, QR codes, the API and `/hop/` are served on both hosts.
-- The HOP family table in the README is checked against the one in HEL.ink by a CI job (`scripts/check-hop-family.sh`), and the app has a family section with the shared typography.
-
-### Sign-in and storage security
-- `GET /auth/helink/logout` ends the PixelHop session when someone signs out at HOP ID, LinkHop or BioHop. Before, only `POST /logout` existed, the session survived and the next visit signed the person straight back in. The `?next=` address is followed only when it is an https address on the HOP family's domain.
-- The SQLite database file is created with mode 0600, and a test checks it.
-- Two SSO secrets can be valid at once so the shared secret can be rotated without downtime: `HELINK_SSO_SECRET_PREV` (also `HOP_SSO_SECRET_PREV`) is accepted for tickets and signed `/hop/*` calls next to the current one. `HOP_SSO_SECRET_PIXELHOP` and `HOP_SSO_SECRET` work as names for the current secret.
-
-## [3.7.0] - 2026-10-28
-
-### Links on their own host
-- **`PIXELHOP_LINK_URL`: shared links can live on another host than the app.** On p.hel.ink this moves the app to **pixel.hel.ink** (like the other HOP apps) while every link stays `p.hel.ink/slug`. New links (page, direct, thumbnail, album, QR, Markdown/HTML/BBCode, API answers) use the link host.
-- On the link host PixelHop serves only what a shared link needs: image and album pages, `/i/` and `/t/` files, QR codes, the password and report forms, static files, the API (so ShareX configs and iPhone Shortcuts keep working) and the signed `/hop/*` calls. Everything else (home, sign-in, dashboard, studio) is sent to the app; forms keep their method (307). Nobody is signed in on the link host.
-- A visitor who opens a shared page at the app's address is sent to the link host. Signed-in people stay on the app, where they see their own private files; a private file's page opened on the link host goes to the app for the same reason.
-- The link host stops offering the app for install and replaces the service worker with one that removes itself, so phones reinstall the app from its new address.
-- Shared pages name the link host as canonical (`<link rel="canonical">`, `og:url`).
-
-
-### HOP App Protocol
-- **Signed admin API under `/hop/*`.** A control center can read health, manifest, stats, a user's profile and counts, content (images and albums), the report queue, settings, search, metrics and the audit trail, and can act: suspend/lock/activate, revoke sessions or API keys, set quotas, warn, purge; hide/unhide/delete/ban-IP/transfer content; dismiss/resolve/delete reports; change the runtime settings. HEL.ink pushes profile changes and account events (`profile.updated`, `account.status`, `account.deleted`, `session.revoked`) to `/hop/events`, handled once per event id. Requests are signed with `HELINK_SSO_SECRET`; `HOP_ADMIN_CLIENTS` names the callers (default `imperium,helink`). Everything that changes something is written to the new `hop_audit` table.
-- **SSO ticket v2.** A ticket's `roles` now decide the local role: `owner`, `admin` or `admin:pixelhop` make an admin, anything else makes a plain user (demotion included); the old `admin` flag only counts when `roles` is absent. A username, bio, website and "show owner" sent in the ticket are copied to the profile. A ticket for another app (`aud`) is refused.
-- Images now remember why they are hidden (`suspended` or `moderation`), so lifting a suspension brings back only the images the suspension hid.
-- **The built-in admin pages are retired.** Moderation (images, users, reports, IP bans) and site settings now live in the HOP control center, which talks to PixelHop through the signed `/hop/*` API; the CLI `user` commands still work. `/admin` sends a signed-in admin to `PIXELHOP_CONTROL_URL` when it is set and otherwise shows a short note saying where things went. The `admin` role keeps its other abilities: seeing hidden images, changing or deleting any image or album through the API, and ZIP downloads. The "Admin" links in the menu are replaced by a "Control center" link when `PIXELHOP_CONTROL_URL` is set.
-
-## [3.6.0] - 2026-10-19
+## [3.7.0] - 2026-10-28 - Links on their own host and the control center
 
 ### Added
-- **Multi-language OCR.** "Image to text" reads 30 languages and up to five at once, for images that mix languages (for example an English receipt with Japanese or Spanish lines). Pick them as chips; the eight most common show first and "More languages" opens the rest. The choice is remembered, and the first time it starts with English plus your browser's language.
-
-### Changed
-- Chinese and Japanese text from OCR no longer has spaces between every character.
-- The project website is available in English, 简体中文, Deutsch, Bahasa Indonesia, 日本語, Português (Brasil) and Español.
-
-## [3.5.3] - 2026-10-16
-
-### Changed
-- **Upload limits per person.** Guests can upload any file (picture, video or PDF) up to 20 MB (`PIXELHOP_GUEST_MAX_MB`). Signed-in members keep 20 MB per picture and get up to 100 MB per video or PDF (`PIXELHOP_MAX_MEDIA_MB`, default lowered from 500 to 100).
-- The upload box shows each person their own limits, and a guest whose file is too big is told how far signing in goes.
-
-## [3.5.2] - 2026-10-16
-
-### Fixed
-- **Admin → Users: quota changes no longer get lost.** The quota is typed in GB now (10, 2.5, "2,5" and "10 GB" all work). A value that can't be read is refused with a message instead of being skipped without a word, which is what happened in 3.5.1 when the MB field got a number like "10.240".
-- Every admin action on a user (quota, status, role, warning, password, delete) says what happened, or why nothing changed, and keeps your search and page.
-- Dashboard: showing, hiding or deleting many files at once reports how many worked. Files that failed, and private or password-protected files that can't go on a profile, are no longer skipped silently.
-- Clearer messages when the server answers with an error page instead of JSON (for example "too large").
-- Settings → Webhooks: "Send test" with no webhook explains that one is needed first, instead of saying a test was sent.
-- IP bans and admin settings confirm the change and report database errors.
-- Video and PDF pages no longer advertise an oEmbed link that answered 404.
-
-### Security
-- Confirmation messages on Settings, Admin → Users and IP bans come from short codes, so a crafted link can no longer put arbitrary text on those pages.
-
-## [3.5.1] - 2026-10-16
-
-### Added
-- **Member dashboard.** Upload straight from the dashboard: links show beside the box and new files appear at the top of "My files" right away. Number cards for files (images, videos, PDFs), views, albums and storage; shortcuts to the studio, albums, public profile, ShareX/API and HEL.ink; a filter by file type.
-- One member menu (Dashboard, Albums, Public profile, Studio, Settings) on the dashboard, albums, settings and your own public profile, so every member page links back to the others.
-
-### Fixed
-- The upload box fills its column again, as in 3.0. Since 3.4.0 it had shrunk to the width of its content. "From a link" has its label back, and on phones the three buttons fit on one row.
+- **Shared links.** Shared links can live on their own host, such as p.hel.ink, while the app itself moves to pixel.hel.ink like the other HOP apps. Every existing link keeps working, and a visitor who opens a shared page on the app's address is sent to the link host.
+- **Control center.** The HOP control center can now look after PixelHop: it reads health, statistics, content and reports, and can suspend or warn a user, hide or delete content and change settings. Every change is written to an audit trail. The sign-in ticket from HOP ID now carries the member's role, username, bio and website.
+- **Hidden images.** Images remember why they are hidden, so lifting a suspension brings back only the images the suspension hid.
 
 ### Removed
-- The PixelHop 2 PHP code (`legacy/`). It stays available in the `v2.3.0-php` tag; old links and `pixelhop import` keep working.
+- **Admin pages.** The built-in admin pages are gone, because moderation and site settings now live in the control center. Signed-in admins are sent there.
 
-## [3.5.0] - 2026-10-16
+## [3.6.0] - 2026-10-19 - Many languages in one picture
 
 ### Added
-- **Own sign-in and sign-up forms with HEL.ink accounts on.** With `HELINK_URL` set, the email and password form on the sign-in page now also accepts HEL.ink accounts (checked with HEL.ink server to server, signed with the shared secret), and signing up here creates the account on HEL.ink too, so one account works in both apps without visiting HEL.ink. "Continue with HEL.ink" stays for Google and two-factor accounts. Needs HEL.ink with `POST /api/pixelhop/login|register`.
-- Optional `HELINK_API_ADDR` (e.g. `127.0.0.1:443`) to reach HEL.ink on the same machine for those checks.
+- **Studio, Image to text.** It now reads 30 languages and up to five at once, for pictures that mix languages such as an English receipt with Japanese lines. Your choice is remembered.
+
+### Changed
+- **Studio, Image to text.** Chinese and Japanese text no longer has spaces between every character.
+- **Project website.** The project website is now in seven languages.
+
+## [3.5.3] - 2026-10-16 - Upload limits per person
+
+### Changed
+- **Upload page.** Guests can upload any file up to 20 MB. Signed-in members keep 20 MB per picture and now get up to 100 MB per video or PDF. The upload box shows each person their own limits, and a guest whose file is too big is told how far signing in goes.
+
+## [3.5.2] - 2026-10-16 - Fewer silent failures
+
+### Fixed
+- **Admin, Users.** Changing someone's storage space no longer gets lost. The value is typed in GB and a value that cannot be read is refused with a message. Every action on a user now says what happened.
+- **Dashboard.** Showing, hiding or deleting many files at once reports how many worked, and files that cannot go on a profile are no longer skipped silently.
+- **Error messages.** The site gives a clearer message when the server answers with an error page instead of the expected data.
+- **Settings, Webhooks.** Send test with no webhook now explains that one is needed first.
+- **Video and PDF pages.** They no longer advertise an embed link that did not work.
 
 ### Security
-- An unconfirmed HEL.ink address never takes over an existing PixelHop profile with the same email.
+- **Settings and admin pages.** Confirmation messages come from short codes, so a crafted link can no longer put its own text on those pages.
 
-## [3.4.2] - 2026-10-16
+## [3.5.1] - 2026-10-16 - Member dashboard
 
-### Changed
-- Image page: the QR code is a compact row inside the details card (with a "Download QR" link) instead of a big card of its own, so the side column no longer runs far below the image.
-
-## [3.4.1] - 2026-10-16
+### Added
+- **Dashboard.** Members can upload straight from the dashboard, and the links show beside the box. Number cards show files, views, albums and storage, shortcuts lead to the studio, albums, public profile and API, and files can be filtered by type.
+- **Member pages.** One member menu now links the dashboard, albums, profile, studio and settings.
 
 ### Fixed
-- The guest note sat on the upload box's colored border and was hard to read; it is now below the box. Phones no longer see the Ctrl+V hint.
+- **Upload page.** The upload box fills its column again. Since 3.4.0 it had shrunk to the width of its content.
 
-### Changed
-- PixelHop is fully standalone: HEL.ink sign-in is an optional add-on that stays off unless `HELINK_URL` and `HELINK_SSO_SECRET` are set, and examples no longer point at HEL.ink.
+### Removed
+- **Old PHP version.** The PixelHop 2 code was removed from the project. It stays available in its own release, and old links and imports keep working.
 
-## [3.4.0] - 2026-10-16
-
-### Changed
-- **New upload page layout.** A shorter headline and one clear upload box. Options fold into an "Options" chip that shows what's set (e.g. "Delete after 7 days"), and the ticket into a "Ticket & note" chip.
-- **Results beside the upload box** on desktop (no scrolling), below it on phones (scrolled into view). Up to 3 files show there; bigger batches open the results page.
-- **"Install app"** moved to the top bar; "Rebuilt in Go" moved down to the features.
-- **Uploaded from this device** is folded by default (count and a few thumbnails), grouped by day inside, a dozen at a time.
-
-## [3.3.2] - 2026-10-16
+## [3.5.0] - 2026-10-16 - One account with HEL.ink
 
 ### Added
-- **Paste button** for phones (no Ctrl+V there): uploads the image on the clipboard, for example one copied inside a work chat app that has no Share button. Chrome asks once for permission; where reading the clipboard isn't allowed, a box appears that takes press-and-hold → Paste. A copied link is fetched like "From a link".
-
-## [3.3.1] - 2026-10-16
-
-### Added
-- **Results page for phones**: after uploading several files on a phone you land on `/uploaded`, a page with just those files, their links, "Copy for chat", "Copy all direct links" and (for guests) the delete links. Desktop keeps showing results on the upload page.
-- **Install app** button on the upload page when the browser offers it (Android/desktop Chrome), and a hint for iPhone.
-
-### Changed
-- The **Ticket / case** box is always visible for signed-in people (it was folded away), with a sign-in hint for guests.
-
-## [3.3.0] - 2026-10-16
-
-### Added
-- **Videos and PDFs.** MP4, MOV, WebM, 3GP and PDF files get a page, a poster/first-page preview and a link, like images. Up to 500 MB per file (`PIXELHOP_MAX_MEDIA_MB`).
-- **Automatic compression.** Videos lose their location and other metadata at once, then are shrunk in the background to 720p H.264 (plays on every phone; a 53 MB screen recording became 2 MB). PDFs are compressed with Ghostscript on upload. Both need `ffmpeg` / `gs` on the server and are skipped without them.
-- **Uploads in pieces** (`/api/v1/uploads`), resumable after a dropped connection, so big phone videos get past proxy limits.
-- **Reports / tickets.** Give an upload a ticket number and a note: every file goes into one album with that title and note.
-- **Copy for chat**: one tap copies the ticket, note, album link and a numbered list of every file's link, on the upload page, albums, `/result` and the share page. "Copy all direct links" is now a primary button.
-- The share target accepts videos and PDFs; an **iPhone Shortcut** guide in the docs.
-
-### Changed
-- Upload rows stack their buttons on phones so the link stays readable.
-
-## [3.2.0] - 2026-10-16
-
-### Added
-- **Private and password-protected images.** Only you, or anyone with the password; the file itself is locked too, so hotlinks stop working. Unlocking is remembered for 30 days and resets when the password changes.
-- **Edit details** on an image page: title, alt text (used in embed codes), visibility and profile listing.
-- **View stats** for owners: views per day for 30 days and the sites that sent visitors.
-- **Resize on the fly**: `/i/{id}.jpg?w=800&h=600&fit=cover&format=webp&q=75`, cached per image.
-- **Album editor**: title, description, cover, drag-to-reorder, add and remove images; **My albums** page; **Make album** from a selection in My images; albums API.
-- **Explore** page with images people chose to show publicly, plus `sitemap.xml`, **oEmbed** and a public gallery API (`/api/v1/users/{username}/images`) for HEL.ink bio pages and other sites.
-- **Webhooks** for `image.uploaded` and `image.deleted`, signed with HMAC-SHA256.
-- **iPhone HEIC and AVIF uploads** are converted on the server; upload results list the hidden data that was removed (GPS location, camera details…).
-- **Installable app (PWA)** with a share target: share photos from your phone's share sheet straight to PixelHop.
-- **Watermark** tool in the studio and in batch (text or logo, position, size, opacity, tiled), and **hold to compare** with the original.
-- **Command-line uploader** in the same binary: `pixelhop login` and `pixelhop push`.
-
-### Changed
-- The AI sidecar keeps its models next to it and loads them only when needed.
-- The old `/result?id=…` page hides private and password-protected images.
-
-## [3.1.0] - 2026-10-16
-
-### Added
-- **Public profiles**: display name, @username, profile photo (square, metadata stripped), bio and website, edited in Settings. Every account gets a username automatically.
-- **Image ownership**: image and album pages show who shared them, with photo and a link to their profile; link previews say "Shared by …". Owners can switch this off.
-- **Profile pages** at `/u/username` showing only the images their owner chooses ("Show on my profile" on an image, in bulk from My images, or `listed` when uploading / via the API).
-
-### Changed
-- Signing in with HEL.ink no longer overwrites a name you edited here; HEL.ink's name and photo only fill in empty ones.
-
-## [3.0.0] - 2026-10-15
-
-PixelHop rebuilt from scratch in Go. See [AUDIT.md](AUDIT.md) for why.
-
-### Added after the first preview
-- **One account with HEL.ink**: optional sign-in with a HEL.ink account (signed, single-use tickets); sign-up, password resets, Google and 2FA handled by HEL.ink; `pixelhop user merge` folds old accounts in.
-- **Server AI tools** (optional `tools/ai-server.py`): background removal, automatic face blur, magic eraser (LaMa) and HD upscale 2x (Real-ESRGAN), sign-in only with daily limits.
-- **Batch page**: the same steps for many images, then one ZIP or one album.
-- **Copy all links** after bulk uploads, on albums and on old `/result` links; share buttons; thumbnail links; gallery select all, copy links and ZIP download.
-- **QR code generator** for any text, PNG or SVG.
-- Cloudflare **Turnstile**, a **Help** page, admin tool usage and disk space, local-only `/metrics`, and redirects for every PixelHop 2 page and tool address.
-
-### Added
-- **One binary**: web server, SQLite database and cleanup janitor in a ~16 MB executable. Docker image, systemd unit and nginx example included.
-- **Lossless metadata stripping**: GPS/EXIF, XMP and IPTC removed from JPEG, PNG and WebP without re-encoding; EXIF rotation applied first.
-- **In-browser studio**: compress, resize, crop, convert (incl. AVIF), adjust/rotate, blur & pixelate, color palette, OCR and background removal, all client-side.
-- **Albums** for multi-file uploads, **QR codes**, **Markdown/HTML/BBCode** embeds, and readable links (`beach-sunset-x7Kp2Q`).
-- **Self-destruct** timers (10 minutes to 90 days) and private **delete links** for guests, plus a per-device upload history.
-- **API keys** (hashed, shown once) with a one-click **ShareX** config; JSON API for upload, list, rename, delete.
-- **Storage backends**: local disk or any S3-compatible bucket, with a built-in SigV4 signer and optional CDN redirects.
-- **Admin**: overview with a 30-day chart, images, users (lock/suspend/role/quota/password/warnings), reports, IP bans, site settings, SEO title/description, announcement bar.
-- **`pixelhop import`**: moves PixelHop 2 users (with their passwords) and images; `--copy` re-hosts the files.
-- GitHub Pages website with EN/ID and light/dark, and README images rendered from it.
+- **Sign-in and sign-up.** When HEL.ink is connected, the email and password form here also accepts HEL.ink accounts, and signing up here creates the account on HEL.ink too, so one account works in both apps.
 
 ### Security
-- SSRF-proof "upload from link" (checks every resolved address, including redirects).
-- Forwarding headers are trusted only from configured proxies (`PIXELHOP_TRUSTED_PROXIES=cloudflare`).
-- CSRF protection via Fetch Metadata, a strict CSP without inline scripts, and sandboxed image responses.
-- Argon2id passwords, rate-limited sign-in, hashed session tokens, and a decompression-bomb guard.
+- **Sign-in.** An unconfirmed HEL.ink address never takes over an existing PixelHop profile with the same email.
+
+## [3.4.2] - 2026-10-16 - Smaller QR code
 
 ### Changed
-- Server-side Python AI (rembg, PaddleOCR, upscale, erase, face blur) replaced by in-browser tools; upscale and erase are not offered.
-- MySQL + `images.json` replaced by SQLite.
-- The PHP code moved to `legacy/` (tag `v2.3.0-php`).
+- **Image page.** The QR code is now a small row inside the details card, with a download link, so the side column no longer runs far below the image.
 
-### Kept working
-- Image pages `/{id}`, PixelHop 2 image links `/i/YYYY/MM/DD/{id}_{size}.{ext}`, `POST /api/upload.php` (ShareX), and `/auth/google-callback`.
-
-## [2.3.0] - 2026-01-03
-
-### Added
-- **Descriptive Image Links**: Uploaded image links now include a slug from the original filename (e.g. `rumah-baru_a3x9K2`), making it easier to identify images from the link alone.
-- **Smart Slug Truncation**: For long filenames, only the first ~15 characters are used for the slug, cut at word boundaries for readability.
-- **Bulk Upload Friendly**: Copying multiple links now shows which image is which, even for guests.
-
-### Changed
-- **Backward Compatibility**: All old image links (e.g. `akqxW3`) remain valid and accessible. Only new uploads use the new descriptive format.
-- **View, Result, and Gallery Pages**: All pages now support both old and new link formats seamlessly.
+## [3.4.1] - 2026-10-16 - Standalone again
 
 ### Fixed
-- Improved filename sanitization for URL slugs.
-
-## [2.2.0] - 2025-12-18
-
-### Added
-- **View Count Tracking**: Track views for all images
-  - View count increments once per hour per IP
-  - View count and last viewed date in Image Info
-  - "Most Views" sort option in galleries
-  - Total Views stat in galleries
-- **Report Image Feature**: Users can report inappropriate images
-  - Report button on image view page
-  - Multiple report reasons (NSFW, Illegal, Privacy, Copyright, Other)
-  - Report queue in Admin Security panel
-  - Dismiss or Delete actions for admins
-- **User Account Status System**:
-  - **Active**: Normal access
-  - **Locked**: Cannot login, images still viewable, must contact support
-  - **Suspended**: No access, images inaccessible, auto-deleted in 30 days
-- **Admin Warning System**: Send warnings that popup on user's next login
-- **Image Expiration System**: Auto-delete images after 90 days of inactivity
-  - Daily cron job at 2 AM
-  - Based on last_viewed or created_at date
-  - Logged to data/expiration_log.json
+- **Upload page.** The guest note was hard to read on the box's colored border and now sits below it. Phones no longer see the Ctrl and V hint.
 
 ### Changed
-- **Admin Gallery Stats**: Compact layout (5 stats in 1 row)
-- **Image View Page**: Added view count, last viewed, and report button
-- **Admin Users Page**: Added status management (Lock/Suspend/Warning)
-- **Login Flow**: Checks account status before allowing login
+- **Sign-in.** PixelHop works fully on its own. Signing in with HEL.ink is an optional add-on that stays off unless the site owner turns it on.
+
+## [3.4.0] - 2026-10-16 - New upload page
+
+### Changed
+- **Upload page.** A shorter headline and one clear upload box. Options fold into an Options chip that shows what is set, and the ticket into a Ticket and note chip.
+- **Upload results.** Results appear beside the upload box on desktop and below it on phones. Up to three files show there, and bigger batches open the results page.
+- **Top bar.** The Install app button moved to the top bar.
+- **Upload history.** Files uploaded from this device are folded by default and grouped by day.
+
+## [3.3.2] - 2026-10-16 - Paste button for phones
+
+### Added
+- **Upload page.** A Paste button uploads the picture on the clipboard, for phones that have no Ctrl and V, for example a picture copied inside a chat app. A copied link is fetched like "From a link".
+
+## [3.3.1] - 2026-10-16 - Results page for phones
+
+### Added
+- **Upload results.** After uploading several files on a phone you land on a page with just those files, their links, a Copy for chat button and, for guests, the delete links.
+- **Upload page.** An Install app button appears when the browser offers it, and a hint for iPhone.
+
+### Changed
+- **Upload page.** The Ticket box is always visible for signed-in people, with a sign-in hint for guests.
+
+## [3.3.0] - 2026-10-16 - Videos and PDFs
+
+### Added
+- **Upload.** MP4, MOV, WebM, 3GP and PDF files get a page, a preview and a link, like pictures, up to 500 MB per file.
+- **Upload.** Videos lose their location data at once and are then shrunk in the background so they play on every phone, and PDFs are compressed. Both need extra programs on the server and are skipped without them.
+- **Upload.** Big files are sent in pieces, so a dropped connection can be resumed.
+- **Tickets and reports.** An upload can carry a ticket number and a note, and all its files go into one album with that title and note. A Copy for chat button copies the ticket, note, album link and a numbered list of every file's link.
+- **Sharing.** The phone share sheet accepts videos and PDFs, and the documentation has a guide for an iPhone Shortcut.
+
+### Changed
+- **Upload page.** Upload rows stack their buttons on phones so the link stays readable.
+
+## [3.2.0] - 2026-10-16 - Private files, albums and webhooks
+
+### Added
+- **Image page.** Images can be private or password-protected, and the file itself is locked too, so hotlinks stop working. Owners can edit title, description, visibility and profile listing, and see views per day and the sites that sent visitors.
+- **Images.** An image can be resized on the fly through its address, and is cached per image.
+- **Albums.** An album editor lets you change title, description and cover, reorder by dragging, and add or remove pictures. There is a My albums page and a Make album button for a selection.
+- **Explore.** A page shows pictures people chose to show publicly, plus a sitemap, embed support and a public gallery for bio pages and other sites.
+- **Settings.** Webhooks announce uploaded and deleted images, signed so the receiver can trust them.
+- **Upload.** iPhone HEIC and AVIF pictures are converted on the server, and upload results list the hidden data that was removed.
+- **Installable app.** PixelHop can be installed on a phone and accepts pictures from the share sheet.
+- **Studio.** A Watermark tool in the studio and in batch, and a Hold to compare button.
+- **Command line.** The same program can upload from a terminal.
+
+### Changed
+- **Old result page.** It now hides private and password-protected images.
+
+## [3.1.0] - 2026-10-16 - Public profiles
+
+### Added
+- **Profiles.** Public profiles with display name, username, profile photo, bio and website, edited in Settings. Every account gets a username automatically.
+- **Image and album pages.** They show who shared the file, with a link to their profile, and link previews say "Shared by". Owners can switch this off.
+- **Profile pages.** Profile pages show only the images their owner chooses to show.
+
+### Changed
+- **Signing in with HEL.ink.** It no longer overwrites a name you edited here.
+
+## [3.0.0] - 2026-10-15 - PixelHop rebuilt
+
+PixelHop was rebuilt from scratch as one small program.
+
+### Added
+- **One program.** The web server, the database and the cleanup job are one file of about 16 MB, with a Docker image and service files included.
+- **Privacy.** Location and camera data are removed from photos without changing the picture, after the rotation is applied.
+- **Studio.** A studio in the browser for compressing, resizing, cropping, converting, adjusting, blurring, finding colors, reading text and removing backgrounds, all on your own device.
+- **Albums and links.** Albums for multi-file uploads, QR codes, Markdown, HTML and BBCode embeds, and readable links such as beach-sunset-x7Kp2Q.
+- **Self-destruct and delete links.** Files can disappear after a time from 10 minutes to 90 days, guests get a private delete link, and each device keeps an upload history.
+- **API keys.** Keys are stored hashed and shown once, with a one-click ShareX setup and an upload, list, rename and delete API.
+- **Storage.** Local disk or any S3-compatible bucket.
+- **Admin.** Overview with a 30-day chart, images, users, reports, IP bans and site settings.
+- **Import.** Users and images of PixelHop 2 move over, with their passwords.
+- **One account with HEL.ink.** Optional sign-in with a HEL.ink account, with sign-up, password resets, Google and two-step sign-in handled there.
+- **Server AI tools.** Optional background removal, automatic face blur, magic eraser and HD upscaling, for signed-in people with daily limits.
+- **Batch page.** The same steps for many images, then one ZIP or one album.
+- **Bulk links.** Copy all links after bulk uploads, on albums and on old result links, plus share buttons and select-all in the gallery.
+- **QR code generator.** A generator for any text.
+- **Protection.** Cloudflare Turnstile, a Help page, usage and disk space in the admin and redirects for every PixelHop 2 address.
+
+### Security
+- **Upload from a link.** It cannot be tricked into reaching internal addresses, including through redirects.
+- **Proxies.** Forwarding headers are trusted only from configured proxies.
+- **Pages.** Cross-site requests are blocked, scripts are tightly limited and images are served in a sandbox.
+- **Accounts.** Passwords use Argon2id, sign-in is rate-limited, session tokens are stored hashed, and a guard stops oversized images that unpack to enormous sizes.
+
+### Changed
+- **Studio.** The old server-side Python tools were replaced by tools that run in the browser, so server upscaling and erasing were not offered at first.
+- **Database.** The old database was replaced by SQLite.
+
+## [2.3.0] - 2026-01-03 - Readable image links
+
+### Added
+- **Image links.** New uploads get a link with a short part of the file name, such as rumah-baru_a3x9K2, so you can tell images apart from the link alone. Long names are cut at word boundaries, and copying many links shows which is which, even for guests.
+
+### Changed
+- **Old links.** Every old link keeps working, and only new uploads use the new form.
 
 ### Fixed
-- Modal styling for light mode in admin panel
-- Report dismiss now properly disables row
-- PHP 8.5 compatibility improvements
+- **Links.** File names are cleaned better when turned into link text.
 
-## [2.1.0] - 2025-12-18
+## [2.2.0] - 2025-12-18 - Views, reports and account status
 
 ### Added
-- **Hybrid Storage System**: R2 + Contabo S3 integration
-  - Cloudflare R2 for thumbnails (9.5GB free tier)
-  - Contabo S3 for original files (250GB)
-  - Automatic failover between providers
-- **R2StorageManager**: Smart storage routing with rate limiting
-- **Storage Stats Dashboard**: Real-time monitoring for R2, Contabo, and Temp storage
-- **Security Firewall**: IP blocking, rate limiting, abuse detection
-- **Swap Memory**: 4GB swap with swappiness=10 for better performance
+- **Views.** Every image counts its views once per hour per visitor, shows the count and last view date, and galleries can be sorted by most views.
+- **Reports.** Visitors can report an image as adult, illegal, a privacy problem or a copyright problem, and admins review a queue of reports.
+- **Accounts.** Accounts can be active, locked or suspended, and admins can send a warning that pops up on the member's next sign-in.
+- **Expiry.** Images are deleted after 90 days without views.
 
 ### Changed
-- **Admin Dashboard**: Consolidated from 10 menus to 5 (Dashboard, Users, Gallery, Security, Settings)
-- **Admin UI**: New shared header, CSS, and JS components
-- **Storage Display**: Progress bars for R2, Contabo, and Temp (10GB allocation)
-- **Gauge Charts**: Larger donut charts (130px) with better centering
+- **Admin.** The gallery statistics are more compact, the image page shows view count and a report button, and the users page manages account status.
 
 ### Fixed
-- Member settings page layout and styling
-- Admin panel centering with visible background
-- Storage stats now show actual provider usage
+- **Admin.** Dialogs now look right in light mode and a dismissed report is disabled in the list.
 
-## [2.0.0] - 2025-12-17
+## [2.1.0] - 2025-12-18 - Two storage providers
 
 ### Added
-- Admin panel v2.0 with glassmorphism design
-- Theme toggle (dark/light mode)
-- Real-time server health monitoring
-- Python process management for OCR/RemBG
+- **Storage.** Thumbnails and originals are kept at two storage providers, with automatic switching if one fails, and the admin shows usage for each.
+- **Protection.** A firewall blocks addresses, limits request rates and spots abuse.
 
 ### Changed
-- Complete admin UI overhaul
-- Responsive design improvements
+- **Admin.** The admin has five menus instead of ten and a shared header, with larger gauges and progress bars for storage.
 
-## [1.0.0] - 2025-12-16
+### Fixed
+- **Settings and admin.** The member settings page layout and the admin page centering were corrected, and storage statistics show real usage.
+
+## [2.0.0] - 2025-12-17 - New admin panel
 
 ### Added
-- Initial release
-- Image upload with multiple formats
-- Image tools: resize, crop, compress, convert
-- OCR text extraction
-- Background removal (RemBG)
-- User authentication with Google OAuth
-- Rate limiting and abuse protection
+- **Admin.** A new admin panel with a glassmorphism look, a dark and light switch and live server health.
+
+### Changed
+- **Admin.** The whole admin was redesigned and made responsive.
+
+## [1.0.0] - 2025-12-16 - First release
+
+### Added
+- **Upload.** Image upload in many formats, with sign-in through Google, rate limits and abuse protection.
+- **Studio.** Tools to resize, crop, compress and convert images, read text in pictures and remove backgrounds.

@@ -209,10 +209,10 @@
   "legal.takedown_button": "，或点击举报按钮并勾选“侵犯我的版权”",
   "legal.runs": "{site} 基于 <a href=\"https://github.com/navi-crwn/pixelhop\">PixelHop</a> 构建，遵循 MIT 开源许可协议。",
   "changelog.title": "更新日志",
-  "changelog.lead": "提交、版本发布和已合并的拉取请求，按时间从新到旧排列。",
+  "changelog.lead": "PixelHop 的更新内容，最新的在前。",
   "changelog.newer": "较新",
   "changelog.older": "较早",
-  "changelog.sources": "源代码版本",
+  "changelog.sources": "最新版本",
   "changelog.commit": "提交",
   "changelog.pr": "已合并的拉取请求",
   "changelog.tag": "版本发布",
@@ -1102,5 +1102,12 @@
   "dash.actions": "操作",
   "upload.done_see": "已上传 {n} 张 · 查看所有链接",
   "upload.progress": "正在上传 {done}/{total} 个文件 · {pct}%",
-  "announce.title": "公告"
+  "announce.title": "公告",
+  "changelog.details": "技术详情",
+  "changelog.t_added": "新增",
+  "changelog.t_changed": "变更",
+  "changelog.t_fixed": "修复",
+  "changelog.t_security": "安全",
+  "changelog.t_removed": "移除",
+  "changelog.t_deprecated": "已弃用"
 }

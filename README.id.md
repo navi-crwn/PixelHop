@@ -272,7 +272,7 @@ tools/            layanan AI opsional
 deploy/           contoh nginx dan systemd
 ```
 
-`make test` menjalankan `go vet` dan pengujian, dan `make build` membuat `./pixelhop`. `scripts/readme-images.mjs` merender ulang tangkapan layar README dari instans yang berjalan (lihat komentar di awal file). `python3 scripts/build-changelog.py --repo PixelHop` membangun ulang `web/changelog.json`, data di balik halaman `/changelog`, dari pull request yang sudah di-merge; perintah ini membutuhkan `gh` yang sudah login.
+`make test` menjalankan `go vet` dan pengujian, dan `make build` membuat `./pixelhop`. `scripts/readme-images.mjs` merender ulang tangkapan layar README dari instans yang berjalan (lihat komentar di awal file). `python3 scripts/build-changelog.py --repo PixelHop` membangun ulang `web/changelog.json`, data di balik halaman `/changelog`, dari `CHANGELOG.md` (bahasa yang mudah dipahami, satu entri per versi); perintah ini tidak butuh jaringan maupun `gh`, dan `make check-changelog` gagal bila berkasnya tidak mudah dipahami atau tidak terbaru.
 
 ## FAQ
 

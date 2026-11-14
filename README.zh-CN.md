@@ -272,7 +272,7 @@ tools/            可选的 AI 服务
 deploy/           nginx 和 systemd 示例
 ```
 
-`make test` 运行 `go vet` 和测试，`make build` 生成 `./pixelhop`。`scripts/readme-images.mjs` 根据运行中的实例重新生成 README 截图（见文件开头的说明）。`python3 scripts/build-changelog.py --repo PixelHop` 根据已合并的 pull request 重新生成 `web/changelog.json`，也就是 `/changelog` 页面的数据；它需要已登录的 `gh`。
+`make test` 运行 `go vet` 和测试，`make build` 生成 `./pixelhop`。`scripts/readme-images.mjs` 根据运行中的实例重新生成 README 截图（见文件开头的说明）。`python3 scripts/build-changelog.py --repo PixelHop` 根据 `CHANGELOG.md`（通俗易懂的语言，每个版本一条）重新生成 `web/changelog.json`，也就是 `/changelog` 页面的数据；它不需要网络，也不需要 `gh`，文件不够通俗或不是最新时 `make check-changelog` 会失败。
 
 ## 常见问题
 
