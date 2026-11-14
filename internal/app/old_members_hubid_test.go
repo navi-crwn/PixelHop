@@ -34,10 +34,16 @@ func TestOldGoogleMemberMeetsHopID(t *testing.T) {
 	}
 	n := a.db.CountUsers(ctx)
 
-	// A different e-mail: a new empty account, the old one untouched.
+	// A different e-mail: a new empty account, and an old Google-only account that is not linked stays as it was.
+	lone := &db.User{Email: "lone@example.com", Name: "Lone", QuotaBytes: 1 << 30, GoogleID: sql.NullString{String: "g-lone", Valid: true}}
+	if err := a.db.InsertUser(ctx, lone); err != nil {
+		t.Fatal(err)
+	}
+	addImage(t, a, lone, "lone-pic")
+	n = a.db.CountUsers(ctx)
 	c2, st2 := start(t, h)
 	tk := ticketFor(st2)
-	tk.Sub, tk.Email, tk.Jti = "99", "ivan.other@example.com", randomToken(12)
+	tk.Sub, tk.Email, tk.Jti = "99", "lone.other@example.com", randomToken(12)
 	if rec := callback(h, c2, signTicket(tk, testSecret)); rec.Code != http.StatusSeeOther {
 		t.Fatalf("callback %d", rec.Code)
 	}
@@ -47,5 +53,12 @@ func TestOldGoogleMemberMeetsHopID(t *testing.T) {
 	}
 	if _, count := a.db.UserStorage(ctx, fresh.ID); count != 0 {
 		t.Error("the new account is not empty")
+	}
+	same, _ := a.db.UserByID(ctx, lone.ID)
+	if same.HelinkID.Valid || !same.GoogleID.Valid || same.Email != "lone@example.com" {
+		t.Errorf("the unlinked old account changed: %+v", same)
+	}
+	if im, err := a.db.Image(ctx, "lone-pic"); err != nil || im.UserID.Int64 != lone.ID {
+		t.Error("its picture moved")
 	}
 }

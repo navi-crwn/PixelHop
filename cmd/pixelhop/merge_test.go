@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -22,7 +25,7 @@ func mergeFixture(t *testing.T) (dir string, old, neu *db.User) {
 	}
 	defer d.Close()
 	ctx := context.Background()
-	old = &db.User{Email: "old@example.com", Name: "Old", QuotaBytes: 500 << 20, PassHash: "hash", Role: "user"}
+	old = &db.User{Email: "old@example.com", Name: "Old", QuotaBytes: 500 << 20, PassHash: "hash", Role: "admin"}
 	neu = &db.User{Email: "new@example.com", Name: "New", QuotaBytes: 128 << 20, HelinkID: sql.NullString{String: "9", Valid: true}}
 	for _, u := range []*db.User{old, neu} {
 		if err := d.InsertUser(ctx, u); err != nil {
@@ -57,6 +60,9 @@ func mergeFixture(t *testing.T) (dir string, old, neu *db.User) {
 	if _, err := d.Exec(`INSERT INTO reminders (user_id,key,dismissed_at) VALUES (?,?,1)`, old.ID, "tips"); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := d.Exec(`UPDATE users SET block_hotlinks=1 WHERE id=?`, old.ID); err != nil {
+		t.Fatal(err)
+	}
 	if err := d.InsertSession(ctx, "old-tok", old.ID, time.Hour, "", ""); err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +90,7 @@ func TestUserMergeMovesEverythingAndDryRunChangesNothing(t *testing.T) {
 	dir, old, neu := mergeFixture(t)
 	dry := runMerge(t, dir, "old@example.com", "new@example.com", "--dry-run")
 	t.Log("\n" + dry)
-	for _, want := range []string{"Would move", "images 2", "albums 1", "API keys 1", "webhooks 1", "reminder cards 1", "profile photo: moved", "content warning moves: true", "Nothing was changed"} {
+	for _, want := range []string{"Would move", "images 2", "albums 1", "API keys 1", "webhooks 1", "reminder cards 1", "profile photo: moved", "content warning moves: true", "WARNING: 1 API key(s) and 1 webhook(s)", "is an admin", "Nothing was changed"} {
 		if !strings.Contains(dry, want) {
 			t.Errorf("dry run does not say %q:\n%s", want, dry)
 		}
@@ -140,6 +146,12 @@ func TestUserMergeMovesEverythingAndDryRunChangesNothing(t *testing.T) {
 	if got.QuotaBytes != 500<<20 {
 		t.Errorf("quota %d, want the larger 500 MB", got.QuotaBytes)
 	}
+	if got.Role == "admin" {
+		t.Error("the old account's admin role moved to the HOP ID account")
+	}
+	if n := countRows(t, d, `SELECT block_hotlinks FROM users WHERE id=?`, neu.ID); n != 1 {
+		t.Error("the embedding block of the old account was lost")
+	}
 	if !got.HelinkID.Valid || got.HelinkID.String != "9" {
 		t.Error("the HOP ID link of the new account changed")
 	}
@@ -167,5 +179,81 @@ func TestUserMergeRefusesAnAccountLinkedToAnotherHopID(t *testing.T) {
 	defer d.Close()
 	if _, err := d.UserByID(context.Background(), old.ID); err != nil {
 		t.Fatal("the account was removed")
+	}
+}
+
+func fileHash(t *testing.T, dir string) string {
+	t.Helper()
+	h := sha256.New()
+	for _, n := range []string{"pixelhop.db", "pixelhop.db-wal"} {
+		b, err := os.ReadFile(filepath.Join(dir, n))
+		if err == nil && len(b) > 0 { // an empty -wal file is not data
+			h.Write([]byte(n))
+			h.Write(b)
+		}
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// A dry run writes nothing: the database files are byte for byte the same afterwards, and a database that
+// has not been migrated to this release is not migrated by it (the run says so and stops).
+func TestUserMergeDryRunWritesNothing(t *testing.T) {
+	dir, _, _ := mergeFixture(t)
+	before := fileHash(t, dir)
+	out := runMerge(t, dir, "old@example.com", "new@example.com", "--dry-run")
+	if !strings.Contains(out, "Would move") || fileHash(t, dir) != before {
+		t.Fatalf("a dry run changed the database or failed: %s", out)
+	}
+
+	d, _ := db.Open(dir)
+	if _, err := d.Exec(`DELETE FROM schema_version WHERE v=(SELECT MAX(v) FROM schema_version)`); err != nil {
+		t.Fatal(err)
+	}
+	d.Close()
+	before = fileHash(t, dir)
+	out = runMerge(t, dir, "old@example.com", "new@example.com", "--dry-run")
+	if !strings.Contains(out, "has not been updated") || fileHash(t, dir) != before {
+		t.Fatalf("a dry run on an old schema must stop without writing: %s", out)
+	}
+}
+
+// Into an account that has its own photo, a warning and a clashing reminder key: nothing of the new
+// account is overwritten; the old photo is reported as kept-by-new.
+func TestUserMergeKeepsWhatTheNewAccountHas(t *testing.T) {
+	dir, old, neu := mergeFixture(t)
+	d, _ := db.Open(dir)
+	ctx := context.Background()
+	neu.AvatarKey, neu.Warning = "avatars/2-own.jpg", "Own warning."
+	d.UpdateUser(ctx, neu)
+	d.Exec(`INSERT INTO reminders (user_id,key,dismissed_at) VALUES (?,?,5)`, neu.ID, "tips")
+	d.Close()
+	out := runMerge(t, dir, "old@example.com", "new@example.com")
+	if !strings.Contains(out, "kept: the new account has its own") {
+		t.Fatalf("output: %s", out)
+	}
+	d, _ = db.Open(dir)
+	defer d.Close()
+	got, _ := d.UserByID(ctx, neu.ID)
+	if got.AvatarKey != "avatars/2-own.jpg" || got.Warning != "Own warning." {
+		t.Errorf("the new account's own photo or warning was overwritten: %+v", got)
+	}
+	if n := countRows(t, d, `SELECT COUNT(*) FROM reminders WHERE user_id=?`, neu.ID); n != 1 {
+		t.Errorf("reminders after a clash: %d, want 1", n)
+	}
+	if _, err := d.UserByID(ctx, old.ID); err == nil {
+		t.Error("old account left")
+	}
+}
+
+// MergeUsers itself refuses to merge an account into itself (which would delete it).
+func TestMergeUsersRefusesTheSameAccount(t *testing.T) {
+	dir, old, _ := mergeFixture(t)
+	d, _ := db.Open(dir)
+	defer d.Close()
+	if _, err := d.MergeUsers(context.Background(), old.ID, old.ID); err == nil {
+		t.Fatal("merged an account into itself")
+	}
+	if n := countRows(t, d, `SELECT COUNT(*) FROM images WHERE user_id=?`, old.ID); n != 2 {
+		t.Fatalf("images after the refusal: %d", n)
 	}
 }

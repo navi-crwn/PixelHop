@@ -5,6 +5,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,6 +41,30 @@ func Open(dir string) (*DB, error) {
 				return nil, fmt.Errorf("chmod %s: %w", p, chmodErr)
 			}
 		}
+	}
+	return d, nil
+}
+
+// ErrSchemaOutdated means the database was made by an older release and has not been migrated yet.
+var ErrSchemaOutdated = errors.New("the database has not been updated to this release yet: start the server once (it updates the database), then run this again")
+
+// OpenReadOnly opens the database for reading only: it applies no migration, changes no file mode and
+// writes nothing. It refuses a database that is not at this release's schema.
+func OpenReadOnly(dir string) (*DB, error) {
+	dsn := "file:" + filepath.Join(dir, "pixelhop.db") + "?mode=ro&_pragma=busy_timeout(5000)&_pragma=query_only(1)"
+	sqlDB, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, err
+	}
+	d := &DB{DB: sqlDB, views: &viewBuffer{}}
+	var v int
+	if err := sqlDB.QueryRow(`SELECT COALESCE(MAX(v),0) FROM schema_version`).Scan(&v); err != nil {
+		sqlDB.Close()
+		return nil, fmt.Errorf("read database: %w", err)
+	}
+	if v != len(migrations) {
+		sqlDB.Close()
+		return nil, ErrSchemaOutdated
 	}
 	return d, nil
 }

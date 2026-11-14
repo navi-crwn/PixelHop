@@ -17,6 +17,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 
@@ -66,7 +67,11 @@ func run(args []string) error {
 	if err := os.MkdirAll(cfg.DataDir, 0o750); err != nil {
 		return err
 	}
-	d, err := db.Open(cfg.DataDir)
+	open := db.Open
+	if cmd == "user" && len(args) > 1 && args[0] == "merge" && slices.Contains(args, "--dry-run") {
+		open = db.OpenReadOnly // a dry run writes nothing, not even a pending migration
+	}
+	d, err := open(cfg.DataDir)
 	if err != nil {
 		return err
 	}
@@ -167,6 +172,12 @@ func userCmd(cfg *config.Config, d *db.DB, args []string) error {
 			plan.Images, humanSize(plan.StorageBytes), plan.Albums, plan.APIKeys, plan.Webhooks, plan.Reminders)
 		fmt.Printf("  profile photo: %s; content warning moves: %v\n", orNone(plan.Avatar), plan.Warning)
 		fmt.Printf("  storage of %s after: %s; quota %s -> %s\n", into.Email, humanSize(plan.UsedAfter), humanSize(plan.QuotaBefore), humanSize(plan.QuotaAfter))
+		if plan.APIKeys > 0 || plan.Webhooks > 0 {
+			fmt.Printf("  WARNING: %d API key(s) and %d webhook(s) of the old account move too and will reach ALL pictures of %s. Check first that both accounts belong to the same person.\n", plan.APIKeys, plan.Webhooks, into.Email)
+		}
+		if plan.OldIsAdmin {
+			fmt.Printf("  Note: the old account is an admin. The admin role is NOT moved (HOP ID decides roles).\n")
+		}
 		if dry {
 			fmt.Println("Nothing was changed (--dry-run). Run again without it to do it.")
 		} else {

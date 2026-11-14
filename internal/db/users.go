@@ -127,6 +127,7 @@ type MergePlan struct {
 	StorageBytes                                 int64  // what the old account holds
 	Avatar                                       string // "moved", "kept: the new account has its own" or ""
 	Warning                                      bool   // a content warning on the old account moves along
+	OldIsAdmin                                   bool   // the old account is an admin: the role does NOT move
 	QuotaBefore, QuotaAfter                      int64  // of the new account
 	UsedAfter                                    int64  // storage of the new account once merged
 }
@@ -144,7 +145,7 @@ func (d *DB) PlanMerge(ctx context.Context, from, into *User) MergePlan {
 		APIKeys:     d.count(ctx, `SELECT COUNT(*) FROM api_keys WHERE user_id=?`, from.ID),
 		Webhooks:    d.count(ctx, `SELECT COUNT(*) FROM webhooks WHERE user_id=?`, from.ID),
 		Reminders:   d.count(ctx, `SELECT COUNT(*) FROM reminders WHERE user_id=? AND key NOT IN (SELECT key FROM reminders WHERE user_id=?)`, from.ID, into.ID),
-		QuotaBefore: into.QuotaBytes, Warning: from.Warning != "" && into.Warning == "",
+		QuotaBefore: into.QuotaBytes, OldIsAdmin: from.Role == "admin", Warning: from.Warning != "" && into.Warning == "",
 	}
 	p.StorageBytes, _ = d.UserStorage(ctx, from.ID)
 	own, _ := d.UserStorage(ctx, into.ID)
@@ -166,6 +167,9 @@ func (d *DB) PlanMerge(ctx context.Context, from, into *User) MergePlan {
 // then deleted, which ends its sessions and removes its password and Google link with it. It refuses an
 // old account that is linked to a HOP ID of its own.
 func (d *DB) MergeUsers(ctx context.Context, fromID, intoID int64) (MergePlan, error) {
+	if fromID == intoID {
+		return MergePlan{}, errors.New("that is the same account")
+	}
 	from, err := d.UserByID(ctx, fromID)
 	if err != nil {
 		return MergePlan{}, err
@@ -201,11 +205,8 @@ func (d *DB) MergeUsers(ctx context.Context, fromID, intoID int64) (MergePlan, e
 	if warning == "" {
 		warning = from.Warning
 	}
-	role := into.Role
-	if from.Role == "admin" {
-		role = "admin"
-	}
-	if _, err := tx.ExecContext(ctx, `UPDATE users SET avatar_key=?, warning=?, quota_bytes=?, role=? WHERE id=?`, avatar, warning, plan.QuotaAfter, role, intoID); err != nil {
+	// The role stays as it is: in hub mode HOP ID decides who is an admin.
+	if _, err := tx.ExecContext(ctx, `UPDATE users SET avatar_key=?, warning=?, quota_bytes=?, block_hotlinks=MAX(block_hotlinks, (SELECT block_hotlinks FROM users WHERE id=?)) WHERE id=?`, avatar, warning, plan.QuotaAfter, fromID, intoID); err != nil {
 		return MergePlan{}, err
 	}
 	// The old photo now belongs to the new account: clear it so deleting the old row cannot be mistaken for a purge.
