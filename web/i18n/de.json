@@ -1101,5 +1101,6 @@
   "settings.api_docs": "API-Dokumentation",
   "dash.actions": "Aktionen",
   "upload.done_see": "{n} hochgeladen · Alle Links ansehen",
-  "upload.progress": "Lade {done} von {total} Dateien hoch · {pct} %"
+  "upload.progress": "Lade {done} von {total} Dateien hoch · {pct} %",
+  "announce.title": "Ankündigung"
 }

@@ -1101,5 +1101,6 @@
   "settings.api_docs": "Documentación de la API",
   "dash.actions": "Acciones",
   "upload.done_see": "{n} subidos · Ver todos los enlaces",
-  "upload.progress": "Subiendo {done} de {total} archivos · {pct} %"
+  "upload.progress": "Subiendo {done} de {total} archivos · {pct} %",
+  "announce.title": "Anuncio"
 }

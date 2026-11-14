@@ -1101,5 +1101,6 @@
   "settings.api_docs": "API ドキュメント",
   "dash.actions": "操作",
   "upload.done_see": "{n} 件をアップロード · すべてのリンクを見る",
-  "upload.progress": "{total} 件中 {done} 件をアップロード中 · {pct}%"
+  "upload.progress": "{total} 件中 {done} 件をアップロード中 · {pct}%",
+  "announce.title": "お知らせ"
 }

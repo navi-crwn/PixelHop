@@ -2,7 +2,7 @@
 <div class="wrap result-page">
   {{with $d.Error}}
   <div class="page-head"><h1>{{$.L.T "uploaded.failed"}}</h1></div>
-  <div class="empty"><p>{{.}}</p><p><a class="btn primary" href="/">{{$.L.T "uploaded.open_site" "site" $.Site}}</a></p></div>
+  <div class="empty"><p>{{.}}</p><p><a class="btn primary" href="{{if $.User}}/dashboard{{else}}/{{end}}">{{$.L.T "uploaded.open_site" "site" $.Site}}</a></p></div>
   {{else}}
   <div class="result-head">
     <span class="pill ok"><svg width="12" height="12"><use href="#i-check"/></svg>{{$.L.T "uploaded.count" "n" (len $d.Items)}}</span>

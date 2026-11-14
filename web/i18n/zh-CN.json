@@ -1101,5 +1101,6 @@
   "settings.api_docs": "API 文档",
   "dash.actions": "操作",
   "upload.done_see": "已上传 {n} 张 · 查看所有链接",
-  "upload.progress": "正在上传 {done}/{total} 个文件 · {pct}%"
+  "upload.progress": "正在上传 {done}/{total} 个文件 · {pct}%",
+  "announce.title": "公告"
 }

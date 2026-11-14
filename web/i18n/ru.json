@@ -1101,5 +1101,6 @@
   "settings.api_docs": "Документация API",
   "dash.actions": "Действия",
   "upload.done_see": "{n} загружено · Все ссылки",
-  "upload.progress": "Загрузка {done} из {total} файлов · {pct}%"
+  "upload.progress": "Загрузка {done} из {total} файлов · {pct}%",
+  "announce.title": "Объявление"
 }

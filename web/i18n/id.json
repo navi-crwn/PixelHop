@@ -1101,5 +1101,6 @@
   "settings.api_docs": "Dokumentasi API",
   "dash.actions": "Aksi",
   "upload.done_see": "{n} terunggah · Lihat semua tautan",
-  "upload.progress": "Mengunggah {done} dari {total} berkas · {pct}%"
+  "upload.progress": "Mengunggah {done} dari {total} berkas · {pct}%",
+  "announce.title": "Pengumuman"
 }

@@ -14,6 +14,8 @@
 .shell-label { margin: 14px 12px 6px; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
 .shell-side-foot { margin: auto 0 0; padding: 12px 12px 4px; border-top: 1px solid var(--line); font-size: .78rem; color: var(--faint); }
 .shell-side-foot a { color: inherit; }
+/* "Part of Hop Easy Link": the last line of the sidebar, left-aligned with the menu items. */
+.shell-side .part-of { margin: 0; padding: 10px 12px 4px; }
 .shell-side-foot a:hover { color: var(--text); }
 .shell-body { margin-inline-start: var(--side); min-height: 100vh; display: flex; flex-direction: column; min-width: 0; }
 /* Sticks at the very top (the 12px margin only floats it at rest), so nothing scrolls into a gap above it. */
@@ -40,3 +42,8 @@
   .shell-tools .btn.primary span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .shell-side { transition: none; } }
+
+/* The studio inside the dashboard frame has 264px less room than the public page, so its three columns
+   (tools, canvas, settings) give way to one column sooner and trim their side columns before that. */
+@media (min-width: 1360px) { .shell .studio { grid-template-columns: 220px minmax(0, 1fr) 270px; } }
+@media (max-width: 1359px) { .shell .studio { grid-template-columns: 1fr; } }

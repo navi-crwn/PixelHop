@@ -40,6 +40,7 @@ type page struct {
 	UIClean       bool // optional "Clean" style: cookie hop_ui=clean puts data-ui="clean" on <html>
 	Dash          bool // the signed-in dashboard shell (sidebar, settings-type top bar)
 	Announcement  string
+	AnnounceID    string // names this wording, so a closed card comes back when the text changes
 	Version       string
 	Asset         string // cache-busting query for /static files
 	Google        bool
@@ -145,6 +146,9 @@ func (a *App) base(r *http.Request, p page) page {
 	}
 	p.RembgServer = a.cfg.RembgURL != ""
 	p.Announcement = a.db.Setting(ctx, "announcement", "")
+	if p.Announcement != "" {
+		p.AnnounceID = hashToken(p.Announcement)[:8]
+	}
 	p.GuestUploads = a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) == "true"
 	if p.User == nil {
 		p.GuestTTLDays = a.guestTTLDays(ctx)
@@ -191,7 +195,8 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	if p.OGImage == "" && siteImagePages[name] {
 		p.OGImage = a.cfg.BaseURL + "/static/img/social.jpg"
 	}
-	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/"))
+	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/") ||
+		p.Path == "/tools" || p.Path == "/tools/batch") // the studio is part of the dashboard for a signed-in member
 	if strings.HasPrefix(name, "admin") || privatePages[name] || p.Dash {
 		p.NoIndex = true
 	}
