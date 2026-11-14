@@ -1,9 +1,12 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"mime/multipart"
 	"net/http"
+	"net/http/httptest"
 
 	"github.com/navi-crwn/pixelhop/internal/db"
 	"testing"
@@ -118,5 +121,39 @@ func TestUploadDoesNotShareAFileThatIsGone(t *testing.T) {
 	}
 	if rec := fetch(h, "/i/"+second+".png"); rec.Code != 200 {
 		t.Fatalf("the new upload does not open: %d", rec.Code)
+	}
+}
+
+// The status of an upload refusal comes from the kind of error, not from English words in its message.
+func TestUploadRefusalStatusDoesNotDependOnTheLanguage(t *testing.T) {
+	a, h := ssoApp(t)
+	post := func(key string) int {
+		var body bytes.Buffer
+		mw := multipart.NewWriter(&body)
+		fw, _ := mw.CreateFormFile("file", "x.png")
+		fw.Write(testPNG(30, 20))
+		mw.Close()
+		req := httptest.NewRequest("POST", "/api/v1/upload?lang=id", &body)
+		req.Header.Set("Content-Type", mw.FormDataContentType())
+		if key != "" {
+			req.Header.Set("Authorization", "Bearer "+key)
+		}
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		return rec.Code
+	}
+	// Guest uploads off: sign in (401), in Indonesian too.
+	a.db.SetSetting(t.Context(), "guest_uploads", "false")
+	if c := post(""); c != http.StatusUnauthorized {
+		t.Errorf("sign-in refusal in Indonesian: %d, want 401", c)
+	}
+	// Too fast: 429.
+	_, key := member(t, a, "fast@example.com")
+	a.cfg.UploadsPerMinute = 1
+	for i := 0; i < 4; i++ { // members get four times the limit
+		post(key)
+	}
+	if c := post(key); c != http.StatusTooManyRequests {
+		t.Errorf("rate refusal in Indonesian: %d, want 429", c)
 	}
 }

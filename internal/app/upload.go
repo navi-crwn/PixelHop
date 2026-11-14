@@ -55,6 +55,11 @@ type userError struct{ msg string }
 
 func (e userError) Error() string { return e.msg }
 
+// signInError is a userError for a visitor who must sign in: the API answers 401, whatever the language.
+type signInError struct{ userError }
+
+func (e signInError) Unwrap() error { return e.userError }
+
 // handleUpload reads every file (and URL) in the request and stores them.
 // It returns per-file results, and an album id when several were uploaded.
 func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
@@ -63,7 +68,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	ip := clientIP(r)
 
 	if u == nil && a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) != "true" {
-		return nil, "", userError{a.tr(r, "Please sign in to upload on this server.")}
+		return nil, "", signInError{userError{a.tr(r, "Please sign in to upload on this server.")}}
 	}
 
 	maxBatch := a.cfg.MaxBatch
@@ -101,7 +106,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	}
 	for range inputs {
 		if !a.limits.allow("upload:"+ip, perMinute, time.Minute) {
-			return nil, "", userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}
+			return nil, "", rateError{userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}, time.Minute}
 		}
 	}
 	// Guests: how many more files this address may store today (-1 = no

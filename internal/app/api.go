@@ -74,9 +74,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 			if errors.As(err, &re) {
 				retryAfter(w, re)
 				code = http.StatusTooManyRequests
-			} else if strings.Contains(ue.msg, "fast") {
-				code = http.StatusTooManyRequests
-			} else if strings.Contains(ue.msg, "sign in") {
+			} else if errors.As(err, new(signInError)) {
 				code = http.StatusUnauthorized
 			}
 			apiError(w, code, ue.msg)
