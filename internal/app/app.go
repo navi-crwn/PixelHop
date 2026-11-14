@@ -44,6 +44,10 @@ type App struct {
 	hopNonces hop.Nonces // signed admin API: each request works once
 	started   time.Time
 	uploadMu  sync.Mutex
+	// shareMu orders "find the picture to share, then add the row that points at it" (an upload) against
+	// "count who points at a file, delete it, delete the row" (a removal), so a file is never deleted under a
+	// row that has just been given its address.
+	shareMu sync.Mutex
 	// hopMediaSlots bounds the /hop/media bodies held in memory before their signature is checked.
 	hopMediaSlots hopSlots
 	quota         quotaLocks
@@ -344,6 +348,24 @@ func (a *App) locale(w http.ResponseWriter, r *http.Request) i18n.Locale {
 // tr translates a message for the language of this request. The English text
 // is its own key, so a message nobody translated yet still reads in English.
 // It only reads the cookies and the ?lang= choice; render writes them.
+// ctxLang carries the visitor's language in a request's context, for the code that stores an upload and has
+// no *http.Request in hand but still words messages for the person.
+type ctxLang struct{}
+
+func withLang(r *http.Request) context.Context {
+	code, _, _ := requestLang(r)
+	return context.WithValue(r.Context(), ctxLang{}, code)
+}
+
+// trc is tr for code that only has the request's context (made with withLang).
+func (a *App) trc(ctx context.Context, key string, kv ...any) string {
+	code, _ := ctx.Value(ctxLang{}).(string)
+	if code == "" {
+		code = i18n.Default
+	}
+	return i18n.T(code, key, kv...)
+}
+
 func (a *App) tr(r *http.Request, key string, kv ...any) string {
 	code, _, _ := requestLang(r)
 	return i18n.T(code, key, kv...)

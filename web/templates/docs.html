@@ -180,7 +180,9 @@ grim - | pixelhop push -        # from a pipe</code></pre>
       <section id="me">
         <h2>Your account</h2>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/me</div>
-        <p>Email, image count, <code>storage_used</code> and <code>storage_quota</code> in bytes.</p>
+        <p>Email, image count, <code>storage_used</code> and <code>storage_quota</code> in bytes. <code>ai_day</code> holds what is left of today's share for each server AI tool that has a limit: <code>limit</code>, <code>used</code>, <code>remaining</code>, and <code>resets_at</code> once the tool has been used. The share is a rolling 24 hours that starts with your first use of that tool.</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/v1/tools/{tool}</div>
+        <p>Server AI tools (<code>remove-background</code>, <code>faces</code>, <code>erase</code>, <code>upscale</code>) for signed-in accounts: send the image as <code>file</code>. A successful answer carries <code>X-Day-Limit</code> and <code>X-Day-Remaining</code> headers; when the share is used up the answer is <code>429</code> with <code>limit</code>, <code>remaining</code> and <code>resets_at</code>.</p>
         <div class="endpoint"><span class="method get">GET</span>/api/v1/stats</div>
         <p>Public: total images and views on this server. No key needed.</p>
       </section>

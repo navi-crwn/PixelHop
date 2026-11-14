@@ -170,6 +170,7 @@ Settings are environment variables, and all of them are optional. [`.env.example
 | `PIXELHOP_GUEST_ALBUM_MAX` | `10` | Images in an album made by a guest (0 = no limit); also a control center setting |
 | `PIXELHOP_GUEST_DAILY_MAX` | `25` | Files one guest address may upload per 24 hours (0 = no limit); also a control center setting |
 | `PIXELHOP_GUEST_TTL_DAYS` | `30` | Days a new guest upload stays online (0 = until deleted); older files are not changed; also a control center setting |
+| `PIXELHOP_SHARE_STORAGE` | `true` | One stored file when different people upload the same picture; each keeps their own link, owner and expiry (false = every upload stores its own copy); files already stored are not changed; also a control center setting |
 | `PIXELHOP_MAX_BATCH` | `20` | Files per upload request |
 | `PIXELHOP_MAX_MEGAPIXELS` | `80` | Largest image accepted, by width times height |
 | `PIXELHOP_UPLOADS_PER_MINUTE` | `30` | Rate limit per address |
@@ -187,7 +188,6 @@ Settings are environment variables, and all of them are optional. [`.env.example
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | none | Sign in with Google. `GOOGLE_REDIRECT_URI` defaults to `PIXELHOP_BASE_URL/auth/google/callback` |
 | `HELINK_URL`, `HELINK_SSO_SECRET` | none | Sign in with a HEL.ink account. The secret is at least 32 characters and equals `PIXELHOP_SSO_SECRET` in HEL.ink's `.env` |
 | `HELINK_SSO_SECRET_PREV` | none | The previous secret, accepted while you rotate it |
-| `HELINK_API_ADDR` | none | Optional `host:port` to reach HEL.ink directly, for example `127.0.0.1:443` on the same server |
 | `HOP_ADMIN_CLIENTS` | `imperium,helink` | App names allowed to call the signed `/hop/*` API |
 | `PIXELHOP_CONTROL_URL` | none | Address of the HOP control center; admins who open `/admin` are sent there |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | none | Cloudflare Turnstile on sign-in and sign-up. With HEL.ink accounts on, these forms refuse every attempt without the keys |

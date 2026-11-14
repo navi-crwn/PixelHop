@@ -10,7 +10,7 @@
       <div class="btn-row">
         {{with $d.Website}}<a class="btn sm" href="{{$u.Website}}" rel="nofollow ugc noopener" target="_blank"><svg><use href="#i-link"/></svg>{{.}}</a>{{end}}
         <button class="btn sm ghost" type="button" data-copy-text="{{.Base}}/u/{{$u.Username.String}}"><svg><use href="#i-copy"/></svg>{{$.L.T "profile.copy_link"}}</button>
-        {{if $d.Mine}}<a class="btn sm ghost" href="/settings#profile"><svg><use href="#i-edit"/></svg>{{$.L.T "profile.edit"}}</a>{{end}}
+        {{if $d.Mine}}<a class="btn sm ghost" href="{{$d.EditURL}}"><svg><use href="#i-edit"/></svg>{{$.L.T "profile.edit"}}</a>{{end}}
       </div>
     </div>
   </header>

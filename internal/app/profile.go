@@ -92,6 +92,21 @@ func displayName(u *db.User) string {
 	return "PixelHop user"
 }
 
+// hubOwnsProfile reports whether HOP ID keeps u's profile (name, username, bio, website, photo): the
+// install talks to a hub and the member has a HOP ID. Without a hub, or without a HOP ID, it is edited here.
+func (a *App) hubOwnsProfile(u *db.User) bool {
+	return u != nil && a.cfg.SSOEnabled() && u.HelinkID.Valid
+}
+
+// profileInHopID answers a profile form sent by a member whose profile HOP ID keeps, and says so.
+func (a *App) profileInHopID(w http.ResponseWriter, r *http.Request) bool {
+	if !a.hubOwnsProfile(currentUser(r)) {
+		return false
+	}
+	a.settingsError(w, r, a.tr(r, "Your profile is managed in HOP ID, not here."))
+	return true
+}
+
 // avatarURL is the photo to show: an uploaded one, else the HEL.ink/Google
 // picture, else "" (pages draw the first letter instead).
 func avatarURL(u *db.User) string {
@@ -113,7 +128,7 @@ func (a *App) avatarOf(u *db.User) string {
 	if u == nil {
 		return ""
 	}
-	if u.AvatarKey != "" {
+	if u.AvatarKey != "" && !a.hubOwnsProfile(u) { // HOP ID's photo wins; an older upload stays on disk, unused
 		return avatarURL(u)
 	}
 	return a.externalAvatar(u.AvatarURL)
@@ -174,6 +189,7 @@ type profileData struct {
 	Total   int
 	Website string
 	Mine    bool
+	EditURL string // where "Edit profile" goes: the hub for a member whose profile HOP ID keeps
 }
 
 func (a *App) profile(w http.ResponseWriter, r *http.Request) {
@@ -190,7 +206,10 @@ func (a *App) profile(w http.ResponseWriter, r *http.Request) {
 	ims, total, _ := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Listed: true, Limit: 120})
 	me := currentUser(r)
 	d := profileData{Owner: a.ownerOf(r.Context(), sql.NullInt64{Int64: u.ID, Valid: true}), User: u, Images: ims, Total: total,
-		Mine: me != nil && me.ID == u.ID}
+		Mine: me != nil && me.ID == u.ID, EditURL: "/settings#profile"}
+	if d.Mine && a.hubOwnsProfile(me) {
+		d.EditURL = a.cfg.HelinkURL + "/settings#account"
+	}
 	if site, err := url.Parse(shownWebsite(u.Website)); err == nil && site.Host != "" {
 		d.Website = strings.TrimPrefix(strings.TrimPrefix(u.Website, "https://"), "http://")
 	}
@@ -219,7 +238,7 @@ func (a *App) serveAvatar(w http.ResponseWriter, r *http.Request) {
 		a.notFound(w, r)
 		return
 	}
-	if u.AvatarKey == "" {
+	if u.AvatarKey == "" || a.hubOwnsProfile(u) {
 		if pic := a.externalAvatar(u.AvatarURL); pic != "" {
 			http.Redirect(w, r, pic, http.StatusFound)
 			return
@@ -246,6 +265,9 @@ func (a *App) serveAvatar(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
+	if a.profileInHopID(w, r) {
+		return
+	}
 	u := currentUser(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
 	data, err := formBytes(r, "avatar", 8<<20)
@@ -253,7 +275,7 @@ func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
 		data, err = imaging.Avatar(data, 40_000_000, 400)
 	}
 	if err != nil {
-		a.settingsError(w, r, a.tr(r, "Profile photo: {err}", "err", err.Error()))
+		a.settingsError(w, r, a.tr(r, "Profile photo: {err}", "err", a.localizedError(withLang(r), err.Error())))
 		return
 	}
 	key := fmt.Sprintf("avatars/%d-%s.jpg", u.ID, randomToken(6))
@@ -274,6 +296,9 @@ func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) deleteAvatar(w http.ResponseWriter, r *http.Request) {
+	if a.profileInHopID(w, r) {
+		return
+	}
 	u := currentUser(r)
 	if u.AvatarKey != "" {
 		a.store.Delete(r.Context(), u.AvatarKey)
@@ -300,6 +325,9 @@ func shownWebsite(site string) string {
 
 // saveProfile stores the public profile: name, handle, bio, website, visibility.
 func (a *App) saveProfile(w http.ResponseWriter, r *http.Request) {
+	if a.profileInHopID(w, r) {
+		return
+	}
 	u := currentUser(r)
 	name := trim(strings.TrimSpace(netsafe.ScrubNoteKeys(r.FormValue("name"))), 60)
 	handle := strings.ToLower(strings.TrimSpace(strings.TrimPrefix(r.FormValue("username"), "@")))

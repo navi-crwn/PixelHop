@@ -62,7 +62,7 @@
   });
   var src = new URLSearchParams(location.search).get('src');
   if (src && /^[A-Za-z0-9_-]+$/.test(src)) {
-    fetch('/i/' + src + '.img').then(function (r) { if (!r.ok) throw 0; return r.blob(); })
+    fetch('/i/' + src + '.img?download').then(function (r) { if (!r.ok) throw 0; return r.blob(); })
       .then(function (b) { load(b, src); }).catch(function () { toast('Could not open that image', true); });
   }
 
@@ -697,6 +697,29 @@
     }
   };
 
+  // ---------- what is left of today's share of the server AI tools ----------
+  // The numbers come from the server (GET /api/v1/me at the start, then the X-Day-* headers of each result),
+  // so a server with other limits shows its own. Nothing is shown for a tool without a limit or before they arrive.
+  var aiLeft = {}, aiLines = [];
+  function showLeft(p) {
+    var n = aiLeft[p.dataset.tool];
+    p.hidden = n === undefined || p.dataset.off === '1';
+    if (!p.hidden) p.textContent = T('{n} left today', { n: n });
+  }
+  function aiLine(tool) {
+    var p = el('p', { class: 'small muted ai-left', style: 'margin:10px 0 0' });
+    p.dataset.tool = tool; aiLines.push(p); showLeft(p);
+    return p;
+  }
+  function setLeft(tool, n) {
+    if (typeof n !== 'number' || isNaN(n)) return;
+    aiLeft[tool] = n;
+    aiLines = aiLines.filter(function (p) { return p.isConnected; });
+    aiLines.forEach(showLeft);
+  }
+  function noteDay(tool, r) { var v = r.headers.get('X-Day-Remaining'); if (v !== null) setLeft(tool, parseInt(v, 10)); }
+  function noteRefused(tool, j) { if (j && typeof j.remaining === 'number') setLeft(tool, j.remaining); }
+
   // ---------- remove background ----------
   var rembgLib = null;
   var studioEl = $('#studio');
@@ -710,8 +733,9 @@
       var fd = new FormData(); fd.append('file', blob, srcName + '.png');
       return fetch('/api/v1/tools/remove-background', { method: 'POST', body: fd, headers: { Accept: 'image/png, application/json' } });
     }).then(function (r) {
+      noteDay('remove-background', r);
       if (r.ok) return r.blob();
-      return r.json().then(function (j) { throw new Error(j.error || 'Server removal failed'); }, function () { throw new Error('Server removal failed (' + r.status + ')'); });
+      return r.json().then(function (j) { noteRefused('remove-background', j); throw new Error(j.error || 'Server removal failed'); }, function () { throw new Error('Server removal failed (' + r.status + ')'); });
     });
   }
 
@@ -720,10 +744,11 @@
     ui: function (p) {
       if (serverRembg) {
         p.appendChild(field('Where', seg([['server', 'On our server · fast'], ['device', 'On this device · private']], rembgWhere, function (w) {
-          rembgWhere = w; note.textContent = whereNote();
+          rembgWhere = w; note.textContent = whereNote(); left.dataset.off = w === 'server' ? '0' : '1'; showLeft(left);
         })));
       }
       var note = el('p', { class: 'small muted', style: 'margin:-6px 0 14px' });
+      var left = aiLine('remove-background'); left.dataset.off = rembgWhere === 'server' && signedIn ? '0' : '1'; showLeft(left);
       function whereNote() {
         if (rembgWhere === 'server') return signedIn
           ? 'About a second. Your image is sent to this server, processed and discarded; it is not stored.'
@@ -754,6 +779,7 @@
           .then(function (bmp) { out.type = 'image/png'; commit(canvasFrom(bmp)); busy(false); pick('rembg'); })
           .catch(function (e) { busy(false); toast((e && e.message) || T('Background removal failed'), true); });
       }, 'primary'));
+      p.appendChild(left);
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Saved as PNG to keep the transparency. Works best on people, products and animals.' }));
       p.appendChild(el('p', { class: 'small faint', text: 'On this device: @imgly/background-removal (AGPL-3.0), loaded unmodified from jsDelivr. On the server: rembg (MIT).' }));
     }
@@ -777,8 +803,9 @@
       for (var k in (extra || {})) fd.append(k, extra[k], k + '.png');
       return fetch('/api/v1/tools/' + name, { method: 'POST', body: fd, headers: { Accept: 'image/png, application/json' } });
     }).then(function (r) {
+      noteDay(name, r);
       if (r.ok) return r;
-      return r.json().then(function (j) { throw new Error(j.error || 'The server could not do that'); }, function () { throw new Error('The server could not do that (' + r.status + ')'); });
+      return r.json().then(function (j) { noteRefused(name, j); throw new Error(j.error || 'The server could not do that'); }, function () { throw new Error('The server could not do that (' + r.status + ')'); });
     });
   }
   function applyResult(r, tool) {
@@ -812,6 +839,7 @@
           found.textContent = list.length === 1 ? T('1 face hidden.') : T('{n} faces hidden.', { n: list.length });
         }).catch(function (e) { busy(false); toast(e.message, true); });
       }, 'primary'));
+      p.appendChild(aiLine('faces'));
       p.appendChild(el('div', { style: 'margin-top:12px' }, [found]));
     }
   };
@@ -862,6 +890,7 @@
         }, 'primary'),
         btn('Clear', function () { mx.clearRect(0, 0, mask.width, mask.height); any = false; redraw(); })
       ]));
+      p.appendChild(aiLine('erase'));
       p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Works best on small things against a simple background. Do several small erases rather than one big one.' }));
     }
   };
@@ -883,9 +912,17 @@
         serverTool('upscale').then(function (r) { return applyResult(r, 'upscale'); })
           .catch(function (e) { busy(false); toast(e.message, true); });
       }, 'primary'));
-      p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Best for small photos, screenshots and artwork. Limit: 10 per day.' }));
+      p.appendChild(aiLine('upscale'));
+      p.appendChild(el('p', { class: 'small muted', style: 'margin-top:12px', text: 'Best for small photos, screenshots and artwork.' }));
     }
   };
+
+  if (signedIn && serverRembg) {
+    fetch('/api/v1/me', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
+      var d = ((j && j.data) || j || {}).ai_day || {};
+      for (var k in d) setLeft(k, d[k].remaining);
+    }).catch(function () {});
+  }
 
   var legacyOpen = { faceblur: 'faces' }[new URLSearchParams(location.search).get('open')] || new URLSearchParams(location.search).get('open');
   pick(location.hash.slice(1) || (tools[legacyOpen] ? legacyOpen : 'compress'));

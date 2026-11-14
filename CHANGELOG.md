@@ -4,6 +4,35 @@ What changed in PixelHop, newest release first. Each entry says what changed, wh
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-11-14 - HOP ID accounts, Edit in studio and shared files
+
+### Added
+- **Upload results, home page and dashboard.** Every picture you upload, as a guest or signed in, now has an Edit in studio button next to its links, and each picture tile in your dashboard has a small pencil that does the same. On a long list of results the button is a small pencil beside each picture's name, so the list stays short. Videos and PDFs do not get one because the studio only opens pictures. Before, you had to open the picture's own page to find Edit. The button asks the server for the file directly, so it also works when files live on an outside storage service.
+- **Photo studio.** The four tools that run on the server (background removal, face blur, magic eraser and HD upscale) now show a small line such as "7 left today" under their button. The number comes from the server, so a site with other limits shows its own, and it updates after every result. Before, only a fixed note said "10 per day" and nobody could tell what was left.
+- **Batch page.** The note about the AI steps now also says how many uses of each step are left today and warns you when the day's share is smaller than the number of pictures in a step you chose, so a long batch does not stop halfway without warning.
+- **Developer documentation.** The API page and the machine-readable description now explain the daily share of the AI tools: what is left of it on your account and the headers that come with each result.
+- **Site settings.** A new setting lets the site owner decide whether the same picture uploaded by different people is stored once. It is on by default. People who run PixelHop themselves can turn it off with the setting named PIXELHOP_SHARE_STORAGE.
+
+### Changed
+- **Settings, Profile.** If you have a HOP ID, your name, photo, username, bio and website are now only shown here, with one Edit at HOP ID button that opens your account settings. Before, you could change them here and your HOP ID changed them back the next time you signed in. People without a HOP ID, and sites that run without HOP ID, edit their profile here as before. The photo you uploaded to PixelHop earlier is no longer shown for HOP ID members, but the file is not deleted.
+- **Settings, Delete.** For people with a HOP ID, the card now deletes your PixelHop pictures and profile only, and it no longer signs you out of every HOP app. It asks you to type your e-mail and then to sign in once more at HOP ID before anything is deleted. If HOP ID cannot confirm that you just signed in, nothing is deleted and you are told so. A link to delete the whole HOP ID account is added. Before, deleting here also signed you out of every HOP app and the next visit created an empty account.
+- **Uploads.** When different people upload exactly the same picture, PixelHop now keeps one stored file and gives each person their own link, owner, expiry and delete link. Nobody is told that someone else had the file, and each member's storage still counts the full picture. Deleting one link leaves the others working, and the file goes away with the last one. This saves disk space. Pictures that are already stored are not merged. Taking down one link for moderation still only removes that link.
+
+- **Sign in and Create account.** On this site the Sign in and Create account pages now hold a single card with one button, Continue with HOP ID, so you sign in the same way in every HOP app and the button is named the same everywhere. The old password form, the sign-up form and the separate Google button are gone, and the server no longer accepts them. Where you were going (the page you wanted to open) is still remembered. If you had an older PixelHop account that used Google or a password, signing in with HOP ID using the same e-mail address brings that account and its pictures back by itself. Sites you run yourself without HOP ID keep their password sign-in. Why: one sign-in is simpler and safer, and the two-step code at HOP ID can no longer be skipped.
+
+### Security
+- **Sign in.** A member who has a HOP ID can no longer sign in to PixelHop with an old PixelHop password or with the direct Google button. Before, the old password skipped the two-step code and the account checks at HOP ID. They are sent to the HOP ID button instead. Members without a HOP ID sign in exactly as before.
+- **Linking an older account to HOP ID.** When an older PixelHop account is linked to a HOP ID with the same e-mail address, its old password and Google link are now removed and every browser that was signed in to it is signed out, because that account never proved who owned the e-mail address. The bio, website and username written here are no longer wiped by an empty HOP ID profile on that first link. The API keys and webhooks of that account are removed too, so the person who owns the e-mail address creates new ones. A HOP ID whose e-mail belongs to an account linked to a different HOP ID, or to another account, is refused with a clear message and nothing is changed or moved. Before, the first case silently moved the account and the second case showed a server error.
+- **Old sign-in methods.** Accounts already linked to a HOP ID had an old PixelHop password or Google link left over. These are now emptied once, so they cannot be used by anyone; the pictures, albums, keys and signed-in browsers of those accounts are not touched.
+- **Sessions.** Browsers that signed in to PixelHop with a password before this release, for accounts that have a HOP ID, are now checked with HOP ID again on their next visit, like any other HOP ID session.
+
+### Fixed
+- **Deleting pictures.** If PixelHop cannot tell whether another link still uses a stored picture, it now keeps the file instead of deleting it, and a deletion is no longer cut short when your browser disconnects. Before, a database hiccup could delete a file that other people's links still needed.
+- **Shared pictures on outside storage.** A picture several people uploaded is now served by PixelHop itself, so one person's link address is not revealed to the others. A new upload is also no longer attached to a stored file that has gone missing.
+- **Upload errors in other languages.** The refusal "sign in first" and "too fast" now answer with the right status in every language, not only English.
+- **Public profile page.** For people with a HOP ID, Edit profile now opens HOP ID directly.
+- **Messages in your language.** Several messages were shown in English whatever the language: the notice that a password is managed in HOP ID, the messages of the AI tools, the "file too large", "cannot read this photo", "damaged file", "link could not be downloaded" and "picture too large" messages of uploads, and a few messages of the picture API. They are now translated into all nine languages.
+
 ## [3.11.4] - 2026-11-14 - Dashboard polish
 
 ### Added

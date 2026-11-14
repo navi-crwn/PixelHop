@@ -50,12 +50,12 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if a.cfg.RembgURL == "" {
-		apiError(w, http.StatusNotFound, "server tools are not set up here")
+		apiError(w, http.StatusNotFound, a.tr(r, "server tools are not set up here"))
 		return
 	}
 	u := currentUser(r)
 	if u == nil {
-		apiError(w, http.StatusUnauthorized, "sign in to use the server tools")
+		apiError(w, http.StatusUnauthorized, a.tr(r, "sign in to use the server tools"))
 		return
 	}
 	if !a.limits.allow("ai-min:"+clientIP(r), 8, time.Minute) {
@@ -74,14 +74,14 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 	}
 	if tool.maxPix > 0 {
 		if cfg, _, err := image.DecodeConfig(bytes.NewReader(img)); err == nil && int64(cfg.Width)*int64(cfg.Height) > tool.maxPix {
-			apiError(w, http.StatusRequestEntityTooLarge, fmt.Sprintf("this image is %d×%d; resize it to about %d megapixel first", cfg.Width, cfg.Height, tool.maxPix/1_000_000))
+			apiError(w, http.StatusRequestEntityTooLarge, a.tr(r, "this image is {w}×{h}; resize it to about {mp} megapixel first", "w", cfg.Width, "h", cfg.Height, "mp", tool.maxPix/1_000_000))
 			return
 		}
 	}
 	var mask []byte
 	if tool.needMask {
 		if mask, err = formBytes(r, "mask", a.cfg.MaxUploadBytes); err != nil {
-			apiError(w, http.StatusBadRequest, "paint over what to erase first")
+			apiError(w, http.StatusBadRequest, a.tr(r, "paint over what to erase first"))
 			return
 		}
 	}
@@ -98,7 +98,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 	used, allowed, err := a.db.AITake(r.Context(), u.ID, name, perDay, aiDay, takenAt)
 	if err != nil {
 		a.log.Error("ai tool: day share", "tool", name, "err", err)
-		apiError(w, http.StatusInternalServerError, "couldn't check today's share; please try again")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "couldn't check today's share; please try again"))
 		return
 	}
 	if !allowed {
@@ -125,7 +125,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 		defer func() { <-aiSlot }()
 	case <-wait.Done():
 		giveBack()
-		apiError(w, http.StatusServiceUnavailable, "the server is busy with other images; please try again in a minute")
+		apiError(w, http.StatusServiceUnavailable, a.tr(r, "the server is busy with other images; please try again in a minute"))
 		return
 	}
 
@@ -147,7 +147,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 	if err != nil { // service down, timeout, or the caller went away
 		giveBack()
 		a.log.Error("ai tool", "tool", name, "err", err)
-		apiError(w, http.StatusBadGateway, "this tool is unavailable right now")
+		apiError(w, http.StatusBadGateway, a.tr(r, "this tool is unavailable right now"))
 		return
 	}
 	defer resp.Body.Close()
@@ -159,7 +159,7 @@ func (a *App) apiAITool(w http.ResponseWriter, r *http.Request) {
 			apiError(w, http.StatusUnprocessableEntity, string(msg))
 			return
 		}
-		apiError(w, http.StatusBadGateway, "the tool couldn't process this image")
+		apiError(w, http.StatusBadGateway, a.tr(r, "the tool couldn't process this image"))
 		return
 	}
 	a.db.CountUsage(r.Context(), name)

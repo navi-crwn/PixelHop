@@ -5,6 +5,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,6 +41,30 @@ func Open(dir string) (*DB, error) {
 				return nil, fmt.Errorf("chmod %s: %w", p, chmodErr)
 			}
 		}
+	}
+	return d, nil
+}
+
+// ErrSchemaOutdated means the database was made by an older release and has not been migrated yet.
+var ErrSchemaOutdated = errors.New("the database has not been updated to this release yet: start the server once (it updates the database), then run this again")
+
+// OpenReadOnly opens the database for reading only: it applies no migration, changes no file mode and
+// writes nothing. It refuses a database that is not at this release's schema.
+func OpenReadOnly(dir string) (*DB, error) {
+	dsn := "file:" + filepath.Join(dir, "pixelhop.db") + "?mode=ro&_pragma=busy_timeout(5000)&_pragma=query_only(1)"
+	sqlDB, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, err
+	}
+	d := &DB{DB: sqlDB, views: &viewBuffer{}}
+	var v int
+	if err := sqlDB.QueryRow(`SELECT COALESCE(MAX(v),0) FROM schema_version`).Scan(&v); err != nil {
+		sqlDB.Close()
+		return nil, fmt.Errorf("read database: %w", err)
+	}
+	if v != len(migrations) {
+		sqlDB.Close()
+		return nil, ErrSchemaOutdated
 	}
 	return d, nil
 }
@@ -253,6 +278,13 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	// seconds) and how many results it has given. In the database so a restart does not hand the day back.
 	`CREATE TABLE IF NOT EXISTS ai_day (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, tool TEXT NOT NULL,
 	start_at INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (user_id, tool));`,
+	// 20: sessions of members who have a HOP ID that were opened with a local password or Google (-1,
+	// never checked with the hub) become "never verified" (0), so the hub vouches for them on the next
+	// visit like any other HOP ID session. Sessions of accounts without a HOP ID are left alone.
+	`UPDATE sessions SET verified_at=0 WHERE verified_at=-1 AND user_id IN (SELECT id FROM users WHERE helink_id IS NOT NULL);`,
+	// 21: an account linked to HOP ID signs in only there: its old local password and Google link are
+	// emptied. Nothing else about the row changes (pictures, albums, keys, valid sessions stay).
+	`UPDATE users SET pass_hash='', google_id=NULL WHERE helink_id IS NOT NULL AND (pass_hash<>'' OR google_id IS NOT NULL);`,
 }
 
 func (d *DB) migrate() error {

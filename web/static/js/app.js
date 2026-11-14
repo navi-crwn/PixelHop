@@ -459,6 +459,8 @@
       setTimeout(function () { location.href = '/uploaded?id=' + b.ids.join(','); }, 500);
     }
 
+    function isImage(im) { return /^image\//.test(im.mime || '') && /^[A-Za-z0-9_-]+$/.test(im.id || ''); }
+
     function done(r, im) {
       if (!r.img.src) r.img.src = im.thumb_url; // keep the local preview when there is one
       r.name.textContent = im.title || im.id;
@@ -473,6 +475,10 @@
       r.act.children[0].textContent = T('Copy'); r.act.children[1].textContent = T('Direct'); r.act.children[2].textContent = T('Open');
       r.act.children[0].addEventListener('click', function () { copy(im.view_url); });
       r.act.children[1].addEventListener('click', function () { copy(im.url); });
+      if (isImage(im)) { // the studio opens pictures only, not videos or PDFs
+        var ed = document.createElement('a'); ed.className = 'btn sm'; ed.href = '/tools?src=' + encodeURIComponent(im.id);
+        ed.textContent = T('Edit in studio'); r.act.appendChild(ed);
+      }
       // remembered for "Copy all links"
       r.el.setAttribute('data-link', ''); r.el.dataset.direct = im.url; r.el.dataset.page = im.view_url; r.el.dataset.title = im.title || im.id;
       var bar = $('#copy-all-bar');
@@ -528,6 +534,12 @@
       var t = document.createElement('span'); t.textContent = im.title || im.id; cap.appendChild(t);
       var nb = document.createElement('span'); nb.className = 'pill acc'; nb.textContent = T('new'); cap.appendChild(nb);
       tile.appendChild(cap);
+      if (isImage(im)) {
+        var ed = document.createElement('a'); ed.className = 'tile-edit'; ed.href = '/tools?src=' + encodeURIComponent(im.id);
+        ed.title = T('Edit in studio'); ed.setAttribute('aria-label', ed.title);
+        ed.innerHTML = '<svg width="15" height="15"><use href="#i-edit"/></svg>';
+        tile.appendChild(ed);
+      }
       g.prepend(tile);
       var c = $('[data-stat="files"]'); if (c) c.textContent = +c.textContent + 1;
     }

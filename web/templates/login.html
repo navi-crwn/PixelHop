@@ -3,10 +3,13 @@
   <div class="auth">
     <div class="card">
       <h1>{{$.L.T "login.title"}}</h1>
-      <p class="sub">{{$.L.T "login.sub"}}</p>
+      {{if $f.SSO}}<p class="sub">{{$.L.T "login.hub_sub"}}</p>{{else}}<p class="sub">{{$.L.T "login.sub"}}</p>{{end}}
       {{with $f.Error}}<div class="alert err" role="alert">{{.}}</div>{{end}}
       {{with $f.Notice}}<div class="alert ok" role="status">{{.}}</div>{{end}}
-      {{if $f.SSO}}<p class="one-account"><svg width="16" height="16"><use href="#i-users"/></svg><span><b>{{$.L.T "login.one_account"}}</b> {{$.L.T "login.one_account_text" "site" $.Site}}</span></p>{{end}}
+      {{if $f.SSO}}
+      <a class="btn primary lg" href="/auth/helink?next={{$f.Next}}" style="width:100%"><img src="/static/img/helink.png" alt="" width="20" height="20">{{$.L.T "login.continue_helink"}}</a>
+      <p class="center small muted" style="margin:14px 0 0">{{$.L.T "register.hub_text"}}</p>
+      {{else}}
       <form method="post" action="/login">
         <input type="hidden" name="next" value="{{$f.Next}}">
         <div class="field"><label for="email">{{$.L.T "form.email"}}</label><input type="email" id="email" name="email" value="{{$f.Email}}" autocomplete="email" required autofocus></div>
@@ -14,18 +17,14 @@
         {{template "turnstile" $}}
         <button class="btn primary lg" type="submit" style="width:100%">{{$.L.T "nav.sign_in"}}</button>
       </form>
-      {{if or $f.SSO $f.Google}}<div class="or">{{$.L.T "form.or"}}</div>{{end}}
-      {{if $f.SSO}}
-      <p class="center small muted" style="margin:0 0 8px">{{$.L.T "login.have_helink"}}</p>
-      <a class="btn lg" href="/auth/helink?next={{$f.Next}}" style="width:100%"><img src="/static/img/helink.png" alt="" width="20" height="20">{{$.L.T "login.continue_helink"}}</a>
-      <p class="center small faint" style="margin:6px 0 0">{{$.L.T "login.helink_hint"}}</p>
-      {{end}}
+      {{if $f.Google}}<div class="or">{{$.L.T "form.or"}}</div>{{end}}
       {{if $f.Google}}
       <a class="btn google" href="/auth/google?next={{$f.Next}}" style="margin-top:10px"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h6a5.1 5.1 0 0 1-2.2 3.3v2.8h3.6c2.1-1.9 3.2-4.8 3.2-8.1z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.4-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.6H2v2.9A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.7 14a6.6 6.6 0 0 1 0-4.2V7H2a11 11 0 0 0 0 9.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2 7l3.7 2.9C6.6 7.3 9.1 5.4 12 5.4z"/></svg>{{$.L.T "login.continue_google"}}</a>
       {{end}}
       {{if $f.Registration}}<p class="center small muted" style="margin:18px 0 0">{{$.L.T "login.new_here"}} <a href="/register{{with $f.Next}}?next={{.}}{{end}}">{{$.L.T "login.create_account"}}</a></p>{{end}}
+      {{end}}
     </div>
-    <p class="center small faint" style="margin-top:14px">{{if $f.SSO}}{{$.L.T "login.forgot"}} <a href="{{$f.Helink}}/forgot-password">{{$.L.T "login.reset_it"}}</a> {{$.L.T "login.accounts_helink"}}{{else}}{{$.L.T "login.forgot"}} {{$.L.T "login.forgot_owner"}}{{end}}</p>
+    <p class="center small faint" style="margin-top:14px">{{if not $f.SSO}}{{$.L.T "login.forgot"}} {{$.L.T "login.forgot_owner"}}{{end}}</p>
   </div>
 </div>
 {{end}}

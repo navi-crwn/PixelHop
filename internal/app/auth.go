@@ -236,6 +236,11 @@ func (a *App) loginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) login(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() {
+		// With a hub the only way in is HOP ID: a password sent here changes nothing and goes nowhere.
+		http.Redirect(w, r, "/login?next="+url.QueryEscape(safeNext(r.FormValue("next"))), http.StatusSeeOther)
+		return
+	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	if !a.limits.allow("login:"+clientIP(r), 10, 15*time.Minute) {
@@ -254,20 +259,6 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		CheckPassword(dummyHash, pw)
 	}
 	local := err == nil && CheckPassword(u.PassHash, pw)
-	if !local && a.cfg.SSOEnabled() {
-		// Not a password kept here: ask HEL.ink, where the account may live.
-		hu, msg, redirect := a.helinkLogin(r, f.Email, pw)
-		if redirect {
-			http.Redirect(w, r, "/auth/helink?next="+url.QueryEscape(safeNext(f.Next)), http.StatusSeeOther)
-			return
-		}
-		if hu == nil {
-			f.Error = msg
-			a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
-			return
-		}
-		u, local = hu, true
-	}
 	if !local {
 		f.Error = a.tr(r, "That email and password don't match.")
 		a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
@@ -303,11 +294,21 @@ func (a *App) registrationOpen(ctx context.Context) bool {
 	return a.db.Setting(ctx, "registration", fmt.Sprint(a.cfg.Registration)) == "true"
 }
 
+// shareStorageOn reports whether uploads of the same picture by different people share one stored file.
+func (a *App) shareStorageOn(ctx context.Context) bool {
+	return a.db.Setting(ctx, "share_storage", fmt.Sprint(a.cfg.ShareStorage)) == "true"
+}
+
 func (a *App) registerPage(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, "register", "Create account", a.authForm(r))
 }
 
 func (a *App) register(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() {
+		// Accounts are made at HOP ID; nothing is created here.
+		http.Redirect(w, r, "/register?next="+url.QueryEscape(safeNext(r.FormValue("next"))), http.StatusSeeOther)
+		return
+	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	f.Name = trim(strings.TrimSpace(r.FormValue("name")), 60)
@@ -326,18 +327,6 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 		f.Error = a.tr(r, "Use at least 8 characters for your password.")
 	case len(pw) > 200:
 		f.Error = a.tr(r, "That password is too long.")
-	case a.cfg.SSOEnabled() && r.FormValue("tos") == "":
-		f.Error = a.tr(r, "Please accept the terms.")
-	}
-	if f.Error == "" && a.cfg.SSOEnabled() {
-		// The account lives on HEL.ink, so it works in both apps.
-		notice, msg := a.helinkRegister(r, f.Name, strings.ToLower(f.Email), pw)
-		if notice != "" {
-			f.Notice = notice
-			a.render(w, r, "login", "Sign in", f)
-			return
-		}
-		f.Error = msg
 	}
 	if f.Error == "" {
 		u := &db.User{Email: f.Email, Name: f.Name, PassHash: HashPassword(pw), QuotaBytes: a.cfg.DefaultQuota}
@@ -373,6 +362,14 @@ func (a *App) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies()})
 	http.Redirect(w, r, next, http.StatusSeeOther)
+}
+
+// endSession ends this browser's PixelHop session only; the hub and the other HOP apps are not told.
+func (a *App) endSession(w http.ResponseWriter, r *http.Request) {
+	if c, err := r.Cookie(sessionCookie); err == nil {
+		a.db.DeleteSession(r.Context(), hashToken(c.Value))
+	}
+	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: a.cfg.SecureCookies()})
 }
 
 // helinkLogout is a step of HOP ID's chained logout: signing out at the hub (or
@@ -414,6 +411,12 @@ func hopURL(u, helink string) bool {
 // ---- Sign in with Google (plain OAuth 2.0, no SDK) ----
 
 const googleState = "ph_oauth"
+
+// Google's endpoints; variables so a test can answer in their place.
+var (
+	googleTokenURL    = "https://oauth2.googleapis.com/token"
+	googleUserinfoURL = "https://openidconnect.googleapis.com/v1/userinfo"
+)
 
 func (a *App) googleStart(w http.ResponseWriter, r *http.Request) {
 	if !a.cfg.GoogleEnabled() {
@@ -501,7 +504,7 @@ func (a *App) googleExchange(r *http.Request, code string) (*googleInfo, error) 
 	defer cancel()
 	form := url.Values{"code": {code}, "client_id": {a.cfg.GoogleID}, "client_secret": {a.cfg.GoogleKey},
 		"redirect_uri": {a.cfg.GoogleRedirect}, "grant_type": {"authorization_code"}}
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "https://oauth2.googleapis.com/token", strings.NewReader(form.Encode()))
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, googleTokenURL, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -515,7 +518,7 @@ func (a *App) googleExchange(r *http.Request, code string) (*googleInfo, error) 
 	if err := json.NewDecoder(resp.Body).Decode(&tok); err != nil || tok.AccessToken == "" {
 		return nil, fmt.Errorf("token exchange: %v %s", err, tok.Error)
 	}
-	req, _ = http.NewRequestWithContext(ctx, http.MethodGet, "https://openidconnect.googleapis.com/v1/userinfo", nil)
+	req, _ = http.NewRequestWithContext(ctx, http.MethodGet, googleUserinfoURL, nil)
 	req.Header.Set("Authorization", "Bearer "+tok.AccessToken)
 	resp2, err := http.DefaultClient.Do(req)
 	if err != nil {

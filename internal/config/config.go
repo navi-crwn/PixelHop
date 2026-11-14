@@ -37,6 +37,7 @@ type Config struct {
 	GuestTTLDays     int // days a new guest upload stays online (0 = keep until deleted)
 	GuestDailyMax    int // files one guest address may upload per rolling 24 hours (0 = no limit)
 	Registration     bool
+	ShareStorage     bool  // one stored file for the same picture uploaded by different people
 	DefaultQuota     int64 // bytes per new account
 	InactiveDays     int   // delete images not viewed for N days (0 = never)
 	TrustedProxies   []netip.Prefix
@@ -58,7 +59,6 @@ type Config struct {
 	HelinkURL        string
 	HelinkSecret     string
 	HelinkSecretPrev string
-	HelinkAPIAddr    string // optional "127.0.0.1:443": reach HEL.ink on this machine for password checks
 	// HOP App Protocol: which callers may use the signed /hop/* admin API
 	// (slugs sent in X-HOP-App, signed with HelinkSecret).
 	HopAdminClients []string
@@ -133,6 +133,7 @@ func Load() (*Config, error) {
 		GuestDailyMax:    envInt("PIXELHOP_GUEST_DAILY_MAX", 25),
 		GuestTTLDays:     envInt("PIXELHOP_GUEST_TTL_DAYS", 30),
 		Registration:     envBool("PIXELHOP_REGISTRATION", true),
+		ShareStorage:     envBool("PIXELHOP_SHARE_STORAGE", true),
 		DefaultQuota:     int64(envInt("PIXELHOP_DEFAULT_QUOTA_MB", 128)) << 20,
 		InactiveDays:     envInt("PIXELHOP_INACTIVE_DAYS", 0),
 		UploadsPerMinute: envInt("PIXELHOP_UPLOADS_PER_MINUTE", 30),
@@ -178,7 +179,6 @@ func Load() (*Config, error) {
 	c.HelinkURL = strings.TrimRight(env("HELINK_URL", ""), "/")
 	c.HelinkSecret = env("HELINK_SSO_SECRET", env("HOP_SSO_SECRET_PIXELHOP", env("HOP_SSO_SECRET", "")))
 	c.HelinkSecretPrev = env("HELINK_SSO_SECRET_PREV", env("HOP_SSO_SECRET_PREV", ""))
-	c.HelinkAPIAddr = env("HELINK_API_ADDR", "")
 	for _, s := range strings.Split(env("HOP_ADMIN_CLIENTS", "imperium,helink"), ",") {
 		if s = strings.TrimSpace(s); s != "" {
 			c.HopAdminClients = append(c.HopAdminClients, s)
@@ -331,7 +331,10 @@ func (c *Config) StoreClientSecrets(app string) []string {
 func (c *Config) TurnstileEnabled() bool { return c.TurnstileSiteKey != "" && c.TurnstileSecret != "" }
 
 // GoogleEnabled reports whether "Sign in with Google" is configured.
-func (c *Config) GoogleEnabled() bool { return c.GoogleID != "" && c.GoogleKey != "" }
+// With a hub the only way in is HOP ID, so the direct Google sign-in is off there.
+func (c *Config) GoogleEnabled() bool {
+	return !c.SSOEnabled() && c.GoogleID != "" && c.GoogleKey != ""
+}
 
 const SessionTTL = 30 * 24 * time.Hour
 

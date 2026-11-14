@@ -231,7 +231,7 @@ func (a *App) storeMedia(ctx context.Context, src, name, kind string, u *db.User
 		}
 		vi, err := probeVideo(ctx, src)
 		if err != nil {
-			return nil, "", false, userError{name + " isn't a video we can read."}
+			return nil, "", false, userError{a.trc(ctx, "{name} isn't a video we can read.", "name", name)}
 		}
 		w, h = vi.W, vi.H
 		if strings.Contains(vi.Format, "webm") || strings.Contains(vi.Format, "matroska") {
@@ -449,7 +449,7 @@ func (a *App) optimizeVideo(ctx context.Context, id string) error {
 		b.Delete(ctx, key)
 		return err
 	}
-	if a.db.CountKeyRefs(ctx, im.KeyFull) == 0 {
+	if n, err := a.db.CountKeyRefs(ctx, im.KeyFull); err == nil && n == 0 {
 		b.Delete(ctx, im.KeyFull)
 	}
 	a.log.Info("video optimised", "id", im.ID, "from", im.Size, "to", newSize)

@@ -92,6 +92,10 @@ func (d *DB) CountWebhooks(ctx context.Context, userID int64) (n int) {
 	return
 }
 
+func (d *DB) DeleteUserWebhooks(ctx context.Context, userID int64) {
+	d.ExecContext(ctx, `DELETE FROM webhooks WHERE user_id=?`, userID)
+}
+
 func (d *DB) DeleteUserAPIKeys(ctx context.Context, userID int64) (n int64) {
 	res, err := d.ExecContext(ctx, `DELETE FROM api_keys WHERE user_id=?`, userID)
 	if err == nil {

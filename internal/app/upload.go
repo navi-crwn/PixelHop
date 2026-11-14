@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -54,15 +55,20 @@ type userError struct{ msg string }
 
 func (e userError) Error() string { return e.msg }
 
+// signInError is a userError for a visitor who must sign in: the API answers 401, whatever the language.
+type signInError struct{ userError }
+
+func (e signInError) Unwrap() error { return e.userError }
+
 // handleUpload reads every file (and URL) in the request and stores them.
 // It returns per-file results, and an album id when several were uploaded.
 func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
-	ctx := r.Context()
+	ctx := withLang(r)
 	u := currentUser(r)
 	ip := clientIP(r)
 
 	if u == nil && a.db.Setting(ctx, "guest_uploads", fmt.Sprint(a.cfg.GuestUploads)) != "true" {
-		return nil, "", userError{a.tr(r, "Please sign in to upload on this server.")}
+		return nil, "", signInError{userError{a.tr(r, "Please sign in to upload on this server.")}}
 	}
 
 	maxBatch := a.cfg.MaxBatch
@@ -81,7 +87,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	if r.MultipartForm != nil {
 		for _, field := range []string{"file", "files", "files[]", "image", "images", "images[]"} {
 			for _, fh := range r.MultipartForm.File[field] {
-				inputs = append(inputs, a.readPart(fh, u))
+				inputs = append(inputs, a.readPart(ctx, fh, u))
 			}
 		}
 	}
@@ -100,7 +106,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	}
 	for range inputs {
 		if !a.limits.allow("upload:"+ip, perMinute, time.Minute) {
-			return nil, "", userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}
+			return nil, "", rateError{userError{a.tr(r, "You're uploading very fast. Please wait a minute.")}, time.Minute}
 		}
 	}
 	// Guests: how many more files this address may store today (-1 = no
@@ -174,7 +180,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			if in.err == nil {
 				in.name = path.Base(p)
 			} else {
-				in.err = userError{in.err.Error()} // netsafe's messages are written for people
+				in.err = userError{a.localizedError(ctx, in.err.Error())} // netsafe's messages are written for people
 			}
 		}
 		if in.err != nil {
@@ -265,15 +271,14 @@ func (a *App) mediaLimit(u *db.User) int64 {
 }
 
 // tooLarge says how big a file may be, and how to get more room when signing in would help.
-func (a *App) tooLarge(name string, u *db.User, limit int64) userError {
-	msg := fmt.Sprintf("%s is larger than %d MB.", name, limit>>20)
+func (a *App) tooLarge(ctx context.Context, name string, u *db.User, limit int64) userError {
 	if u == nil && a.cfg.MaxMediaBytes > limit {
-		msg += fmt.Sprintf(" Sign in to upload videos and PDFs up to %d MB.", a.cfg.MaxMediaBytes>>20)
+		return userError{a.trc(ctx, "{name} is larger than {mb} MB. Sign in to upload videos and PDFs up to {max} MB.", "name", name, "mb", limit>>20, "max", a.cfg.MaxMediaBytes>>20)}
 	}
-	return userError{msg}
+	return userError{a.trc(ctx, "{name} is larger than {mb} MB.", "name", name, "mb", limit>>20)}
 }
 
-func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
+func (a *App) readPart(ctx context.Context, fh *multipart.FileHeader, u *db.User) uploadInput {
 	in := uploadInput{name: fh.Filename}
 	imgMax := a.imageLimit(u)
 	if fh.Size > imgMax {
@@ -287,11 +292,11 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 					in.path, in.size, in.err = a.spool(fh)
 					return in
 				}
-				in.err = a.tooLarge(fh.Filename, u, a.mediaLimit(u))
+				in.err = a.tooLarge(ctx, fh.Filename, u, a.mediaLimit(u))
 				return in
 			}
 		}
-		in.err = a.tooLarge(fh.Filename, u, imgMax)
+		in.err = a.tooLarge(ctx, fh.Filename, u, imgMax)
 		return in
 	}
 	f, err := fh.Open()
@@ -302,7 +307,7 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 	defer f.Close()
 	in.data, in.err = io.ReadAll(io.LimitReader(f, imgMax+1))
 	if in.err == nil && int64(len(in.data)) > imgMax {
-		in.err = a.tooLarge(fh.Filename, u, imgMax)
+		in.err = a.tooLarge(ctx, fh.Filename, u, imgMax)
 	}
 	return in
 }
@@ -327,7 +332,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 				return nil, "", false, err
 			}
 			if limit := a.imageLimit(u); int64(len(data)) > limit {
-				return nil, "", false, a.tooLarge(in.name, u, limit)
+				return nil, "", false, a.tooLarge(ctx, in.name, u, limit)
 			}
 			in.data, in.path = data, ""
 		} else {
@@ -348,6 +353,10 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 		}
 	}
 
+	if im, token, ok, err := a.shareStoredImage(ctx, in, sha, u, uid, ip, albumID, expiresAt, useSlug, listed, alt); ok || err != nil {
+		return im, token, false, err
+	}
+
 	stripped := imaging.MetadataFound(in.data)
 	if kind := imaging.Container(in.data); kind != "" {
 		// iPhone (HEIC) and AVIF photos: the AI service turns them into JPEG/PNG.
@@ -359,7 +368,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	}
 	p, err := imaging.Process(in.data, a.cfg.MaxPixels)
 	if err != nil {
-		return nil, "", false, userError{err.Error()}
+		return nil, "", false, userError{a.localizedError(ctx, err.Error())}
 	}
 
 	slug := ""
@@ -409,21 +418,114 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	return im, token, false, nil
 }
 
+// shareStoredImage gives an upload its own row (link, owner, delete token, expiry, warning, album) that
+// points at the file somebody else's upload of the same bytes already stored. ok is false when there is
+// nothing to share (the setting is off, or no such file) and the upload is stored as usual. The uploader is
+// never told the file was already here: the answer looks like any other upload (duplicate stays for the
+// same owner only). The quota still counts the whole file for each owner.
+func (a *App) shareStoredImage(ctx context.Context, in uploadInput, sha string, u *db.User, uid sql.NullInt64, ip, albumID string, expiresAt int64, useSlug, listed bool, alt string) (im *db.Image, token string, ok bool, err error) {
+	if !a.shareStorageOn(ctx) {
+		return nil, "", false, nil
+	}
+	slug := ""
+	if useSlug {
+		slug = slugify(strings.TrimSuffix(in.name, path.Ext(in.name)))
+	}
+	a.shareMu.Lock()
+	defer a.shareMu.Unlock()
+	src, err := a.db.ImageForSharing(ctx, sha, a.store.Name())
+	if err != nil || !a.objectsExist(ctx, src) {
+		return nil, "", false, nil // nothing to share, or its file is gone: store this upload as a new file
+	}
+	im = &db.Image{
+		UserID: uid, Title: trim(strings.TrimSuffix(in.name, path.Ext(in.name)), 120), OrigName: trim(in.name, 200),
+		Mime: src.Mime, Ext: src.Ext, Size: src.Size, Width: src.Width, Height: src.Height,
+		SHA256: sha, Color: src.Color, Backend: src.Backend, KeyFull: src.KeyFull, KeyThumb: src.KeyThumb,
+		IP: ip, ExpiresAt: expiresAt, Listed: listed,
+		Stripped: src.Stripped, Alt: alt, ContentWarning: in.contentWarning, WarningReason: in.warningReason,
+	}
+	if albumID != "" {
+		im.AlbumID = sql.NullString{String: albumID, Valid: true}
+	}
+	if u == nil {
+		token = randomToken(18)
+		im.OwnerToken = hashToken(token)
+	}
+	for attempt := 0; ; attempt++ {
+		im.ID = newID(slug)
+		err = a.db.InsertImage(ctx, im)
+		if err == nil {
+			break
+		}
+		if attempt >= 3 || !strings.Contains(err.Error(), "UNIQUE") {
+			return nil, "", false, err
+		}
+	}
+	if u != nil {
+		a.fireWebhooks(u.ID, "image.uploaded", a.imageJSON(im))
+	}
+	return im, token, true, nil
+}
+
+// Messages the imaging and download code writes in English, with the numbers they carry: each is turned
+// into a catalog entry, so the person reads it in their own language.
+var errorKeys = []struct {
+	re    *regexp.Regexp
+	key   string
+	names []string
+}{
+	{regexp.MustCompile(`^this file looks damaged: `), "This file looks damaged.", nil},
+	{regexp.MustCompile(`^image is too large \((\d+)×(\d+)\); the limit is (\d+) megapixels$`), "This image is too large ({w}×{h}); the limit is {mp} megapixels.", []string{"w", "h", "mp"}},
+	{regexp.MustCompile(`^that link answered (.+)$`), "That link answered {status}.", []string{"status"}},
+	{regexp.MustCompile(`^that image is larger than (\d+) MB$`), "That image is larger than {mb} MB.", []string{"mb"}},
+}
+
+// localizedError words an error from the imaging or download code for the person: a fixed message is
+// looked up as it stands, one with numbers by its pattern, anything else is left as it is.
+func (a *App) localizedError(ctx context.Context, msg string) string {
+	for _, e := range errorKeys {
+		if m := e.re.FindStringSubmatch(msg); m != nil {
+			kv := make([]any, 0, 2*len(e.names))
+			for i, n := range e.names {
+				kv = append(kv, n, m[i+1])
+			}
+			return a.trc(ctx, e.key, kv...)
+		}
+	}
+	return a.trc(ctx, msg)
+}
+
+// objectsExist reports whether the stored file and thumbnail of a row are really there.
+func (a *App) objectsExist(ctx context.Context, im *db.Image) bool {
+	b := a.backends[im.Backend]
+	if b == nil {
+		return false
+	}
+	for _, k := range []string{im.KeyFull, im.KeyThumb} {
+		obj, err := b.Get(ctx, k, "")
+		if err != nil {
+			return false
+		}
+		obj.Body.Close()
+	}
+	return true
+}
+
 // normalize converts HEIC/AVIF to JPEG/PNG through the AI service and
 // reports which kinds of metadata the original carried.
 func (a *App) normalize(ctx context.Context, data []byte) ([]byte, []string, error) {
 	if a.cfg.RembgURL == "" {
-		return nil, nil, userError{"iPhone (HEIC) and AVIF photos aren't supported on this server yet; save them as JPG first."}
+		return nil, nil, userError{a.trc(ctx, "iPhone (HEIC) and AVIF photos aren't supported on this server yet; save them as JPG first.")}
 	}
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, a.cfg.RembgURL+"/normalize", bytes.NewReader(data))
 	req.Header.Set("Content-Type", "application/octet-stream")
 	resp, err := aiClient.Do(req)
 	if err != nil {
-		return nil, nil, userError{"Couldn't convert this photo right now; please try again."}
+		return nil, nil, userError{a.trc(ctx, "Couldn't convert this photo right now; please try again.")}
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil, userError{"This photo couldn't be read."}
+		return nil, nil, userError{a.trc(ctx, "This photo couldn't be read.")}
 	}
 	out, err := io.ReadAll(io.LimitReader(resp.Body, a.cfg.MaxUploadBytes*3))
 	if err != nil {
@@ -483,7 +585,15 @@ func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
 			return fmt.Errorf("delete variant: %w", err)
 		}
 	}
-	if b := a.backends[im.Backend]; b != nil && a.db.CountKeyRefs(ctx, im.KeyFull) <= 1 {
+	b := a.backends[im.Backend]
+	refs := 0
+	if b != nil {
+		var err error
+		if refs, err = a.db.CountKeyRefs(ctx, im.KeyFull); err != nil {
+			return fmt.Errorf("count references: %w", err) // cannot tell whether others share the file: keep it
+		}
+	}
+	if b != nil && refs <= 1 {
 		if err := b.Delete(ctx, im.KeyFull); err != nil {
 			return fmt.Errorf("delete original: %w", err)
 		}
@@ -498,6 +608,10 @@ func (a *App) deleteImageObjects(ctx context.Context, im *db.Image) error {
 
 // removeImage deletes an image's row and its stored files.
 func (a *App) removeImage(ctx context.Context, im *db.Image) error {
+	// A dropped connection must not cut the removal in the middle (objects gone, row left, or the reverse).
+	ctx = context.WithoutCancel(ctx)
+	a.shareMu.Lock() // counting who still points at the file, deleting it and dropping the row are one step
+	defer a.shareMu.Unlock()
 	if err := a.deleteImageObjects(ctx, im); err != nil {
 		return err
 	}

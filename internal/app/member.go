@@ -123,7 +123,7 @@ func (a *App) savePassword(w http.ResponseWriter, r *http.Request) {
 	d := a.settingsData(r)
 	cur, pw := r.FormValue("current"), r.FormValue("password")
 	switch {
-	case a.cfg.SSOEnabled() && u.HelinkID.Valid: // the same test as the template that hides the form: the password belongs to the hub
+	case a.hubOwnsProfile(u): // the same test as the template that hides the form: the password belongs to the hub
 		d.Error = a.tr(r, "Your password is managed in HOP ID, not here.")
 	case u.PassHash != "" && !CheckPassword(u.PassHash, cur):
 		d.Error = a.tr(r, "Your current password isn't right.")
@@ -190,6 +190,18 @@ func (a *App) sharexConfig(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
+	if a.hubOwnsProfile(u) {
+		// The account lives at the hub: typing the e-mail is not enough, the hub must say the person has just
+		// signed in. Only the images and the profile kept here are deleted, and only after that answer.
+		if r.FormValue("confirm") != u.Email {
+			d := a.settingsData(r)
+			d.Error = a.tr(r, "Type your email address to confirm deleting your images and profile.")
+			a.renderStatus(w, r, http.StatusBadRequest, "settings", "Settings", d)
+			return
+		}
+		a.helinkReauth(w, r)
+		return
+	}
 	if u.PassHash != "" && !CheckPassword(u.PassHash, r.FormValue("password")) {
 		d := a.settingsData(r)
 		d.Error = a.tr(r, "Type your password to confirm deleting your account.")

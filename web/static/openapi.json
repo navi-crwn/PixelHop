@@ -845,10 +845,77 @@
     },
     "/api/v1/me": {
       "get": {
-        "summary": "Your account: email, file count, storage used and quota",
+        "summary": "Your account: email, file count, storage used and quota, and what is left of today's AI tool share (ai_day)",
         "responses": {
           "200": {
-            "description": "Account"
+            "description": "Account. ai_day maps each limited server AI tool to {limit, used, remaining, resets_at}; resets_at appears once the tool has been used in the current rolling 24 hours."
+          }
+        }
+      }
+    },
+    "/api/v1/tools/{tool}": {
+      "post": {
+        "summary": "Run a server AI tool on an image (signed-in accounts)",
+        "parameters": [
+          {
+            "name": "tool",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "remove-background",
+                "faces",
+                "erase",
+                "upscale"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "mask": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "erase only: the white strokes mark what to remove"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result (an image, or JSON for faces).",
+            "headers": {
+              "X-Day-Limit": {
+                "description": "Uses of this tool allowed per rolling 24 hours.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Day-Remaining": {
+                "description": "Uses left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Today's share is used up. The body carries limit, remaining (0) and resets_at."
           }
         }
       }
