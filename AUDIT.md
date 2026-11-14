@@ -56,7 +56,7 @@ PixelHop 3 uses SQLite in WAL mode:
 Background removal and OCR start a Python process per request. Each one loads hundreds of MB of model weights, so a handful of visitors can exhaust a small VPS (hence the "Gatekeeper" CPU checks).
 
 In PixelHop 3 these tools run in the browser:
-- **OCR:** tesseract.js (Apache-2.0).
+- **OCR:** tesseract.js and tesseract.js-core (Apache-2.0), bundled under `web/static/vendor/tesseract`; English model built in, other languages from `PIXELHOP_DATA/tessdata`; no external host.
 - **Background removal:** @imgly/background-removal (AGPL-3.0, loaded unmodified from jsDelivr).
 
 The server only ever hosts the results, and private images never have to be uploaded to be edited.

@@ -960,7 +960,6 @@
   "How many": "Cuántos",
   "Pick at least one language": "Elige al menos un idioma",
   "Image to text": "Imagen a texto",
-  "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.": "Lee el texto de una foto o captura de pantalla, en un idioma o varios mezclados. El modelo de lectura de cada idioma (unos 2–15 MB) se descarga una vez y luego todo funciona en tu dispositivo.",
   "Languages in the image": "Idiomas de la imagen",
   "The text will appear here.": "El texto aparecerá aquí.",
   "Read text": "Leer texto",
@@ -1154,5 +1153,7 @@
   "{tool}: {n} left today": "{tool}: quedan {n} hoy",
   "Today's share is not enough for all {n} images in a step you chose.": "El cupo de hoy no alcanza para las {n} imágenes en un paso elegido.",
   "login.hub_sub": "Inicia sesión con tu HOP ID para ver tu galería, álbumes y claves de API.",
-  "register.hub_text": "Una cuenta para todas las apps HOP. Inicia sesión con ella o créala en la siguiente pantalla: es gratis y lleva un minuto."
+  "register.hub_text": "Una cuenta para todas las apps HOP. Inicia sesión con ella o créala en la siguiente pantalla: es gratis y lleva un minuto.",
+  "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "Lee el texto de una foto o captura, en un idioma o en varios mezclados. Todo se ejecuta en tu dispositivo; no se carga nada de otros sitios.",
+  "Only English is installed on this server. The site owner can add more reading languages.": "Este servidor solo tiene instalado el inglés. El propietario del sitio puede añadir más idiomas de lectura."
 }

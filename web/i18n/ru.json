@@ -961,7 +961,6 @@
   "How many": "Сколько",
   "Pick at least one language": "Выберите хотя бы один язык",
   "Image to text": "Изображение в текст",
-  "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.": "Распознайте текст на фото или скриншоте — на одном языке или на нескольких сразу. Модель каждого языка (около 2–15 МБ) загружается один раз, дальше всё работает на вашем устройстве.",
   "Languages in the image": "Языки на изображении",
   "The text will appear here.": "Текст появится здесь.",
   "Read text": "Распознать текст",
@@ -1154,5 +1153,7 @@
   "{tool}: {n} left today": "{tool}: осталось сегодня {n}",
   "Today's share is not enough for all {n} images in a step you chose.": "Дневного лимита не хватит на все {n} изображений в выбранном шаге.",
   "login.hub_sub": "Войдите с помощью HOP ID, чтобы увидеть галерею, альбомы и ключи API.",
-  "register.hub_text": "Один аккаунт для всех приложений HOP. Войдите с ним или создайте его на следующем экране: бесплатно и займёт минуту."
+  "register.hub_text": "Один аккаунт для всех приложений HOP. Войдите с ним или создайте его на следующем экране: бесплатно и займёт минуту.",
+  "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "Распознаёт текст на фото или скриншоте, на одном языке или на нескольких сразу. Всё работает на вашем устройстве; с других сайтов ничего не загружается.",
+  "Only English is installed on this server. The site owner can add more reading languages.": "На этом сервере установлен только английский. Владелец сайта может добавить другие языки распознавания."
 }

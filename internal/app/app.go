@@ -120,6 +120,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET /t/{file}", a.serveThumb)
 	mux.HandleFunc("GET /qr/{id}", a.qr)
 	mux.Handle("GET /static/", a.static)
+	mux.HandleFunc("GET /tessdata/{file}", a.tessdata)
 	mux.HandleFunc("GET /favicon.ico", a.favicon)
 	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
 	mux.HandleFunc("GET /sw.js", a.serviceWorker)

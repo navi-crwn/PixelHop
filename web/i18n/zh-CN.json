@@ -962,7 +962,6 @@
   "How many": "数量",
   "Pick at least one language": "至少选择一种语言",
   "Image to text": "图片转文字",
-  "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.": "识别照片或截图中的文字，可使用一种语言或多种语言混合。每种语言的识别模型（约 2–15 MB）只需下载一次，之后一切都在您的设备上运行。",
   "Languages in the image": "图片中的语言",
   "The text will appear here.": "文字将显示在这里。",
   "Read text": "识别文字",
@@ -1154,5 +1153,7 @@
   "{tool}: {n} left today": "{tool}：今天还剩 {n} 次",
   "Today's share is not enough for all {n} images in a step you chose.": "今天的剩余额度不够处理全部 {n} 张图片（所选步骤）。",
   "login.hub_sub": "用你的 HOP ID 登录，查看图库、相册和 API 密钥。",
-  "register.hub_text": "一个账号通用于所有 HOP 应用。用它登录，或在下一屏免费创建，只需一分钟。"
+  "register.hub_text": "一个账号通用于所有 HOP 应用。用它登录，或在下一屏免费创建，只需一分钟。",
+  "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "读取照片或截图中的文字，可同时识别一种或多种语言。一切都在你的设备上运行，不会从其他网站加载任何内容。",
+  "Only English is installed on this server. The site owner can add more reading languages.": "此服务器只安装了英语。站点所有者可以添加更多识别语言。"
 }

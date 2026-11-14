@@ -11,7 +11,7 @@
   </div>
   <input type="file" id="st-file" accept="image/*" hidden>
 
-  <div class="studio" id="studio" data-rembg-server="{{if .RembgServer}}1{{end}}" data-signed-in="{{if .User}}1{{end}}">
+  <div class="studio" id="studio" data-rembg-server="{{if .RembgServer}}1{{end}}" data-signed-in="{{if .User}}1{{end}}" data-ocr-langs="{{.OCRLangs}}">
     <div class="tool-list" role="tablist" aria-label="{{$.L.T "tools.label"}}">
       <button role="tab" data-tool="compress"><svg><use href="#i-compress"/></svg>{{$.L.T "home.tool_compress"}}</button>
       <button role="tab" data-tool="resize"><svg><use href="#i-resize"/></svg>{{$.L.T "home.tool_resize"}}</button>

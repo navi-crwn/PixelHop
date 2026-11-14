@@ -955,7 +955,6 @@
   "How many": "Berapa banyak",
   "Pick at least one language": "Pilih setidaknya satu bahasa",
   "Image to text": "Gambar ke teks",
-  "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.": "Baca teks pada foto atau tangkapan layar, dalam satu bahasa atau beberapa bahasa sekaligus. Model baca tiap bahasa (sekitar 2–15 MB) diunduh sekali, lalu semuanya berjalan di perangkat Anda.",
   "Languages in the image": "Bahasa dalam gambar",
   "The text will appear here.": "Teks akan muncul di sini.",
   "Read text": "Baca teks",
@@ -1154,5 +1153,7 @@
   "{tool}: {n} left today": "{tool}: sisa {n} hari ini",
   "Today's share is not enough for all {n} images in a step you chose.": "Jatah hari ini tidak cukup untuk semua {n} gambar pada langkah yang Anda pilih.",
   "login.hub_sub": "Masuk dengan HOP ID Anda untuk melihat galeri, album, dan kunci API.",
-  "register.hub_text": "Satu akun untuk semua aplikasi HOP. Masuk dengannya, atau buat di layar berikutnya: gratis dan hanya semenit."
+  "register.hub_text": "Satu akun untuk semua aplikasi HOP. Masuk dengannya, atau buat di layar berikutnya: gratis dan hanya semenit.",
+  "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "Baca teks dalam foto atau tangkapan layar, dalam satu bahasa atau beberapa sekaligus. Semuanya berjalan di perangkat Anda; tidak ada yang dimuat dari situs lain.",
+  "Only English is installed on this server. The site owner can add more reading languages.": "Server ini hanya memasang bahasa Inggris. Pemilik situs dapat menambah bahasa baca lainnya."
 }

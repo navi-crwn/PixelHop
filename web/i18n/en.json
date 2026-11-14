@@ -963,7 +963,6 @@
   "How many": "How many",
   "Pick at least one language": "Pick at least one language",
   "Image to text": "Image to text",
-  "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.": "Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.",
   "Languages in the image": "Languages in the image",
   "The text will appear here.": "The text will appear here.",
   "Read text": "Read text",
@@ -1154,5 +1153,7 @@
   "{tool}: {n} left today": "{tool}: {n} left today",
   "Today's share is not enough for all {n} images in a step you chose.": "Today's share is not enough for all {n} images in a step you chose.",
   "login.hub_sub": "Sign in with your HOP ID to see your gallery, albums and API keys.",
-  "register.hub_text": "One account for every HOP app. Sign in with it, or create it on the next screen: it is free and takes a minute."
+  "register.hub_text": "One account for every HOP app. Sign in with it, or create it on the next screen: it is free and takes a minute.",
+  "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.": "Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.",
+  "Only English is installed on this server. The site owner can add more reading languages.": "Only English is installed on this server. The site owner can add more reading languages."
 }

@@ -49,6 +49,7 @@ type page struct {
 	Control       string // HOP control center, shown to admins when configured
 	Turnstile     string // Turnstile site key, when forms are protected
 	RembgServer   bool   // background removal can run on the server
+	OCRLangs      string // reading languages this server has, comma separated (studio)
 	GuestUploads  bool
 	GuestTTLDays  int // lifetime of a new guest upload, shown to guests (0 = none)
 	MaxMB         int64
@@ -227,7 +228,7 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	// script: the family's hop-ui.js (base.html), always with its SRI hash.
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline' https://hel.ink; "+
 		"script-src 'self' 'wasm-unsafe-eval'"+eval+" https://hel.ink https://cdn.jsdelivr.net https://challenges.cloudflare.com blob:; frame-src https://challenges.cloudflare.com; worker-src 'self' blob: https://cdn.jsdelivr.net; "+
-		"connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://staticimgly.com blob: data:; "+
+		"connect-src 'self' https://cdn.jsdelivr.net https://staticimgly.com blob: data:; "+
 		"font-src 'self' https://hel.ink; frame-ancestors 'self'; base-uri 'none'; form-action 'self' https://accounts.google.com"+formHelink)
 	if p.User != nil {
 		h.Set("Cache-Control", "private, no-store")
@@ -257,7 +258,7 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) tools(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "tools", page{Title: "Photo studio",
+	a.renderPage(w, r, "tools", page{Title: "Photo studio", OCRLangs: joinLangs(a.ocrLanguages()),
 		Desc: "Compress, resize, crop, convert, read text (OCR), remove backgrounds, blur faces and pick colors, privately in your browser."})
 }
 

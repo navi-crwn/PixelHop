@@ -10,7 +10,9 @@
   var T = window.phT || function (k, v) { return v ? k.replace(/\{(\w+)\}/g, function (m, n) { return n in v ? v[n] : m; }) : k; };
   var tx = function (v) { return typeof v === 'string' ? T(v) : v; };
 
-  var TESSERACT = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+  // Tesseract is part of this site (web/static/vendor/tesseract), never loaded from another one.
+  var TESSERACT = '/static/vendor/tesseract/tesseract.min.js?v=5.1.1';
+  var TESSERACT_OPTS = { workerPath: '/static/vendor/tesseract/worker.min.js?v=5.1.1', corePath: '/static/vendor/tesseract/tesseract-core-simd-lstm.wasm.js', langPath: '/tessdata', gzip: true };
   var REMBG = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm';
 
   var box = $('#st-box'), view = $('#st-canvas'), empty = $('#st-empty'), toolBox = $('#st-tool');
@@ -627,6 +629,12 @@
     ['swe', 'Svenska', 'Swedish'], ['tha', 'ไทย', 'Thai'], ['tur', 'Türkçe', 'Turkish'], ['ukr', 'Українська', 'Ukrainian'],
     ['urd', 'اردو', 'Urdu'], ['vie', 'Tiếng Việt', 'Vietnamese']
   ];
+  // Only the languages this server has the reading model for are offered (English is always there).
+  var OCR_HAVE = (function () {
+    var st = $('#studio'), have = ((st && st.dataset.ocrLangs) || 'eng').split(',').filter(Boolean);
+    return have.indexOf('eng') < 0 ? ['eng'].concat(have) : have;
+  })();
+  OCR_LANGS = OCR_LANGS.filter(function (l) { return OCR_HAVE.indexOf(l[0]) >= 0; });
   var OCR_COMMON = ['eng', 'chi_sim', 'deu', 'spa', 'fra', 'jpn', 'kor', 'por'];
   var OCR_MAX = 5;
   // browser language -> tesseract code, for a sensible first choice
@@ -660,18 +668,20 @@
         });
         grid.appendChild(b);
       });
+      more.hidden = OCR_LANGS.length <= 1 || OCR_LANGS.every(function (l) { return OCR_COMMON.indexOf(l[0]) >= 0 || ocrLangs.indexOf(l[0]) >= 0; });
       more.textContent = showAll ? T('Fewer languages') : T('More languages ({n})', { n: OCR_LANGS.length });
       summary.textContent = T('Reading:') + ' ' + ocrLangs.map(function (c) { var l = OCR_LANGS.filter(function (x) { return x[0] === c; })[0]; return l[2] || l[1]; }).join(' + ') +
         (ocrLangs.length > 2 ? ' · ' + T('more languages read a little slower') : '');
     }
     var more = btn('', function () { showAll = !showAll; draw(); }, 'sm ghost');
     wrap.appendChild(grid); wrap.appendChild(el('div', { style: 'margin-top:6px' }, [more])); wrap.appendChild(summary);
+    if (OCR_LANGS.length <= 1) wrap.appendChild(el('p', { class: 'small muted', style: 'margin:6px 0 0', text: 'Only English is installed on this server. The site owner can add more reading languages.' }));
     draw();
     return wrap;
   }
 
   tools.ocr = {
-    title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Each language’s reading model (about 2–15 MB) downloads once, then everything runs on your device.',
+    title: 'Image to text', desc: 'Read the text in a photo or screenshot, in one language or several mixed together. Everything runs on your device; nothing is loaded from other sites.',
     noResult: true,
     ui: function (p) {
       p.appendChild(field('Languages in the image', ocrLangPicker(), T('pick up to {n}', { n: OCR_MAX })));
@@ -679,9 +689,9 @@
       p.appendChild(btn('Read text', function () {
         busy('Loading the reader…');
         script(TESSERACT).then(function () {
-          return window.Tesseract.recognize(cur, ocrLangs.join('+'), { logger: function (m) {
+          return window.Tesseract.recognize(cur, ocrLangs.join('+'), Object.assign({}, TESSERACT_OPTS, { logger: function (m) {
             if (m.status) busy(m.status.replace(/^\w/, function (c) { return c.toUpperCase(); }) + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
-          } });
+          } }));
         }).then(function (r) {
           // Tesseract spaces out Chinese and Japanese characters; join them again.
           var text = r.data.text.replace(/([\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])[ \t]+(?=[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef])/g, '$1');
