@@ -38,8 +38,8 @@ func TestAdminNoteMigrationPreservesLegacyDescriptions(t *testing.T) {
 		`INSERT INTO schema_version (v) VALUES (14)`,
 		`CREATE TABLE albums (id TEXT PRIMARY KEY, description TEXT NOT NULL DEFAULT '')`,
 		`CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL, ip TEXT NOT NULL DEFAULT '', user_agent TEXT NOT NULL DEFAULT '')`,
-		`CREATE TABLE images (id TEXT PRIMARY KEY)`,                   // migration 17 adds a column to it
-		`CREATE TABLE users (id INTEGER PRIMARY KEY, helink_id TEXT)`, // migration 20 reads it
+		`CREATE TABLE images (id TEXT PRIMARY KEY)`, // migration 17 adds a column to it
+		`CREATE TABLE users (id INTEGER PRIMARY KEY, helink_id TEXT, pass_hash TEXT NOT NULL DEFAULT '', google_id TEXT)`, // migration 20 reads it
 		`INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES ('old', 1, 1, 4102444800)`,
 		`INSERT INTO albums (id, description) VALUES ('legacy-ticket', 'ambiguous legacy text')`,
 	} {

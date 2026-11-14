@@ -37,7 +37,7 @@ func TestMigrationChecksOldSessionsOfHopIDMembers(t *testing.T) {
 	must(d.InsertHubSession(ctx, "linked-hub", linked.ID, time.Hour, "", ""))
 
 	// Run the last migration again as an upgrade would.
-	if _, err := d.Exec(`DELETE FROM schema_version WHERE v=?`, len(migrations)); err != nil {
+	if _, err := d.Exec(`DELETE FROM schema_version WHERE v>=?`, 20); err != nil {
 		t.Fatal(err)
 	}
 	must(d.migrate())

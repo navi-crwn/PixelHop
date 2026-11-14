@@ -257,6 +257,9 @@ CREATE INDEX guest_uploads_ip ON guest_uploads (ip_hash, at);`,
 	// never checked with the hub) become "never verified" (0), so the hub vouches for them on the next
 	// visit like any other HOP ID session. Sessions of accounts without a HOP ID are left alone.
 	`UPDATE sessions SET verified_at=0 WHERE verified_at=-1 AND user_id IN (SELECT id FROM users WHERE helink_id IS NOT NULL);`,
+	// 21: an account linked to HOP ID signs in only there: its old local password and Google link are
+	// emptied. Nothing else about the row changes (pictures, albums, keys, valid sessions stay).
+	`UPDATE users SET pass_hash='', google_id=NULL WHERE helink_id IS NOT NULL AND (pass_hash<>'' OR google_id IS NOT NULL);`,
 }
 
 func (d *DB) migrate() error {
