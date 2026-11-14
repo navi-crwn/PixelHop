@@ -35,11 +35,11 @@
   function clone(c) { return canvasFrom(c); }
 
   function load(blob, name) {
-    if (!blob || !/^image\//.test(blob.type)) { toast('That is not an image', true); return; }
+    if (!blob || !(/^image\//.test(blob.type) || window.phIsSvg(blob, name))) { toast('That is not an image', true); return; }
     busy('Opening…');
-    createImageBitmap(blob, { imageOrientation: 'from-image' }).then(function (bmp) {
+    window.phBitmap(blob, { imageOrientation: 'from-image' }, name).then(function (bmp) {
       cur = canvasFrom(bmp); original = clone(cur); undo = [];
-      srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = blob.type; srcSize = blob.size;
+      srcName = (name || 'image').replace(/\.[a-z0-9]+$/i, ''); srcType = window.phIsSvg(blob, name) ? 'image/png' : blob.type; srcSize = blob.size;
       out.type = null;
       show(); busy(false);
       $('#st-export').classList.remove('hide');
@@ -506,7 +506,7 @@
       }, 'sm ghost hide');
       logoIn.addEventListener('change', function () {
         var f = logoIn.files[0]; if (!f) return;
-        createImageBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); logoRm.classList.remove('hide'); draw(); }, function () { toast('That logo could not be opened', true); });
+        window.phBitmap(f).then(function (b) { o.logo = b; logoBtn.textContent = T('Logo: {name}', { name: f.name }); logoRm.classList.remove('hide'); draw(); }, function () { toast('That logo could not be opened', true); });
       });
       function render(c) {
         var x = c.getContext('2d'), W = c.width, H = c.height, m = Math.round(Math.min(W, H) * 0.03);

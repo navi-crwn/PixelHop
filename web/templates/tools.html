@@ -9,7 +9,7 @@
       <button class="btn ghost" type="button" id="st-compare" disabled aria-pressed="false" title="{{$.L.T "tools.compare_title"}}"><svg><use href="#i-eye"/></svg>{{$.L.T "tools.compare"}}</button>
     </div>
   </div>
-  <input type="file" id="st-file" accept="image/*" hidden>
+  <input type="file" id="st-file" accept="image/*,.svg" hidden>
 
   <div class="studio" id="studio" data-rembg-server="{{if .RembgServer}}1{{end}}" data-signed-in="{{if .User}}1{{end}}" data-ocr-langs="{{.OCRLangs}}">
     <div class="tool-list" role="tablist" aria-label="{{$.L.T "tools.label"}}">
@@ -56,4 +56,4 @@
   </div>
 </div>
 {{end}}
-{{define "scripts"}}<script src="/static/js/studio.js?v={{.Asset}}" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/js/svg.js?v={{.Asset}}" defer></script><script src="/static/js/studio.js?v={{.Asset}}" defer></script>{{end}}
