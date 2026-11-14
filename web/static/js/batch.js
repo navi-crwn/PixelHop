@@ -49,13 +49,34 @@
   });
   $('#b-quality').addEventListener('input', function () { $('#b-qout').textContent = this.value; });
 
+  // What is left of today's share for each AI step: from GET /api/v1/me at the start, then the X-Day-* headers.
+  var left = {}, aiNames = { 'remove-background': 'home.tool_rembg', faces: 'tools.faces', upscale: 'batch.upscale' };
+  var aiBoxes = { 'remove-background': '#b-rembg', faces: '#b-faces', upscale: '#b-upscale' };
+  function leftNote() {
+    var parts = [], short = false, n = items.length;
+    Object.keys(aiNames).forEach(function (k) {
+      if (left[k] === undefined) return;
+      parts.push(T('{tool}: {n} left today', { tool: T(aiNames[k]), n: left[k] }));
+      if ($(aiBoxes[k]).checked && left[k] < n) short = true;
+    });
+    return (parts.length ? ' ' + parts.join(' · ') + '.' : '') + (short ? ' ' + T('Today\'s share is not enough for all {n} images in a step you chose.', { n: n }) : '');
+  }
+  function noteDay(name, r) { var v = r.headers.get('X-Day-Remaining'); if (v !== null) { left[name] = parseInt(v, 10); refresh(); } }
+  if (signedIn && server) {
+    fetch('/api/v1/me', { headers: { Accept: 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
+      var d = ((j && j.data) || j || {}).ai_day || {};
+      Object.keys(aiNames).forEach(function (k) { if (d[k]) left[k] = d[k].remaining; });
+      refresh();
+    }).catch(function () {});
+  }
+
   function refresh() {
     var n = items.length;
     $('#b-zip').disabled = $('#b-upload').disabled = n === 0;
     var ai = ['#b-rembg', '#b-faces', '#b-upscale'];
     ai.forEach(function (s) { $(s).disabled = !server || !signedIn; });
     $('#b-ai-note').textContent = !server ? T('AI steps are not available on this server.')
-      : !signedIn ? T('Sign in (free) to use the AI steps.') : T('AI steps run on our server, one image at a time.');
+      : !signedIn ? T('Sign in (free) to use the AI steps.') : T('AI steps run on our server, one image at a time.') + leftNote();
     if (!signedIn && n > maxBatch) $('#b-ai-note').textContent += ' ' + T('Albums from guests hold up to {n} images; sign in for bigger ones.', { n: maxBatch });
   }
   refresh();
@@ -88,7 +109,8 @@
       var fd = new FormData(); fd.append('file', b, 'image.png');
       return fetch('/api/v1/tools/' + name, { method: 'POST', body: fd, headers: { Accept: 'image/png, application/json' } });
     }).then(function (r) {
-      if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || name + ' failed'); }, function () { throw new Error(name + ' failed (' + r.status + ')'); });
+      noteDay(name, r);
+      if (!r.ok) return r.json().then(function (j) { if (j && typeof j.remaining === 'number') { left[name] = j.remaining; refresh(); } throw new Error(j.error || name + ' failed'); }, function () { throw new Error(name + ' failed (' + r.status + ')'); });
       return name === 'faces' ? r.json() : r.blob().then(createImageBitmap).then(function (b) { return toCanvas(b); });
     });
   }

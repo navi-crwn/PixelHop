@@ -101,7 +101,7 @@ func (a *App) apiStartUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if limit := a.mediaLimit(u); body.Size > limit {
-		apiError(w, http.StatusBadRequest, a.tooLarge(body.Name, u, limit).msg)
+		apiError(w, http.StatusBadRequest, a.tooLarge(withLang(r), body.Name, u, limit).msg)
 		return
 	}
 	if u != nil {
@@ -236,7 +236,7 @@ func (a *App) apiFinishUpload(w http.ResponseWriter, r *http.Request) {
 		warning = "none"
 	}
 	in := uploadInput{name: c.name, path: c.path, size: c.size, contentWarning: warning, warningReason: trim(strings.TrimSpace(r.FormValue("warning_reason")), 255)}
-	im, tok, dup, err := a.storeImage(ctx, in, u, clientIP(r), albumID, expiresAt, useSlug, false, trim(strings.TrimSpace(r.FormValue("alt")), 300))
+	im, tok, dup, err := a.storeImage(withLang(r), in, u, clientIP(r), albumID, expiresAt, useSlug, false, trim(strings.TrimSpace(r.FormValue("alt")), 300))
 	if err != nil {
 		var ue userError
 		if errors.As(err, &ue) {

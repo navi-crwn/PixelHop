@@ -134,7 +134,7 @@ func (a *App) apiUpload(w http.ResponseWriter, r *http.Request) {
 func (a *App) apiUser(w http.ResponseWriter, r *http.Request) *db.User {
 	u := currentUser(r)
 	if u == nil {
-		apiError(w, http.StatusUnauthorized, "sign in or send an API key (Authorization: Bearer ph_...)")
+		apiError(w, http.StatusUnauthorized, a.tr(r, "sign in or send an API key (Authorization: Bearer ph_...)"))
 	}
 	return u
 }
@@ -155,7 +155,7 @@ func (a *App) apiImages(w http.ResponseWriter, r *http.Request) {
 	}
 	ims, total, err := a.db.Images(r.Context(), db.ImageQuery{UserID: u.ID, Search: q.Get("q"), Sort: q.Get("sort"), Limit: limit, Offset: (page - 1) * limit})
 	if err != nil {
-		apiError(w, http.StatusInternalServerError, "couldn't list images")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "couldn't list images"))
 		return
 	}
 	out := make([]map[string]any, 0, len(ims))
@@ -173,7 +173,7 @@ func (a *App) ownImage(w http.ResponseWriter, r *http.Request) *db.Image {
 	}
 	im, err := a.db.Image(r.Context(), r.PathValue("id"))
 	if err != nil || (im.UserID.Int64 != u.ID && !u.IsAdmin()) {
-		apiError(w, http.StatusNotFound, "image not found")
+		apiError(w, http.StatusNotFound, a.tr(r, "image not found"))
 		return nil
 	}
 	return im
@@ -195,14 +195,14 @@ func (a *App) apiDeleteImage(w http.ResponseWriter, r *http.Request) {
 	// Your own files go to the trash first (restorable for a week); ?permanent=1, or an admin, removes for good.
 	if u := currentUser(r); u != nil && im.UserID.Int64 == u.ID && r.URL.Query().Get("permanent") != "1" && !a.db.Trashed(r.Context(), im.ID) {
 		if err := a.db.TrashImage(r.Context(), im.ID); err != nil {
-			apiError(w, http.StatusInternalServerError, "couldn't delete")
+			apiError(w, http.StatusInternalServerError, a.tr(r, "couldn't delete"))
 			return
 		}
 		apiOK(w, map[string]any{"deleted": im.ID, "trashed": true})
 		return
 	}
 	if err := a.removeImage(r.Context(), im); err != nil {
-		apiError(w, http.StatusInternalServerError, "couldn't delete")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "couldn't delete"))
 		return
 	}
 	a.db.DeleteEmptyAlbums(r.Context())
@@ -216,7 +216,7 @@ func (a *App) apiRestoreImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := a.db.RestoreImage(r.Context(), im.ID); err != nil {
-		apiError(w, http.StatusInternalServerError, "couldn't restore")
+		apiError(w, http.StatusInternalServerError, a.tr(r, "couldn't restore"))
 		return
 	}
 	apiOK(w, map[string]any{"restored": im.ID})

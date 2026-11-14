@@ -271,7 +271,7 @@ func (a *App) saveAvatar(w http.ResponseWriter, r *http.Request) {
 		data, err = imaging.Avatar(data, 40_000_000, 400)
 	}
 	if err != nil {
-		a.settingsError(w, r, a.tr(r, "Profile photo: {err}", "err", err.Error()))
+		a.settingsError(w, r, a.tr(r, "Profile photo: {err}", "err", a.localizedError(withLang(r), err.Error())))
 		return
 	}
 	key := fmt.Sprintf("avatars/%d-%s.jpg", u.ID, randomToken(6))

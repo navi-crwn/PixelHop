@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -57,7 +58,7 @@ func (e userError) Error() string { return e.msg }
 // handleUpload reads every file (and URL) in the request and stores them.
 // It returns per-file results, and an album id when several were uploaded.
 func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
-	ctx := r.Context()
+	ctx := withLang(r)
 	u := currentUser(r)
 	ip := clientIP(r)
 
@@ -81,7 +82,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 	if r.MultipartForm != nil {
 		for _, field := range []string{"file", "files", "files[]", "image", "images", "images[]"} {
 			for _, fh := range r.MultipartForm.File[field] {
-				inputs = append(inputs, a.readPart(fh, u))
+				inputs = append(inputs, a.readPart(ctx, fh, u))
 			}
 		}
 	}
@@ -174,7 +175,7 @@ func (a *App) handleUpload(r *http.Request) ([]uploadResult, string, error) {
 			if in.err == nil {
 				in.name = path.Base(p)
 			} else {
-				in.err = userError{in.err.Error()} // netsafe's messages are written for people
+				in.err = userError{a.localizedError(ctx, in.err.Error())} // netsafe's messages are written for people
 			}
 		}
 		if in.err != nil {
@@ -265,15 +266,14 @@ func (a *App) mediaLimit(u *db.User) int64 {
 }
 
 // tooLarge says how big a file may be, and how to get more room when signing in would help.
-func (a *App) tooLarge(name string, u *db.User, limit int64) userError {
-	msg := fmt.Sprintf("%s is larger than %d MB.", name, limit>>20)
+func (a *App) tooLarge(ctx context.Context, name string, u *db.User, limit int64) userError {
 	if u == nil && a.cfg.MaxMediaBytes > limit {
-		msg += fmt.Sprintf(" Sign in to upload videos and PDFs up to %d MB.", a.cfg.MaxMediaBytes>>20)
+		return userError{a.trc(ctx, "{name} is larger than {mb} MB. Sign in to upload videos and PDFs up to {max} MB.", "name", name, "mb", limit>>20, "max", a.cfg.MaxMediaBytes>>20)}
 	}
-	return userError{msg}
+	return userError{a.trc(ctx, "{name} is larger than {mb} MB.", "name", name, "mb", limit>>20)}
 }
 
-func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
+func (a *App) readPart(ctx context.Context, fh *multipart.FileHeader, u *db.User) uploadInput {
 	in := uploadInput{name: fh.Filename}
 	imgMax := a.imageLimit(u)
 	if fh.Size > imgMax {
@@ -287,11 +287,11 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 					in.path, in.size, in.err = a.spool(fh)
 					return in
 				}
-				in.err = a.tooLarge(fh.Filename, u, a.mediaLimit(u))
+				in.err = a.tooLarge(ctx, fh.Filename, u, a.mediaLimit(u))
 				return in
 			}
 		}
-		in.err = a.tooLarge(fh.Filename, u, imgMax)
+		in.err = a.tooLarge(ctx, fh.Filename, u, imgMax)
 		return in
 	}
 	f, err := fh.Open()
@@ -302,7 +302,7 @@ func (a *App) readPart(fh *multipart.FileHeader, u *db.User) uploadInput {
 	defer f.Close()
 	in.data, in.err = io.ReadAll(io.LimitReader(f, imgMax+1))
 	if in.err == nil && int64(len(in.data)) > imgMax {
-		in.err = a.tooLarge(fh.Filename, u, imgMax)
+		in.err = a.tooLarge(ctx, fh.Filename, u, imgMax)
 	}
 	return in
 }
@@ -327,7 +327,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 				return nil, "", false, err
 			}
 			if limit := a.imageLimit(u); int64(len(data)) > limit {
-				return nil, "", false, a.tooLarge(in.name, u, limit)
+				return nil, "", false, a.tooLarge(ctx, in.name, u, limit)
 			}
 			in.data, in.path = data, ""
 		} else {
@@ -363,7 +363,7 @@ func (a *App) storeImage(ctx context.Context, in uploadInput, u *db.User, ip, al
 	}
 	p, err := imaging.Process(in.data, a.cfg.MaxPixels)
 	if err != nil {
-		return nil, "", false, userError{err.Error()}
+		return nil, "", false, userError{a.localizedError(ctx, err.Error())}
 	}
 
 	slug := ""
@@ -462,21 +462,49 @@ func (a *App) shareStoredImage(ctx context.Context, in uploadInput, sha string, 
 	return im, token, true, nil
 }
 
+// Messages the imaging and download code writes in English, with the numbers they carry: each is turned
+// into a catalog entry, so the person reads it in their own language.
+var errorKeys = []struct {
+	re    *regexp.Regexp
+	key   string
+	names []string
+}{
+	{regexp.MustCompile(`^this file looks damaged: `), "This file looks damaged.", nil},
+	{regexp.MustCompile(`^image is too large \((\d+)×(\d+)\); the limit is (\d+) megapixels$`), "This image is too large ({w}×{h}); the limit is {mp} megapixels.", []string{"w", "h", "mp"}},
+	{regexp.MustCompile(`^that link answered (.+)$`), "That link answered {status}.", []string{"status"}},
+	{regexp.MustCompile(`^that image is larger than (\d+) MB$`), "That image is larger than {mb} MB.", []string{"mb"}},
+}
+
+// localizedError words an error from the imaging or download code for the person: a fixed message is
+// looked up as it stands, one with numbers by its pattern, anything else is left as it is.
+func (a *App) localizedError(ctx context.Context, msg string) string {
+	for _, e := range errorKeys {
+		if m := e.re.FindStringSubmatch(msg); m != nil {
+			kv := make([]any, 0, 2*len(e.names))
+			for i, n := range e.names {
+				kv = append(kv, n, m[i+1])
+			}
+			return a.trc(ctx, e.key, kv...)
+		}
+	}
+	return a.trc(ctx, msg)
+}
+
 // normalize converts HEIC/AVIF to JPEG/PNG through the AI service and
 // reports which kinds of metadata the original carried.
 func (a *App) normalize(ctx context.Context, data []byte) ([]byte, []string, error) {
 	if a.cfg.RembgURL == "" {
-		return nil, nil, userError{"iPhone (HEIC) and AVIF photos aren't supported on this server yet; save them as JPG first."}
+		return nil, nil, userError{a.trc(ctx, "iPhone (HEIC) and AVIF photos aren't supported on this server yet; save them as JPG first.")}
 	}
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, a.cfg.RembgURL+"/normalize", bytes.NewReader(data))
 	req.Header.Set("Content-Type", "application/octet-stream")
 	resp, err := aiClient.Do(req)
 	if err != nil {
-		return nil, nil, userError{"Couldn't convert this photo right now; please try again."}
+		return nil, nil, userError{a.trc(ctx, "Couldn't convert this photo right now; please try again.")}
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, nil, userError{"This photo couldn't be read."}
+		return nil, nil, userError{a.trc(ctx, "This photo couldn't be read.")}
 	}
 	out, err := io.ReadAll(io.LimitReader(resp.Body, a.cfg.MaxUploadBytes*3))
 	if err != nil {
