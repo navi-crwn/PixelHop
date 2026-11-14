@@ -905,6 +905,18 @@
     });
   })();
 
+  // The family announcement: closed for 7 days under the key ann-<id> (a critical one has no button and stays).
+  (function () {
+    var card = $('#fam-announce'), close = $('#fam-announce-close'); if (!card || !close) return;
+    var key = 'ann-' + card.dataset.id, week = 7 * 86400000, at = 0;
+    try { at = +localStorage.getItem(key) || 0; } catch (e) {}
+    if (at && Date.now() - at < week) card.hidden = true;
+    close.addEventListener('click', function () {
+      card.hidden = true;
+      try { localStorage.setItem(key, String(Date.now())); } catch (e) {}
+    });
+  })();
+
   // ---------- settings subtabs ----------
   // One card group at a time, chosen by the address (#api, #profile, #webhooks ...), so every old
   // link and server redirect still lands on the right card. Without the script all groups stay.

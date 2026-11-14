@@ -52,7 +52,9 @@ type App struct {
 	hopMediaSlots hopSlots
 	quota         quotaLocks
 	space         func(string) (int64, int64)
-	hubUp         func() bool // is HEL.ink reachable (cached); replaced in tests
+	famAnn        famAnnCache  // the hub's family announcement, kept five minutes
+	annClient     *http.Client // replaced in tests
+	hubUp         func() bool  // is HEL.ink reachable (cached); replaced in tests
 }
 
 func New(cfg *config.Config, d *db.DB, log *slog.Logger) (*App, error) {
