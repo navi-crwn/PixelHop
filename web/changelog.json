@@ -56,6 +56,11 @@
           "text": "When different people upload exactly the same picture, PixelHop now keeps one stored file and gives each person their own link, owner, expiry and delete link. Nobody is told that someone else had the file, and each member's storage still counts the full picture. Deleting one link leaves the others working, and the file goes away with the last one. This saves disk space. Pictures that are already stored are not merged. Taking down one link for moderation still only removes that link."
         },
         {
+          "type": "changed",
+          "where": "Sign in and Create account",
+          "text": "On this site the Sign in and Create account pages now hold a single card with one button, Continue with HOP ID, so you sign in the same way in every HOP app and the button is named the same everywhere. The old password form, the sign-up form and the separate Google button are gone, and the server no longer accepts them. Where you were going (the page you wanted to open) is still remembered. If you had an older PixelHop account that used Google or a password, signing in with HOP ID using the same e-mail address brings that account and its pictures back by itself. Sites you run yourself without HOP ID keep their password sign-in. Why: one sign-in is simpler and safer, and the two-step code at HOP ID can no longer be skipped."
+        },
+        {
           "type": "security",
           "where": "Sign in",
           "text": "A member who has a HOP ID can no longer sign in to PixelHop with an old PixelHop password or with the direct Google button. Before, the old password skipped the two-step code and the account checks at HOP ID. They are sent to the HOP ID button instead. Members without a HOP ID sign in exactly as before."
@@ -64,6 +69,11 @@
           "type": "security",
           "where": "Linking an older account to HOP ID",
           "text": "When an older PixelHop account is linked to a HOP ID with the same e-mail address, its old password and Google link are now removed and every browser that was signed in to it is signed out, because that account never proved who owned the e-mail address. The bio, website and username written here are no longer wiped by an empty HOP ID profile on that first link. The API keys and webhooks of that account are removed too, so the person who owns the e-mail address creates new ones. A HOP ID whose e-mail belongs to an account linked to a different HOP ID, or to another account, is refused with a clear message and nothing is changed or moved. Before, the first case silently moved the account and the second case showed a server error."
+        },
+        {
+          "type": "security",
+          "where": "Old sign-in methods",
+          "text": "Accounts already linked to a HOP ID had an old PixelHop password or Google link left over. These are now emptied once, so they cannot be used by anyone; the pictures, albums, keys and signed-in browsers of those accounts are not touched."
         },
         {
           "type": "security",
