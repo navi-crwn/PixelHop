@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -32,40 +33,63 @@ func plainMember(t *testing.T, a *App, email, pw string) *db.User {
 	return u
 }
 
-const hubIDOnlyMsg = "signs in with HOP ID"
-
-// With a hub, a member who has a HOP ID signs in there (2FA, account status). The old local password
-// must not open a session; accounts without a HOP ID sign in as before.
-func TestHubMemberCannotSignInWithLocalPassword(t *testing.T) {
+// With a hub the only way in is HOP ID: the login and register screens hold one card, the old forms are
+// refused by the server (nothing is created, nobody signs in), and direct Google is off.
+func TestHubModeAcceptsOnlyHopID(t *testing.T) {
+	t.Setenv("GOOGLE_CLIENT_ID", "gid")
+	t.Setenv("GOOGLE_CLIENT_SECRET", "gsecret")
 	hub := fakeHelink(t, map[string]map[string]any{})
 	defer hub.Close()
 	a, h := apiSSOApp(t, hub.URL)
 	hubMember(t, a, "helena@example.com", "501", "old-password-1", "user")
-	hubMember(t, a, "boss@example.com", "502", "old-password-2", "admin")
 	plainMember(t, a, "legacy@example.com", "legacy-pass-1")
+	users := a.db.CountUsers(t.Context())
 
-	for _, email := range []string{"helena@example.com", "boss@example.com"} {
-		pw := map[string]string{"helena@example.com": "old-password-1", "boss@example.com": "old-password-2"}[email]
-		rec := postForm(h, "/login", url.Values{"email": {email}, "password": {pw}, "next": {"/dashboard"}})
-		if rec.Code != http.StatusForbidden || hasSession(rec) || !strings.Contains(rec.Body.String(), hubIDOnlyMsg) {
-			t.Fatalf("%s: local password opened or mis-answered: %d session=%v", email, rec.Code, hasSession(rec))
+	for _, path := range []string{"/login?next=/albums", "/register?next=/albums"} {
+		rec := fetch(h, path)
+		body := rec.Body.String()
+		if rec.Code != 200 || !regexp.MustCompile(`href="/auth/helink\?next=(/|%2[Ff])albums"`).MatchString(body) || !strings.Contains(body, "Continue with HOP ID") {
+			t.Errorf("%s: %d, no HOP ID card carrying next", path, rec.Code)
+		}
+		for _, gone := range []string{`name="password"`, `name="email"`, `name="tos"`, `/auth/google`, `action="/login"`, `action="/register"`, "cf-turnstile"} {
+			if strings.Contains(body, gone) {
+				t.Errorf("%s still offers %s", path, gone)
+			}
 		}
 	}
 
-	// A wrong password gives the same answer as an unknown e-mail: nothing new is revealed.
-	wrong := postForm(h, "/login", url.Values{"email": {"helena@example.com"}, "password": {"not-it-at-all"}})
-	unknown := postForm(h, "/login", url.Values{"email": {"nobody@example.com"}, "password": {"not-it-at-all"}})
-	if wrong.Code != http.StatusUnauthorized || unknown.Code != http.StatusUnauthorized || hasSession(wrong) || hasSession(unknown) {
-		t.Fatalf("wrong/unknown: %d %d", wrong.Code, unknown.Code)
+	// The old forms answer with a pointer back to the card and change nothing.
+	for _, c := range []struct{ path, email, pw string }{
+		{"/login", "helena@example.com", "old-password-1"}, {"/login", "legacy@example.com", "legacy-pass-1"},
+		{"/register", "brand-new@example.com", "a-fresh-password-1"}} {
+		rec := postForm(h, c.path, url.Values{"email": {c.email}, "password": {c.pw}, "name": {"X"}, "tos": {"1"}, "next": {"/albums"}})
+		if rec.Code != http.StatusSeeOther || !strings.HasPrefix(rec.Header().Get("Location"), c.path) || hasSession(rec) {
+			t.Errorf("POST %s %s: %d %q session=%v", c.path, c.email, rec.Code, rec.Header().Get("Location"), hasSession(rec))
+		}
 	}
-	if strings.Contains(wrong.Body.String(), hubIDOnlyMsg) || strings.Contains(unknown.Body.String(), hubIDOnlyMsg) {
-		t.Fatal("a wrong password was told the account uses HOP ID")
+	if a.db.CountUsers(t.Context()) != users {
+		t.Error("an old form created an account")
+	}
+	if _, err := a.db.UserByEmail(t.Context(), "brand-new@example.com"); err == nil {
+		t.Error("sign-up through the old form worked")
 	}
 
-	// A member without a HOP ID signs in with the password exactly as before.
-	rec := postForm(h, "/login", url.Values{"email": {"legacy@example.com"}, "password": {"legacy-pass-1"}, "next": {"/albums"}})
-	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/albums" || !hasSession(rec) {
-		t.Fatalf("legacy member: %d %s", rec.Code, rec.Header().Get("Location"))
+	// Direct Google is gone, even with Google configured and a person who would have matched.
+	if rec := fetch(h, "/auth/google"); rec.Code != http.StatusNotFound {
+		t.Errorf("/auth/google: %d, want 404", rec.Code)
+	}
+	fakeGoogle(t, "google-1", "legacy@example.com", true)
+	if rec := googleReturn(h); hasSession(rec) || rec.Code < 400 {
+		t.Errorf("Google callback signed someone in: %d", rec.Code)
+	}
+	if u, _ := a.db.UserByEmail(t.Context(), "legacy@example.com"); u.GoogleID.Valid {
+		t.Error("a refused Google callback wrote google_id")
+	}
+
+	// HOP ID still takes next= through.
+	rec := fetch(h, "/auth/helink?next=/albums")
+	if rec.Code != http.StatusFound || !strings.Contains(rec.Result().Header.Get("Set-Cookie"), "%2Falbums") && !strings.Contains(rec.Result().Header.Get("Set-Cookie"), "/albums") {
+		t.Errorf("next= lost on the way to HOP ID: %d %q", rec.Code, rec.Result().Header.Get("Set-Cookie"))
 	}
 }
 
@@ -90,44 +114,4 @@ func googleReturn(h http.Handler) *httptest.ResponseRecorder {
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	return rec
-}
-
-// Google sign-in straight into PixelHop is refused for a member with a HOP ID too, whether the Google
-// account was linked before or is only matched by e-mail now; the match must not be written either.
-func TestHubMemberCannotSignInWithGoogle(t *testing.T) {
-	t.Setenv("GOOGLE_CLIENT_ID", "gid")
-	t.Setenv("GOOGLE_CLIENT_SECRET", "gsecret")
-	hub := fakeHelink(t, map[string]map[string]any{})
-	defer hub.Close()
-	a, h := apiSSOApp(t, hub.URL)
-	ctx := t.Context()
-
-	linked := hubMember(t, a, "g1@example.com", "601", "x-password-1", "user")
-	linked.GoogleID = sql.NullString{String: "google-1", Valid: true}
-	a.db.UpdateUser(ctx, linked)
-	byMail := hubMember(t, a, "g2@example.com", "602", "x-password-2", "user")
-	plain := plainMember(t, a, "g3@example.com", "x-password-3")
-
-	fakeGoogle(t, "google-1", "g1@example.com", true)
-	if rec := googleReturn(h); rec.Code != http.StatusForbidden || hasSession(rec) || !strings.Contains(rec.Body.String(), hubIDOnlyMsg) {
-		t.Fatalf("linked Google account of a HOP ID member: %d", rec.Code)
-	}
-
-	fakeGoogle(t, "google-2", "g2@example.com", true)
-	if rec := googleReturn(h); rec.Code != http.StatusForbidden || hasSession(rec) {
-		t.Fatalf("Google matched by e-mail to a HOP ID member: %d", rec.Code)
-	}
-	if u, _ := a.db.UserByEmail(ctx, "g2@example.com"); u.GoogleID.Valid || u.ID != byMail.ID {
-		t.Fatalf("a refused Google sign-in still wrote google_id: %+v", u.GoogleID)
-	}
-
-	// Without a HOP ID: unchanged (matched by verified e-mail, signed in).
-	fakeGoogle(t, "google-3", "g3@example.com", true)
-	rec := googleReturn(h)
-	if rec.Code != http.StatusSeeOther || !hasSession(rec) {
-		t.Fatalf("Google sign-in of a member without HOP ID: %d", rec.Code)
-	}
-	if u, _ := a.db.UserByEmail(ctx, "g3@example.com"); u.ID != plain.ID || u.GoogleID.String != "google-3" {
-		t.Fatalf("not linked as before: %+v", u)
-	}
 }

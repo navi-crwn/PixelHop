@@ -356,7 +356,7 @@
   "form.password": "Kata sandi",
   "form.or": "atau",
   "login.have_helink": "Sudah punya akun HEL.ink? Gunakan tombol ini:",
-  "login.continue_helink": "Lanjutkan dengan HEL.ink",
+  "login.continue_helink": "Lanjutkan dengan HOP ID",
   "login.helink_hint": "Diperlukan jika Anda masuk ke HEL.ink dengan Google atau kode dua faktor.",
   "login.continue_google": "Lanjutkan dengan Google",
   "login.new_here": "Baru di sini?",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "Keamanan",
   "changelog.t_removed": "Dihapus",
   "changelog.t_deprecated": "Usang",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Akun ini masuk lewat HOP ID. Pakai tombol “Lanjutkan dengan HEL.ink” di halaman ini.",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "HOP ID ini tidak bisa dihubungkan ke PixelHop karena e-mailnya sudah dipakai akun PixelHop lain. Hubungi pemilik situs.",
   "Your profile is managed in HOP ID, not here.": "Profil Anda dikelola di HOP ID, bukan di sini.",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Masuk HOP ID tadi untuk akun yang berbeda dari yang Anda pakai di sini, jadi tidak ada yang dihapus.",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "tidak bisa dipulihkan",
   "{n} left today": "Sisa {n} hari ini",
   "{tool}: {n} left today": "{tool}: sisa {n} hari ini",
-  "Today's share is not enough for all {n} images in a step you chose.": "Jatah hari ini tidak cukup untuk semua {n} gambar pada langkah yang Anda pilih."
+  "Today's share is not enough for all {n} images in a step you chose.": "Jatah hari ini tidak cukup untuk semua {n} gambar pada langkah yang Anda pilih.",
+  "login.hub_sub": "Masuk dengan HOP ID Anda untuk melihat galeri, album, dan kunci API.",
+  "register.hub_text": "Satu akun untuk semua aplikasi HOP. Masuk dengannya, atau buat di layar berikutnya: gratis dan hanya semenit."
 }

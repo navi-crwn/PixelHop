@@ -236,6 +236,11 @@ func (a *App) loginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) login(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() {
+		// With a hub the only way in is HOP ID: a password sent here changes nothing and goes nowhere.
+		http.Redirect(w, r, "/login?next="+url.QueryEscape(safeNext(r.FormValue("next"))), http.StatusSeeOther)
+		return
+	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	if !a.limits.allow("login:"+clientIP(r), 10, 15*time.Minute) {
@@ -254,28 +259,6 @@ func (a *App) login(w http.ResponseWriter, r *http.Request) {
 		CheckPassword(dummyHash, pw)
 	}
 	local := err == nil && CheckPassword(u.PassHash, pw)
-	if local && a.cfg.SSOEnabled() && u.HelinkID.Valid {
-		// A HOP ID member signs in at the hub, where the 2FA code and the account's status are checked;
-		// the old password kept here would walk around both. Only someone who typed the right password is
-		// told this, so the message does not reveal which e-mails have an account.
-		f.Error = a.tr(r, "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.")
-		a.renderStatus(w, r, http.StatusForbidden, "login", "Sign in", f)
-		return
-	}
-	if !local && a.cfg.SSOEnabled() {
-		// Not a password kept here: ask HEL.ink, where the account may live.
-		hu, msg, redirect := a.helinkLogin(r, f.Email, pw)
-		if redirect {
-			http.Redirect(w, r, "/auth/helink?next="+url.QueryEscape(safeNext(f.Next)), http.StatusSeeOther)
-			return
-		}
-		if hu == nil {
-			f.Error = msg
-			a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
-			return
-		}
-		u, local = hu, true
-	}
 	if !local {
 		f.Error = a.tr(r, "That email and password don't match.")
 		a.renderStatus(w, r, http.StatusUnauthorized, "login", "Sign in", f)
@@ -321,6 +304,11 @@ func (a *App) registerPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) register(w http.ResponseWriter, r *http.Request) {
+	if a.cfg.SSOEnabled() {
+		// Accounts are made at HOP ID; nothing is created here.
+		http.Redirect(w, r, "/register?next="+url.QueryEscape(safeNext(r.FormValue("next"))), http.StatusSeeOther)
+		return
+	}
 	f := a.authForm(r)
 	f.Email = strings.TrimSpace(r.FormValue("email"))
 	f.Name = trim(strings.TrimSpace(r.FormValue("name")), 60)
@@ -339,18 +327,6 @@ func (a *App) register(w http.ResponseWriter, r *http.Request) {
 		f.Error = a.tr(r, "Use at least 8 characters for your password.")
 	case len(pw) > 200:
 		f.Error = a.tr(r, "That password is too long.")
-	case a.cfg.SSOEnabled() && r.FormValue("tos") == "":
-		f.Error = a.tr(r, "Please accept the terms.")
-	}
-	if f.Error == "" && a.cfg.SSOEnabled() {
-		// The account lives on HEL.ink, so it works in both apps.
-		notice, msg := a.helinkRegister(r, f.Name, strings.ToLower(f.Email), pw)
-		if notice != "" {
-			f.Notice = notice
-			a.render(w, r, "login", "Sign in", f)
-			return
-		}
-		f.Error = msg
 	}
 	if f.Error == "" {
 		u := &db.User{Email: f.Email, Name: f.Name, PassHash: HashPassword(pw), QuotaBytes: a.cfg.DefaultQuota}
@@ -482,11 +458,6 @@ func (a *App) googleCallback(w http.ResponseWriter, r *http.Request) {
 		if u, err = a.db.UserByEmail(ctx, info.Email); err == nil {
 			u.GoogleID = sql.NullString{String: info.Sub, Valid: true}
 		}
-	}
-	if err == nil && a.cfg.SSOEnabled() && u.HelinkID.Valid {
-		// Same rule as the password form: a HOP ID member signs in through the hub.
-		a.fail(w, r, http.StatusForbidden, a.tr(r, "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead."))
-		return
 	}
 	if errors.Is(err, db.ErrNotFound) {
 		first := a.db.CountUsers(ctx) == 0

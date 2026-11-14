@@ -390,14 +390,12 @@ func (a *App) linkHelinkUser(ctx context.Context, t *helinkTicket) (*db.User, er
 // ---- Cloudflare Turnstile ----
 
 // turnstileOK checks the widget's answer. Without keys configured it passes,
-// so development and self-hosting without Cloudflare keep working, except
-// when accounts come from HEL.ink: then the password forms check HEL.ink
-// passwords and must not run unprotected ("Continue with HEL.ink" still works).
+// so development and self-hosting without Cloudflare keep working.
 var turnstileVerifyURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
 func (a *App) turnstileOK(r *http.Request) bool {
 	if !a.cfg.TurnstileEnabled() {
-		return !a.cfg.SSOEnabled()
+		return true
 	}
 	tok := r.FormValue("cf-turnstile-response")
 	if tok == "" || len(tok) > 2048 {

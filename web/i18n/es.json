@@ -357,7 +357,7 @@
   "form.password": "Contraseña",
   "form.or": "o",
   "login.have_helink": "¿Ya tienes una cuenta de HEL.ink? Usa este botón:",
-  "login.continue_helink": "Continuar con HEL.ink",
+  "login.continue_helink": "Continuar con HOP ID",
   "login.helink_hint": "Necesario si inicias sesión en HEL.ink con Google o con un código de dos factores.",
   "login.continue_google": "Continuar con Google",
   "login.new_here": "¿Eres nuevo?",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "Seguridad",
   "changelog.t_removed": "Eliminado",
   "changelog.t_deprecated": "Obsoleto",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Esta cuenta inicia sesión con HOP ID. Usa el botón “Continuar con HEL.ink” de esta página.",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Este HOP ID no se puede vincular a PixelHop porque su correo ya pertenece a otra cuenta de PixelHop. Contacta con el propietario del sitio.",
   "Your profile is managed in HOP ID, not here.": "Tu perfil se gestiona en HOP ID, no aquí.",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Ese inicio de sesión de HOP ID era de otra cuenta distinta a la que usas aquí, así que no se ha borrado nada.",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "no se pudo restaurar",
   "{n} left today": "Quedan {n} hoy",
   "{tool}: {n} left today": "{tool}: quedan {n} hoy",
-  "Today's share is not enough for all {n} images in a step you chose.": "El cupo de hoy no alcanza para las {n} imágenes en un paso elegido."
+  "Today's share is not enough for all {n} images in a step you chose.": "El cupo de hoy no alcanza para las {n} imágenes en un paso elegido.",
+  "login.hub_sub": "Inicia sesión con tu HOP ID para ver tu galería, álbumes y claves de API.",
+  "register.hub_text": "Una cuenta para todas las apps HOP. Inicia sesión con ella o créala en la siguiente pantalla: es gratis y lleva un minuto."
 }

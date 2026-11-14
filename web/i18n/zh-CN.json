@@ -357,7 +357,7 @@
   "form.password": "密码",
   "form.or": "或",
   "login.have_helink": "已有 HEL.ink 账号？请使用此按钮：",
-  "login.continue_helink": "使用 HEL.ink 继续",
+  "login.continue_helink": "使用 HOP ID 继续",
   "login.helink_hint": "如果您在 HEL.ink 使用 Google 或双重验证码登录，请使用此按钮。",
   "login.continue_google": "使用 Google 继续",
   "login.new_here": "第一次来？",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "安全",
   "changelog.t_removed": "移除",
   "changelog.t_deprecated": "已弃用",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "此账号通过 HOP ID 登录。请改用本页的“使用 HEL.ink 继续”按钮。",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "此 HOP ID 无法关联到 PixelHop，因为它的电子邮箱已属于另一个 PixelHop 账号。请联系站点所有者。",
   "Your profile is managed in HOP ID, not here.": "你的个人资料由 HOP ID 管理，请在那里修改。",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "这次 HOP ID 登录与你在此使用的账号不是同一个，所以没有删除任何内容。",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "无法恢复",
   "{n} left today": "今天还剩 {n} 次",
   "{tool}: {n} left today": "{tool}：今天还剩 {n} 次",
-  "Today's share is not enough for all {n} images in a step you chose.": "今天的剩余额度不够处理全部 {n} 张图片（所选步骤）。"
+  "Today's share is not enough for all {n} images in a step you chose.": "今天的剩余额度不够处理全部 {n} 张图片（所选步骤）。",
+  "login.hub_sub": "用你的 HOP ID 登录，查看图库、相册和 API 密钥。",
+  "register.hub_text": "一个账号通用于所有 HOP 应用。用它登录，或在下一屏免费创建，只需一分钟。"
 }

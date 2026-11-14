@@ -357,7 +357,7 @@
   "form.password": "Mot de passe",
   "form.or": "ou",
   "login.have_helink": "Vous avez déjà un compte HEL.ink ? Utilisez ce bouton :",
-  "login.continue_helink": "Continuer avec HEL.ink",
+  "login.continue_helink": "Continuer avec HOP ID",
   "login.helink_hint": "Nécessaire si vous vous connectez à HEL.ink avec Google ou un code à deux facteurs.",
   "login.continue_google": "Continuer avec Google",
   "login.new_here": "Nouveau ici ?",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "Sécurité",
   "changelog.t_removed": "Supprimé",
   "changelog.t_deprecated": "Obsolète",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Ce compte se connecte avec HOP ID. Utilisez plutôt le bouton « Continuer avec HEL.ink » de cette page.",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Ce HOP ID ne peut pas être lié à PixelHop, car son e-mail appartient déjà à un autre compte PixelHop. Contactez le propriétaire du site.",
   "Your profile is managed in HOP ID, not here.": "Votre profil est géré dans HOP ID, pas ici.",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Cette connexion HOP ID concernait un autre compte que celui que vous utilisez ici : rien n’a été supprimé.",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "restauration impossible",
   "{n} left today": "Encore {n} aujourd’hui",
   "{tool}: {n} left today": "{tool} : encore {n} aujourd’hui",
-  "Today's share is not enough for all {n} images in a step you chose.": "Le quota du jour ne suffit pas pour les {n} images dans une étape choisie."
+  "Today's share is not enough for all {n} images in a step you chose.": "Le quota du jour ne suffit pas pour les {n} images dans une étape choisie.",
+  "login.hub_sub": "Connectez-vous avec votre HOP ID pour voir votre galerie, vos albums et vos clés d’API.",
+  "register.hub_text": "Un compte pour toutes les apps HOP. Connectez-vous avec lui ou créez-le sur l’écran suivant : c’est gratuit et rapide."
 }

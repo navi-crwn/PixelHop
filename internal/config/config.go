@@ -59,7 +59,6 @@ type Config struct {
 	HelinkURL        string
 	HelinkSecret     string
 	HelinkSecretPrev string
-	HelinkAPIAddr    string // optional "127.0.0.1:443": reach HEL.ink on this machine for password checks
 	// HOP App Protocol: which callers may use the signed /hop/* admin API
 	// (slugs sent in X-HOP-App, signed with HelinkSecret).
 	HopAdminClients []string
@@ -180,7 +179,6 @@ func Load() (*Config, error) {
 	c.HelinkURL = strings.TrimRight(env("HELINK_URL", ""), "/")
 	c.HelinkSecret = env("HELINK_SSO_SECRET", env("HOP_SSO_SECRET_PIXELHOP", env("HOP_SSO_SECRET", "")))
 	c.HelinkSecretPrev = env("HELINK_SSO_SECRET_PREV", env("HOP_SSO_SECRET_PREV", ""))
-	c.HelinkAPIAddr = env("HELINK_API_ADDR", "")
 	for _, s := range strings.Split(env("HOP_ADMIN_CLIENTS", "imperium,helink"), ",") {
 		if s = strings.TrimSpace(s); s != "" {
 			c.HopAdminClients = append(c.HopAdminClients, s)
@@ -333,7 +331,10 @@ func (c *Config) StoreClientSecrets(app string) []string {
 func (c *Config) TurnstileEnabled() bool { return c.TurnstileSiteKey != "" && c.TurnstileSecret != "" }
 
 // GoogleEnabled reports whether "Sign in with Google" is configured.
-func (c *Config) GoogleEnabled() bool { return c.GoogleID != "" && c.GoogleKey != "" }
+// With a hub the only way in is HOP ID, so the direct Google sign-in is off there.
+func (c *Config) GoogleEnabled() bool {
+	return !c.SSOEnabled() && c.GoogleID != "" && c.GoogleKey != ""
+}
 
 const SessionTTL = 30 * 24 * time.Hour
 

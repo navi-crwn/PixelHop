@@ -357,7 +357,7 @@
   "form.password": "Password",
   "form.or": "or",
   "login.have_helink": "Already have a HEL.ink account? Use this button:",
-  "login.continue_helink": "Continue with HEL.ink",
+  "login.continue_helink": "Continue with HOP ID",
   "login.helink_hint": "Needed if you sign in to HEL.ink with Google or a two-factor code.",
   "login.continue_google": "Continue with Google",
   "login.new_here": "New here?",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "Security",
   "changelog.t_removed": "Removed",
   "changelog.t_deprecated": "Deprecated",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.",
   "Your profile is managed in HOP ID, not here.": "Your profile is managed in HOP ID, not here.",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "couldn't restore",
   "{n} left today": "{n} left today",
   "{tool}: {n} left today": "{tool}: {n} left today",
-  "Today's share is not enough for all {n} images in a step you chose.": "Today's share is not enough for all {n} images in a step you chose."
+  "Today's share is not enough for all {n} images in a step you chose.": "Today's share is not enough for all {n} images in a step you chose.",
+  "login.hub_sub": "Sign in with your HOP ID to see your gallery, albums and API keys.",
+  "register.hub_text": "One account for every HOP app. Sign in with it, or create it on the next screen: it is free and takes a minute."
 }

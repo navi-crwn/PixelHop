@@ -357,7 +357,7 @@
   "form.password": "Passwort",
   "form.or": "oder",
   "login.have_helink": "Du hast schon ein HEL.ink-Konto? Nutze diese Schaltfläche:",
-  "login.continue_helink": "Weiter mit HEL.ink",
+  "login.continue_helink": "Weiter mit HOP ID",
   "login.helink_hint": "Nötig, wenn du dich bei HEL.ink mit Google oder einem Zwei-Faktor-Code anmeldest.",
   "login.continue_google": "Weiter mit Google",
   "login.new_here": "Neu hier?",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "Sicherheit",
   "changelog.t_removed": "Entfernt",
   "changelog.t_deprecated": "Veraltet",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "Dieses Konto meldet sich mit HOP ID an. Nutze stattdessen auf dieser Seite „Weiter mit HEL.ink“.",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "Diese HOP ID kann nicht mit PixelHop verknüpft werden, weil ihre E-Mail-Adresse bereits zu einem anderen PixelHop-Konto gehört. Bitte wende dich an den Betreiber der Seite.",
   "Your profile is managed in HOP ID, not here.": "Dein Profil wird in HOP ID verwaltet, nicht hier.",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "Diese HOP-ID-Anmeldung gehörte zu einem anderen Konto als dem, das du hier benutzt. Es wurde nichts gelöscht.",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "Wiederherstellen nicht möglich",
   "{n} left today": "Heute noch {n} übrig",
   "{tool}: {n} left today": "{tool}: heute noch {n} übrig",
-  "Today's share is not enough for all {n} images in a step you chose.": "Das heutige Kontingent reicht für einen gewählten Schritt nicht für alle {n} Bilder."
+  "Today's share is not enough for all {n} images in a step you chose.": "Das heutige Kontingent reicht für einen gewählten Schritt nicht für alle {n} Bilder.",
+  "login.hub_sub": "Melde dich mit deiner HOP ID an, um Galerie, Alben und API-Schlüssel zu sehen.",
+  "register.hub_text": "Ein Konto für alle HOP-Apps. Melde dich damit an oder lege es auf dem nächsten Bildschirm an: kostenlos und in einer Minute erledigt."
 }

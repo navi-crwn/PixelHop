@@ -357,7 +357,7 @@
   "form.password": "パスワード",
   "form.or": "または",
   "login.have_helink": "すでに HEL.ink アカウントをお持ちですか？こちらのボタンをお使いください。",
-  "login.continue_helink": "HEL.ink で続ける",
+  "login.continue_helink": "HOP ID で続ける",
   "login.helink_hint": "HEL.ink に Google または二要素コードでログインする場合に必要です。",
   "login.continue_google": "Google で続ける",
   "login.new_here": "はじめてですか？",
@@ -1110,7 +1110,6 @@
   "changelog.t_security": "セキュリティ",
   "changelog.t_removed": "削除",
   "changelog.t_deprecated": "非推奨",
-  "This account signs in with HOP ID. Use the “Continue with HEL.ink” button on this page instead.": "このアカウントは HOP ID でログインします。このページの「HEL.ink で続ける」を使ってください。",
   "This HOP ID can't be linked to PixelHop because its e-mail already belongs to another PixelHop account. Please contact the site owner.": "この HOP ID のメールアドレスは別の PixelHop アカウントですでに使われているため、PixelHop に連携できません。サイトの管理者に連絡してください。",
   "Your profile is managed in HOP ID, not here.": "プロフィールは HOP ID で管理されています。ここでは変更できません。",
   "That HOP ID sign-in was for a different account than the one you are using here, so nothing was deleted.": "今回の HOP ID ログインは、ここで使っているアカウントとは別のものだったため、何も削除されていません。",
@@ -1153,5 +1152,7 @@
   "couldn't restore": "元に戻せませんでした",
   "{n} left today": "今日はあと {n} 回",
   "{tool}: {n} left today": "{tool}：今日はあと {n} 回",
-  "Today's share is not enough for all {n} images in a step you chose.": "選んだ処理の今日の残り回数では、{n} 枚すべては処理できません。"
+  "Today's share is not enough for all {n} images in a step you chose.": "選んだ処理の今日の残り回数では、{n} 枚すべては処理できません。",
+  "login.hub_sub": "HOP ID でログインして、ギャラリー、アルバム、API キーを見ましょう。",
+  "register.hub_text": "1つのアカウントですべての HOP アプリを使えます。ログインするか、次の画面で無料で作成できます（1分ほど）。"
 }

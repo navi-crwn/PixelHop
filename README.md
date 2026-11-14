@@ -188,7 +188,6 @@ Settings are environment variables, and all of them are optional. [`.env.example
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | none | Sign in with Google. `GOOGLE_REDIRECT_URI` defaults to `PIXELHOP_BASE_URL/auth/google/callback` |
 | `HELINK_URL`, `HELINK_SSO_SECRET` | none | Sign in with a HEL.ink account. The secret is at least 32 characters and equals `PIXELHOP_SSO_SECRET` in HEL.ink's `.env` |
 | `HELINK_SSO_SECRET_PREV` | none | The previous secret, accepted while you rotate it |
-| `HELINK_API_ADDR` | none | Optional `host:port` to reach HEL.ink directly, for example `127.0.0.1:443` on the same server |
 | `HOP_ADMIN_CLIENTS` | `imperium,helink` | App names allowed to call the signed `/hop/*` API |
 | `PIXELHOP_CONTROL_URL` | none | Address of the HOP control center; admins who open `/admin` are sent there |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | none | Cloudflare Turnstile on sign-in and sign-up. With HEL.ink accounts on, these forms refuse every attempt without the keys |

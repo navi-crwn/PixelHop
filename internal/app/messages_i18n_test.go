@@ -45,7 +45,7 @@ func TestEveryTranslatedMessageIsInTheCatalog(t *testing.T) {
 			}
 		}
 	}
-	if checked < 100 {
+	if checked < 80 {
 		t.Fatalf("only %d messages found: the pattern no longer matches the code", checked)
 	}
 }
