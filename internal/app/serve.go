@@ -151,9 +151,9 @@ func (a *App) sendObject(w http.ResponseWriter, r *http.Request, im *db.Image, k
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Del("X-Frame-Options")
+	h.Set("X-Robots-Tag", "noindex") // no shared image is ever in a search index (Google Images reads files directly)
 	if im.Hidden || im.Locked() || a.mediaHasWarning(r, im) {
 		h.Set("Cache-Control", "private, no-store") // never let a CDN keep a private image
-		h.Set("X-Robots-Tag", "noindex")            // nor a search engine (Google Images reads files directly)
 	} else if im.ExpiresAt > 0 {
 		h.Set("Cache-Control", "public, max-age=300")
 	} else {
@@ -350,8 +350,8 @@ func (a *App) view(w http.ResponseWriter, r *http.Request) {
 		desc = "Content warning: 18+ adult material · shared on " + a.cfg.SiteName
 	}
 	a.renderPage(w, r, "view", page{Title: title, Canon: a.pageURL(im.ID), Data: d, OGImage: og, OGType: "image", Desc: desc,
-		// Never in a search index: private, password-protected, or behind a content warning (its own or its album's).
-		NoIndex: im.Locked() || a.mediaHasWarning(r, im)})
+		// Shared images are never in a search index (owner decision, no opt-in); link previews (og tags) still work.
+		NoIndex: true})
 }
 
 // legacyResult serves PixelHop 2's upload result links (/result?id=a,b,c):
@@ -440,18 +440,8 @@ func (a *App) album(w http.ResponseWriter, r *http.Request) {
 		desc = "Content warning · shared on " + a.cfg.SiteName
 	}
 	a.renderPage(w, r, "album", page{Title: title, Canon: a.albumURL(al.ID), OGImage: og,
-		Desc: desc, NoIndex: al.HasWarning() || anyWarning(live),
+		Desc: desc, NoIndex: true, // albums are never in a search index either
 		Data: albumData{Album: al, Images: live, Link: a.albumURL(al.ID), Owner: mine, Own: u != nil && al.UserID.Valid && al.UserID.Int64 == u.ID, By: by, GatePassed: gatePassed}})
-}
-
-// anyWarning reports whether any of the images carries a content warning.
-func anyWarning(ims []*db.Image) bool {
-	for _, im := range ims {
-		if im.HasWarning() {
-			return true
-		}
-	}
-	return false
 }
 
 // qr draws a QR code that opens the image page; ?a=1 points at an album.

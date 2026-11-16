@@ -109,8 +109,8 @@ func TestOwnerPagesLinkBackToTheDashboard(t *testing.T) {
 		t.Error("another member sees a dashboard link on someone else's album")
 	}
 	guest := fetch(h, "/a/"+al.ID)
-	if strings.Contains(guest.Body.String(), `class="back"`) || guest.Header().Get("X-Robots-Tag") != "" {
-		t.Error("a guest's album page changed or became non-indexable")
+	if strings.Contains(guest.Body.String(), `class="back"`) || guest.Header().Get("X-Robots-Tag") != "noindex" {
+		t.Error("a guest album page changed or is not noindex")
 	}
 	if rec := fetch(h, "/a/"+al.ID+"/edit", oth); rec.Code != 404 {
 		t.Errorf("another member opens the editor: %d, want 404", rec.Code)

@@ -218,7 +218,7 @@ func TestPublicPages(t *testing.T) {
 	call(t, h, "PATCH", "/api/v1/images/"+id, key, map[string]any{"listed": true})
 
 	for path, want := range map[string]string{
-		"/sitemap.xml":                "/" + id,
+		"/sitemap.xml":                "/changelog", // shared images are noindex, so not listed (checked below)
 		"/manifest.webmanifest":       "share_target",
 		"/sw.js":                      "caches",
 		"/api/v1/users/tester/images": id,
@@ -228,6 +228,9 @@ func TestPublicPages(t *testing.T) {
 		if rec.Code != 200 || !strings.Contains(rec.Body.String(), want) {
 			t.Errorf("%s: %d, want %q in body", path, rec.Code, want)
 		}
+	}
+	if strings.Contains(fetch(h, "/sitemap.xml").Body.String(), "/"+id) {
+		t.Error("the sitemap lists a shared image: those pages are noindex")
 	}
 	if rec := fetch(h, "/api/v1/users/nobody/images"); rec.Code != 404 {
 		t.Errorf("unknown profile: %d", rec.Code)

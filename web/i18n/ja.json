@@ -729,11 +729,10 @@
   "Resize, convert, remove backgrounds, blur faces and upscale many images at once; download a ZIP or upload an album.": "多数の画像のサイズ変更、変換、背景除去、顔のぼかし、アップスケールを一度に行い、ZIP のダウンロードやアルバムのアップロードができます。",
   "{site} is free, open-source image hosting from the HOP family: no ads, no trackers, location data removed.": "{site} は HOP ファミリーの無料・オープンソースの画像ホスティングです。広告もトラッカーもなく、位置情報は削除されます。",
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "画像・動画・PDF のホスティング、アルバム、フォトスタジオ、API がすべて {site} で無料。",
-  "Common questions about {site}: cost, accounts, privacy and self-hosting.": "{site} についてのよくある質問：料金、アカウント、プライバシー、セルフホスト。",
-  "Report a bug, suggest an idea or send a security report to {site}.": "{site} にバグ報告、ご提案、セキュリティ報告を送れます。",
-  "Is {site} up? Live status from the server.": "{site} は稼働中？サーバーからのリアルタイムの状態です。",
+  "Common questions about {site}: cost, accounts, privacy and self-hosting.": "{site} についてのよくある質問：料金、アカウント、プライバシー、セルフホスト（自分のサーバーでの運用）について答えます。",
+  "Report a bug, suggest an idea or send a security report to {site}.": "{site} へのバグの報告、ご提案、セキュリティに関する報告は、このページからご連絡いただけます。",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "{site} のアップロード、リンク、アルバム、スタジオ、アカウント、プライバシーについての回答です。",
-  "Upload from scripts, apps and ShareX with the {site} API.": "{site} API で、スクリプト、アプリ、ShareX からアップロードできます。",
+  "Upload from scripts, apps and ShareX with the {site} API.": "{site} の API を使って、スクリプト、アプリ、ShareX から画像をアップロードできます。開発者向けの説明をまとめています。",
   "Images people chose to share publicly on {site}.": "{site} で公開共有することを選んだ画像です。",
   "This page is for admins.": "このページは管理者専用です。",
   "Too many attempts. Please wait a few minutes and try again.": "試行回数が多すぎます。数分待ってからもう一度お試しください。",
@@ -1154,5 +1153,8 @@
   "palette.label": "配色",
   "palette.classic": "クラシック",
   "palette.mist": "ミスト",
-  "palette.sand": "サンド"
+  "palette.sand": "サンド",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "{site} を使うときのルール：利用規約、データの取り扱い（プライバシー）、コンテンツの通報と削除の方法をわかりやすくまとめています。",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "{site} の更新履歴：リリースごとの新機能、改善、不具合の修正を、やさしい言葉で新しい順に紹介します。",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "{site} は今使えますか？このページを開いた瞬間に、サイトとサーバーの状態をリアルタイムで確認できます。"
 }
