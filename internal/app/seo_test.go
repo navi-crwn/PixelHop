@@ -180,10 +180,12 @@ func TestSEOPrivatePagesAndSitemap(t *testing.T) {
 	}
 }
 
-// User content: a public image page, its album and its owner's profile stay indexable as before, with their
-// canonical where crawlers find them (images and albums on the link host, profiles on the app host). A
-// private, password-protected, expired, trashed or content-warning file is never indexable: its page answers
-// noindex or not at all, and its file carries X-Robots-Tag: noindex or is refused.
+// User content: shared images and albums are never indexed, whatever their settings (owner decision, no
+// opt-in): the page, the file, the thumbnail, a resized copy, the QR code and the album embed all answer
+// X-Robots-Tag: noindex, on both hosts, and the sitemap does not list them. Link previews (og tags) keep
+// working, because noindex does not affect them. A owner's profile stays indexable as before. A private,
+// password-protected, expired, trashed or content-warning file is never indexable either: its page answers
+// noindex or not at all.
 func TestSEOUserContent(t *testing.T) {
 	a, h := linkApp(t)
 	ctx := context.Background()
@@ -196,20 +198,33 @@ func TestSEOUserContent(t *testing.T) {
 	var albumID string
 	a.db.QueryRow(`SELECT album_id FROM images WHERE id=?`, ids[0]).Scan(&albumID)
 
-	// Public: indexable, canonical on the link host; the app host sends guests there.
+	// Public image page: noindex (header and meta), but the link preview still has its picture.
 	rec := hostGet(h, "p.example", "/"+pub)
-	if body := rec.Body.String(); rec.Code != 200 || !indexable(rec, body) || first(canonRe, body) != "https://p.example/"+pub {
-		t.Fatalf("public image page: %d, canonical %q", rec.Code, first(canonRe, body))
+	if body := rec.Body.String(); rec.Code != 200 || indexable(rec, body) || rec.Header().Get("X-Robots-Tag") != "noindex" ||
+		!strings.Contains(body, `<meta name="robots" content="noindex">`) || !strings.HasPrefix(first(ogImgRe, body), "https://") ||
+		!strings.Contains(body, `<meta name="twitter:card" content="summary_large_image">`) {
+		t.Fatalf("public image page: %d, X-Robots-Tag %q, og:image %q", rec.Code, rec.Header().Get("X-Robots-Tag"), first(ogImgRe, body))
 	}
 	if rec := hostGet(h, "pixel.example", "/"+pub); rec.Code != http.StatusFound || rec.Header().Get("Location") != "https://p.example/"+pub {
 		t.Errorf("app host image page for a guest: %d %q", rec.Code, rec.Header().Get("Location"))
 	}
-	if rec := hostGet(h, "p.example", "/i/"+pub+".png"); rec.Code != 200 || rec.Header().Get("X-Robots-Tag") != "" {
-		t.Errorf("public file: %d %q", rec.Code, rec.Header().Get("X-Robots-Tag"))
+	for _, host := range []string{"p.example", "pixel.example"} {
+		for _, f := range []string{"/i/" + pub + ".png", "/t/" + pub + ".png", "/i/" + pub + ".jpg?w=20", "/qr/" + pub + ".png",
+			"/qr/" + albumID + ".png?a=1", "/a/" + albumID + "/embed"} {
+			if rec := hostGet(h, host, f); (rec.Code != 200 && rec.Code != http.StatusMovedPermanently) || rec.Header().Get("X-Robots-Tag") != "noindex" {
+				t.Errorf("public %s%s: %d, X-Robots-Tag %q", host, f, rec.Code, rec.Header().Get("X-Robots-Tag"))
+			}
+		}
+	}
+	if cc := hostGet(h, "p.example", "/i/"+pub+".png").Header().Get("Cache-Control"); !strings.HasPrefix(cc, "public") {
+		t.Errorf("public file lost its cache header: %q", cc)
 	}
 	rec = hostGet(h, "p.example", "/a/"+albumID+"?lang=de")
-	if body := rec.Body.String(); rec.Code != 200 || !indexable(rec, body) || first(canonRe, body) != "https://p.example/a/"+albumID || altRe.MatchString(body) {
-		t.Errorf("album: %d, canonical %q", rec.Code, first(canonRe, body))
+	if body := rec.Body.String(); rec.Code != 200 || indexable(rec, body) || rec.Header().Get("X-Robots-Tag") != "noindex" || altRe.MatchString(body) || ogImgRe.FindString(body) == "" {
+		t.Errorf("album: %d, X-Robots-Tag %q", rec.Code, rec.Header().Get("X-Robots-Tag"))
+	}
+	if rec := hostGet(h, "p.example", "/robots.txt"); strings.Contains(rec.Body.String(), "Disallow: /a/") || strings.Contains(rec.Body.String(), "Disallow: /i/") {
+		t.Error("robots.txt blocks images or albums: a Disallow would hide the noindex from crawlers")
 	}
 	if altRe.MatchString(hostGet(h, "p.example", "/"+pub+"?lang=de").Body.String()) {
 		t.Error("an image page has language alternates: its text is the owner's")
@@ -222,8 +237,11 @@ func TestSEOUserContent(t *testing.T) {
 		t.Errorf("profile on the link host: %d", rec.Code)
 	}
 	sm := hostGet(h, "pixel.example", "/sitemap.xml").Body.String()
-	if !strings.Contains(sm, "<loc>https://p.example/"+pub+"</loc>") || !strings.Contains(sm, "<loc>https://pixel.example/u/tester</loc>") {
-		t.Error("the sitemap lost the listed image or the profile")
+	if strings.Contains(sm, "p.example/"+pub) {
+		t.Error("the sitemap lists a shared image: those pages are noindex")
+	}
+	if !strings.Contains(sm, "<loc>https://pixel.example/u/tester</loc>") {
+		t.Error("the sitemap lost the profile")
 	}
 
 	// Each kind of closed file, alone.

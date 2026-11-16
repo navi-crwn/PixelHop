@@ -93,5 +93,6 @@ func historyPage(r *http.Request) changePage {
 
 func (a *App) changelog(w http.ResponseWriter, r *http.Request) {
 	l := a.locale(w, r)
-	a.renderPage(w, r, "changelog", page{Title: l.T("changelog.title"), Data: historyPage(r)})
+	a.renderPage(w, r, "changelog", page{Title: l.T("changelog.title"), Data: historyPage(r),
+		Desc: l.T("What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.", "site", a.cfg.SiteName)})
 }

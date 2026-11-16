@@ -726,7 +726,6 @@
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "Hosting gambar, video, dan PDF, album, studio foto, dan API, semuanya gratis di {site}.",
   "Common questions about {site}: cost, accounts, privacy and self-hosting.": "Pertanyaan umum tentang {site}: biaya, akun, privasi, dan hosting mandiri.",
   "Report a bug, suggest an idea or send a security report to {site}.": "Laporkan bug, usulkan ide, atau kirim laporan keamanan ke {site}.",
-  "Is {site} up? Live status from the server.": "Apakah {site} aktif? Status langsung dari server.",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "Jawaban tentang unggahan, tautan, album, studio, akun, dan privasi di {site}.",
   "Upload from scripts, apps and ShareX with the {site} API.": "Unggah dari skrip, aplikasi, dan ShareX dengan API {site}.",
   "Images people chose to share publicly on {site}.": "Gambar yang dipilih orang untuk dibagikan secara publik di {site}.",
@@ -997,7 +996,7 @@
   "common.edit": "Ubah",
   "form.email": "Email",
   "Free image hosting with a built-in photo studio": "Hosting gambar gratis dengan studio foto bawaan",
-  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Letakkan gambar, dapatkan tautan. Menghapus data GPS, membuat album, bekerja dengan ShareX. Edit, kompres, konversi, OCR, dan hapus latar langsung di browser Anda.",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Letakkan gambar, dapatkan tautan. Hapus data GPS, buat album, kompatibel dengan ShareX. Edit, kompres, konversi, dan OCR langsung di browser.",
   "settings.scope": "Akses",
   "settings.scope_full": "Akses penuh",
   "settings.scope_upload": "Hanya unggah",
@@ -1154,5 +1153,8 @@
   "palette.label": "Warna",
   "palette.classic": "Klasik",
   "palette.mist": "Kabut",
-  "palette.sand": "Pasir"
+  "palette.sand": "Pasir",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "Aturan memakai {site}: ketentuan layanan, cara kami menangani data Anda, dan cara melaporkan atau menghapus konten.",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "Apa yang berubah di {site}, rilis demi rilis: fitur baru, perbaikan, dan penyempurnaan yang dijelaskan dengan bahasa sederhana.",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "Apakah {site} sedang aktif? Pemeriksaan langsung terhadap situs dan servernya, tampil begitu Anda membuka halaman ini."
 }

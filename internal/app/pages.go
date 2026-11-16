@@ -42,7 +42,7 @@ func (a *App) status(w http.ResponseWriter, r *http.Request) {
 	if !d.DBOK {
 		w.Header().Set("Retry-After", strconv.Itoa(60))
 	}
-	a.renderPage(w, r, "status", page{Title: "Status", Data: d, Desc: a.tr(r, "Is {site} up? Live status from the server.", "site", a.cfg.SiteName)})
+	a.renderPage(w, r, "status", page{Title: "Status", Data: d, Desc: a.tr(r, "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.", "site", a.cfg.SiteName)})
 }
 
 // backPaths are the inner pages that get a "Back to PixelHop" link above their content.

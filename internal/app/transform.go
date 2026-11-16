@@ -115,9 +115,9 @@ func (a *App) serveTransformed(w http.ResponseWriter, r *http.Request, im *db.Im
 	h.Set("Content-Security-Policy", "default-src 'none'; sandbox")
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Set("Cross-Origin-Resource-Policy", "cross-origin")
+	h.Set("X-Robots-Tag", "noindex") // never in a search index
 	if im.Hidden || im.Locked() || a.mediaHasWarning(r, im) {
 		h.Set("Cache-Control", "private, no-store")
-		h.Set("X-Robots-Tag", "noindex")
 	} else {
 		h.Set("Cache-Control", "public, max-age=2592000, immutable")
 	}

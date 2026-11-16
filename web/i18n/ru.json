@@ -730,7 +730,6 @@
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "Хостинг изображений, видео и PDF, альбомы, фотостудия и API — всё бесплатно на {site}.",
   "Common questions about {site}: cost, accounts, privacy and self-hosting.": "Частые вопросы о {site}: стоимость, аккаунты, приватность и самостоятельное размещение.",
   "Report a bug, suggest an idea or send a security report to {site}.": "Сообщите об ошибке, предложите идею или отправьте отчёт о безопасности для {site}.",
-  "Is {site} up? Live status from the server.": "Работает ли {site}? Текущее состояние сервера.",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "Ответы о загрузке, ссылках, альбомах, студии, аккаунтах и приватности на {site}.",
   "Upload from scripts, apps and ShareX with the {site} API.": "Загружайте из скриптов, приложений и ShareX через API {site}.",
   "Images people chose to share publicly on {site}.": "Изображения, которыми люди решили поделиться публично на {site}.",
@@ -997,7 +996,7 @@
   "settings.webhooks": "Вебхуки",
   "FAQ": "FAQ",
   "Free image hosting with a built-in photo studio": "Бесплатный хостинг изображений со встроенной фотостудией",
-  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Перетащите изображение — получите ссылку. Удаляет данные GPS, создаёт альбомы, работает с ShareX. Редактируйте, сжимайте, конвертируйте, распознавайте текст и удаляйте фон прямо в браузере.",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Перетащите изображение — получите ссылку. Удаляет данные GPS, создаёт альбомы, работает с ShareX. Редактор и OCR прямо в браузере.",
   "settings.scope": "Доступ",
   "settings.scope_full": "Полный доступ",
   "settings.scope_upload": "Только загрузка",
@@ -1154,5 +1153,8 @@
   "palette.label": "Цвета",
   "palette.classic": "Классика",
   "palette.mist": "Дымка",
-  "palette.sand": "Песок"
+  "palette.sand": "Песок",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "Правила использования {site}: условия сервиса, как мы обращаемся с вашими данными и как пожаловаться на контент или удалить его.",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "Что изменилось в {site} от версии к версии: новые функции, улучшения и исправления простыми словами.",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "Работает ли {site} сейчас? Проверка сайта и его сервера в реальном времени — результат виден сразу при открытии страницы."
 }

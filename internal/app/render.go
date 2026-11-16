@@ -275,7 +275,8 @@ func (a *App) docs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) legal(w http.ResponseWriter, r *http.Request) {
-	a.renderPage(w, r, "legal", page{Title: "Terms, privacy & takedowns", Data: a.cfg.AdminEmail})
+	a.renderPage(w, r, "legal", page{Title: "Terms, privacy & takedowns", Data: a.cfg.AdminEmail,
+		Desc: a.tr(r, "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.", "site", a.cfg.SiteName)})
 }
 
 func (a *App) notFound(w http.ResponseWriter, r *http.Request) {

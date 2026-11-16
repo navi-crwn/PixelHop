@@ -4,6 +4,13 @@ What changed in PixelHop, newest release first. Each entry says what changed, wh
 
 ## [Unreleased]
 
+## [3.13.1] - 2026-11-16 - Shared pictures stay out of search engines, and clearer page descriptions
+
+### Changed
+- **Shared pictures and albums.** Search engines such as Google are now told never to list your shared pictures, albums, thumbnails and QR codes, whatever the picture's settings are; before, only locked, private or age-restricted ones were kept out. Anyone with the link can still open it, and link previews on chat apps and social sites still show the picture. Pictures that were already listed drop out of search results as search engines revisit them, which can take a few weeks. Why: your pictures are shared with the people you send the link to, not published for strangers to find.
+- **Site map.** The site map no longer lists individual pictures, only the public pages and profiles. Why: it should not point search engines at pages that ask them not to list them.
+- **Terms, Changelog and Status pages.** Each now has its own short description in all nine languages, so that search results and link previews describe the page instead of showing a random piece of text. Several other pages had descriptions that were too long or too short in some languages; these are now a sensible length everywhere.
+
 ## [3.13.0] - 2026-11-14 - Family announcements, colour choice and text reading that stays on this site
 
 ### Added

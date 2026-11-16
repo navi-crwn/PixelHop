@@ -730,7 +730,6 @@
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "Hospedagem de imagens, vídeos e PDFs, álbuns, um estúdio de fotos e uma API, tudo grátis no {site}.",
   "Common questions about {site}: cost, accounts, privacy and self-hosting.": "Perguntas comuns sobre o {site}: custo, contas, privacidade e hospedagem própria.",
   "Report a bug, suggest an idea or send a security report to {site}.": "Relate um bug, sugira uma ideia ou envie um relatório de segurança ao {site}.",
-  "Is {site} up? Live status from the server.": "O {site} está no ar? Status ao vivo do servidor.",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "Respostas sobre envios, links, álbuns, estúdio, contas e privacidade no {site}.",
   "Upload from scripts, apps and ShareX with the {site} API.": "Envie de scripts, apps e ShareX com a API do {site}.",
   "Images people chose to share publicly on {site}.": "Imagens que as pessoas escolheram compartilhar publicamente no {site}.",
@@ -997,7 +996,7 @@
   "settings.bio": "Bio",
   "Status": "Status",
   "Free image hosting with a built-in photo studio": "Hospedagem de imagens grátis com estúdio de fotos integrado",
-  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Solte uma imagem e receba um link. Remove dados de GPS, cria álbuns e funciona com o ShareX. Edite, comprima, converta, faça OCR e remova fundos direto no navegador.",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Solte uma imagem e receba um link. Remove dados de GPS, cria álbuns e funciona com ShareX. Edite, comprima e converta direto no navegador.",
   "settings.scope": "Acesso",
   "settings.scope_full": "Acesso total",
   "settings.scope_upload": "Somente envio",
@@ -1154,5 +1153,8 @@
   "palette.label": "Cores",
   "palette.classic": "Clássico",
   "palette.mist": "Névoa",
-  "palette.sand": "Areia"
+  "palette.sand": "Areia",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "As regras para usar o {site}: termos de uso, como tratamos seus dados e como denunciar ou remover conteúdo.",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "O que mudou no {site}, versão por versão: novos recursos, melhorias e correções explicados em palavras simples.",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "O {site} está no ar? Uma verificação ao vivo do site e do servidor, exibida assim que você abre esta página."
 }

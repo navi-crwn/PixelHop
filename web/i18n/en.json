@@ -733,7 +733,6 @@
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.",
   "Common questions about {site}: cost, accounts, privacy and self-hosting.": "Common questions about {site}: cost, accounts, privacy and self-hosting.",
   "Report a bug, suggest an idea or send a security report to {site}.": "Report a bug, suggest an idea or send a security report to {site}.",
-  "Is {site} up? Live status from the server.": "Is {site} up? Live status from the server.",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.",
   "Upload from scripts, apps and ShareX with the {site} API.": "Upload from scripts, apps and ShareX with the {site} API.",
   "Images people chose to share publicly on {site}.": "Images people chose to share publicly on {site}.",
@@ -1154,5 +1153,8 @@
   "palette.label": "Colours",
   "palette.classic": "Classic",
   "palette.mist": "Mist",
-  "palette.sand": "Sand"
+  "palette.sand": "Sand",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "Is {site} up and running? A live check of the site and its server, shown the moment you open this page."
 }

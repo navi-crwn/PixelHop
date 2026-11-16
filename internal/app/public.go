@@ -50,11 +50,7 @@ func (a *App) sitemap(w http.ResponseWriter, r *http.Request) {
 		}
 		rows.Close()
 	}
-	// Listed images live on the link host (pageURL): that is their canonical address.
-	ims, _, _ := a.db.Images(r.Context(), db.ImageQuery{Listed: true, PublicOwner: true, Limit: 5000})
-	for _, im := range ims {
-		urls = append(urls, sitemapURL{Loc: a.pageURL(im.ID), LastMod: time.Unix(im.CreatedAt, 0).UTC().Format("2006-01-02")})
-	}
+	// Shared images and albums are never indexed (noindex on page and file), so they are not listed either.
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.Write([]byte(xml.Header))
 	enc := xml.NewEncoder(w)

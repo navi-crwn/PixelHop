@@ -132,10 +132,11 @@ func (a *App) appSchema(name string, p *page) template.JS {
 // and signed calls, sign-in round trips, account pages, delete links and upload results.
 func noIndexPath(path string) bool {
 	for _, pre := range []string{"/api", "/hop", "/auth", "/admin", "/dashboard", "/settings", "/delete",
-		"/uploaded", "/result", "/oembed", "/metrics"} {
+		"/uploaded", "/result", "/oembed", "/metrics",
+		"/i", "/t", "/qr", "/a", "/avatar"} { // image files, thumbnails, QR codes, albums, embeds: never indexed
 		if path == pre || strings.HasPrefix(path, pre+"/") {
 			return true
 		}
 	}
-	return strings.HasPrefix(path, "/a/") && strings.HasSuffix(path, "/edit")
+	return false
 }

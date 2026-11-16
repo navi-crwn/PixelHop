@@ -730,7 +730,6 @@
   "Image, video and PDF hosting, albums, a photo studio and an API, all free on {site}.": "Alojamiento de imágenes, vídeos y PDF, álbumes, un estudio de fotos y una API, todo gratis en {site}.",
   "Common questions about {site}: cost, accounts, privacy and self-hosting.": "Preguntas habituales sobre {site}: coste, cuentas, privacidad y autoalojamiento.",
   "Report a bug, suggest an idea or send a security report to {site}.": "Informa de un error, sugiere una idea o envía un informe de seguridad a {site}.",
-  "Is {site} up? Live status from the server.": "¿Está {site} en funcionamiento? Estado en vivo del servidor.",
   "Answers about uploading, links, albums, the studio, accounts and privacy on {site}.": "Respuestas sobre subidas, enlaces, álbumes, estudio, cuentas y privacidad en {site}.",
   "Upload from scripts, apps and ShareX with the {site} API.": "Sube desde scripts, aplicaciones y ShareX con la API de {site}.",
   "Images people chose to share publicly on {site}.": "Imágenes que la gente eligió compartir públicamente en {site}.",
@@ -997,7 +996,7 @@
   "settings.webhooks": "Webhooks",
   "Color": "Color",
   "Free image hosting with a built-in photo studio": "Alojamiento de imágenes gratis con estudio de fotos integrado",
-  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Suelta una imagen y obtén un enlace. Elimina los datos GPS, crea álbumes y funciona con ShareX. Edita, comprime, convierte, haz OCR y quita fondos directamente en tu navegador.",
+  "Drop an image, get a link. Strips GPS data, makes albums, works with ShareX. Edit, compress, convert, OCR and remove backgrounds right in your browser.": "Suelta una imagen y obtén un enlace. Elimina datos GPS, crea álbumes y funciona con ShareX. Edita, comprime y convierte en tu navegador.",
   "settings.scope": "Acceso",
   "settings.scope_full": "Acceso total",
   "settings.scope_upload": "Solo subir",
@@ -1154,5 +1153,8 @@
   "palette.label": "Colores",
   "palette.classic": "Clásico",
   "palette.mist": "Niebla",
-  "palette.sand": "Arena"
+  "palette.sand": "Arena",
+  "The rules for using {site}: terms of use, how we handle your data and how to report or remove content.": "Las reglas para usar {site}: términos de uso, cómo tratamos tus datos y cómo denunciar o retirar contenido.",
+  "What changed in {site}, release by release: new features, improvements and fixes, explained in plain words.": "Qué ha cambiado en {site}, versión por versión: nuevas funciones, mejoras y correcciones explicadas con palabras sencillas.",
+  "Is {site} up and running? A live check of the site and its server, shown the moment you open this page.": "¿Está {site} funcionando? Una comprobación en vivo del sitio y su servidor, que se muestra al abrir esta página."
 }
