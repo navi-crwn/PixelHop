@@ -2,7 +2,7 @@
 <div class="wrap">
   <div class="prose" style="margin:0 auto">
     <h1>{{$.L.T "footer.help"}}</h1>
-    <p class="muted">{{$.L.T "help.intro"}} {{with .Data}}{{$.L.H "help.email" "mail" .}}{{else}}{{$.L.T "help.report"}}{{end}}</p>
+    <p class="muted">{{$.L.T "help.intro"}} {{with .Data}}{{$.L.H "help.email" "mail" .}}{{else}}{{$.L.T "help.report"}}{{end}}{{with .Feedback}} <a href="{{.}}" target="_blank" rel="noopener">{{$.L.T "contact.feedback"}}</a>{{end}}</p>
 
     <h2>{{$.L.T "home2.s1_uploading"}}</h2>
     <details open><summary><b>{{$.L.T "help.q1"}}</b></summary><p>{{$.L.H "help.a1" "max_mb" .MaxMB "max_batch" .MaxBatch}}</p></details>

@@ -43,7 +43,9 @@ type page struct {
 	FamAnn        *FamilyAnnouncement // the hub's family announcement (dashboard card)
 	AnnounceID    string              // names this wording, so a closed card comes back when the text changes
 	Version       string
-	Asset         string // cache-busting query for /static files
+	Feedback      string        // the Feedback link for this screen; empty without a hub address
+	FeedbackNote  template.HTML // the Privacy sentence about that link; empty without a hub address
+	Asset         string        // cache-busting query for /static files
 	Google        bool
 	SSO           bool   // accounts come from HEL.ink
 	Helink        string // HEL.ink base URL
@@ -199,6 +201,10 @@ func (a *App) renderPage(w http.ResponseWriter, r *http.Request, name string, p 
 	}
 	p.Dash = p.User != nil && (p.Path == "/dashboard" || strings.HasPrefix(p.Path, "/dashboard/") || p.Path == "/settings" || strings.HasPrefix(p.Path, "/settings/") ||
 		p.Path == "/tools" || p.Path == "/tools/batch") // the studio is part of the dashboard for a signed-in member
+	p.Feedback = feedbackURL(a.cfg.HelinkURL, feedbackScreen(name), Version)
+	if p.Feedback != "" {
+		p.FeedbackNote = feedbackNote(p.L, a.cfg.HelinkURL)
+	}
 	if p.Dash {
 		p.FamAnn = a.familyAnnouncement()
 	}

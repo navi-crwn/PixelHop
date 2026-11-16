@@ -71,6 +71,7 @@
     <nav class="shell-side-foot" aria-label="{{.Site}}">
       <ul class="foot-list">
         <li><a href="/help">{{.L.T "footer.help"}}</a></li>
+        {{with .Feedback}}<li><a href="{{.}}" target="_blank" rel="noopener">{{$.L.T "footer.feedback"}}</a></li>{{end}}
         <li><a href="/legal#terms">{{.L.T "footer.terms"}}</a></li>
         <li><a href="/legal#privacy">{{.L.T "legal.privacy_title"}}</a></li>
         <li><a href="/changelog">{{.L.T "changelog.title"}}</a></li>
@@ -181,6 +182,7 @@
       <h2 class="foot-heading">{{.L.T "footer.support"}}</h2>
       <nav aria-label="{{.L.T "footer.support"}}">
         <a href="/help">{{.L.T "footer.help"}}</a>
+        {{with .Feedback}}<a href="{{.}}" target="_blank" rel="noopener">{{$.L.T "footer.feedback"}}</a>{{end}}
         <a href="/faq">{{.L.T "footer.faq"}}</a>
         <a href="/contact">{{.L.T "footer.contact"}}</a>
         <a href="/legal#takedown">{{.L.T "footer.report"}}</a>

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"html"
 	"io/fs"
 	"regexp"
 	"strings"
@@ -21,14 +22,14 @@ func TestSidebarFootAndPalettePicker(t *testing.T) {
 	hrefs := regexp.MustCompile(`href="([^"]+)"`).FindAllStringSubmatch(foot, -1)
 	var got []string
 	for _, m := range hrefs {
-		got = append(got, m[1])
+		got = append(got, html.UnescapeString(m[1]))
 	}
-	want := []string{"/help", "/legal#terms", "/legal#privacy", "/changelog", "https://github.com/navi-crwn/pixelhop", "https://hel.ink/announcements", "https://hel.ink"}
+	want := []string{"/help", "https://hel.example.com/feedback?app=pixelhop&from=dashboard&v=" + Version, "/legal#terms", "/legal#privacy", "/changelog", "https://github.com/navi-crwn/pixelhop", "https://hel.ink/announcements", "https://hel.ink"}
 	if strings.Join(got, " ") != strings.Join(want, " ") {
 		t.Fatalf("foot links %v, want %v", got, want)
 	}
-	if strings.Count(foot, "<li>") != 6 {
-		t.Error("the foot is not six list items")
+	if strings.Count(foot, "<li>") != 7 {
+		t.Error("the foot is not seven list items")
 	}
 	if strings.Index(side, `class="shell-pal"`) > strings.Index(side, `class="shell-side-foot"`) || strings.Count(side, `data-palette=`) != 3 {
 		t.Error("the colour picker is missing or not above the foot")
