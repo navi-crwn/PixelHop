@@ -8,6 +8,7 @@
       <li>{{.L.H "contact.pr"}}</li>
       <li>{{.L.H "contact.security"}}</li>
       <li>{{.L.H "contact.rules"}}</li>
+      {{with .Feedback}}<li><a href="{{.}}" target="_blank" rel="noopener">{{$.L.T "contact.feedback"}}</a></li>{{end}}
       {{with .Data}}<li><!--email_off-->{{$.L.H "contact.else" "email" .}}<!--/email_off--></li>{{end}}
     </ul>
   </div>

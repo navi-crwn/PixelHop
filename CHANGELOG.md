@@ -4,6 +4,16 @@ What changed in PixelHop, newest release first. Each entry says what changed, wh
 
 ## [Unreleased]
 
+## [3.14.0] - 2026-11-16 - Send feedback from PixelHop
+
+### Added
+- **Dashboard sidebar.** A new Feedback link sits right under Help at the bottom of the sidebar. It opens the feedback form of the HOP ID site in a new tab, so whatever you were doing in PixelHop stays open. Why: you can now report a problem or share an idea without writing an e-mail.
+- **Public pages, Help and Contact.** The footer of every public page has a Feedback link next to Help, including the pages of shared pictures and albums, and the Help and Contact pages have a Send feedback link. The link only tells the form which page you came from, such as "image page", never the address of your picture or album, so private links are not passed on. Why: visitors who are not signed in can reach the form too.
+- **Terms and Privacy.** One new sentence says that the Feedback link opens a form on the HOP ID site this PixelHop is connected to, that PixelHop itself receives nothing from that form, and where to read what the form keeps. All of this is available in the nine languages.
+
+### Changed
+- **Sites that run PixelHop without HOP ID.** Nothing changes for them: without the address of a HOP ID site there is no Feedback link and no new sentence, and the sidebar keeps its six links. Why: there is no form to open.
+
 ## [3.13.1] - 2026-11-16 - Shared pictures stay out of search engines, and clearer page descriptions
 
 ### Changed
