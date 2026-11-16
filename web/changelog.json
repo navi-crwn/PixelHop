@@ -1,9 +1,42 @@
 {
   "schema": 2,
   "sources": {
-    "PixelHop": "3.13.1"
+    "PixelHop": "3.14.0"
   },
   "entries": [
+    {
+      "kind": "tag",
+      "date": "2026-11-16T00:00:00Z",
+      "title": "Send feedback from PixelHop",
+      "url": "https://github.com/navi-crwn/PixelHop/releases/tag/v3.14.0",
+      "id": "v3.14.0",
+      "app": "PixelHop",
+      "repo": "PixelHop",
+      "version": "3.14.0",
+      "summary": "",
+      "items": [
+        {
+          "type": "added",
+          "where": "Dashboard sidebar",
+          "text": "A new Feedback link sits right under Help at the bottom of the sidebar. It opens the feedback form of the HOP ID site in a new tab, so whatever you were doing in PixelHop stays open. Why: you can now report a problem or share an idea without writing an e-mail."
+        },
+        {
+          "type": "added",
+          "where": "Public pages, Help and Contact",
+          "text": "The footer of every public page has a Feedback link next to Help, including the pages of shared pictures and albums, and the Help and Contact pages have a Send feedback link. The link only tells the form which page you came from, such as \"image page\", never the address of your picture or album, so private links are not passed on. Why: visitors who are not signed in can reach the form too."
+        },
+        {
+          "type": "added",
+          "where": "Terms and Privacy",
+          "text": "One new sentence says that the Feedback link opens a form on the HOP ID site this PixelHop is connected to, that PixelHop itself receives nothing from that form, and where to read what the form keeps. All of this is available in the nine languages."
+        },
+        {
+          "type": "changed",
+          "where": "Sites that run PixelHop without HOP ID",
+          "text": "Nothing changes for them: without the address of a HOP ID site there is no Feedback link and no new sentence, and the sidebar keeps its six links. Why: there is no form to open."
+        }
+      ]
+    },
     {
       "kind": "tag",
       "date": "2026-11-16T00:00:00Z",
